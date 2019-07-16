@@ -70,31 +70,23 @@ const escapeForRegExp = str => {
 };
 
 const parseGitRemote = remote => {
-  const pathRegExp = escapeForRegExp(getInstancePath());
-  if (remote.startsWith('git@') || remote.startsWith('git://')) {
-    const match = new RegExp('^git(?:@|://)([^:/]+)(?::|:/|/)(.+)/(.+?)(?:.git)?$', 'i').exec(
-      remote,
-    );
-
-    if (!match) {
-      return null;
-    }
-
-    return ['git:', ...match.slice(1, 4)];
+  if (remote.startsWith('git@')) {
+    remote = 'ssh://' + remote
   }
 
-  const { protocol = 'https:', hostname, pathname } = url.parse(remote);
+  const { protocol, host, pathname } = url.parse(remote);
 
-  if (!hostname || !pathname) {
+  if (!host || !pathname) {
     return null;
   }
 
-  const match = pathname.match(pathRegExp + '/(.+)/(.*?)(?:.git)?$');
+  const pathRegExp = escapeForRegExp(getInstancePath());
+  const match = pathname.match(pathRegExp + '/:?(.+)/(.*?)(?:.git)?$');
   if (!match) {
     return null;
   }
 
-  return [protocol, hostname, ...match.slice(1, 3)];
+  return [protocol, host, ...match.slice(1, 3)];
 };
 
 async function fetchRemoteUrl(name) {
@@ -118,9 +110,9 @@ async function fetchRemoteUrl(name) {
   }
 
   if (remoteUrl) {
-    const [schema, domain, namespace, project] = parseGitRemote(remoteUrl);
+    const [schema, host, namespace, project] = parseGitRemote(remoteUrl);
 
-    return { schema, domain, namespace, project };
+    return { schema, host, namespace, project };
   }
 
   return null;
