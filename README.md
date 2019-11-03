@@ -55,7 +55,7 @@ To use this extension, you need to create a GitLab Personal Access Token and giv
   - Self-hosted GitLab instance go to "Settings" and click "Access Tokens" on the left navigation menu
 - On "Add a personal access token" form
   - Give a name to your token.
-  - Select and expiry date.
+  - Select an expiry date.
   - Select "api" and "read_user" permissions.
   - Hit "Create personal access token" button.
 - Copy the token. _Remember you won't be able to see the value of this token ever again for security reasons._
