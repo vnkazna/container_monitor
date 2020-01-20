@@ -180,9 +180,7 @@ async function fetchIssuables(params = {}) {
       config.scope = config.scope.replace(/_/g, '-');
     }
 
-    const path = `/projects/${project.id}/${config.type}?scope=${config.scope}&state=${
-      config.state
-    }`;
+    const path = `/projects/${project.id}/${config.type}?scope=${config.scope}&state=${config.state}`;
     issuables = await fetch(path);
   }
 
@@ -419,15 +417,14 @@ async function renderMarkdown(markdown) {
   return rendered.html;
 }
 
-async function saveNote({ issuable, note }) {
+async function saveNote({ issuable, note, noteType }) {
   let response = {};
 
   try {
     const projectId = issuable.project_id;
-    const issueId = issuable.iid;
-    response = await fetch(`/projects/${projectId}/issues/${issueId}/notes`, 'POST', {
-      id: projectId,
-      issue_iid: issueId,
+    const { iid } = issuable;
+    const { path } = noteType;
+    response = await fetch(`/projects/${projectId}/${path}/${iid}/notes`, 'POST', {
       body: note,
     });
   } catch (e) {

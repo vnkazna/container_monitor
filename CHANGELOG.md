@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.2.0 - 2019-11-06
+
+- [Experimental Feature](https://gitlab.com/fatihacet/gitlab-vscode-extension#experimental-features): View Merge Request details and comments in VSCode. Click a Merge Request link from the sidebar and VSCode will open a new tab to show the Merge Request details. You can also directly comment on the Merge Request.
+
 ## v2.1.1 - 2019-07-10
 
 ### Fixed

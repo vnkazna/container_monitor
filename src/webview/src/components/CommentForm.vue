@@ -20,12 +20,16 @@ export default {
     },
   },
   methods: {
+    getNoteType() {
+      return this.issuable.sha ? { type: 'merge_request', path: 'merge_requests' } : { type: 'issue', path: 'issues' };
+    },
     addComment() {
       const { issuable, note, command } = this;
 
       this.isSaving = true;
       this.isFailed = false;
-      window.vsCodeApi.postMessage({ command, issuable, note });
+      const noteType = this.getNoteType();
+      window.vsCodeApi.postMessage({ command, issuable, note, noteType });
     },
   },
   mounted() {

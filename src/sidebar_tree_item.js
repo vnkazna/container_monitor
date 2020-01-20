@@ -10,7 +10,7 @@ class SidebarTreeItem extends vscode.TreeItem {
       let command = 'gl.showRichContent';
       let arg = data;
 
-      if (data.sha || !enableExperimentalFeatures) {
+      if (!enableExperimentalFeatures) {
         command = 'vscode.open';
         arg = vscode.Uri.parse(data.web_url);
       }
