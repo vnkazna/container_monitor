@@ -20,7 +20,7 @@ const getNonce = () => {
   return text;
 };
 
-const getResources = () => {
+const getResources = panel => {
   const paths = {
     appScriptUri: 'src/webview/dist/js/app.js',
     vendorUri: 'src/webview/dist/js/chunk-vendors.js',
@@ -31,7 +31,7 @@ const getResources = () => {
   Object.keys(paths).forEach(key => {
     const uri = vscode.Uri.file(path.join(context.extensionPath, paths[key]));
 
-    paths[key] = uri.with({ scheme: 'vscode-resource' });
+    paths[key] = panel.webview.asWebviewUri(uri);
   });
 
   return paths;
@@ -43,8 +43,8 @@ const getIndexPath = () => {
   return isDev ? 'src/webview/public/dev.html' : 'src/webview/public/index.html';
 };
 
-const replaceResources = () => {
-  const { appScriptUri, vendorUri, styleUri, devScriptUri } = getResources();
+const replaceResources = panel => {
+  const { appScriptUri, vendorUri, styleUri, devScriptUri } = getResources(panel);
 
   return fs
     .readFileSync(path.join(context.extensionPath, getIndexPath()), 'UTF-8')
@@ -96,6 +96,7 @@ async function handleCreate(panel, issuable) {
       const response = await gitLabService.saveNote({
         issuable: message.issuable,
         note: message.note,
+        noteType: message.noteType,
       });
 
       if (response.status !== false) {
@@ -114,7 +115,7 @@ async function handleCreate(panel, issuable) {
 
 async function create(issuable) {
   const panel = createPanel(issuable);
-  const html = replaceResources();
+  const html = replaceResources(panel);
   panel.webview.html = html;
 
   panel.onDidChangeViewState(() => {
