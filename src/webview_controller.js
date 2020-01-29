@@ -118,6 +118,10 @@ async function create(issuable) {
   const html = replaceResources(panel);
   panel.webview.html = html;
 
+  lightIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'gitlab-logo.svg'));
+  darkIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'gitlab-logo.svg'));
+  panel.iconPath = {light: lightIconUri, dark: darkIconUri};
+
   panel.onDidChangeViewState(() => {
     handleCreate(panel, issuable);
   });
