@@ -19,3 +19,8 @@
 - Justin Parker [@jparkrr](https://gitlab.com/jparkrr)
 - Tim Tilberg [@ttilberg](https://gitlab.com/ttilberg)
 - Ivan [@Grafexy](https://gitlab.com/Grafexy)
+- Alexandre Garnier[@zigarn](https://gitlab.com/zigarn)
+- Tom Quirk [@tomquirk](https://gitlab.com/tomquirk)
+- John Hampton [@jhampton](https://gitlab.com/jhampton)
+- Philip Nicolai [@philip-n](https://gitlab.com/philip-n)
+- Massimeddu Cireddu [@massimeddu](https://gitlab.com/massimeddu)
