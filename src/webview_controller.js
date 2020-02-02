@@ -69,8 +69,9 @@ function sendIssuableAndDiscussions(panel, issuable, discussions, appIsReady) {
   panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions });
 }
 
-async function handleCreate(panel, issuable) {
+async function handleCreate(panel, issuable, workspaceFolder) {
   let discussions = false;
+  let labelEvents = false;
   let appIsReady = false;
   panel.webview.onDidReceiveMessage(async message => {
     if (message.command === 'appReady') {
@@ -79,15 +80,24 @@ async function handleCreate(panel, issuable) {
     }
 
     if (message.command === 'renderMarkdown') {
-      let rendered = await gitLabService.renderMarkdown(message.markdown);
+      message.markdown = message.markdown.replace(
+        /\(\/.*(\/-)?\/merge_requests\//,
+        '(/-/merge_requests/',
+      );
+      let rendered = await gitLabService.renderMarkdown(message.markdown, workspaceFolder);
       rendered = (rendered || '')
         .replace(/ src=".*" alt/gim, ' alt')
-        .replace(/" data-src/gim, '" src');
+        .replace(/" data-src/gim, '" src')
+        .replace(
+          / href="\//gim,
+          ` href="${vscode.workspace.getConfiguration('gitlab').instanceUrl}/`,
+        )
+        .replace(/\/master\/-\/merge_requests\//gim, '/-/merge_requests/');
 
       panel.webview.postMessage({
         type: 'markdownRendered',
         ref: message.ref,
-        key: message.key,
+        object: message.object,
         markdown: rendered,
       });
     }
@@ -109,11 +119,19 @@ async function handleCreate(panel, issuable) {
     }
   });
 
+  // TODO: Call APIs in parallel
   discussions = await gitLabService.fetchDiscussions(issuable);
+  labelEvents = await gitLabService.fetchLabelEvents(issuable);
+  discussions = discussions.concat(labelEvents);
+  discussions.sort((a, b) => {
+    const aCreatedAt = a.label ? a.created_at : a.notes[0].created_at;
+    const bCreatedAt = b.label ? b.created_at : b.notes[0].created_at;
+    return aCreatedAt < bCreatedAt ? -1 : 1;
+  });
   sendIssuableAndDiscussions(panel, issuable, discussions, appIsReady);
 }
 
-async function create(issuable) {
+async function create(issuable, workspaceFolder) {
   const panel = createPanel(issuable);
   const html = replaceResources(panel);
   panel.webview.html = html;
@@ -123,10 +141,10 @@ async function create(issuable) {
   panel.iconPath = {light: lightIconUri, dark: darkIconUri};
 
   panel.onDidChangeViewState(() => {
-    handleCreate(panel, issuable);
+    handleCreate(panel, issuable, workspaceFolder);
   });
 
-  handleCreate(panel, issuable);
+  handleCreate(panel, issuable, workspaceFolder);
 }
 
 exports.addDeps = addDeps;

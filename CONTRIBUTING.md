@@ -83,6 +83,7 @@ Once project is cloned, open terminal within the project folder and run followin
 
 ```bash
 yarn install
+yarn webview
 ```
 
 This command will install all necessary dependencies to run and debug extension in developer mode.
@@ -91,6 +92,24 @@ This command will install all necessary dependencies to run and debug extension 
 
 Open VS Code and then open GitLab Workflow project and then you can follow [Running and debugging your extension](https://code.visualstudio.com/docs/extensions/developing-extensions#_running-and-debugging-your-extension)
 section from VS Code documentation.
+
+#### Step - 5 : Run tests
+
+To run tests, open terminal within the project folder and run following;
+
+```bash
+yarn compile
+yarn test
+```
+
+#### Step - 5 : Run linter
+
+To run linters, open terminal within the project folder and run following;
+
+```bash
+yarn format
+yarn eslint
+```
 
 ### Code Contribution For Beginners
 

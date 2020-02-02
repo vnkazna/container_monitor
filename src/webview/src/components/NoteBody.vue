@@ -18,8 +18,19 @@ export default {
     window.vsCodeApi.postMessage({
       command: 'renderMarkdown',
       markdown: this.note.body,
+      object: 'note',
       ref: this.note.id,
-      key: 'body',
+    });
+  },
+  created() {
+    window.addEventListener('message', event => {
+      if (event.data.type === 'markdownRendered') {
+        const { ref, object, markdown } = event.data;
+        if (object == 'note' && ref == this.note.id) {
+          this.note.markdownRenderedOnServer = true;
+          this.note.body = markdown;
+        }
+      }
     });
   },
 };
@@ -33,8 +44,7 @@ export default {
 
 <style lang="scss">
 .note-body {
-  margin-left: 56px;
-  line-height: 21px;
+  word-wrap: break-word;
 
   .badge {
     padding: 0 8px;

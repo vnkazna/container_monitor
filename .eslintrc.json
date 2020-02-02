@@ -1,6 +1,13 @@
 {
   "extends": ["airbnb-base", "prettier"],
   "plugins": ["import", "prettier"],
+  "ignorePatterns": [
+    "node_modules/",
+    "src/webview/node_modules/",
+    "src/webview/dist/",
+    ".vscode-test/",
+    "out"
+  ],
   "rules": {
     "no-console": "off",
     "no-return-await": "off",

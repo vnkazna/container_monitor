@@ -4,11 +4,9 @@
 
 This extension integrates GitLab to VSCode by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VSCode command palette and status bar to provide more information about your project.
 
-
 ## Screencast
 
 [![video-cover](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/screencast-cover.jpg)](https://www.youtube.com/watch?v=XcxsF0lWBhA)
-
 
 ## Features
 
@@ -31,6 +29,7 @@ This extension integrates GitLab to VSCode by adding a new GitLab sidebar where 
 - Open the merge request page to create a merge request.
 - Set and remove your GitLab Personal Access Token. _Required step, see [Setup](#setup) section below._
 - Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
+- Supports custom custom queries [Read more](#custom-queries)
 
 ## Experimental Features
 
@@ -44,12 +43,12 @@ GitLab Workflow allows you to view issue details and comments right in the VSCod
 
 Updating assignees and labels are also not implemented. However, you can use [GitLab Slash Commands](https://docs.gitlab.com/ee/integration/slash_commands.html) to perform actions directly from VSCode. For example, to assign an issue to `@fatihacet`, simply add a comment `/assign @fatihacet` inside VSCode.
 
-
 ## Setup
 
 To use this extension, you need to create a GitLab Personal Access Token and give it to the extension.
 
 ##### Step 1: Create your Personal Access Token
+
 - If you are using
   - GitLab.com [click to open Personal Access Tokens page](https://gitlab.com/profile/personal_access_tokens).
   - Self-hosted GitLab instance go to "Settings" and click "Access Tokens" on the left navigation menu
@@ -61,6 +60,7 @@ To use this extension, you need to create a GitLab Personal Access Token and giv
 - Copy the token. _Remember you won't be able to see the value of this token ever again for security reasons._
 
 ##### Step 2: Add token to GitLab Workflow Extension
+
 - Open up Command Palette by pressing `Cmd+Shift+P`.
 - Search for "GitLab: Set GitLab Personal Access Token" and hit Enter.
 - Enter the URL to the Gitlab instance the PAT should apply to and hit Enter.
@@ -76,7 +76,6 @@ You can start using this extension right away. If your project has a pipeline fo
 #### Multiple Gitlab instances
 
 If you want to use multiple GitLab instances you may want to configure each workspace separately. See `gitlab.instanceUrl` config option in [Configuration Options](#configuration-options) section.
-
 
 ## Configuration options
 
@@ -110,7 +109,7 @@ If your self-hosted GitLab instance requires a custom cert/key pair you would pr
 
 If your self-hosted GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate key file. Please also see `gitlab.cert` option. More information [here](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/29#note_132284448).
 
-**`gitlab.ignoreCertificateErrors`**  _(required: false, default: false)_
+**`gitlab.ignoreCertificateErrors`** _(required: false, default: false)_
 
 If you are using a self-hosted GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors. More information can be found [here](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/26#note_61312786).
 
@@ -124,13 +123,98 @@ The name of the git remote link corresponding to the GitLab repositiory with you
 
 The name of the git remote link corresponding to the GitLab repositiory with your pipelines. If no setting is provided, the extension will detect it. For example: origin.
 
-
-**`gitlab.enableExperimentalFeatures`**  _(required: false, default: false)_
+**`gitlab.enableExperimentalFeatures`** _(required: false, default: false)_
 
 To enable experimental features set this flag to `true`. List of experiemental features and details can be found [here](#experiemental-features)
 
+**`gitlab.customQueries`** _(required: false)_
+
+Defines the search queries that retrives the items shown on the Gitlab Panel. See [#custom-queries] for more details.
+
+### Custom Queries
+
+You can define custom queries in your VS Code configuration.
+
+Example:
+
+```json
+{
+  "gitlab.customQueries": [
+    {
+      "name": "Issues assigned to me",
+      "type": "issues",
+      "scope": "assigned_to_me",
+      "noItemText": "There is no issue assigned to you.",
+      "state": "opened"
+    }
+  ]
+}
+```
+
+Each query is an entry of the json array. Each entry can have the following values:
+
+**`name`** _(required: true)_ : The label to show in the GitLab panel
+
+**`type`** _(required: false, default: merge\_requests)_ : The type of GitLab items to return. If snippets is selected, none of the other filter will work. Epics will work only on GitLab ultimate/gold. Possible values: issues, merge_requests, epics, snippets, vulnerabilities.
+
+**`noItemText`** _(required: false, default: "No items found.")_ : The text to show if the query returns no items.
+
+**`maxResults`** _(required: false, default: 20)_ : The maximum number of results to show
+
+**`orderBy`** _(required: false, default: created\_at)_ : Return issues ordered by the selected value. It is not applicable for vulnerabilities. Possible values: created_at, updated_at, priority, due_date, relative_position, label_priority, milestone_due, popularity, weight.
+
+**`sort`** _(required: false, default: desc)_ : Return issues sorted in ascending or descending order. It is not applicable for vulnerabilities. Possible values: asc, desc.
+
+**`scope`** _(required: false, default: all)_ : Return Gitlab items for the given scope. It is not applicable for epics. Possible values: assigned_to_me, created_by_me, dismissed, all. "assigned_to_me" and "created_by_me" are not applicable for vulnerabilities. "dismissed" is not applicable for issues and merge requests.
+
+**`state`** _(required: false, default: opened)_ : "Return "all" issues or just those that are "opened" or "closed". It is not applicable for vulnerabilities. Possible values: all, opened, closed.
+
+**`labels`** _(required: false, default: [])_ : Array of label names, Gitlab item must have all labels to be returned. "None" lists all GitLab items with no labels. "Any" lists all GitLab issues with at least one label. Predefined names are case-insensitive. It is not applicable for vulnerabilities.
+
+**`excludeLabels`** _(required: false, default: [])_ : Array of label names, Gitlab item must not have to be returned. Predefined names are case-insensitive. Works only with issues
+
+**`milestone`** _(required: false)_ : The milestone title. None lists all GitLab items with no milestone. Any lists all GitLab items that have an assigned milestone. It is not applicable for epics and vulnerabilities.
+
+**`excludeMilestone`** _(required: false)_ : The milestone title to exclude. Works only with issues.
+
+**`author`** _(required: false)_ : Return GitLab items created by the given username. It is not applicable for vulnerabilities.
+
+**`excludeAuthor`** _(required: false)_ : Return GitLab items not created by the given username. Works only with issues.
+
+**`assignee`** _(required: false)_ : Returns GitLab items assigned to the given username. "None" returns unassigned GitLab items. "Any" returns GitLab items with an assignee. It is not applicable for epics and vulnerabilities.
+
+**`excludeAssignee`** _(required: false)_ : ": Returns GitLab items not assigned to the given username. Works only with issues.
+
+**`search`** _(required: false)_ : Search GitLab items against their title and description. It is not applicable for vulnerabilities.
+
+**`excludeSearch`** _(required: false)_ : Search GitLab items that doesn't have the search key in their title or description. Works only with issues.
+
+**`searchIn`** _(required: false, default: all)_ : Modify the scope of the search attribute. It is not applicable for epics and vulnerabilities. Possible values: all, title, description.
+
+**`searchIn`** _(required: false, default: all)_ :  Modify the scope of the excludeSearch attribute. Works only with issues. Possible values: all, title, description.
+
+**`createdAfter`** _(required: false)_ : Return GitLab items created after the given date. It is not applicable for vulnerabilities.
+
+**`createdBefore`** _(required: false)_ : Return GitLab items created before the given date. It is not applicable for vulnerabilities.
+
+**`updatedAfter`** _(required: false)_ : Return GitLab items updated after the given date. It is not applicable for vulnerabilities.
+
+**`updatedBefore`** _(required: false)_ : Return GitLab items updated before the given date. It is not applicable for vulnerabilities.
+
+**`wip`** _(required: false, default: no)_ : Filter merge requests against their wip status. "yes" to return only WIP merge requests, "no" to return non WIP merge requests. Works only with merge requests.
+
+**`confidential`** _(required: false, default: false)_ : Filter confidential or public issues. Works only with issues.
+
+**`reportTypes`** _(required: false)_ : Returns vulnerabilities belonging to specified report types. Works only with vulnerabilities. Possible values: sast, dast, dependency_scanning, container_scanning.
+
+**`severityLevels`** _(required: false)_ : Returns vulnerabilities belonging to specified severity levels. Defaults to all. Works only with vulnerabilities. Possible values: undefined, info, unknown, low, medium, high, critical.
+
+**`confidenceLevels`** _(required: false)_ : Returns vulnerabilities belonging to specified confidence levels. Defaults to all. Works only with vulnerabilities. Possible values: undefined, ignore, unknown, experimental, low, medium, high, confirmed.
+
+**`pipelineId`** _(required: false)_ : Returns vulnerabilities belonging to specified pipeline. "branch" returns vulnerabilities belonging to latest pipeline of the current branch. Works only with vulnerabilities.
 
 ## Usage
+
 - Open up Command Palette by pressing `Cmd+Shift+P`.
 - Search for `GitLab:` and you will see all the commands provided by the extension.
 
@@ -138,19 +222,18 @@ To enable experimental features set this flag to `true`. List of experiemental f
 
 ![https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/pipeline-actions.png](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/pipeline-actions.png)
 
-
 ## Features in-depth
 
-
 ### Sidebar
+
 Extension will add a GitLab Workflow panel to sidebar of your VSCode. The dedicated panel will allow you to see the list of your issues and MRs. Also you will be able to see pipeline, MR and issue links for your current branch.
 
 In the current version, clicking the links will open them on your default browser but the next version will allow you to interact with your issues and MRs right in your VSCode. With the upcoming versions, the extension will allow you to see the MR changes and discussions in VSCode.
 
 ![_sidebar.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_sidebar.gif)
 
-
 ### Pipeline actions
+
 One of the real power features of this extension is pipeline actions. This feature can be accessible from the status bar by clicking the pipeline status text or command palette and allows you to,
 
 - View the latest pipeline on GitLab
@@ -160,8 +243,8 @@ One of the real power features of this extension is pipeline actions. This featu
 
 ![_pipeline_actions.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_pipeline_actions.gif)
 
-
 ### Status bar
+
 If your current project is a GitLab project, the extension will do the following things:
 
 - Fetch pipeline of the last commit and show it on the status bar. Clicking this item will open the pipeline actions menu.
@@ -170,70 +253,71 @@ If your current project is a GitLab project, the extension will do the following
 
 ![_status_bar.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_status-bar.gif)
 
-
 ### Advanced Search
+
 GitLab Workflow extension provides you two types of search. Basic and advanced search. Basic search is quick however advanced search is more powerful which allows you to filter issues by author, assignee, milestone, title etc.
 
 To use the basic search, in the search input, you can type your search term and hit Enter. This will search issues/MRs against their title and description fields. Example: `Inconsistent line endings for HEX files` or `Pipelines should ignore retried builds`.
 
 You can perform advanced issue/MR search by using some predefined tokens. Full list below.
 
-|Token|Description|Example|
-|-|-|-|
-|title|Search issues/MRs against their title and description. You don't need to add quotes around multiple words. See Important notes section.|discussions refactor|
-|labels|Comma separated label list for multiple labels.|`labels: frontend, Discussion, performance`|
-|label|To search with a single label. You can also have multiple `label` tokens.|`label: frontend` or `label:frontend label: Discussion`
-|milestone|Milestone title without `%`.|`milestone: 9.5`|
-|scope|Searches issues/MRs for the given scope. Values can be `created-by-me`, `assigned-to-me` or `all`. Defaults to `created-by-me`.|`scope: created-by-me` or `scope: assigned-to-me` or `scope: all`.|
-|author|Username of the author without `@`.|`author: fatihacet`|
-|assignee|Username of the assignee without `@`.|`assignee: timzallmann`|
+| Token     | Description                                                                                                                             | Example                                                            |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| title     | Search issues/MRs against their title and description. You don't need to add quotes around multiple words. See Important notes section. | discussions refactor                                               |
+| labels    | Comma separated label list for multiple labels.                                                                                         | `labels: frontend, Discussion, performance`                        |
+| label     | To search with a single label. You can also have multiple `label` tokens.                                                               | `label: frontend` or `label:frontend label: Discussion`            |
+| milestone | Milestone title without `%`.                                                                                                            | `milestone: 9.5`                                                   |
+| scope     | Searches issues/MRs for the given scope. Values can be `created-by-me`, `assigned-to-me` or `all`. Defaults to `created-by-me`.         | `scope: created-by-me` or `scope: assigned-to-me` or `scope: all`. |
+| author    | Username of the author without `@`.                                                                                                     | `author: fatihacet`                                                |
+| assignee  | Username of the assignee without `@`.                                                                                                   | `assignee: timzallmann`                                            |
 
 **Examples**
+
 - `title: new merge request widget author: fatihacet assignee: jschatz1 labels: frontend, performance milestone: 10.5`
 - `title: multiple group page author: annabeldunstone assignee: timzallmann label: frontend`
 
 **Important notes**
+
 - `:` after the token name is necessary. `label :` is not a valid token name and may return parsing error. Hence `label:` should be used. However, space after the token name is optional. Both `label: frontend` and `label:frontend` is valid. This rule is valid for all tokens above.
 - You don't need to add quotes around multiple words for `title` token. `title:"new merge request widget"` may return parsing error. `title: new merge request widget` should be used.
 - You can have `labels` and `label` tokens at the same time. `labels: fronted discussion label: performance` is a valid query and all labels will be included in your search query. It's equal with `labels: fronted discussion performance`. You can also have multiple `label` tokens. `label: frontend label: discussion label: performance` is valid and equals to `labels: fronted discussion performance`.
 
 ![_advanced-search.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_advanced-search.gif)
 
-
 ### Create snippet
+
 You can create a snippet from selection or entire file. You can also select visibility level of your snippet.
 
 ![_create-snippet.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_create-snippet.gif)
 
-
 ### Compare with master
+
 You can see changes in your branch by comparing with `master` and see them on GitLab.
 
 ![_compare-with-master.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_compare-with-master.gif)
 
 > Soon extension will support comparing your current branch with other branches.
 
-
 ### Open active file
+
 This command allows you to see active file on GitLab. Extension sends active line number and selected text block to GitLab UI so you can see them highlighted.
 
 ![_open_active_file.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_open_active_file.gif)
 
-
 ### Validate GitLab CI Configuration
+
 Using this command, you can quickly validate GitLab CI configuration.
 
 ![_validate-ci-config.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_validate-ci-config.gif)
 
-
 ### Caveats and known issues
+
 - The current version of the extension doesn't support multi-root workspaces. If you want to know more about limitations and read recent developments, please check [multi-root-workspace](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues?scope=all&utf8=%E2%9C%93&state=all&label_name[]=multi-root-workspace) labeled issues.
 
-
------
-
+---
 
 ## Contribution
+
 This extension is open source and [hosted on GitLab](https://gitlab.com/fatihacet/gitlab-vscode-extension). Contributions are more than welcome. Feel free to fork and add new features or submit bug reports.
 
 [Here](https://gitlab.com/fatihacet/gitlab-vscode-extension/blob/master/CONTRIBUTORS.md) is the list of great people who contributed this project and make it even more awesome. Thank you all 🎉

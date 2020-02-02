@@ -4,3 +4,4 @@ node_modules
 .history
 .DS_Store
 src/webview/dist/*.hot-update.js*
+out

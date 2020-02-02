@@ -36,6 +36,8 @@ const commandRegisterHelper = (cmdName, callback) => {
 };
 
 async function refreshPipeline() {
+  const editor = vscode.window.activeTextEditor;
+  let workspaceFolder = null;
   let project = null;
   let pipeline = null;
   const maxJobs = 4;
@@ -49,8 +51,13 @@ async function refreshPipeline() {
   };
 
   try {
-    project = await gitLabService.fetchCurrentPipelineProject();
-    pipeline = await gitLabService.fetchLastPipelineForCurrentBranch();
+    workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
+    project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
+    if (project != null) {
+      pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
+    } else {
+      pipelineStatusBarItem.hide();
+    }
   } catch (e) {
     if (!project) {
       pipelineStatusBarItem.hide();
@@ -64,7 +71,7 @@ async function refreshPipeline() {
 
     if (status === 'running' || status === 'failed') {
       try {
-        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline);
+        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder);
         if (jobs) {
           const jobsName = jobs.filter(job => job.status === status).map(job => job.name);
           if (jobsName.length > maxJobs) {
@@ -108,15 +115,16 @@ const initPipelineStatus = () => {
     '$(info) GitLab: Fetching pipeline...',
     'gl.pipelineActions',
   );
+
   pipelinesStatusTimer = setInterval(() => {
     refreshPipeline();
-  }, 30000);
+  }, 5000);
 
   refreshPipeline();
 };
 
-async function fetchMRIssues() {
-  const issues = await gitLabService.fetchMRIssues(mr.iid);
+async function fetchMRIssues(workspaceFolder) {
+  const issues = await gitLabService.fetchMRIssues(mr.iid, workspaceFolder);
   let text = `$(code) GitLab: No issue.`;
 
   if (issues[0]) {
@@ -128,21 +136,31 @@ async function fetchMRIssues() {
 }
 
 async function fetchBranchMR() {
-  let project = null;
+  const editor = vscode.window.activeTextEditor;
   let text = '$(git-pull-request) GitLab: No MR.';
+  let workspaceFolder = null;
+  let project = null;
 
   try {
-    project = await gitLabService.fetchCurrentProject();
-    mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch();
+    workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
+    project = await gitLabService.fetchCurrentProject(workspaceFolder);
+    if (project != null) {
+      mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
+      mrStatusBarItem.show();
+    } else {
+      mrStatusBarItem.hide();
+    }
   } catch (e) {
     mrStatusBarItem.hide();
   }
 
-  if (mr) {
+  if (project && mr) {
     text = `$(git-pull-request) GitLab: MR !${mr.iid}`;
-    fetchMRIssues();
+    fetchMRIssues(workspaceFolder);
+    mrIssueStatusBarItem.show();
   } else if (project) {
     mrIssueStatusBarItem.text = `$(code) GitLab: No issue.`;
+    mrIssueStatusBarItem.show();
   } else {
     mrIssueStatusBarItem.hide();
   }
@@ -163,7 +181,7 @@ const initMrStatus = () => {
   mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...', cmdName);
   mrStatusTimer = setInterval(() => {
     fetchBranchMR();
-  }, 60000);
+  }, 5000);
 
   fetchBranchMR();
 };

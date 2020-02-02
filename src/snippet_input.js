@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const openers = require('./openers');
 const gitLabService = require('./gitlab_service');
+const gitlabProjectInput = require('./gitlab_project_input');
 
 const visibilityOptions = [
   {
@@ -46,8 +47,8 @@ async function createSnippet(project, editor, visibility, context) {
   let data = {
     title: fileName,
     file_name: fileName,
-    visibility, 
-  }
+    visibility,
+  };
 
   if (project) {
     data.id = project.id;
@@ -63,9 +64,26 @@ async function createSnippet(project, editor, visibility, context) {
 
 async function showPicker() {
   const editor = vscode.window.activeTextEditor;
-  const project = await gitLabService.fetchCurrentProject();
+  let workspaceFolder = null;
+  let project = null;
 
   if (editor) {
+    workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
+    project = await gitLabService.fetchCurrentProject(workspaceFolder);
+
+    if (project == null) {
+      workspaceFolder = await gitlabProjectInput.show(
+        [
+          {
+            label: "User's Snippets",
+            uri: '',
+          },
+        ],
+        "Select a Gitlab Project or use the User's Snippets",
+      );
+      project = await gitLabService.fetchCurrentProject(workspaceFolder);
+    }
+
     const visibility = await vscode.window.showQuickPick(visibilityOptions);
 
     if (visibility) {

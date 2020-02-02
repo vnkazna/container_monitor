@@ -1,7 +1,7 @@
 <script>
 import UserAvatar from './UserAvatar';
+import Date from './Date';
 
-const moment = require('moment');
 const md = require('markdown-it')().use(require('markdown-it-checkbox'));
 
 export default {
@@ -13,6 +13,7 @@ export default {
   },
   components: {
     UserAvatar,
+    Date,
   },
   computed: {
     stateText() {
@@ -35,16 +36,24 @@ export default {
 
       return md.render(normalized);
     },
-    createdAgo() {
-      return moment(this.issuable.created_at).fromNow();
-    },
   },
   mounted() {
     window.vsCodeApi.postMessage({
       command: 'renderMarkdown',
       markdown: this.issuable.description,
+      object: 'issuable',
       ref: this.issuable.id,
-      key: 'description',
+    });
+  },
+  created() {
+    window.addEventListener('message', event => {
+      if (event.data.type === 'markdownRendered') {
+        const { ref, object, markdown } = event.data;
+        if (object == 'issuable' && ref == this.issuable.id) {
+          this.issuable.markdownRenderedOnServer = true;
+          this.issuable.description = markdown;
+        }
+      }
     });
   },
 };
@@ -58,7 +67,8 @@ export default {
         class="state"
       >{{ stateText }}</span>
       <span class="capitalize"> opened</span>
-      {{ createdAgo }} by
+      <date :date='issuable.created_at' />
+      by
       <user-avatar
         :user="issuable.author"
         :show-handle="false"
@@ -79,14 +89,24 @@ export default {
 
 <style lang="scss">
 .issuable-details {
-  border-bottom: 1px solid #919191;
+  border-bottom: 1px solid;
+  border-color: var(--vscode-panel-border);
   line-height: 21px;
+
+  .badge {
+    padding: 0 8px;
+    line-height: 16px;
+    border-radius: 36px;
+    font-size: 12px;
+    display: inline-block;
+  }
 
   .header {
     padding: 10px 0 6px;
     line-height: 36px;
     margin-bottom: 8px;
-    border-bottom: 1px solid #919191;
+    border-bottom: 1px solid;
+    border-color: var(--vscode-panel-border);
     position: relative;
 
     .view-link {
@@ -112,6 +132,48 @@ export default {
 
   .description {
     margin-bottom: 16px;
+  }
+
+  table:not(.code) {
+    margin: 16px 0;
+    border: 0;
+    width: auto;
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+
+  table:not(.code) tbody td {
+    border: 1px solid;
+    border-color: var(--vscode-panel-border);
+    border-collapse: collapse;
+    border-image-repeat: stretch;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 10px;
+    text-align: start;
+    text-size-adjust: 100%;
+    vertical-align: middle;
+    box-sizing: border-box;
+  }
+
+  table:not(.code) thead th {
+    border-bottom: 2px solid;
+    border-right: 1px solid;
+    border-left: 1px solid;
+    border-top: 1px solid;
+    border-color: var(--vscode-panel-border);
+    border-collapse: collapse;
+    border-image-repeat: stretch;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 10px;
+    text-align: start;
+    text-size-adjust: 100%;
+    vertical-align: middle;
+    box-sizing: border-box;
   }
 }
 </style>

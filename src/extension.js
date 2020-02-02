@@ -17,33 +17,7 @@ vscode.gitLabWorkflow = {
 };
 
 const registerSidebarTreeDataProviders = () => {
-  const assignedIssuesDataProvider = new IssuableDataProvider({
-    fetcher: 'fetchIssuesAssignedToMe',
-    noItemText: 'There is no issue assigned to you.',
-  });
-
-  const createdIssuesDataProvider = new IssuableDataProvider({
-    fetcher: 'fetchIssuesCreatedByMe',
-    noItemText: 'There is no issue created by you.',
-  });
-
-  const assignedMrsDataProvider = new IssuableDataProvider({
-    fetcher: 'fetchMergeRequestsAssignedToMe',
-    issuableType: 'merge request',
-    noItemText: 'There is no MR assigned to you.',
-  });
-
-  const createdMrsDataProvider = new IssuableDataProvider({
-    fetcher: 'fetchMergeRequestsCreatedByMe',
-    issuableType: 'merge request',
-    noItemText: 'There is no MR created by you.',
-  });
-
-  const allProjectMrsDataProvider = new IssuableDataProvider({
-    fetcher: 'fetchAllProjectMergeRequests',
-    issuableType: 'merge request',
-    noItemText: 'The project has no merge requests',
-  });
+  const issuableDataProvider = new IssuableDataProvider();
 
   const currentBranchDataProvider = new CurrentBranchDataProvider();
 
@@ -52,11 +26,7 @@ const registerSidebarTreeDataProviders = () => {
     vscode.gitLabWorkflow.sidebarDataProviders.push(provider);
   };
 
-  register('issuesAssignedToMe', assignedIssuesDataProvider);
-  register('issuesCreatedByMe', createdIssuesDataProvider);
-  register('mrsAssignedToMe', assignedMrsDataProvider);
-  register('mrsCreatedByMe', createdMrsDataProvider);
-  register('allProjectMrs', allProjectMrsDataProvider);
+  register('issuesAndMrs', issuableDataProvider);
   register('currentBranchInfo', currentBranchDataProvider);
 };
 
