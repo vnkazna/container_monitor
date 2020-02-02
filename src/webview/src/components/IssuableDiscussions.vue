@@ -2,6 +2,7 @@
 import Note from './Note';
 import Discussion from './Discussion';
 import SystemNote from './SystemNote';
+import LabelNote from './LabelNote';
 
 export default {
   props: {
@@ -14,6 +15,7 @@ export default {
     Note,
     Discussion,
     SystemNote,
+    LabelNote,
   },
   methods: {
     getComponentName(discussion) {
@@ -23,11 +25,16 @@ export default {
         }
 
         return Note;
+      } else if (discussion.label) {
+          return LabelNote;
       }
 
       return Discussion;
     },
     getComponentData(discussion) {
+      if (discussion.label) {
+        return discussion;
+      }
       return discussion.individual_note ? discussion.notes[0] : discussion;
     },
   },
@@ -35,28 +42,41 @@ export default {
 </script>
 
 <template>
-  <div class="issuable-discussions">
+  <ul class="issuable-discussions">
     <component
       v-for="discussion in discussions"
       :key="discussion.id"
       :is="getComponentName(discussion)"
       :noteable="getComponentData(discussion)"
     />
-  </div>
+  </ul>
 </template>
 
 <style lang="scss">
+* {
+  box-sizing: border-box;
+}
+
 .issuable-discussions {
   position: relative;
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  text-align: left;
 
   &::before {
     content: '';
-    border-left: 2px solid #919191;
+    border-left: 2px solid;
+    border-color: var(--vscode-panel-border);
     position: absolute;
-    left: 35px;
-    top: 16px;
+    left: 36px;
+    top: 0px;
     bottom: 0;
-    z-index: -1;
+    width: 2px;
+    box-sizing: border-box;
+    z-index: 4px;
   }
 }
 </style>

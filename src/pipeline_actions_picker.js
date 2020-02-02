@@ -22,15 +22,17 @@ async function showPicker() {
     },
   ];
 
+  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+
   const selected = await vscode.window.showQuickPick(items);
 
   if (selected) {
     if (selected.action === 'view') {
-      openers.openCurrentPipeline();
+      openers.openCurrentPipeline(workspaceFolder);
       return;
     }
 
-    gitLabService.handlePipelineAction(selected.action);
+    gitLabService.handlePipelineAction(selected.action, workspaceFolder);
   }
 }
 

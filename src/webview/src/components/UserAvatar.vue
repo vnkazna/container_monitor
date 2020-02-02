@@ -15,6 +15,16 @@ export default {
       required: false,
       default: true,
     },
+    showLink: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    showUsername: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
     showHandle: {
       type: Boolean,
       required: false,
@@ -31,29 +41,38 @@ export default {
 
 <template>
   <span>
-    <img
-      v-if="showAvatar"
-      :src="user.avatar_url"
-      :class="sizeClass"
-      class="avatar"
-    />
-    <span class="author">
-      {{ user.name }}
-      <a
-        v-if="showHandle"
-        :href="user.web_url"
-        target="_blank"
-      >@{{user.username}}</a>
-    </span>
+    <component
+      :is="showLink?'a':'span'"
+      :href="user.web_url"
+      target="_blank"
+    >
+      <img
+        v-if="showAvatar"
+        :src="user.avatar_url"
+        :class="sizeClass"
+        class="avatar"
+      />
+      <span v-if="showUsername" class="author">
+        <strong> {{ user.name }}</strong>
+        <span v-if="showHandle"> @{{ user.username }}</span>
+      </span>
+    </component>
   </span>
 </template>
 
 <style lang="scss" scoped>
+a {
+  color: var(--vscode-foreground);
+  text-decoration: none;
+}
 .avatar {
+  float: left;
+  margin-right: 16px;
   border-radius: 100%;
   max-width: 64px;
   max-height: 64px;
   vertical-align: middle;
+  background: var(--vscode-editor-background);
 }
 
 .s24 {

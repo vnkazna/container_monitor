@@ -2,21 +2,30 @@ const vscode = require('vscode');
 const execa = require('execa');
 const url = require('url');
 
-const getWorkspaceRootPath = () => vscode.workspace.workspaceFolders[0].uri.fsPath;
 const currentInstanceUrl = () => vscode.workspace.getConfiguration('gitlab').instanceUrl;
 
-async function fetch(cmd) {
+async function fetch(cmd, workspaceFolder) {
   const [git, ...args] = cmd.split(' ');
-  const output = await execa.stdout(git, args, {
-    cwd: getWorkspaceRootPath(),
-  });
+  let currentWorkspaceFolder = workspaceFolder;
+
+  if (currentWorkspaceFolder == null) {
+    currentWorkspaceFolder = '';
+  }
+  let output = null;
+  try {
+    output = await execa.stdout(git, args, {
+      cwd: currentWorkspaceFolder,
+    });
+  } catch (ex) {
+    // Fail siletly
+  }
 
   return output;
 }
 
-async function fetchBranchName() {
+async function fetchBranchName(workspaceFolder) {
   const cmd = 'git rev-parse --abbrev-ref HEAD';
-  const output = await fetch(cmd);
+  const output = await fetch(cmd, workspaceFolder);
 
   return output;
 }
@@ -28,12 +37,12 @@ async function fetchBranchName() {
  * Fixes #1 where local branch name is renamed and doesn't exists on remote but
  * local branch still tracks another branch on remote.
  */
-async function fetchTrackingBranchName() {
-  const branchName = await fetchBranchName();
+async function fetchTrackingBranchName(workspaceFolder) {
+  const branchName = await fetchBranchName(workspaceFolder);
 
   try {
     const cmd = `git config --get branch.${branchName}.merge`;
-    const ref = await fetch(cmd);
+    const ref = await fetch(cmd, workspaceFolder);
 
     if (ref) {
       return ref.replace('refs/heads/', '');
@@ -47,9 +56,9 @@ async function fetchTrackingBranchName() {
   return branchName;
 }
 
-async function fetchLastCommitId() {
+async function fetchLastCommitId(workspaceFolder) {
   const cmd = 'git log --format=%H -n 1';
-  const output = await fetch(cmd);
+  const output = await fetch(cmd, workspaceFolder);
 
   return output;
 }
@@ -71,7 +80,7 @@ const escapeForRegExp = str => {
 
 const parseGitRemote = remote => {
   if (remote.startsWith('git@')) {
-    remote = 'ssh://' + remote
+    remote = 'ssh://' + remote;
   }
 
   const { protocol, host, pathname } = url.parse(remote);
@@ -89,23 +98,23 @@ const parseGitRemote = remote => {
   return [protocol, host, ...match.slice(1, 3)];
 };
 
-async function fetchRemoteUrl(name) {
+async function fetchRemoteUrl(name, workspaceFolder) {
   let remoteUrl = null;
   let remoteName = name;
 
   try {
-    const branchName = await fetchBranchName();
+    const branchName = await fetchBranchName(workspaceFolder);
     if (!remoteName) {
-      remoteName = await fetch(`git config --get branch.${branchName}.remote`);
+      remoteName = await fetch(`git config --get branch.${branchName}.remote`, workspaceFolder);
     }
-    remoteUrl = await fetch(`git ls-remote --get-url ${remoteName}`);
+    remoteUrl = await fetch(`git ls-remote --get-url ${remoteName}`, workspaceFolder);
   } catch (err) {
     try {
-      remoteUrl = await fetch('git ls-remote --get-url');
+      remoteUrl = await fetch('git ls-remote --get-url', workspaceFolder);
     } catch (e) {
-      const remote = await fetch('git remote');
+      const remote = await fetch('git remote', workspaceFolder);
 
-      remoteUrl = await fetch(`git ls-remote --get-url ${remote}`);
+      remoteUrl = await fetch(`git ls-remote --get-url ${remote}`, workspaceFolder);
     }
   }
 
@@ -118,16 +127,16 @@ async function fetchRemoteUrl(name) {
   return null;
 }
 
-async function fetchGitRemote() {
+async function fetchGitRemote(workspaceFolder) {
   const { remoteName } = vscode.workspace.getConfiguration('gitlab');
 
-  return await fetchRemoteUrl(remoteName);
+  return await fetchRemoteUrl(remoteName, workspaceFolder);
 }
 
-async function fetchGitRemotePipeline() {
+async function fetchGitRemotePipeline(workspaceFolder) {
   const { pipelineGitRemoteName } = vscode.workspace.getConfiguration('gitlab');
 
-  return await fetchRemoteUrl(pipelineGitRemoteName);
+  return await fetchRemoteUrl(pipelineGitRemoteName, workspaceFolder);
 }
 
 exports.fetchBranchName = fetchBranchName;

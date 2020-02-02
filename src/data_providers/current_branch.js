@@ -13,9 +13,9 @@ class DataProvider {
     this.mr = null;
   }
 
-  async fetchProject() {
+  async fetchProject(workspaceFolder) {
     try {
-      this.project = await gitLabService.fetchCurrentProject();
+      this.project = await gitLabService.fetchCurrentProject(workspaceFolder);
     } catch (e) {
       this.project = null;
       this.children.push(
@@ -26,11 +26,11 @@ class DataProvider {
     }
   }
 
-  async fetchPipeline() {
+  async fetchPipeline(workspaceFolder) {
+    let message = 'No pipeline found.';
+    let url = null;
     if (this.project) {
-      const pipeline = await gitLabService.fetchLastPipelineForCurrentBranch();
-      let message = 'No pipeline found.';
-      let url = null;
+      const pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
 
       if (pipeline) {
         const statusText = pipeline.status === 'success' ? 'passed' : pipeline.status;
@@ -48,38 +48,42 @@ class DataProvider {
         message = `Pipeline #${pipeline.id} ${statusText} · ${actionText} ${timeAgo}`;
         url = `${this.project.web_url}/pipelines/${pipeline.id}`;
       }
-
-      this.children.push(new SidebarTreeItem(message, url));
     }
+    this.children.push(new SidebarTreeItem(message, url, 'pipelines', null, workspaceFolder));
   }
 
-  async fetchMR() {
+  async fetchMR(workspaceFolder) {
     this.mr = null;
+    let url = null;
+    let message = 'No merge request found.';
 
     if (this.project) {
-      const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch();
-      let message = 'No merge request found.';
-      let url = null;
+      const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
 
       if (mr) {
         this.mr = mr;
         message = `MR: !${mr.iid} · ${mr.title}`;
         url = mr.web_url;
       }
-
-      this.children.push(new SidebarTreeItem(message, url));
     }
+    this.children.push(new SidebarTreeItem(message, url, 'merge_requests', null, workspaceFolder));
   }
 
-  async fetchClosingIssue() {
+  async fetchClosingIssue(workspaceFolder) {
     if (this.project) {
       if (this.mr) {
-        const issues = await gitLabService.fetchMRIssues(this.mr.iid);
+        const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
 
         if (issues.length) {
           issues.forEach(issue => {
             this.children.push(
-              new SidebarTreeItem(`Issue: #${issue.iid} · ${issue.title}`, issue.web_url),
+              new SidebarTreeItem(
+                `Issue: #${issue.iid} · ${issue.title}`,
+                issue,
+                'issues',
+                null,
+                workspaceFolder,
+              ),
             );
           });
         } else {
@@ -88,14 +92,17 @@ class DataProvider {
       } else {
         this.children.push(new SidebarTreeItem('No closing issue found.'));
       }
+    } else {
+      this.children.push(new SidebarTreeItem('No closing issue found.'));
     }
   }
 
   async getChildren() {
-    await this.fetchProject();
-    await this.fetchPipeline();
-    await this.fetchMR();
-    await this.fetchClosingIssue();
+    const workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
+    await this.fetchProject(workspaceFolder);
+    await this.fetchPipeline(workspaceFolder);
+    await this.fetchMR(workspaceFolder);
+    await this.fetchClosingIssue(workspaceFolder);
 
     return this.children;
   }

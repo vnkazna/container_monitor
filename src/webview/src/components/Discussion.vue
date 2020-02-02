@@ -74,9 +74,11 @@ export default {
 
 <style lang="scss">
 .discussion {
-  border: 1px solid #919191;
+  margin-top: 16px;
+  border: 1px solid;
+  border-color: var(--vscode-panel-border);
   border-radius: 4px;
-  background: var(--background-color);
+  background: var(--vscode-editor-background);
 
   &.collapsed {
     .toggle-widget {
@@ -94,6 +96,7 @@ export default {
     padding: 8px 16px;
     cursor: pointer;
     user-select: none;
+    position: relative;
   }
 
   .chevron svg {

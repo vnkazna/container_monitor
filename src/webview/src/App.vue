@@ -19,20 +19,6 @@ export default {
     IssuableDiscussions,
     CommentForm,
   },
-  computed: {
-    notesById() {
-      const notes = {}
-
-      this.discussions.forEach((d) => {
-        d.notes.forEach((n) => {
-          notes[n.id] = n;
-        });
-      });
-
-      notes[this.issuable.id] = this.issuable;
-      return notes;
-    },
-  },
   created() {
     window.vsCodeApi = vscode;
     this.isLoading = true;
@@ -42,12 +28,6 @@ export default {
         this.issuable = event.data.issuable;
         this.discussions = event.data.discussions;
         this.isLoading = false;
-      } else if (event.data.type === 'markdownRendered') {
-        const { ref, key, markdown } = event.data;
-        const note = this.notesById[ref] || {};
-
-        note[key] = markdown;
-        note.markdownRenderedOnServer = true;
       }
     });
 
@@ -75,44 +55,33 @@ export default {
 </template>
 
 <style lang="scss">
-body.vscode-light {
-  * {
-    border-color: #B3B7BE !important;
-
-    &::before {
-      border-color: #B3B7BE !important;
-    }
-  }
-
-  .idiff.deletion {
-    background: #fac5cd;
-  }
-
-  .idiff.addition {
-    background: #c7f0d2;
-  }
-
-  .issuable-details .state {
-    color: #fff;
-  }
+.issuable-details .state {
+  color: var(--vscode-foreground);
 }
+
 .capitalize {
   text-transform: capitalize;
 }
 
-code {
+.code {
   padding: 2px 4px;
-  color: #c0341d;
-  background-color: #fbe5e1;
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-textCodeBlock-background);
   border-radius: 4px;
+  border-color: var(--vscode-textBlockQuote-border);
+  font-family: var(--vscode-editor-font-family);
+  font-weight: var(--vscode-editor-font-weight);
+  font-size: var(--vscode-editor-font-size);
 }
 
 .idiff.deletion {
-  background: #df818f;
+  background: var(--vscode-diffEditor-removedTextBackground);
+  border-color: var(--vscode-diffEditor-removedTextBorder);
 }
 
 .idiff.addition {
-  background: #7cba8d;
+  background: var(--vscode-diffEditor-insertedTextBackground);
+  border-color: var(--vscode-diffEditor-insertedTextBorder);
 }
 
 #app {
