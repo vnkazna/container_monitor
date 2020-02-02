@@ -69,7 +69,7 @@ class DataProvider {
         } else if (projects.length === 1) {
           items = await this.getProjectIssues(parameters, projects[0].uri);
         } else {
-          items.push(new SidebarTreeItem(this.noItemText));
+          items.push(new SidebarTreeItem(parameters.noItemText));
         }
       }
     } else {
