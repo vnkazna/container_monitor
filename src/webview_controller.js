@@ -136,9 +136,13 @@ async function create(issuable, workspaceFolder) {
   const html = replaceResources(panel);
   panel.webview.html = html;
 
-  lightIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'gitlab-logo.svg'));
-  darkIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'gitlab-logo.svg'));
-  panel.iconPath = {light: lightIconUri, dark: darkIconUri};
+  let lightIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'issues.svg'));
+  let darkIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'issues.svg'));
+  if (issuable.squash_commit_sha !== undefined) {
+    lightIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'merge_requests.svg'));
+    darkIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'merge_requests.svg'));
+  }
+  panel.iconPath = { light: lightIconUri, dark: darkIconUri };
 
   panel.onDidChangeViewState(() => {
     handleCreate(panel, issuable, workspaceFolder);
