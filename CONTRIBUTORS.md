@@ -24,3 +24,4 @@
 - John Hampton [@jhampton](https://gitlab.com/jhampton)
 - Philip Nicolai [@philip-n](https://gitlab.com/philip-n)
 - Massimeddu Cireddu [@massimeddu](https://gitlab.com/massimeddu)
+- John [@VeenarM](https://gitlab.com/VeenarM)

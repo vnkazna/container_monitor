@@ -6,6 +6,7 @@
 - Enable custom queries in GitLab panel.
 - Improvements to the issue and merge request webview.
 - Adds gitlab icon as webview tab icon.
+- Improve remote URL parsing to support non standard Gitlab usernames.
 
 ## v2.2.0 - 2019-11-06
 
