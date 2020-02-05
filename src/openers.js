@@ -117,8 +117,10 @@ async function openProjectPage() {
   openLink('$projectUrl', workspaceFolder);
 }
 
-async function openCurrentPipeline() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+async function openCurrentPipeline(workspaceFolder) {
+  if (!workspaceFolder) {
+    workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  }
   const project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
 
   if (project) {

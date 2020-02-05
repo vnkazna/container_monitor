@@ -455,7 +455,7 @@ async function handlePipelineAction(action, workspaceFolder) {
     }
 
     if (newPipeline) {
-      statusBar.refreshPipeline(workspaceFolder);
+      statusBar.refreshPipeline();
     }
   } else {
     vscode.window.showErrorMessage('GitLab Workflow: No project or pipeline found.');

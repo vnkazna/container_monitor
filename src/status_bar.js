@@ -97,7 +97,7 @@ async function refreshPipeline() {
         .showInformationMessage(message, { modal: false }, 'View in Gitlab')
         .then(selection => {
           if (selection === 'View in Gitlab') {
-            openers.openCurrentPipeline();
+            openers.openCurrentPipeline(workspaceFolder);
           }
         });
     }
