@@ -17,6 +17,12 @@ suite('git_service tests', () => {
       'fatihacet',
       'gitlab-vscode-extension',
     ]);
+    assert.deepEqual(parseGitRemote('gitlab-ci@gitlab-mydomain.com:fatihacet/gitlab-vscode-extension.git'), [
+      'ssh:',
+      'gitlab-mydomain.com',
+      'fatihacet',
+      'gitlab-vscode-extension',
+    ]);
     assert.deepEqual(parseGitRemote('ssh://git@gitlab.com:fatihacet/gitlab-vscode-extension.git'), [
       'ssh:',
       'gitlab.com',

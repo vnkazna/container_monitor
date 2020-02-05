@@ -79,7 +79,8 @@ const escapeForRegExp = str => {
 };
 
 const parseGitRemote = remote => {
-  if (remote.startsWith('git@')) {
+  // Regex to match gitlab potential starting names for ssh remotes.
+  if (remote.match(`^[a-zA-Z0-9_-]+@`)) {
     remote = 'ssh://' + remote;
   }
 
