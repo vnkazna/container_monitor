@@ -54,7 +54,6 @@ class DataProvider {
 
   async fetchMR(workspaceFolder) {
     this.mr = null;
-    let url = null;
     let message = 'No merge request found.';
 
     if (this.project) {
@@ -63,10 +62,11 @@ class DataProvider {
       if (mr) {
         this.mr = mr;
         message = `MR: !${mr.iid} · ${mr.title}`;
-        url = mr.web_url;
       }
     }
-    this.children.push(new SidebarTreeItem(message, url, 'merge_requests', null, workspaceFolder));
+    this.children.push(
+      new SidebarTreeItem(message, this.mr, 'merge_requests', null, workspaceFolder),
+    );
   }
 
   async fetchClosingIssue(workspaceFolder) {
