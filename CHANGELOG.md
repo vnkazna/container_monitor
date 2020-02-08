@@ -7,6 +7,7 @@
 - Improvements to the issue and merge request webview.
 - Adds gitlab icon as webview tab icon.
 - Improve remote URL parsing to support non standard Gitlab usernames.
+- Update Extension Icon to match the new vscode-codicons.
 
 ## v2.2.0 - 2019-11-06
 
