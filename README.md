@@ -4,13 +4,9 @@
 
 This extension integrates GitLab to VSCode by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VSCode command palette and status bar to provide more information about your project.
 
-## Screencast
-
-[![video-cover](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/screencast-cover.jpg)](https://www.youtube.com/watch?v=XcxsF0lWBhA)
-
 ## Features
 
-- See your issues and MRs on a dedicated panel in the VSCode sidebar. [Read more](#sidebar)
+- See your issues, MRs and other [custom search results](#custom-queries) on a dedicated panel in the VSCode sidebar. [Read more](#sidebar)
 - See pipeline status, open MR and closing issue links in the status bar. [Read more](#status-bar).
 - Automatically updates pipeline status on the status bar so you don't need to open GitLab to see your pipeline status.
 - Advanced pipeline actions allow you to view pipeline on GitLab, create a new pipeline, retry or cancel current pipeline. [Read more](#pipeline-actions).
@@ -28,14 +24,13 @@ This extension integrates GitLab to VSCode by adding a new GitLab sidebar where 
 - Open issue page to create a new issue.
 - Open the merge request page to create a merge request.
 - Set and remove your GitLab Personal Access Token. _Required step, see [Setup](#setup) section below._
-- Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
-- Supports custom custom queries [Read more](#custom-queries)
+- Supports multi-root workspace and multiple GitLab instances [Read more](#multiple-gitlab-instances).
 
 ## Experimental Features
 
 Experimental features are behind a feature flag. To enable them, you can set `gitlab.enableExperimentalFeatures` to `true` in your VSCode settings.
 
-#### View issue details and comments in VSCode
+#### View issue and MR details and comments in VSCode
 
 ![_issues-in-vscode](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_issues-in-vscode.png)
 
