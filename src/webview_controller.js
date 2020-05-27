@@ -136,11 +136,19 @@ async function create(issuable, workspaceFolder) {
   const html = replaceResources(panel);
   panel.webview.html = html;
 
-  let lightIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'issues.svg'));
-  let darkIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'issues.svg'));
+  let lightIconUri = vscode.Uri.file(
+    path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'issues.svg'),
+  );
+  let darkIconUri = vscode.Uri.file(
+    path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'issues.svg'),
+  );
   if (issuable.squash_commit_sha !== undefined) {
-    lightIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'merge_requests.svg'));
-    darkIconUri = vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'merge_requests.svg'));
+    lightIconUri = vscode.Uri.file(
+      path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'merge_requests.svg'),
+    );
+    darkIconUri = vscode.Uri.file(
+      path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'merge_requests.svg'),
+    );
   }
   panel.iconPath = { light: lightIconUri, dark: darkIconUri };
 

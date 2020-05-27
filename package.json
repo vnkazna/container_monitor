@@ -488,12 +488,12 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "node_modules/.bin/tsc -p ./",
-    "watch": "node_modules/.bin/tsc -watch -p ./",
-    "test": "node ./out/runTest.js",
-    "eslint": "node_modules/.bin/eslint --max-warnings 0 --ext .js .",
-    "format": "node_modules/.bin/prettier --write '**/*.{js,json}'",
-    "publish": "node_modules/.bin/vsce publish",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "yarn compile && node ./out/runTest.js",
+    "eslint": "eslint --max-warnings 49 --ext .js .",
+    "format": "prettier --write '**/*.{js,json}'",
+    "publish": "vsce publish",
     "webview": "cd src/webview ; yarn install ; yarn watch"
   },
   "devDependencies": {
