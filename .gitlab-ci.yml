@@ -1,0 +1,14 @@
+image: node:12-slim
+
+stages:
+  - publish
+
+publish:
+  stage: publish
+  script:
+    - yarn
+    - yarn global add vsce
+    - vsce publish -p $AZURE_ACCESS_TOKEN
+  when: manual
+  only:
+    - tags
