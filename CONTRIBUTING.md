@@ -61,7 +61,7 @@ development environment to work on the extension.
 #### Step - 1 : Installation Prerequisites
 
 We're assuming that you already have [Visual Studio Code](https://code.visualstudio.com/) installed along
-with [GitLab Workflow](https://marketplace.visualstudio.com/items?itemName=fatihacet.gitlab-workflow) installed
+with [GitLab Workflow](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) installed
 and configured, if not, do that first! If already done, proceed ahead.
 
 *  [Git](https://git-scm.com/)

@@ -3,11 +3,11 @@
   "displayName": "GitLab Workflow",
   "description": "GitLab VSCode integration",
   "version": "2.2.0",
-  "publisher": "fatihacet",
+  "publisher": "GitLab",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/fatihacet/gitlab-vscode-extension"
+    "url": "https://gitlab.com/gitlab-org/gitlab-vscode-extension"
   },
   "engines": {
     "vscode": "^1.19.0"
@@ -26,8 +26,8 @@
     "*"
   ],
   "bugs": {
-    "url": "https://gitlab.com/fatihacet/gitlab-vscode-extension/issues",
-    "email": "acetfatih@gmail.com"
+    "url": "https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues",
+    "email": "vscode@gitlab.com"
   },
   "galleryBanner": {
     "color": "#805DE7",
