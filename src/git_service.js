@@ -9,6 +9,7 @@ async function fetch(cmd) {
   const [git, ...args] = cmd.split(' ');
   const output = await execa.stdout(git, args, {
     cwd: getWorkspaceRootPath(),
+    preferLocal: false,
   });
 
   return output;
