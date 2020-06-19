@@ -6,9 +6,9 @@ stages:
 publish:
   stage: publish
   script:
-    - yarn
-    - yarn global add vsce
-    - vsce publish --yarn -p $AZURE_ACCESS_TOKEN
+    - npm install
+    - npm install -g vsce
+    - vsce publish -p $AZURE_ACCESS_TOKEN
   when: manual
   only:
     - tags
