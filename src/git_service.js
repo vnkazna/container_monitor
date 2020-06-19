@@ -15,6 +15,7 @@ async function fetch(cmd, workspaceFolder) {
   try {
     output = await execa.stdout(git, args, {
       cwd: currentWorkspaceFolder,
+      preferLocal: false,
     });
   } catch (ex) {
     // Fail siletly
