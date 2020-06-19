@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.2.2 - 2020-06-19
+
+- Fix dependency issues caused by publishing the extension using `yarn`
+
 ## v2.2.1 - 2020-06-19
 
 ### Security
