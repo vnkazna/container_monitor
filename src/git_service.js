@@ -5,7 +5,7 @@ const url = require('url');
 const currentInstanceUrl = () => vscode.workspace.getConfiguration('gitlab').instanceUrl;
 
 async function fetch(cmd, workspaceFolder) {
-  const [git, ...args] = cmd.split(' ');
+  const [git, ...args] = cmd.trim().split(' ');
   let currentWorkspaceFolder = workspaceFolder;
 
   if (currentWorkspaceFolder == null) {
@@ -103,21 +103,18 @@ const parseGitRemote = remote => {
 async function fetchRemoteUrl(name, workspaceFolder) {
   let remoteUrl = null;
   let remoteName = name;
-
+  // TODO: there is a good chance that the code in the try block never throws,
+  //       because `fetch` swallows all errors
   try {
     const branchName = await fetchBranchName(workspaceFolder);
     if (!remoteName) {
       remoteName = await fetch(`git config --get branch.${branchName}.remote`, workspaceFolder);
     }
-    remoteUrl = await fetch(`git ls-remote --get-url ${remoteName}`, workspaceFolder);
-  } catch (err) {
-    try {
-      remoteUrl = await fetch('git ls-remote --get-url', workspaceFolder);
-    } catch (e) {
-      const remote = await fetch('git remote', workspaceFolder);
-
-      remoteUrl = await fetch(`git ls-remote --get-url ${remote}`, workspaceFolder);
-    }
+    // It's likely that the branch doesn't have a custom remote configured. The `ls-remote` remote argument is optional.
+    remoteUrl = await fetch(`git ls-remote --get-url ${remoteName || ''}`, workspaceFolder);
+  } catch (e) {
+    const remote = await fetch('git remote', workspaceFolder);
+    remoteUrl = await fetch(`git ls-remote --get-url ${remote}`, workspaceFolder);
   }
 
   if (remoteUrl) {
