@@ -50,11 +50,10 @@ async function createSnippet(project, editor, visibility, context) {
     visibility,
   };
 
+  data.content = content;
+
   if (project) {
     data.id = project.id;
-    data.code = content;
-  } else {
-    data.content = content;
   }
 
   const snippet = await gitLabService.createSnippet(data);
