@@ -10,6 +10,7 @@ async function go() {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
+      launchArgs: ['--disable-extensions'],
     });
   } catch (err) {
     console.error('Failed to run tests');
