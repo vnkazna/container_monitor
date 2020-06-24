@@ -2,6 +2,8 @@
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/fatihacet.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=fatihacet.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/fatihacet.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=fatihacet.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/fatihacet.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=fatihacet.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/fatihacet.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=fatihacet.gitlab-workflow)
 
+*We are happy to announce that the GitLab VSCode Extension is officially joining GitLab. The team is now focusing on [housekeeping tasks](https://gitlab.com/groups/gitlab-org/-/epics/3350). You can expect regular improvements and fixes. We want to thank the whole community for creating the extension, special thanks to the maintainers [@fatihacet](https://gitlab.com/fatihacet) and [@massimeddu](https://gitlab.com/massimeddu).*
+
 This extension integrates GitLab to VSCode by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VSCode command palette and status bar to provide more information about your project.
 
 ## Features
