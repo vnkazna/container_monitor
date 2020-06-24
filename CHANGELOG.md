@@ -12,6 +12,8 @@
 ### Fixed
 
 - Click on merge request "for current branch" doesn't do anything
+- Unable to create Snippets [#195](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/195)
+  - Fixed by [@massimeddu](https://gitlab.com/massimeddu) with [MR !62](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/62) 👍
 
 ## v2.2.2 - 2020-06-19
 
