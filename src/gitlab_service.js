@@ -132,27 +132,29 @@ async function fetchCurrentPipelineProject(workspaceFolder) {
   }
 }
 
-async function fetchUser(userName) {
-  let user = null;
-
+async function fetchCurrentUser() {
   try {
-    const path = userName ? `/users?username=${userName}` : '/user';
-
-    user = await fetch(path);
-    if (Array.isArray(user)) {
-      [user] = user;
-    }
+    const { response: user } = await fetch('/user');
+    return user;
   } catch (e) {
-    let message = 'GitLab Workflow: GitLab user not found.';
-
-    if (!userName) {
-      message += ' Check your Personal Access Token.';
-    }
-
+    console.error(e);
+    const message =
+      'GitLab Workflow: Cannot access current user. Check your Personal Access Token.';
     vscode.window.showInformationMessage(message);
+    return undefined;
   }
+}
 
-  return user;
+async function fetchFirstUserByUsername(userName) {
+  try {
+    const { response: users } = await fetch(`/users?username=${userName}`);
+    return users[0];
+  } catch (e) {
+    console.error(e);
+    const message = 'GitLab Workflow: GitLab user not found.';
+    vscode.window.showInformationMessage(message);
+    return undefined;
+  }
 }
 
 async function fetchVersion() {
@@ -295,9 +297,9 @@ async function fetchIssuables(params = {}, project_uri) {
         path = `${path}&author_username=${author}`;
       }
     } else if (author) {
-      const authorId = await this.fetchUser(author);
-      if (authorId) {
-        path = `${path}&author_id=${authorId.id}`;
+      const authorUser = await fetchFirstUserByUsername(author);
+      if (authorUser) {
+        path = `${path}&author_id=${authorUser.id}`;
       } else {
         path = `${path}&author_id=-1`;
       }
@@ -307,9 +309,9 @@ async function fetchIssuables(params = {}, project_uri) {
     } else if (assignee && config.type === 'issues') {
       path = `${path}&assignee_username=${assignee}`;
     } else if (assignee) {
-      const assigneeId = await this.fetchUser(assignee);
-      if (assigneeId) {
-        path = `${path}&assignee_id=${assigneeId.id}`;
+      const assigneeUser = await fetchFirstUserByUsername(assignee);
+      if (assigneeUser) {
+        path = `${path}&assignee_id=${assigneeUser.id}`;
       } else {
         path = `${path}&assignee_id=-1`;
       }
@@ -645,7 +647,7 @@ async function getCurrentWorkspaceFolderOrSelectOne() {
   return workspaceFolder;
 }
 
-exports.fetchUser = fetchUser;
+exports.fetchCurrentUser = fetchCurrentUser;
 exports.fetchIssuables = fetchIssuables;
 exports.fetchOpenMergeRequestForCurrentBranch = fetchOpenMergeRequestForCurrentBranch;
 exports.fetchLastPipelineForCurrentBranch = fetchLastPipelineForCurrentBranch;

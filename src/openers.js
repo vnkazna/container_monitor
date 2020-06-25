@@ -20,7 +20,7 @@ const openUrl = url => {
  * @param {string} link
  */
 async function openLink(link, workspaceFolder) {
-  const user = await gitLabService.fetchUser();
+  const user = await gitLabService.fetchCurrentUser();
 
   if (user) {
     const project = await gitLabService.fetchCurrentProject(workspaceFolder);
