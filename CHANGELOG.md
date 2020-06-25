@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v3.0.0 - TBD
+## v3.0.0 - 2020-06-25
 
 - Support multi root workspaces.
 - Enable custom queries in GitLab panel.
