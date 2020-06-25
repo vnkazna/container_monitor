@@ -100,21 +100,20 @@ const parseGitRemote = remote => {
   return [protocol, host, ...match.slice(1, 3)];
 };
 
-async function fetchRemoteUrl(name, workspaceFolder) {
-  let remoteUrl = null;
-  let remoteName = name;
-  // TODO: there is a good chance that the code in the try block never throws,
-  //       because `fetch` swallows all errors
-  try {
-    const branchName = await fetchBranchName(workspaceFolder);
-    if (!remoteName) {
-      remoteName = await fetch(`git config --get branch.${branchName}.remote`, workspaceFolder);
-    }
-    // It's likely that the branch doesn't have a custom remote configured. The `ls-remote` remote argument is optional.
-    remoteUrl = await fetch(`git ls-remote --get-url ${remoteName || ''}`, workspaceFolder);
-  } catch (e) {
-    const remote = await fetch('git remote', workspaceFolder);
-    remoteUrl = await fetch(`git ls-remote --get-url ${remote}`, workspaceFolder);
+async function fetchRemoteUrl(remoteName, workspaceFolder) {
+  // If remote name isn't provided, we the command returns default remote for the current branch
+  const getUrlForRemoteName = async name =>
+    fetch(`git ls-remote --get-url ${name || ''}`, workspaceFolder);
+
+  const getFirstRemoteName = async () => {
+    const multilineRemotes = await fetch('git remote', workspaceFolder);
+    return (multilineRemotes || '').split('\n')[0];
+  };
+
+  let remoteUrl = await getUrlForRemoteName(remoteName);
+  if (!remoteUrl) {
+    // If there's no remote now, that means that there's no origin and no `remote.pushDefault` config.
+    remoteUrl = await getUrlForRemoteName(await getFirstRemoteName());
   }
 
   if (remoteUrl) {
