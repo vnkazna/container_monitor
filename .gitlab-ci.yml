@@ -7,6 +7,7 @@ image: node:12-slim
 
 stages:
   - test
+  - publish
 
 lint:
   stage: test
@@ -25,3 +26,14 @@ test-integration:
     - echo $DISPLAY
     - /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     - yarn test
+
+publish:
+  stage: publish
+  script:
+    - yarn
+    - cd src/webview && yarn && yarn build && cd ../.. # build webview
+    - yarn global add vsce
+    - vsce publish -p $AZURE_ACCESS_TOKEN
+  when: manual
+  only:
+    - tags
