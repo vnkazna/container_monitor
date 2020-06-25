@@ -30,10 +30,10 @@ test-integration:
 publish:
   stage: publish
   script:
-    - yarn
+    - npm install
     - cd src/webview && yarn && yarn build && cd ../.. # build webview
-    - yarn global add vsce
-    - vsce publish --yarn -p $AZURE_ACCESS_TOKEN
+    - npm install -g vsce
+    - vsce publish -p $AZURE_ACCESS_TOKEN
   when: manual
   only:
     - tags
