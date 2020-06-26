@@ -487,14 +487,14 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "yarn compile && node ./out/runTest.js",
+    "test": "npm run compile && node ./out/runTest.js",
     "eslint": "eslint --max-warnings 49 --ext .js .",
     "format": "prettier --write '**/*.{js,json}'",
     "publish": "vsce publish",
-    "webview": "cd src/webview ; yarn install ; yarn watch"
+    "webview": "cd src/webview ; npm install ; npm run watch"
   },
   "devDependencies": {
     "@types/mocha": "^7.0.1",
@@ -513,7 +513,6 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "eslint-plugin-vue-libs": "^4.0.0",
     "execa": "^1.0.0",
     "moment": "^2.24.0",
     "request": "^2.88.0",
