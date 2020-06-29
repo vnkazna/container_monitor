@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v3.0.3 - 2020-06-29
+
+- No user-facing changes.
+- Fixed automated releasing of the extension [#206](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/206)
+
 ## v3.0.0 - 2020-06-25
 
 - Support multi root workspaces.
