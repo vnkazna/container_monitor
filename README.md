@@ -307,10 +307,6 @@ Using this command, you can quickly validate GitLab CI configuration.
 
 ![_validate-ci-config.gif](https://gitlab.com/fatihacet/gitlab-vscode-extension/raw/master/src/assets/_validate-ci-config.gif)
 
-### Caveats and known issues
-
-- The current version of the extension doesn't support multi-root workspaces. If you want to know more about limitations and read recent developments, please check [multi-root-workspace](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues?scope=all&utf8=%E2%9C%93&state=all&label_name[]=multi-root-workspace) labeled issues.
-
 ---
 
 ## Contribution
