@@ -12,8 +12,8 @@ stages:
 lint:
   stage: test
   script:
-    - yarn
-    - yarn run eslint
+    - npm ci
+    - npm run eslint
 
 test-integration:
   stage: test
@@ -22,18 +22,18 @@ test-integration:
   script:
     - apt-get update
     - apt-get install -y xvfb libxtst6 libnss3 libgtk-3-0 libxss1 libasound2 libsecret-1-0
-    - yarn
+    - npm ci
     - echo $DISPLAY
     - /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-    - yarn test
+    - npm test
 
 publish:
   stage: publish
   script:
-    - yarn
-    - cd src/webview && yarn && yarn build && cd ../.. # build webview
-    - yarn global add vsce
-    - vsce publish --yarn -p $AZURE_ACCESS_TOKEN
+    - npm ci
+    - cd src/webview && npm install && npm run build && cd ../.. # build webview
+    - npm install -g vsce
+    - vsce publish -p $AZURE_ACCESS_TOKEN
   when: manual
   only:
     - tags
