@@ -88,9 +88,7 @@ Here, the process diverges from the [`gitlab-org/gitlab` security release proces
 
 ### Release the change
 
-- [ ] TODO insert a reference to the release process
-
-Follow the release process to tag a new patch version on the `security-2-2` branch and release it. Patch release for tag `v2.2.0` would have version and tag `v2.2.1`.
+Follow the [regular release process](release-process.md) to tag a new patch version on the `security-2-2` branch and release it. Patch release for tag `v2.2.0` would have version and tag `v2.2.1`.
 
 Validate that the security issue is fixed in production.
 
