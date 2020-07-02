@@ -118,7 +118,7 @@ const initPipelineStatus = () => {
 
   pipelinesStatusTimer = setInterval(() => {
     refreshPipeline();
-  }, 5000);
+  }, 30000);
 
   refreshPipeline();
 };
@@ -181,7 +181,7 @@ const initMrStatus = () => {
   mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...', cmdName);
   mrStatusTimer = setInterval(() => {
     fetchBranchMR();
-  }, 5000);
+  }, 60000);
 
   fetchBranchMR();
 };
