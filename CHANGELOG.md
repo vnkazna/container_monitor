@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v3.0.4 - 2020-07-03
+
+- Increased interval for polling pipelines and merge requests for a branch [#211](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/211)
+
 ## v3.0.3 - 2020-06-29
 
 - No user-facing changes.
