@@ -1,62 +1,47 @@
+## Developer Certificate of Origin + License
+
+By contributing to GitLab B.V., You accept and agree to the following terms and
+conditions for Your present and future Contributions submitted to GitLab B.V.
+Except for the license granted herein to GitLab B.V. and recipients of software
+distributed by GitLab B.V., You reserve all right, title, and interest in and to
+Your Contributions. All Contributions are subject to the following DCO + License
+terms.
+
+[DCO + License](https://gitlab.com/gitlab-org/dco/blob/master/README.md)
+
+All Documentation content that resides under the [docs/ directory](/docs) of this
+repository is licensed under Creative Commons:
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+
+_This notice should stay as the first item in the CONTRIBUTING.md file._
+
+---
+
 # Contributing to GitLab Workflow
 
 Thank you for your interest in contributing to GitLab Workflow! This guide details how to contribute
 to this extension in a way that is easy for everyone. These are mostly guidelines, not rules.
-Use your best judgment, and feel free to propose changes to this document in a merge request.
-
-#### Table of Contents
-
-*  [Code of Conduct](#code-of-conduct)
-*  [Getting Started](#getting-started)
-    *  [Reporting Issues](#reporting-issues)
-    *  [Proposing Features](#proposing-features)
-    *  [Configuring Development Environment](#configuring-development-environment)
-    *  [Code Contribution For Beginners](#code-contribution-for-beginners)
-    *  [Opening Merge Requests](#opening-merge-requests)
+Use your best judgement, and feel free to propose changes to this document in a merge request.
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
-By participating, you are expected to uphold this code. Please report unacceptable behavior by
-[opening an issue](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/new) within project
-and adding a label `Code of Conduct`.
+We want to create a welcoming environment for everyone who is interested in contributing. Visit our [Code of Conduct page](https://about.gitlab.com/community/contribute/code-of-conduct/) to learn more about our commitment to an open and welcoming environment.
 
 ## Getting Started
 
 ### Reporting Issues
 
-This section guides you through submitting an issue/bug for GitLab Workflow.
-
-Before creating issues, please check [list of existing issues](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues)
-to see if issue you want to open is already known or not.
-
-If you are facing issues around configuring Token from your GitLab.com account, see
-list of **already addressed** [Token related issues](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues?scope=all&utf8=%E2%9C%93&state=closed&label_name[]=token-issue).
-As chances are that problem you're facing already has a solution.
-
-If issue is not found, you can [report your issue](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/new) along
-with detailed description that includes;
-
-*  Version of VS Code, GitLab Workflow and Operating System used.
-*  Expected behaviour and actual behaviour.
-*  Steps to reproduce the issue.
+Create a [new issue from the "Bug" template](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/new?issuable_template=Bug) and follow the instructions in the template.
 
 ### Proposing Features
 
-GitLab Workflow is currently maintained by handful of developers at GitLab in their free time, so not
-all features proposed are promised to be developed. Please refer to "[What's next?](https://gitlab.com/fatihacet/gitlab-vscode-extension#whats-next)"
-section of project README to know what we have in the project roadmap. Having said that, we welcome new and interesting
-ideas that you might have for this extension, so feel free to propose those by opening an issue within
-project with detailed description that includes;
-
-*  How this feature is useful
-*  Possible approach to implement it (we're open to your ideas)
-*  Label `feature-proposal` added to the issue
+Create a [new issue from the "Feature Proposal" template](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/new?issuable_template=Feature%20Proposal) and follow the instructions in the template.
 
 ### Configuring Development Environment
 
-Developing and/or debugging GitLab Workflow works similar to any other VS Code extension. Here's how you can configure
-development environment to work on the extension.
+For general information how to develop and debug VS Code Extensions, please see the [official documentation](https://code.visualstudio.com/api).
+
+The following instructions will help you run the GitLab Workflow Extension locally.
 
 #### Step - 1 : Installation Prerequisites
 
@@ -66,13 +51,13 @@ and configured, if not, do that first! If already done, proceed ahead.
 
 *  [Git](https://git-scm.com/)
 *  [NodeJS](https://nodejs.org/en/) (LTS or Current, any of it works)
-*  [Yarn](https://yarnpkg.com/en/)
+*  [Npm](https://www.npmjs.com/get-npm)
 
 #### Step - 2 : Fork and Clone
 
-*  Use your GitLab account to [fork](https://gitlab.com/fatihacet/gitlab-vscode-extension/forks/new) this project
+*  Use your GitLab account to [fork](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/forks/new) this project
     *  Don't know how forking works? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/fork-project.html#doc-nav).
-    *  Don't have GitLab account? Create one! It is free and it is awesome!
+    *  Don't have GitLab account? [Create one](https://gitlab.com/users/sign_in#register-pane)! It is free and it is awesome!
 *  Visit your forked project (usually URL is `https://gitlab.com/<your user name>/gitlab-vscode-extension`) and copy
    SSH or HTTPS URL to clone the project into your system.
     *  Don't know how to clone a project? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/command-line-commands.html#clone-your-project).
@@ -82,39 +67,47 @@ and configured, if not, do that first! If already done, proceed ahead.
 Once project is cloned, open terminal within the project folder and run following;
 
 ```bash
-yarn install
-yarn webview
+npm install
+npm webview
 ```
 
 This command will install all necessary dependencies to run and debug extension in developer mode.
 
 #### Step - 4 : Running the extension
 
-Open VS Code and then open GitLab Workflow project and then you can follow [Running and debugging your extension](https://code.visualstudio.com/docs/extensions/developing-extensions#_running-and-debugging-your-extension)
-section from VS Code documentation.
+Open the extension project in VS Code (e.g. by running `code .` in the project folder).
 
-#### Step - 5 : Run tests
+You can run the extension in development mode by running `View: Show Run and Debug` command (using `cmd+shift+p`). And clicking the green play icon to start the extension.
+
+You can read through the [Running and debugging your extension](https://code.visualstudio.com/api/working-with-extensions/bundling-extension#run-the-extension) section of the official documentation.
+
+#### Step - 5 : Troubleshooting
+
+Logs can be found by running `Developer: Show Logs ...` command (using `cmd+shift+p`) and selecting `Extension Host`.
+
+You can always use debugger when you are running the extension in development mode.
+
+#### Step - 6 : Run tests
 
 To run tests, open terminal within the project folder and run following;
 
 ```bash
-yarn compile
-yarn test
+npm test
 ```
 
-#### Step - 5 : Run linter
+#### Step - 7 : Run linter
 
 To run linters, open terminal within the project folder and run following;
 
 ```bash
-yarn format
-yarn eslint
+npm format # Automatically formats your code using prettier
+npm eslint
 ```
 
-### Code Contribution For Beginners
+### Your First Contribution?
 
-For newcomers to the project, you can take a look at issues labelled as `Contributions Welcome`
-as available [here](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues?label_name%5B%5D=Contributions+Welcome).
+For newcomers to the project, you can take a look at issues labelled as `Accepting merge requests`
+as available [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues?label_name[]=Accepting%20merge%20requests).
 
 ### Opening Merge Requests
 
