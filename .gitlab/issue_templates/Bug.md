@@ -7,6 +7,10 @@ filtered by the "bug" label:
 - https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues?label_name%5B%5D=bug
 
 and verify the issue you're about to submit isn't a duplicate.
+
+If you are facing issues around configuring Token from your GitLab.com account, see the list of already addressed Token related issues:
+
+https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues?scope=all&utf8=%E2%9C%93&state=closed&label_name[]=token-issue
 --->
 
 ### Summary
