@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "configurations": [
     {
-      "name": "Extension",
+      "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -11,14 +11,30 @@
       "stopOnEntry": false
     },
     {
-      "name": "Extension Tests",
+      "name": "Unit Tests",
+      "args": [
+        "--timeout",
+        "999999",
+        "--colors",
+        "--ignore",
+        "${workspaceFolder}/src/webview/node_modules/**",
+        "${workspaceFolder}/src/**/**.test.js"
+      ],
+      "internalConsoleOptions": "openOnSessionStart",
+      "program": "${workspaceFolder}/node_modules/.bin/mocha",
+      "request": "launch",
+      "type": "node"
+    },
+    {
+      "name": "Integration Tests",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceRoot}",
-        "--extensionTestsPath=${workspaceRoot}/out/unit_tests/"
+        "--extensionTestsPath=${workspaceRoot}/test/integration/",
+        "<paste the last line of `npm run create-test-workspace` output here>"
       ],
       "stopOnEntry": false
     }

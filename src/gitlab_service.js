@@ -33,7 +33,9 @@ async function fetch(path, method = 'GET', data = null) {
       err = `${err} You have configured tokens for ${tokens}.`;
     }
 
-    return vscode.window.showInformationMessage(err);
+    vscode.window.showInformationMessage(err);
+    console.error(err);
+    throw err;
   }
 
   const config = {
@@ -114,6 +116,7 @@ async function fetchCurrentProject(workspaceFolder) {
 
     return await fetchProjectData(remote);
   } catch (e) {
+    console.error(e);
     return null;
   }
 }
