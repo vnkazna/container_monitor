@@ -17,26 +17,30 @@ const openUrl = url => {
  * An example link is `$projectUrl/issues?assignee_id=$userId` which will be
  * `gitlab.com/gitlab-org/gitlab-ce/issues?assignee_id=502136`.
  *
- * @param {string} link
+ * @param {string} linkTemplate
  */
-async function openLink(link, workspaceFolder) {
+async function getLink(linkTemplate, workspaceFolder) {
   const user = await gitLabService.fetchCurrentUser();
 
-  if (user) {
-    const project = await gitLabService.fetchCurrentProject(workspaceFolder);
-
-    if (project) {
-      openUrl(link.replace('$userId', user.id).replace('$projectUrl', project.web_url));
-    } else {
-      vscode.window.showInformationMessage(
-        'GitLab Workflow: Failed to open file on web. No GitLab project.',
-      );
-    }
-  } else {
+  if (!user) {
     vscode.window.showInformationMessage(
       'GitLab Workflow: GitLab user not found. Check your Personal Access Token.',
     );
+    return undefined;
   }
+  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+
+  if (!project) {
+    vscode.window.showInformationMessage(
+      'GitLab Workflow: Failed to find file on the web. No GitLab project.',
+    );
+    return undefined;
+  }
+  return linkTemplate.replace('$userId', user.id).replace('$projectUrl', project.web_url);
+}
+
+function openLink(link, workspaceFolder) {
+  openUrl(getLink(link, workspaceFolder));
 }
 
 async function showIssues() {
@@ -49,7 +53,7 @@ async function showMergeRequests() {
   openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder);
 }
 
-async function openActiveFile() {
+async function getActiveFile() {
   const editor = vscode.window.activeTextEditor;
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
 
@@ -71,15 +75,24 @@ async function openActiveFile() {
         }
       }
 
-      openUrl(`${fileUrl}${anchor}`);
-    } else {
-      vscode.window.showInformationMessage(
-        'GitLab Workflow: Failed to open file on web. No GitLab project.',
-      );
+      return `${fileUrl}${anchor}`;
     }
+    vscode.window.showInformationMessage(
+      'GitLab Workflow: Failed to get file from web. No GitLab project.',
+    );
   } else {
     vscode.window.showInformationMessage('GitLab Workflow: No open file.');
   }
+  return undefined;
+}
+
+async function openActiveFile() {
+  openUrl(await getActiveFile());
+}
+
+async function copyLinkToActiveFile() {
+  const fileUrl = await getActiveFile();
+  await vscode.env.clipboard.writeText(fileUrl);
 }
 
 async function openCurrentMergeRequest() {
@@ -153,6 +166,7 @@ exports.openUrl = openUrl;
 exports.showIssues = showIssues;
 exports.showMergeRequests = showMergeRequests;
 exports.openActiveFile = openActiveFile;
+exports.copyLinkToActiveFile = copyLinkToActiveFile;
 exports.openCurrentMergeRequest = openCurrentMergeRequest;
 exports.openCreateNewIssue = openCreateNewIssue;
 exports.openCreateNewMr = openCreateNewMr;

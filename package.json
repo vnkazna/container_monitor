@@ -58,6 +58,10 @@
         "title": "GitLab: Open active file on GitLab"
       },
       {
+        "command": "gl.copyLinkToActiveFile",
+        "title": "GitLab: Copy link to active file on GitLab"
+      },
+      {
         "command": "gl.openCurrentMergeRequest",
         "title": "GitLab: Open merge request for current branch"
       },
