@@ -5,7 +5,11 @@ const { SidebarTreeItem } = require('../sidebar_tree_item');
 
 class DataProvider {
   constructor() {
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-underscore-dangle
     this._onDidChangeTreeData = new vscode.EventEmitter();
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-underscore-dangle
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
 
     this.children = [];
@@ -107,16 +111,20 @@ class DataProvider {
     return this.children;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getParent() {
     return null;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getTreeItem(item) {
     return item;
   }
 
   refresh() {
     this.children = [];
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-underscore-dangle
     this._onDidChangeTreeData.fire();
   }
 }

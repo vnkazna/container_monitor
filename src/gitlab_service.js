@@ -8,8 +8,6 @@ const gitlabProjectInput = require('./gitlab_project_input');
 
 const projectCache = [];
 let versionCache = null;
-let branchMR = null;
-let version = null;
 
 async function fetch(path, method = 'GET', data = null) {
   const {
@@ -163,7 +161,9 @@ async function fetchVersion() {
       const { response } = await fetch('/version');
       versionCache = response.version;
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error(e);
+  }
 
   return versionCache;
 }
@@ -180,6 +180,8 @@ async function getAllGitlabProjects() {
       .then(res => res)
       .catch(err => console.log(err));
 
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < workspaceFolders.length; i++) {
       if (labels[i] != null) {
         workspaceFolders[i].label = labels[i].name;
@@ -204,15 +206,15 @@ async function fetchLastPipelineForCurrentBranch(workspaceFolder) {
     const pipelines = response;
 
     if (pipelines.length) {
-      const { response } = await fetch(`${pipelinesRootPath}/${pipelines[0].id}`);
-      pipeline = response;
+      const fetchResult = await fetch(`${pipelinesRootPath}/${pipelines[0].id}`);
+      pipeline = fetchResult.response;
     }
   }
 
   return pipeline;
 }
 
-async function fetchIssuables(params = {}, project_uri) {
+async function fetchIssuables(params = {}, projectUri) {
   const {
     type,
     maxResults,
@@ -254,7 +256,7 @@ async function fetchIssuables(params = {}, project_uri) {
     return [];
   }
 
-  const project = await fetchCurrentProject(project_uri);
+  const project = await fetchCurrentProject(projectUri);
   if (project) {
     if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
       config.scope = 'all';
@@ -529,6 +531,8 @@ async function fetchLabelEvents(issuable) {
   }
 
   labelEvents.forEach(el => {
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-param-reassign
     el.body = '';
   });
   return labelEvents;
@@ -547,6 +551,8 @@ async function fetchDiscussions(issuable, page = 1) {
     discussions = response;
     if (page === 1 && headers['x-next-page'] !== '') {
       const pages = [];
+      // Temporarily disable eslint to be able to start enforcing stricter rules
+      // eslint-disable-next-line no-plusplus
       for (let i = 2; i <= headers['x-total-pages']; i++) {
         pages.push(fetchDiscussions(issuable, i));
       }
@@ -599,8 +605,6 @@ async function renderMarkdown(markdown, workspaceFolder) {
 }
 
 async function saveNote({ issuable, note, noteType }) {
-  let saveNote = {};
-
   try {
     const projectId = issuable.project_id;
     const { iid } = issuable;
@@ -608,12 +612,12 @@ async function saveNote({ issuable, note, noteType }) {
     const { response } = await fetch(`/projects/${projectId}/${path}/${iid}/notes`, 'POST', {
       body: note,
     });
-    saveNote = response;
+    return response;
   } catch (e) {
-    saveNote = { success: false };
+    console.error(e);
   }
 
-  return saveNote;
+  return { success: false };
 }
 
 async function getCurrenWorkspaceFolder() {

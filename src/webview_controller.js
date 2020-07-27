@@ -13,6 +13,8 @@ const getNonce = () => {
   let text = '';
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+  // Temporarily disable eslint to be able to start enforcing stricter rules
+  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
@@ -80,6 +82,8 @@ async function handleCreate(panel, issuable, workspaceFolder) {
     }
 
     if (message.command === 'renderMarkdown') {
+      // Temporarily disable eslint to be able to start enforcing stricter rules
+      // eslint-disable-next-line no-param-reassign
       message.markdown = message.markdown.replace(
         /\(\/.*(\/-)?\/merge_requests\//,
         '(/-/merge_requests/',

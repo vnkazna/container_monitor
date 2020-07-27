@@ -17,19 +17,6 @@
         "ignore": ["vscode", "vue", "v-tooltip"]
       }
     ],
-    "prettier/prettier": ["error"],
-    "no-underscore-dangle": "warn",
-    "class-methods-use-this": "warn",
-    "camelcase": "warn",
-    "no-param-reassign": "warn",
-    "prefer-destructuring": "warn",
-    "no-useless-escape": "warn",
-    "prefer-template": "warn",
-    "no-plusplus": "warn",
-    "no-shadow": "warn",
-    "no-else-return": "warn",
-    "prefer-const": "warn",
-    "no-empty": "warn",
-    "no-unused-vars": "warn"
+    "prettier/prettier": ["error"]
   }
 }

@@ -495,8 +495,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node ./out/runTest.js",
-    "eslint": "eslint --max-warnings 49 --ext .js .",
-    "format": "prettier --write '**/*.{js,json}'",
+    "eslint": "eslint --ext .js .",
+    "autofix": "eslint --fix . && prettier --write '**/*.{js,json}'",
     "publish": "vsce publish",
     "webview": "cd src/webview ; npm install ; npm run watch"
   },

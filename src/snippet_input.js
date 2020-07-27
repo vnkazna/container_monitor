@@ -44,7 +44,7 @@ async function createSnippet(project, editor, visibility, context) {
     content = editor.document.getText();
   }
 
-  let data = {
+  const data = {
     title: fileName,
     file_name: fileName,
     visibility,
