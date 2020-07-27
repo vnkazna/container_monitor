@@ -37,6 +37,7 @@ const registerCommands = () => {
     'gl.setToken': tokenInput.showInput,
     'gl.removeToken': tokenInput.removeTokenPicker,
     'gl.openActiveFile': openers.openActiveFile,
+    'gl.copyLinkToActiveFile': openers.copyLinkToActiveFile,
     'gl.openCurrentMergeRequest': openers.openCurrentMergeRequest,
     'gl.openCreateNewIssue': openers.openCreateNewIssue,
     'gl.openCreateNewMR': openers.openCreateNewMr,
