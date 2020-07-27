@@ -132,6 +132,8 @@ async function openProjectPage() {
 
 async function openCurrentPipeline(workspaceFolder) {
   if (!workspaceFolder) {
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-param-reassign
     workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
   }
   const project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);

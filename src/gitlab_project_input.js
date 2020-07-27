@@ -10,7 +10,8 @@ async function showPicker(additionalEntries = [], placeHolder = 'Select a Gitlab
 
   if (workspaceFolderOptions.length === 0) {
     return null;
-  } else if (workspaceFolderOptions.length === 1) {
+  }
+  if (workspaceFolderOptions.length === 1) {
     return workspaceFolderOptions[0];
   }
 

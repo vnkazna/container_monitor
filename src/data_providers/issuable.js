@@ -4,14 +4,18 @@ const { SidebarTreeItem } = require('../sidebar_tree_item');
 
 class DataProvider {
   constructor() {
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-underscore-dangle
     this._onDidChangeTreeData = new vscode.EventEmitter();
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-underscore-dangle
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
   }
 
-  async getProjectIssues(parameters, project_uri) {
+  // eslint-disable-next-line class-methods-use-this
+  async getProjectIssues(parameters, projectUri) {
     const items = [];
-    parameters.noItemText = parameters.noItemText ? parameters.noItemText : 'No items found.';
-    const issues = await gitLabService.fetchIssuables(parameters, project_uri);
+    const issues = await gitLabService.fetchIssuables(parameters, projectUri);
     let issuableSign = '!';
     if (parameters.type === 'issues') {
       issuableSign = '#';
@@ -30,10 +34,11 @@ class DataProvider {
         } else if (issuableSign === '-') {
           title = `[${issue.severity}] - ${issue.name}`;
         }
-        items.push(new SidebarTreeItem(title, issue, parameters.type, null, project_uri));
+        items.push(new SidebarTreeItem(title, issue, parameters.type, null, projectUri));
       });
     } else {
-      items.push(new SidebarTreeItem(parameters.noItemText));
+      const noItemText = parameters.noItemText || 'No items found.';
+      items.push(new SidebarTreeItem(noItemText));
     }
     return items;
   }
@@ -88,15 +93,19 @@ class DataProvider {
     return items;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getParent() {
     return null;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getTreeItem(item) {
     return item;
   }
 
   refresh() {
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-underscore-dangle
     this._onDidChangeTreeData.fire();
   }
 }

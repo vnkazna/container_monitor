@@ -65,7 +65,7 @@ async function fetchLastCommitId(workspaceFolder) {
 }
 
 const getInstancePath = () => {
-  const pathname = url.parse(currentInstanceUrl()).pathname;
+  const { pathname } = url.parse(currentInstanceUrl());
   if (pathname !== '/') {
     // Remove trailing slash if exists
     return pathname.replace(/\/$/, '');
@@ -76,13 +76,15 @@ const getInstancePath = () => {
 };
 
 const escapeForRegExp = str => {
-  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
 };
 
 const parseGitRemote = remote => {
   // Regex to match gitlab potential starting names for ssh remotes.
   if (remote.match(`^[a-zA-Z0-9_-]+@`)) {
-    remote = 'ssh://' + remote;
+    // Temporarily disable eslint to be able to start enforcing stricter rules
+    // eslint-disable-next-line no-param-reassign
+    remote = `ssh://${remote}`;
   }
 
   const { protocol, host, pathname } = url.parse(remote);
@@ -92,7 +94,7 @@ const parseGitRemote = remote => {
   }
 
   const pathRegExp = escapeForRegExp(getInstancePath());
-  const match = pathname.match(pathRegExp + '/:?(.+)/(.*?)(?:.git)?$');
+  const match = pathname.match(`${pathRegExp}/:?(.+)/(.*?)(?:.git)?$`);
   if (!match) {
     return null;
   }
