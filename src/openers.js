@@ -39,8 +39,8 @@ async function getLink(linkTemplate, workspaceFolder) {
   return linkTemplate.replace('$userId', user.id).replace('$projectUrl', project.web_url);
 }
 
-function openLink(link, workspaceFolder) {
-  openUrl(getLink(link, workspaceFolder));
+async function openLink(link, workspaceFolder) {
+  openUrl(await getLink(link, workspaceFolder));
 }
 
 async function showIssues() {
