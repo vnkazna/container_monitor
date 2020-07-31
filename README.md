@@ -1,10 +1,10 @@
-# <img src="https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/logo.png" width="64" align="center" /> [GitLab VSCode Extension](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
+# <img src="https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/logo.png" width="64" align="center" /> [GitLab VS Code Extension](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
 
-*We are happy to announce that the GitLab VSCode Extension is officially joining GitLab. The team is now focusing on [housekeeping tasks](https://gitlab.com/groups/gitlab-org/-/epics/3350). You can expect regular improvements and fixes. We want to thank the whole community for creating the extension, special thanks to the maintainers [@fatihacet](https://gitlab.com/fatihacet) and [@massimeddu](https://gitlab.com/massimeddu).*
+*We are happy to announce that the GitLab VS Code Extension is officially joining GitLab. The team is now focusing on [housekeeping tasks](https://gitlab.com/groups/gitlab-org/-/epics/3350). You can expect regular improvements and fixes. We want to thank the whole community for creating the extension, special thanks to the maintainers [@fatihacet](https://gitlab.com/fatihacet) and [@massimeddu](https://gitlab.com/massimeddu).*
 
-This extension integrates GitLab to VSCode by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VSCode command palette and status bar to provide more information about your project.
+This extension integrates GitLab to VS Code by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VS Code command palette and status bar to provide more information about your project.
 
 ## Features
 
@@ -12,7 +12,7 @@ _You need to set up your access token to use these features, please see [Setup](
 
 ### Sidebar
 
-See your issues, MRs and other [custom search results](#custom-queries) on a dedicated panel in the VSCode sidebar. [Read more](#sidebar---details)
+See your issues, MRs and other [custom search results](#custom-queries) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
 
 ### Status bar
 
@@ -48,15 +48,15 @@ Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
 
 ### Experimental Features
 
-Experimental features are behind a feature flag. To enable them, you can set `gitlab.enableExperimentalFeatures` to `true` in your VSCode settings.
+Experimental features are behind a feature flag. To enable them, you can set `gitlab.enableExperimentalFeatures` to `true` in your VS Code settings.
 
-#### View issue and MR details and comments in VSCode
+#### View issue and MR details and comments in VS Code
 
 ![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_issues-in-vscode.png)
 
-GitLab Workflow allows you to view issue details and comments right in the VSCode. Click an issue link from the sidebar and VSCode will open a new tab to show the issue details. You can also comment to the issue from VSCode. Currently, replying to discussions are not supported.
+GitLab Workflow allows you to view issue details and comments right in the VS Code. Click an issue link from the sidebar and VS Code will open a new tab to show the issue details. You can also comment to the issue from VS Code. Currently, replying to discussions are not supported.
 
-Updating assignees and labels are also not implemented. However, you can use [GitLab Slash Commands](https://docs.gitlab.com/ee/integration/slash_commands.html) to perform actions directly from VSCode. For example, to assign an issue to `@fatihacet`, simply add a comment `/assign @fatihacet` inside VSCode.
+Updating assignees and labels are also not implemented. However, you can use [GitLab Slash Commands](https://docs.gitlab.com/ee/integration/slash_commands.html) to perform actions directly from VS Code. For example, to assign an issue to `@fatihacet`, simply add a comment `/assign @fatihacet` inside VS Code.
 
 ## Setup
 
@@ -86,7 +86,7 @@ To use this extension, you need to create a GitLab Personal Access Token and giv
 
 That's it. 🏁
 
-You can start using this extension right away. If your project has a pipeline for last commit and a MR from your current branch, you should see them on VSCode status bar. 🎉
+You can start using this extension right away. If your project has a pipeline for last commit and a MR from your current branch, you should see them on VS Code status bar. 🎉
 
 #### Multiple Gitlab instances
 
@@ -102,15 +102,15 @@ To enable Gitlab Workflow extension to work with different Gitlab instances, eac
 
 **`gitlab.showStatusBarLinks`** _(required: false, default: true)_
 
-If you don't want to see GitLab related links on the status bar, you can set this option to `false`. If you are using version 1.0.0 or above you can also find the same links in sidebar. You should restart your VSCode after updating this option.
+If you don't want to see GitLab related links on the status bar, you can set this option to `false`. If you are using version 1.0.0 or above you can also find the same links in sidebar. You should restart your VS Code after updating this option.
 
 **`gitlab.showIssueLinkOnStatusBar`** _(required: false, default: true)_
 
-If you are not using GitLab's issue tracker, you can set this option to `false` to remove related issue link on the status bar. You should restart your VSCode after updating this option.
+If you are not using GitLab's issue tracker, you can set this option to `false` to remove related issue link on the status bar. You should restart your VS Code after updating this option.
 
 **`gitlab.showMrStatusOnStatusBar`** _(required: false, default: true)_
 
-You can toggle visibility of MR link in your sidebar. You can always find MR link in GitLab Workflow sidebar. You should restart your VSCode after updating this option.
+You can toggle visibility of MR link in your sidebar. You can always find MR link in GitLab Workflow sidebar. You should restart your VS Code after updating this option.
 
 **`gitlab.ca`** _(required: false, default: null)_
 
@@ -128,7 +128,7 @@ If your self-hosted GitLab instance requires a custom cert/key pair you would pr
 
 If you are using a self-hosted GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors. More information can be found [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26#note_61312786).
 
-> You can open User Settings file by pressing `Cmd+,` on Mac OS or following `Code > Preferences > User Settings`. You can simply add extension configuration values to your User Settings file. This won't break or change anything on your VSCode.
+> You can open User Settings file by pressing `Cmd+,` on Mac OS or following `Code > Preferences > User Settings`. You can simply add extension configuration values to your User Settings file. This won't break or change anything on your VS Code.
 
 **`gitlab.remoteName`** _(required: false, default: null)_
 
@@ -241,9 +241,9 @@ Each query is an entry of the json array. Each entry can have the following valu
 
 ### Sidebar - details
 
-Extension will add a GitLab Workflow panel to sidebar of your VSCode. The dedicated panel will allow you to see the list of your issues and MRs. Also you will be able to see pipeline, MR and issue links for your current branch.
+Extension will add a GitLab Workflow panel to sidebar of your VS Code. The dedicated panel will allow you to see the list of your issues and MRs. Also you will be able to see pipeline, MR and issue links for your current branch.
 
-In the current version, clicking the links will open them on your default browser but the next version will allow you to interact with your issues and MRs right in your VSCode. With the upcoming versions, the extension will allow you to see the MR changes and discussions in VSCode.
+In the current version, clicking the links will open them on your default browser but the next version will allow you to interact with your issues and MRs right in your VS Code. With the upcoming versions, the extension will allow you to see the MR changes and discussions in VS Code.
 
 ![_sidebar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_sidebar.gif)
 
