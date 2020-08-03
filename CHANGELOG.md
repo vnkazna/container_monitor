@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v3.2.0 - 2020-08-03
+
+- Publish GitLab Workflow extension to Open VSX Registry [#205](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/205)
+
+### Fixed
+
+- Command to create a new issue is not working [#218](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/218)
+
 ## v3.1.0 - 2020-07-28
 
 - Copy GitLab link for the active file to the clipboard [#209](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/209)
