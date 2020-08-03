@@ -46,6 +46,8 @@ Supports [multi-root workspaces](https://code.visualstudio.com/docs/editor/multi
 
 Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
 
+Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
+
 ### Experimental Features
 
 Experimental features are behind a feature flag. To enable them, you can set `gitlab.enableExperimentalFeatures` to `true` in your VS Code settings.

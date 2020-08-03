@@ -7,6 +7,7 @@ image: node:12-slim
 
 stages:
   - test
+  - package
   - publish
 
 lint:
@@ -27,13 +28,32 @@ test-integration:
     - /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     - npm test
 
-publish:
-  stage: publish
+package:
+  stage: package
   script:
     - npm ci
     - cd src/webview && npm install && npm run build && cd ../.. # build webview
-    - npm install -g vsce
-    - vsce publish -p $AZURE_ACCESS_TOKEN
+    - npx vsce package
+  artifacts:
+    paths:
+      - '*.vsix'
+    expire_in: 1 year
+  only:
+    - tags
+
+publish_marketplace:
+  stage: publish
+  script:
+    - npx vsce publish *.vsix -p $AZURE_ACCESS_TOKEN
   when: manual
   only:
     - tags
+
+publish_open_vsx:
+  stage: publish
+  script:
+    - npx ovsx publish *.vsix -p $OPENVSX_ACCESS_TOKEN
+  when: manual
+  only:
+    - tags
+
