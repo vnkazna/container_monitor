@@ -1,5 +1,3 @@
-# CHANGELOG
-
 ## v3.2.0 - 2020-08-03
 
 - Publish GitLab Workflow extension to Open VSX Registry [#205](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/205)
