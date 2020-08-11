@@ -498,12 +498,14 @@
     "eslint": "eslint --ext .js .",
     "autofix": "eslint --fix . && prettier --write '**/*.{js,json}'",
     "publish": "vsce publish",
-    "webview": "cd src/webview ; npm install ; npm run watch"
+    "webview": "cd src/webview ; npm install ; npm run watch",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "devDependencies": {
     "@types/mocha": "^7.0.1",
     "@types/node": "^13.7.0",
     "@types/vscode": "^1.41.0",
+    "conventional-changelog-cli": "^2.0.34",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.10.0",
