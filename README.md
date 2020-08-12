@@ -2,7 +2,8 @@
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
 
-*We are happy to announce that the GitLab VS Code Extension is officially joining GitLab. The team is now focusing on [housekeeping tasks](https://gitlab.com/groups/gitlab-org/-/epics/3350). You can expect regular improvements and fixes. We want to thank the whole community for creating the extension, special thanks to the maintainers [@fatihacet](https://gitlab.com/fatihacet) and [@massimeddu](https://gitlab.com/massimeddu).*
+**GitLab Workflow changes its main branch from `master` to `main`.** More details on the reasoning are on this [GitLab issue](https://gitlab.com/gitlab-org/gitlab/-/issues/221164).
+If you are an existing contributor please run locally: `git fetch && git checkout main && git branch -D master`.
 
 This extension integrates GitLab to VS Code by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VS Code command palette and status bar to provide more information about your project.
 
