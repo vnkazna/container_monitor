@@ -11,11 +11,11 @@ const {
   CI_PROJECT_ID, // 5261717
   CI_MERGE_REQUEST_IID,
   CI_COMMIT_SHA,
-  CI_MERGE_REQUEST_TARGET_BRANCH_NAME, // usually master
+  CI_MERGE_REQUEST_TARGET_BRANCH_NAME, // usually main
 } = process.env;
 
 const urlSemanticRelease =
-  'https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/master/docs/commits.md';
+  'https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/commits.md';
 
 const customRules = {
   'header-max-length': [2, 'always', maximumLineLength],

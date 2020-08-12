@@ -22,7 +22,7 @@ Once a security issue is assigned to a developer, we follow the same merge reque
 graph TD;
 A[run security-harness] --> B[prepare branches]
 B --> C[MR to the release branch]
-C --> D[MR to the master]
+C --> D[MR to the main]
 D --> E[tag, release and validate]
 E --> F[push changes to the regular repo]
 ```
@@ -45,13 +45,13 @@ Security harness installed -- you will only be able to push to gitlab.com/gitlab
 
 ### Request CVE number
 
-For exploitable security issues, request a CVE number by [creating an issue in `gitlab-org/cves` project](https://gitlab.com/gitlab-org/cves/-/issues/new). Use the assigned CVE number in the [changelog entry](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/master/CHANGELOG.md#security).
+For exploitable security issues, request a CVE number by [creating an issue in `gitlab-org/cves` project](https://gitlab.com/gitlab-org/cves/-/issues/new). Use the assigned CVE number in the [changelog entry](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CHANGELOG.md#security).
 
 Example CVE request: https://gitlab.com/gitlab-org/cves/-/issues/21
 
 ### Branches
 
-The main objective is to release the security fix as a patch of the latest production release and backporting this fix on `master`.
+The main objective is to release the security fix as a patch of the latest production release and backporting this fix on `main`.
 
 #### Patch release branch
 
@@ -69,10 +69,10 @@ git push security security-9999
 
 #### Backporting fix branch
 
-This branch is going to serve for merging all the security fixes back to `master` branch. If you work on security release v2.2.1, you create the `security-backport-2-2` branch as follows:
+This branch is going to serve for merging all the security fixes back to `main` branch. If you work on security release v2.2.1, you create the `security-backport-2-2` branch as follows:
 
 ```sh
-git checkout master
+git checkout main
 git checkout -b security-backport-2-2
 git push security security-backport-2-2
 ```
@@ -92,11 +92,11 @@ Follow the [regular release process](release-process.md) to tag a new patch vers
 
 Validate that the security issue is fixed in production.
 
-### Backport the fix to `master`
+### Backport the fix to `main`
 
 1. Checkout the backporting branch `git checkout security-backport-2-2`
 1. Cherry-pick all the fixes from the `security-2-2` branch.
-1. Create an MR to merge this the backporting branch to `master`
+1. Create an MR to merge this the backporting branch to `main`
 1. Merge the MR
 
 Example: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension/-/merge_requests/4
@@ -104,7 +104,7 @@ Example: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension/-/merge_
 ## Push changes back to the [Extension Repo]
 
 1. Push the patch tag to the [Extension Repo]
-1. Merge the [Security Repo] `master` branch with the [Extension Repo] `master` and push to [Extension Repo]
+1. Merge the [Security Repo] `main` branch with the [Extension Repo] `main` and push to [Extension Repo]
 
 [GitLab.com]: https://gitlab.com/
 [Security Repo]: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension

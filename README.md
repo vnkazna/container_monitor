@@ -1,4 +1,4 @@
-# <img src="https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/logo.png" width="64" align="center" /> [GitLab VS Code Extension](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
+# <img src="https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/logo.png" width="64" align="center" /> [GitLab VS Code Extension](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
 
@@ -21,7 +21,7 @@ This pipeline status automatically updates so you don't need to open GitLab to s
 
 Advanced pipeline actions allow you to view pipeline on GitLab, create a new pipeline, retry or cancel current pipeline. [Read more](#pipeline-actions).
 
-![_status_bar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_status-bar.gif)
+![_status_bar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_status-bar.gif)
 
 ### Commands
 
@@ -54,7 +54,7 @@ Experimental features are behind a feature flag. To enable them, you can set `gi
 
 #### View issue and MR details and comments in VS Code
 
-![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_issues-in-vscode.png)
+![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_issues-in-vscode.png)
 
 GitLab Workflow allows you to view issue details and comments right in the VS Code. Click an issue link from the sidebar and VS Code will open a new tab to show the issue details. You can also comment to the issue from VS Code. Currently, replying to discussions are not supported.
 
@@ -235,9 +235,9 @@ Each query is an entry of the json array. Each entry can have the following valu
 - Open up Command Palette by pressing `Cmd+Shift+P`.
 - Search for `GitLab:` and you will see all the commands provided by the extension.
 
-![https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/gitlab-vscode.png](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/gitlab-vscode.png)
+![https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/gitlab-vscode.png](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/gitlab-vscode.png)
 
-![https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/pipeline-actions.png](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/pipeline-actions.png)
+![https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png)
 
 ## Features in-depth
 
@@ -247,7 +247,7 @@ Extension will add a GitLab Workflow panel to sidebar of your VS Code. The dedic
 
 In the current version, clicking the links will open them on your default browser but the next version will allow you to interact with your issues and MRs right in your VS Code. With the upcoming versions, the extension will allow you to see the MR changes and discussions in VS Code.
 
-![_sidebar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_sidebar.gif)
+![_sidebar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_sidebar.gif)
 
 ### Pipeline actions
 
@@ -258,7 +258,7 @@ One of the real power features of this extension is pipeline actions. This featu
 - Retry the last pipeline
 - Cancel the last pipeline
 
-![_pipeline_actions.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_pipeline_actions.gif)
+![_pipeline_actions.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_pipeline_actions.gif)
 
 ### Status bar - details
 
@@ -297,19 +297,19 @@ You can perform advanced issue/MR search by using some predefined tokens. Full l
 - You don't need to add quotes around multiple words for `title` token. `title:"new merge request widget"` may return parsing error. `title: new merge request widget` should be used.
 - You can have `labels` and `label` tokens at the same time. `labels: fronted discussion label: performance` is a valid query and all labels will be included in your search query. It's equal with `labels: fronted discussion performance`. You can also have multiple `label` tokens. `label: frontend label: discussion label: performance` is valid and equals to `labels: fronted discussion performance`.
 
-![_advanced-search.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_advanced-search.gif)
+![_advanced-search.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_advanced-search.gif)
 
 ### Create snippet
 
 You can create a snippet from selection or entire file. You can also select visibility level of your snippet.
 
-![_create-snippet.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_create-snippet.gif)
+![_create-snippet.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_create-snippet.gif)
 
 ### Compare with master
 
 You can see changes in your branch by comparing with `master` and see them on GitLab.
 
-![_compare-with-master.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_compare-with-master.gif)
+![_compare-with-master.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_compare-with-master.gif)
 
 > Soon extension will support comparing your current branch with other branches.
 
@@ -317,13 +317,13 @@ You can see changes in your branch by comparing with `master` and see them on Gi
 
 This command allows you to see active file on GitLab. Extension sends active line number and selected text block to GitLab UI so you can see them highlighted.
 
-![_open_active_file.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_open_active_file.gif)
+![_open_active_file.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_open_active_file.gif)
 
 ### Validate GitLab CI Configuration
 
 Using this command, you can quickly validate GitLab CI configuration.
 
-![_validate-ci-config.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/master/src/assets/_validate-ci-config.gif)
+![_validate-ci-config.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_validate-ci-config.gif)
 
 ---
 
