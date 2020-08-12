@@ -32,7 +32,7 @@ When looking at the tests from the perspective of the testing pyramid[^1], the V
 
 ### Unit tests
 
-Unit tests (usually run by `mocha`) are run directly in the development environment, and they are not dependent on the VS Code editor and its APIs. The tests will fail to execute if they import any code dependent on the `vscode` module.
+Unit tests (written in Jest) are run directly in the development environment, and they are not dependent on the VS Code editor and its APIs. The tests will fail to execute if they import any code dependent on the `vscode` module.
 
 ### Integration tests
 

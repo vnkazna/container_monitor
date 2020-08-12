@@ -10,18 +10,14 @@
       "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceRoot}"],
       "stopOnEntry": false
     },
+
     {
       "name": "Unit Tests",
       "args": [
-        "--timeout",
-        "999999",
-        "--colors",
-        "--ignore",
-        "${workspaceFolder}/src/webview/node_modules/**",
-        "${workspaceFolder}/src/**/**.test.js"
+        "-i",
       ],
       "internalConsoleOptions": "openOnSessionStart",
-      "program": "${workspaceFolder}/node_modules/.bin/mocha",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
       "request": "launch",
       "type": "node"
     },
