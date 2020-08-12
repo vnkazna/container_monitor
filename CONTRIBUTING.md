@@ -89,18 +89,20 @@ You can always use debugger when you are running the extension in development mo
 
 #### Step - 6 : Run tests
 
-To run tests, open terminal within the project folder and run following;
+To run tests, open terminal within the project folder and run following:
 
 ```bash
 npm test
 ```
+
+See also [how to write automated tests](docs/writing-tests.md).
 
 #### Step - 7 : Run linter
 
 To run linters, open terminal within the project folder and run following;
 
 ```bash
-npm format # Automatically formats your code using prettier
+npm autofix # Automatically formats your code using prettier and fixes eslint errors
 npm eslint
 ```
 

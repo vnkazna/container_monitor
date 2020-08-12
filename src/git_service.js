@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const execa = require('execa');
-const url = require('url');
+const { parseGitRemote } = require('./git/git_remote_parser');
 
 const currentInstanceUrl = () => vscode.workspace.getConfiguration('gitlab').instanceUrl;
 
@@ -64,44 +64,6 @@ async function fetchLastCommitId(workspaceFolder) {
   return output;
 }
 
-const getInstancePath = () => {
-  const { pathname } = url.parse(currentInstanceUrl());
-  if (pathname !== '/') {
-    // Remove trailing slash if exists
-    return pathname.replace(/\/$/, '');
-  }
-
-  // Do not return extra slash if no extra path in instance url
-  return '';
-};
-
-const escapeForRegExp = str => {
-  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-};
-
-const parseGitRemote = remote => {
-  // Regex to match gitlab potential starting names for ssh remotes.
-  if (remote.match(`^[a-zA-Z0-9_-]+@`)) {
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-param-reassign
-    remote = `ssh://${remote}`;
-  }
-
-  const { protocol, host, pathname } = url.parse(remote);
-
-  if (!host || !pathname) {
-    return null;
-  }
-
-  const pathRegExp = escapeForRegExp(getInstancePath());
-  const match = pathname.match(`${pathRegExp}/:?(.+)/(.*?)(?:.git)?$`);
-  if (!match) {
-    return null;
-  }
-
-  return [protocol, host, ...match.slice(1, 3)];
-};
-
 async function fetchRemoteUrl(remoteName, workspaceFolder) {
   // If remote name isn't provided, we the command returns default remote for the current branch
   const getUrlForRemoteName = async name =>
@@ -119,7 +81,7 @@ async function fetchRemoteUrl(remoteName, workspaceFolder) {
   }
 
   if (remoteUrl) {
-    const [schema, host, namespace, project] = parseGitRemote(remoteUrl);
+    const [schema, host, namespace, project] = parseGitRemote(currentInstanceUrl(), remoteUrl);
 
     return { schema, host, namespace, project };
   }

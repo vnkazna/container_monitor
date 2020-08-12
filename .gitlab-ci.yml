@@ -27,17 +27,23 @@ lint_commit:
     - if: '$CI_MERGE_REQUEST_IID'
       when: always
 
+test-unit:
+  stage: test
+  script:
+    - npm ci
+    - npm run test-unit
+
 test-integration:
   stage: test
   variables:
     DISPLAY: ':99.0'
   script:
     - apt-get update
-    - apt-get install -y xvfb libxtst6 libnss3 libgtk-3-0 libxss1 libasound2 libsecret-1-0
+    - apt-get install -y xvfb libxtst6 libnss3 libgtk-3-0 libxss1 libasound2 libsecret-1-0 git
     - npm ci
     - echo $DISPLAY
     - /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-    - npm test
+    - npm run test-integration
 
 package:
   stage: package
