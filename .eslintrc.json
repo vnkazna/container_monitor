@@ -2,7 +2,8 @@
   "extends": ["airbnb-base", "prettier" ],
   "plugins": ["import", "prettier"],
   "env": {
-    "mocha": true
+    "mocha": true,
+    "jest": true
   },
   "ignorePatterns": [
     "node_modules/",

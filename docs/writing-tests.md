@@ -4,11 +4,11 @@ This document provides technical details about our automated tests. Please see [
 
 ## Technology choice
 
-We are using [`mocha`](https://mochajs.org/) as a test runner for both unit and integration tests. We use [`assert`](https://nodejs.org/docs/latest-v12.x/api/assert.html) for assertions. We use [`vscode-test`](https://code.visualstudio.com/api/working-with-extensions/testing-extension#the-test-script) to run integration tests.
+We are using [Jest](https://jestjs.io/) for our unit tests[^1]. For integration tests, we use [`mocha`](https://mochajs.org/) as a test runner, [`assert`](https://nodejs.org/docs/latest-v12.x/api/assert.html) for assertions, and [`vscode-test`](https://code.visualstudio.com/api/working-with-extensions/testing-extension#the-test-script) to run integration tests in VS Code instance.
 
 ## Unit tests `npm run test-unit`
 
-Modules that don't depend on `vscode` module can be unit tested. Unit tests for a module are placed in the same folder. The name of the test file has `.test.js` suffix.
+Modules that **don't depend on `vscode` module** can be unit tested. Unit tests for a module are placed in the same folder. The name of the test file has `.test.js` suffix.
 
 - `src/git/git_remote_parser.js` - production file
 - `src/git/git_remote_parser.test.js` - test file
@@ -48,3 +48,5 @@ For debugging of the integration tests, we first need to create a test workspace
 Then we can debug the by running the "Integration Tests" [Launch configuration].
 
 [Launch configuration]: https://code.visualstudio.com/docs/editor/debugging#_launch-configurations
+
+[^1]: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/87
