@@ -2,6 +2,7 @@ include:
   - template: SAST.gitlab-ci.yml
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
+  - template: Secret-Detection.gitlab-ci.yml
 
 # run the pipeline only on MRs, tags, and default branch
 workflow:
@@ -108,5 +109,5 @@ eslint-sast:
 nodejs-scan-sast:
   <<: *secure-jobs-config
 
-secrets-sast:
+secret_detection:
   <<: *secure-jobs-config
