@@ -49,4 +49,14 @@ describe('git_remote_parser', () => {
   ])('should parse %s', (remote, parsed) => {
     expect(parseGitRemote('https://gitlab.com', remote)).toEqual(parsed);
   });
+
+  // For more details see https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/11
+  it('should support self managed GitLab on a custom path', () => {
+    expect(
+      parseGitRemote(
+        'https://example.com/gitlab',
+        'https://example.com/gitlab/fatihacet/gitlab-vscode-extension',
+      ),
+    ).toEqual(['https:', 'example.com', 'fatihacet', 'gitlab-vscode-extension']);
+  });
 });
