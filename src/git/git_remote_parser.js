@@ -1,14 +1,9 @@
 const url = require('url');
 
+// returns path without the trailing slash or empty string if there is no path
 const getInstancePath = instanceUrl => {
   const { pathname } = url.parse(instanceUrl);
-  if (pathname !== '/') {
-    // Remove trailing slash if exists
-    return pathname.replace(/\/$/, '');
-  }
-
-  // Do not return extra slash if no extra path in instance url
-  return '';
+  return pathname.replace(/\/$/, '');
 };
 
 const escapeForRegExp = str => {
