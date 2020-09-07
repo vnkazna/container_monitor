@@ -8,7 +8,7 @@ const maximumLineLength = 72;
 
 // You can test the script by setting these environment variables
 const {
-  CI_PROJECT_ID, // 5261717
+  CI_MERGE_REQUEST_PROJECT_ID, // 5261717
   CI_MERGE_REQUEST_IID,
   CI_COMMIT_SHA,
   CI_MERGE_REQUEST_TARGET_BRANCH_NAME, // usually main
@@ -26,7 +26,7 @@ const customRules = {
 
 async function getMr() {
   const result = await axios.get(
-    `https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}`,
+    `https://gitlab.com/api/v4/projects/${CI_MERGE_REQUEST_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}`,
   );
   const { title, squash } = result.data;
   return {
