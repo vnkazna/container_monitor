@@ -24,6 +24,10 @@ function parseGitRemote(instanceUrl, remote) {
     return null;
   }
 
+  if (!instanceUrl) {
+    return [protocol, host, pathname];
+  }
+
   const pathRegExp = escapeForRegExp(getInstancePath(instanceUrl));
   const match = pathname.match(`${pathRegExp}/:?(.+)/(.*?)(?:.git)?$`);
   if (!match) {

@@ -1,8 +1,8 @@
 const vscode = require('vscode');
 const execa = require('execa');
+const url = require('url');
+const tokenService = require('./token_service');
 const { parseGitRemote } = require('./git/git_remote_parser');
-
-const currentInstanceUrl = () => vscode.workspace.getConfiguration('gitlab').instanceUrl;
 
 async function fetch(cmd, workspaceFolder) {
   const [git, ...args] = cmd.trim().split(' ');
@@ -23,6 +23,82 @@ async function fetch(cmd, workspaceFolder) {
 
   return output;
 }
+
+const fetchGitRemoteUrls = async workspaceFolder => {
+  const fetchGitRemotesVerbose = async () => {
+    const cmd = 'git remote -v';
+    const output = await fetch(cmd, workspaceFolder);
+
+    return output.split('\n');
+  };
+
+  const parseRemoteFromVerboseLine = line => {
+    // git remote -v output looks like
+    // origin[TAB]git@gitlab.com:gitlab-org/gitlab-vscode-extension.git[WHITESPACE](fetch)
+    // the interesting part is surrounded by a tab symbol and a whitespace
+
+    return line.split(/\t| /)[1];
+  };
+
+  const remotes = await fetchGitRemotesVerbose();
+  const remoteUrls = remotes.map(remote => parseRemoteFromVerboseLine(remote));
+
+  // git remote -v returns a (fetch) and a (push) line for each remote,
+  // so we need to remove duplicates
+  return [...new Set(remoteUrls)];
+};
+
+const intersectionOfInstanceAndTokenUrls = async workspaceFolder => {
+  const uriHostname = uri => url.parse(uri).host;
+
+  const instanceUrls = tokenService.getInstanceUrls();
+  const gitRemotes = await fetchGitRemoteUrls(workspaceFolder);
+  const gitRemoteHosts = gitRemotes.map(remote => {
+    const [, host] = parseGitRemote(null, remote);
+    return host;
+  });
+
+  return instanceUrls.filter(host => gitRemoteHosts.includes(uriHostname(host)));
+};
+
+const heuristicInstanceUrl = async workspaceFolder => {
+  // if the intersection of git remotes and configured PATs exists and is exactly
+  // one hostname, use it
+  const intersection = await intersectionOfInstanceAndTokenUrls(workspaceFolder);
+  if (intersection.length === 1) {
+    const heuristicUrl = intersection[0];
+    console.log(
+      `Found ${heuristicUrl} in the PAT list and git remotes, using it as the instanceUrl`,
+    );
+    return heuristicUrl;
+  }
+
+  if (intersection.length > 1) {
+    console.log(
+      'Found more than one intersection of git remotes and configured PATs',
+      intersection,
+    );
+  }
+
+  return null;
+};
+
+const fetchCurrentInstanceUrl = async workspaceFolder => {
+  // if the workspace setting exists, use it
+  const workspaceInstanceUrl = vscode.workspace.getConfiguration('gitlab').instanceUrl;
+  if (workspaceInstanceUrl) {
+    return workspaceInstanceUrl;
+  }
+
+  // try to determine the instance URL heuristically
+  const heuristicUrl = await heuristicInstanceUrl(workspaceFolder);
+  if (heuristicUrl) {
+    return heuristicUrl;
+  }
+
+  // default to Gitlab cloud
+  return 'https://gitlab.com';
+};
 
 async function fetchBranchName(workspaceFolder) {
   const cmd = 'git rev-parse --abbrev-ref HEAD';
@@ -65,7 +141,7 @@ async function fetchLastCommitId(workspaceFolder) {
 }
 
 async function fetchRemoteUrl(remoteName, workspaceFolder) {
-  // If remote name isn't provided, we the command returns default remote for the current branch
+  // If remote name isn't provided, the command returns default remote for the current branch
   const getUrlForRemoteName = async name =>
     fetch(`git ls-remote --get-url ${name || ''}`, workspaceFolder);
 
@@ -81,7 +157,8 @@ async function fetchRemoteUrl(remoteName, workspaceFolder) {
   }
 
   if (remoteUrl) {
-    const [schema, host, namespace, project] = parseGitRemote(currentInstanceUrl(), remoteUrl);
+    const instanceUrl = await fetchCurrentInstanceUrl(workspaceFolder);
+    const [schema, host, namespace, project] = parseGitRemote(instanceUrl, remoteUrl);
 
     return { schema, host, namespace, project };
   }
@@ -106,3 +183,4 @@ exports.fetchTrackingBranchName = fetchTrackingBranchName;
 exports.fetchLastCommitId = fetchLastCommitId;
 exports.fetchGitRemote = fetchGitRemote;
 exports.fetchGitRemotePipeline = fetchGitRemotePipeline;
+exports.fetchCurrentInstanceUrl = fetchCurrentInstanceUrl;

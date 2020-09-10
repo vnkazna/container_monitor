@@ -148,8 +148,8 @@
       "title": "GitLab Workflow (GitLab VSCode Extension)",
       "properties": {
         "gitlab.instanceUrl": {
-          "type": "string",
-          "default": "https://gitlab.com",
+          "type": ["string", "null"],
+          "default": null,
           "description": "Your GitLab instance URL (default is https://gitlab.com)"
         },
         "gitlab.showStatusBarLinks": {
