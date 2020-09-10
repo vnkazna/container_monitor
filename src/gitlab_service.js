@@ -9,14 +9,44 @@ const gitlabProjectInput = require('./gitlab_project_input');
 const projectCache = [];
 let versionCache = null;
 
+async function getCurrentWorkspaceFolder() {
+  const editor = vscode.window.activeTextEditor;
+
+  if (
+    editor &&
+    editor.document &&
+    vscode.workspace.getWorkspaceFolder(editor.document.uri) !== undefined
+  ) {
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
+    return workspaceFolder;
+  }
+
+  if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+    return vscode.workspace.workspaceFolders[0].uri.fsPath;
+  }
+
+  return null;
+}
+
+async function getCurrentWorkspaceFolderOrSelectOne() {
+  let workspaceFolder = null;
+
+  workspaceFolder = await getCurrentWorkspaceFolder();
+
+  if (workspaceFolder == null) {
+    workspaceFolder = await gitlabProjectInput.show();
+  }
+
+  return workspaceFolder;
+}
+
 async function fetch(path, method = 'GET', data = null) {
-  const {
-    instanceUrl,
-    ignoreCertificateErrors,
-    ca,
-    cert,
-    certKey,
-  } = vscode.workspace.getConfiguration('gitlab');
+  const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
+    'gitlab',
+  );
+  const instanceUrl = await gitService.fetchCurrentInstanceUrl(
+    await getCurrentWorkspaceFolderOrSelectOne(),
+  );
   const { proxy } = vscode.workspace.getConfiguration('http');
   const apiRoot = `${instanceUrl}/api/v4`;
   const glToken = tokenService.getToken(instanceUrl);
@@ -623,37 +653,6 @@ async function saveNote({ issuable, note, noteType }) {
   return { success: false };
 }
 
-async function getCurrenWorkspaceFolder() {
-  const editor = vscode.window.activeTextEditor;
-
-  if (
-    editor &&
-    editor.document &&
-    vscode.workspace.getWorkspaceFolder(editor.document.uri) !== undefined
-  ) {
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
-    const project = await fetchCurrentProject(workspaceFolder);
-    if (project != null) {
-      return workspaceFolder;
-    }
-  } else if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-    return vscode.workspace.workspaceFolders[0].uri.fsPath;
-  }
-  return null;
-}
-
-async function getCurrentWorkspaceFolderOrSelectOne() {
-  let workspaceFolder = null;
-
-  workspaceFolder = await getCurrenWorkspaceFolder();
-
-  if (workspaceFolder == null) {
-    workspaceFolder = await gitlabProjectInput.show();
-  }
-
-  return workspaceFolder;
-}
-
 exports.fetchCurrentUser = fetchCurrentUser;
 exports.fetchIssuables = fetchIssuables;
 exports.fetchOpenMergeRequestForCurrentBranch = fetchOpenMergeRequestForCurrentBranch;
@@ -671,5 +670,5 @@ exports.renderMarkdown = renderMarkdown;
 exports.saveNote = saveNote;
 exports.getCurrentWorkspaceFolderOrSelectOne = getCurrentWorkspaceFolderOrSelectOne;
 exports.getAllGitlabProjects = getAllGitlabProjects;
-exports.getCurrenWorkspaceFolder = getCurrenWorkspaceFolder;
+exports.getCurrenWorkspaceFolder = getCurrentWorkspaceFolder;
 exports.fetchLabelEvents = fetchLabelEvents;
