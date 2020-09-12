@@ -332,4 +332,4 @@ Using this command, you can quickly validate GitLab CI configuration.
 
 This extension is open source and [hosted on GitLab](https://gitlab.com/gitlab-org/gitlab-vscode-extension). Contributions are more than welcome. Feel free to fork and add new features or submit bug reports.
 
-[Here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/blob/master/CONTRIBUTORS.md) is the list of great people who contributed this project and make it even more awesome. Thank you all 🎉
+[Here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CONTRIBUTORS.md) is the list of great people who contributed this project and make it even more awesome. Thank you all 🎉
