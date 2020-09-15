@@ -1,13 +1,16 @@
 const vscode = require('vscode');
 const request = require('request-promise');
 const fs = require('fs');
-const gitService = require('./git_service');
+const GitService = require('./git_service');
 const tokenService = require('./token_service');
 const statusBar = require('./status_bar');
 const gitlabProjectInput = require('./gitlab_project_input');
 
 const projectCache = [];
 let versionCache = null;
+
+const createGitService = workspaceFolder =>
+  new GitService(workspaceFolder, vscode.workspace.getConfiguration('gitlab'), tokenService);
 
 async function getCurrentWorkspaceFolder() {
   const editor = vscode.window.activeTextEditor;
@@ -44,9 +47,9 @@ async function fetch(path, method = 'GET', data = null) {
   const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
     'gitlab',
   );
-  const instanceUrl = await gitService.fetchCurrentInstanceUrl(
+  const instanceUrl = await createGitService(
     await getCurrentWorkspaceFolderOrSelectOne(),
-  );
+  ).fetchCurrentInstanceUrl();
   const { proxy } = vscode.workspace.getConfiguration('http');
   const apiRoot = `${instanceUrl}/api/v4`;
   const glToken = tokenService.getToken(instanceUrl);
@@ -142,7 +145,7 @@ async function fetchProjectData(remote) {
 
 async function fetchCurrentProject(workspaceFolder) {
   try {
-    const remote = await gitService.fetchGitRemote(workspaceFolder);
+    const remote = await createGitService(workspaceFolder).fetchGitRemote();
 
     return await fetchProjectData(remote);
   } catch (e) {
@@ -153,7 +156,7 @@ async function fetchCurrentProject(workspaceFolder) {
 
 async function fetchCurrentPipelineProject(workspaceFolder) {
   try {
-    const remote = await gitService.fetchGitRemotePipeline(workspaceFolder);
+    const remote = await createGitService(workspaceFolder).fetchGitRemotePipeline();
 
     return await fetchProjectData(remote);
   } catch (e) {
@@ -233,7 +236,7 @@ async function fetchLastPipelineForCurrentBranch(workspaceFolder) {
   let pipeline = null;
 
   if (project) {
-    const branchName = await gitService.fetchTrackingBranchName(workspaceFolder);
+    const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
     const pipelinesRootPath = `/projects/${project.id}/pipelines`;
     const { response } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
     const pipelines = response;
@@ -453,7 +456,7 @@ async function fetchLastJobsForCurrentBranch(pipeline, workspaceFolder) {
 
 async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder) {
   const project = await fetchCurrentProject(workspaceFolder);
-  const branchName = await gitService.fetchTrackingBranchName(workspaceFolder);
+  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
   const path = `/projects/${project.id}/merge_requests?state=opened&source_branch=${branchName}`;
   const { response } = await fetch(path);
@@ -480,7 +483,7 @@ async function handlePipelineAction(action, workspaceFolder) {
     let newPipeline = null;
 
     if (action === 'create') {
-      const branchName = await gitService.fetchTrackingBranchName(workspaceFolder);
+      const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
       endpoint = `/projects/${project.id}/pipeline?ref=${branchName}`;
     }
 

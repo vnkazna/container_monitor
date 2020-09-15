@@ -1,7 +1,5 @@
-const vscode = require('vscode');
 const execa = require('execa');
 const url = require('url');
-const tokenService = require('./token_service');
 const { parseGitRemote } = require('./git/git_remote_parser');
 
 async function fetch(cmd, workspaceFolder) {
@@ -29,7 +27,7 @@ const fetchGitRemoteUrls = async workspaceFolder => {
     const cmd = 'git remote -v';
     const output = await fetch(cmd, workspaceFolder);
 
-    return output.split('\n');
+    return (output || '').split('\n');
   };
 
   const parseRemoteFromVerboseLine = line => {
@@ -41,14 +39,14 @@ const fetchGitRemoteUrls = async workspaceFolder => {
   };
 
   const remotes = await fetchGitRemotesVerbose();
-  const remoteUrls = remotes.map(remote => parseRemoteFromVerboseLine(remote));
+  const remoteUrls = remotes.map(remote => parseRemoteFromVerboseLine(remote)).filter(Boolean);
 
   // git remote -v returns a (fetch) and a (push) line for each remote,
   // so we need to remove duplicates
   return [...new Set(remoteUrls)];
 };
 
-const intersectionOfInstanceAndTokenUrls = async workspaceFolder => {
+const intersectionOfInstanceAndTokenUrls = async (workspaceFolder, tokenService) => {
   const uriHostname = uri => url.parse(uri).host;
 
   const instanceUrls = tokenService.getInstanceUrls();
@@ -61,10 +59,10 @@ const intersectionOfInstanceAndTokenUrls = async workspaceFolder => {
   return instanceUrls.filter(host => gitRemoteHosts.includes(uriHostname(host)));
 };
 
-const heuristicInstanceUrl = async workspaceFolder => {
+const heuristicInstanceUrl = async (workspaceFolder, tokenService) => {
   // if the intersection of git remotes and configured PATs exists and is exactly
   // one hostname, use it
-  const intersection = await intersectionOfInstanceAndTokenUrls(workspaceFolder);
+  const intersection = await intersectionOfInstanceAndTokenUrls(workspaceFolder, tokenService);
   if (intersection.length === 1) {
     const heuristicUrl = intersection[0];
     console.log(
@@ -83,15 +81,14 @@ const heuristicInstanceUrl = async workspaceFolder => {
   return null;
 };
 
-const fetchCurrentInstanceUrl = async workspaceFolder => {
+const fetchCurrentInstanceUrl = async (workspaceFolder, configuredInstanceUrl, tokenService) => {
   // if the workspace setting exists, use it
-  const workspaceInstanceUrl = vscode.workspace.getConfiguration('gitlab').instanceUrl;
-  if (workspaceInstanceUrl) {
-    return workspaceInstanceUrl;
+  if (configuredInstanceUrl) {
+    return configuredInstanceUrl;
   }
 
   // try to determine the instance URL heuristically
-  const heuristicUrl = await heuristicInstanceUrl(workspaceFolder);
+  const heuristicUrl = await heuristicInstanceUrl(workspaceFolder, tokenService);
   if (heuristicUrl) {
     return heuristicUrl;
   }
@@ -140,7 +137,7 @@ async function fetchLastCommitId(workspaceFolder) {
   return output;
 }
 
-async function fetchRemoteUrl(remoteName, workspaceFolder) {
+async function fetchRemoteUrl(remoteName, workspaceFolder, instanceUrl) {
   // If remote name isn't provided, the command returns default remote for the current branch
   const getUrlForRemoteName = async name =>
     fetch(`git ls-remote --get-url ${name || ''}`, workspaceFolder);
@@ -157,7 +154,6 @@ async function fetchRemoteUrl(remoteName, workspaceFolder) {
   }
 
   if (remoteUrl) {
-    const instanceUrl = await fetchCurrentInstanceUrl(workspaceFolder);
     const [schema, host, namespace, project] = parseGitRemote(instanceUrl, remoteUrl);
 
     return { schema, host, namespace, project };
@@ -166,21 +162,45 @@ async function fetchRemoteUrl(remoteName, workspaceFolder) {
   return null;
 }
 
-async function fetchGitRemote(workspaceFolder) {
-  const { remoteName } = vscode.workspace.getConfiguration('gitlab');
+class GitService {
+  constructor(workspaceFolder, { instanceUrl, remoteName, pipelineGitRemoteName }, tokenService) {
+    this.gitlabConfig = { instanceUrl, remoteName, pipelineGitRemoteName };
+    this.workspaceFolder = workspaceFolder;
+    this.tokenService = tokenService;
+  }
 
-  return await fetchRemoteUrl(remoteName, workspaceFolder);
+  async fetchGitRemote() {
+    const instanceUrl = await this.fetchCurrentInstanceUrl();
+    return await fetchRemoteUrl(this.gitlabConfig.remoteName, this.workspaceFolder, instanceUrl);
+  }
+
+  async fetchBranchName() {
+    return await fetchBranchName(this.workspaceFolder);
+  }
+
+  async fetchLastCommitId() {
+    return await fetchLastCommitId(this.workspaceFolder);
+  }
+
+  async fetchGitRemotePipeline() {
+    return await fetchRemoteUrl(
+      this.gitlabConfig.pipelineGitRemoteName,
+      this.workspaceFolder,
+      this.gitlabConfig.instanceUrl,
+    );
+  }
+
+  async fetchTrackingBranchName() {
+    return await fetchTrackingBranchName(this.workspaceFolder);
+  }
+
+  async fetchCurrentInstanceUrl() {
+    return await fetchCurrentInstanceUrl(
+      this.workspaceFolder,
+      this.gitlabConfig.instanceUrl,
+      this.tokenService,
+    );
+  }
 }
 
-async function fetchGitRemotePipeline(workspaceFolder) {
-  const { pipelineGitRemoteName } = vscode.workspace.getConfiguration('gitlab');
-
-  return await fetchRemoteUrl(pipelineGitRemoteName, workspaceFolder);
-}
-
-exports.fetchBranchName = fetchBranchName;
-exports.fetchTrackingBranchName = fetchTrackingBranchName;
-exports.fetchLastCommitId = fetchLastCommitId;
-exports.fetchGitRemote = fetchGitRemote;
-exports.fetchGitRemotePipeline = fetchGitRemotePipeline;
-exports.fetchCurrentInstanceUrl = fetchCurrentInstanceUrl;
+module.exports = GitService;
