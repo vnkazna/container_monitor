@@ -21,6 +21,7 @@ class DataProvider {
     try {
       this.project = await gitLabService.fetchCurrentProject(workspaceFolder);
     } catch (e) {
+      vscode.gitLabWorkflow.log(e.detail);
       this.project = null;
       this.children.push(
         new SidebarTreeItem('No pipeline found.'),

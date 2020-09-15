@@ -143,7 +143,7 @@ async function fetchBranchMR() {
 
   try {
     workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
-    project = await gitLabService.fetchCurrentProject(workspaceFolder);
+    project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
     if (project != null) {
       mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
       mrStatusBarItem.show();

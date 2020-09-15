@@ -5,6 +5,7 @@ const GitService = require('./git_service');
 const tokenService = require('./token_service');
 const statusBar = require('./status_bar');
 const gitlabProjectInput = require('./gitlab_project_input');
+const { ApiError } = require('./errors');
 
 const projectCache = [];
 let versionCache = null;
@@ -149,7 +150,15 @@ async function fetchCurrentProject(workspaceFolder) {
 
     return await fetchProjectData(remote);
   } catch (e) {
-    console.error(e);
+    throw new ApiError(e, 'get current project');
+  }
+}
+
+async function fetchCurrentProjectSwallowError(workspaceFolder) {
+  try {
+    return fetchCurrentProject(workspaceFolder);
+  } catch (error) {
+    vscode.gitLabWorkflow.log(error.detail);
     return null;
   }
 }
@@ -171,11 +180,7 @@ async function fetchCurrentUser() {
     const { response: user } = await fetch('/user');
     return user;
   } catch (e) {
-    console.error(e);
-    const message =
-      'GitLab Workflow: Cannot access current user. Check your Personal Access Token.';
-    vscode.window.showInformationMessage(message);
-    return undefined;
+    throw new ApiError(e, 'get current user');
   }
 }
 
@@ -208,7 +213,7 @@ async function getAllGitlabProjects() {
   let workspaceFolders = [];
   if (vscode.workspace.workspaceFolders) {
     workspaceFolders = vscode.workspace.workspaceFolders.map(workspaceFolder => ({
-      label: fetchCurrentProject(workspaceFolder.uri.fsPath),
+      label: fetchCurrentProjectSwallowError(workspaceFolder.uri.fsPath),
       uri: workspaceFolder.uri.fsPath,
     }));
 
@@ -292,7 +297,7 @@ async function fetchIssuables(params = {}, projectUri) {
     return [];
   }
 
-  const project = await fetchCurrentProject(projectUri);
+  const project = await fetchCurrentProjectSwallowError(projectUri);
   if (project) {
     if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
       config.scope = 'all';
@@ -455,7 +460,7 @@ async function fetchLastJobsForCurrentBranch(pipeline, workspaceFolder) {
 }
 
 async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder) {
-  const project = await fetchCurrentProject(workspaceFolder);
+  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
   const path = `/projects/${project.id}/merge_requests?state=opened&source_branch=${branchName}`;
@@ -476,7 +481,7 @@ async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder) {
  */
 async function handlePipelineAction(action, workspaceFolder) {
   const pipeline = await fetchLastPipelineForCurrentBranch(workspaceFolder);
-  const project = await fetchCurrentProject(workspaceFolder);
+  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
 
   if (pipeline && project) {
     let endpoint = `/projects/${project.id}/pipelines/${pipeline.id}/${action}`;
@@ -503,7 +508,7 @@ async function handlePipelineAction(action, workspaceFolder) {
 }
 
 async function fetchMRIssues(mrId, workspaceFolder) {
-  const project = await fetchCurrentProject(workspaceFolder);
+  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
   let issues = [];
 
   if (project) {
@@ -626,7 +631,7 @@ async function renderMarkdown(markdown, workspaceFolder) {
   }
 
   try {
-    const project = await fetchCurrentProject(workspaceFolder);
+    const project = await fetchCurrentProjectSwallowError(workspaceFolder);
     const { response } = await fetch('/markdown', 'POST', {
       text: markdown,
       project: project.path_with_namespace,
@@ -662,6 +667,7 @@ exports.fetchOpenMergeRequestForCurrentBranch = fetchOpenMergeRequestForCurrentB
 exports.fetchLastPipelineForCurrentBranch = fetchLastPipelineForCurrentBranch;
 exports.fetchLastJobsForCurrentBranch = fetchLastJobsForCurrentBranch;
 exports.fetchCurrentProject = fetchCurrentProject;
+exports.fetchCurrentProjectSwallowError = fetchCurrentProjectSwallowError;
 exports.fetchCurrentPipelineProject = fetchCurrentPipelineProject;
 exports.handlePipelineAction = handlePipelineAction;
 exports.fetchMRIssues = fetchMRIssues;
