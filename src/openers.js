@@ -1,10 +1,14 @@
 const vscode = require('vscode');
-const gitService = require('./git_service');
+const GitService = require('./git_service');
 const gitLabService = require('./gitlab_service');
+const tokenService = require('./token_service');
 
 const openUrl = url => {
   vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
 };
+
+const createGitService = workspaceFolder =>
+  new GitService(workspaceFolder, vscode.workspace.getConfiguration('gitlab'), tokenService);
 
 /**
  * Fetches user and project before opening a link.
@@ -61,7 +65,7 @@ async function getActiveFile() {
     const currentProject = await gitLabService.fetchCurrentProject(workspaceFolder);
 
     if (currentProject) {
-      const branchName = await gitService.fetchTrackingBranchName(workspaceFolder);
+      const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
       const filePath = editor.document.uri.path.replace(`${workspaceFolder}/`, '');
       const fileUrl = `${currentProject.web_url}/blob/${branchName}/${filePath}`;
       let anchor = '';
@@ -115,7 +119,7 @@ async function openCreateNewMr() {
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
 
   if (project) {
-    const branchName = await gitService.fetchTrackingBranchName(workspaceFolder);
+    const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
     openUrl(`${project.web_url}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
   } else {
@@ -154,7 +158,7 @@ async function compareCurrentBranch() {
 
   try {
     project = await gitLabService.fetchCurrentProject(workspaceFolder);
-    lastCommitId = await gitService.fetchLastCommitId(workspaceFolder);
+    lastCommitId = await createGitService(workspaceFolder).fetchLastCommitId();
   } catch (e) {
     console.log('Failed to run compareCurrentBranch command', e);
   }

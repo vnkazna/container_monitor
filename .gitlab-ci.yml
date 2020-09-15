@@ -42,6 +42,7 @@ lint_commit:
 test-unit:
   stage: test
   script:
+    - apt-get update && apt-get install -y git
     - npm ci
     - npm run test-unit
 
