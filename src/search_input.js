@@ -95,7 +95,7 @@ async function showSearchInputFor(noteableType) {
   const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
 
   const queryString = await parseQuery(query, noteableType);
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  const project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
 
   if (project) {
     openers.openUrl(`${project.web_url}/${noteableType}${queryString}`);

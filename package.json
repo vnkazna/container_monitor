@@ -106,6 +106,10 @@
         "title": "GitLab: Validate GitLab CI config"
       },
       {
+        "command": "gl.showOutput",
+        "title": "GitLab: Show extension logs"
+      },
+      {
         "command": "gl.refreshSidebar",
         "title": "GitLab: Refresh sidebar",
         "icon": {

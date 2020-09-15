@@ -11,9 +11,22 @@ const webviewController = require('./webview_controller');
 const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
 
-let context = null;
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
+  log: () => {},
+};
+
+const wrapWithCatch = command => async () => {
+  try {
+    await command();
+  } catch (e) {
+    vscode.gitLabWorkflow.log(e.details || `${e.message}\n${e.stack}`);
+
+    const choice = await vscode.window.showErrorMessage(e.message, null, 'Show logs');
+    if (choice === 'Show logs') {
+      vscode.commands.executeCommand('gl.showOutput');
+    }
+  }
 };
 
 const registerSidebarTreeDataProviders = () => {
@@ -30,7 +43,7 @@ const registerSidebarTreeDataProviders = () => {
   register('currentBranchInfo', currentBranchDataProvider);
 };
 
-const registerCommands = () => {
+const registerCommands = (context, outputChannel) => {
   const commands = {
     'gl.showIssuesAssignedToMe': openers.showIssues,
     'gl.showMergeRequestsAssignedToMe': openers.showMergeRequests,
@@ -51,25 +64,23 @@ const registerCommands = () => {
     'gl.validateCIConfig': ciConfigValidator.validate,
     'gl.refreshSidebar': sidebar.refresh,
     'gl.showRichContent': webviewController.create,
+    'gl.showOutput': () => outputChannel.show(),
   };
 
   Object.keys(commands).forEach(cmd => {
-    context.subscriptions.push(vscode.commands.registerCommand(cmd, commands[cmd]));
+    context.subscriptions.push(vscode.commands.registerCommand(cmd, wrapWithCatch(commands[cmd])));
   });
 
   registerSidebarTreeDataProviders();
 };
 
-const init = () => {
+const activate = context => {
+  const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
+  vscode.gitLabWorkflow.log = line => outputChannel.appendLine(line);
+
+  registerCommands(context, outputChannel);
   webviewController.addDeps(context);
   tokenService.init(context);
 };
 
-const activate = ctx => {
-  context = ctx;
-  registerCommands();
-  init();
-};
-
-exports.init = init;
 exports.activate = activate;

@@ -68,7 +68,7 @@ async function showPicker() {
 
   if (editor) {
     workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
-    project = await gitLabService.fetchCurrentProject(workspaceFolder);
+    project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
 
     if (project == null) {
       workspaceFolder = await gitlabProjectInput.show(
@@ -80,7 +80,7 @@ async function showPicker() {
         ],
         "Select a Gitlab Project or use the User's Snippets",
       );
-      project = await gitLabService.fetchCurrentProject(workspaceFolder);
+      project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
     }
 
     const visibility = await vscode.window.showQuickPick(visibilityOptions);

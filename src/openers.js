@@ -3,9 +3,7 @@ const GitService = require('./git_service');
 const gitLabService = require('./gitlab_service');
 const tokenService = require('./token_service');
 
-const openUrl = url => {
-  vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
-};
+const openUrl = url => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
 
 const createGitService = workspaceFolder =>
   new GitService(workspaceFolder, vscode.workspace.getConfiguration('gitlab'), tokenService);
@@ -25,36 +23,23 @@ const createGitService = workspaceFolder =>
  */
 async function getLink(linkTemplate, workspaceFolder) {
   const user = await gitLabService.fetchCurrentUser();
-
-  if (!user) {
-    vscode.window.showInformationMessage(
-      'GitLab Workflow: GitLab user not found. Check your Personal Access Token.',
-    );
-    return undefined;
-  }
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
 
-  if (!project) {
-    vscode.window.showInformationMessage(
-      'GitLab Workflow: Failed to find file on the web. No GitLab project.',
-    );
-    return undefined;
-  }
   return linkTemplate.replace('$userId', user.id).replace('$projectUrl', project.web_url);
 }
 
-async function openLink(link, workspaceFolder) {
-  openUrl(await getLink(link, workspaceFolder));
+async function openLink(linkTemplate, workspaceFolder) {
+  await openUrl(await getLink(linkTemplate, workspaceFolder));
 }
 
 async function showIssues() {
   const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
-  openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder);
+  await openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder);
 }
 
 async function showMergeRequests() {
   const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
-  openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder);
+  await openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder);
 }
 
 async function getActiveFile() {
@@ -62,7 +47,7 @@ async function getActiveFile() {
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
 
   if (editor) {
-    const currentProject = await gitLabService.fetchCurrentProject(workspaceFolder);
+    const currentProject = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
 
     if (currentProject) {
       const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
@@ -91,7 +76,7 @@ async function getActiveFile() {
 }
 
 async function openActiveFile() {
-  openUrl(await getActiveFile());
+  await openUrl(await getActiveFile());
 }
 
 async function copyLinkToActiveFile() {
@@ -104,7 +89,7 @@ async function openCurrentMergeRequest() {
   const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
 
   if (mr) {
-    openUrl(mr.web_url);
+    await openUrl(mr.web_url);
   }
 }
 
@@ -156,12 +141,8 @@ async function compareCurrentBranch() {
   let lastCommitId = null;
   const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
 
-  try {
-    project = await gitLabService.fetchCurrentProject(workspaceFolder);
-    lastCommitId = await createGitService(workspaceFolder).fetchLastCommitId();
-  } catch (e) {
-    console.log('Failed to run compareCurrentBranch command', e);
-  }
+  project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  lastCommitId = await createGitService(workspaceFolder).fetchLastCommitId();
 
   if (project && lastCommitId) {
     openUrl(`${project.web_url}/compare/master...${lastCommitId}`);
