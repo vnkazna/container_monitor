@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const gitLabService = require('../gitlab_service');
-const { SidebarTreeItem } = require('../sidebar_tree_item');
+const { SidebarTreeItem } = require('./sidebar_tree_item');
+const ErrorItem = require('./error_item');
 
 class DataProvider {
   constructor() {
@@ -44,10 +45,20 @@ class DataProvider {
   }
 
   async getChildren(el) {
-    let items = [];
+    try {
+      return await this.collectIssuables(el);
+    } catch (e) {
+      vscode.gitLabWorkflow.handleError(e);
+      return [new ErrorItem()];
+    }
+  }
+
+  async collectIssuables(el) {
     const { customQueries } = vscode.workspace.getConfiguration('gitlab');
+
     const projects = await gitLabService.getAllGitlabProjects();
 
+    let items = [];
     if (el) {
       if (el.contextValue && el.contextValue.startsWith('custom-query-')) {
         const customQuery = el.contextValue.split('custom-query-')[1];

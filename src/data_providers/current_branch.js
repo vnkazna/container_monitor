@@ -1,7 +1,8 @@
 const vscode = require('vscode');
 const moment = require('moment');
 const gitLabService = require('../gitlab_service');
-const { SidebarTreeItem } = require('../sidebar_tree_item');
+const { SidebarTreeItem } = require('./sidebar_tree_item');
+const ErrorItem = require('./error_item');
 
 class DataProvider {
   constructor() {
@@ -17,23 +18,10 @@ class DataProvider {
     this.mr = null;
   }
 
-  async fetchProject(workspaceFolder) {
-    try {
-      this.project = await gitLabService.fetchCurrentProject(workspaceFolder);
-    } catch (e) {
-      vscode.gitLabWorkflow.log(e.detail);
-      this.project = null;
-      this.children.push(
-        new SidebarTreeItem('No pipeline found.'),
-        new SidebarTreeItem('No merge request found.'),
-        new SidebarTreeItem('No closing issue found.'),
-      );
-    }
-  }
-
   async fetchPipeline(workspaceFolder) {
     let message = 'No pipeline found.';
     let url = null;
+    // TODO project is always present (we throw if we fail to fetch it)
     if (this.project) {
       const pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
 
@@ -61,6 +49,7 @@ class DataProvider {
     this.mr = null;
     let message = 'No merge request found.';
 
+    // TODO project is always present (we throw if we fail to fetch it)
     if (this.project) {
       const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
 
@@ -75,6 +64,7 @@ class DataProvider {
   }
 
   async fetchClosingIssue(workspaceFolder) {
+    // TODO project is always present (we throw if we fail to fetch it)
     if (this.project) {
       if (this.mr) {
         const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
@@ -103,11 +93,16 @@ class DataProvider {
   }
 
   async getChildren() {
-    const workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
-    await this.fetchProject(workspaceFolder);
-    await this.fetchPipeline(workspaceFolder);
-    await this.fetchMR(workspaceFolder);
-    await this.fetchClosingIssue(workspaceFolder);
+    try {
+      const workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
+      this.project = await gitLabService.fetchCurrentProject(workspaceFolder);
+      await this.fetchPipeline(workspaceFolder);
+      await this.fetchMR(workspaceFolder);
+      await this.fetchClosingIssue(workspaceFolder);
+    } catch (e) {
+      vscode.gitLabWorkflow.handleError(e);
+      this.children.push(new ErrorItem());
+    }
 
     return this.children;
   }
