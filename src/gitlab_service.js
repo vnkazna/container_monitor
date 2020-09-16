@@ -156,9 +156,9 @@ async function fetchCurrentProject(workspaceFolder) {
 
 async function fetchCurrentProjectSwallowError(workspaceFolder) {
   try {
-    return fetchCurrentProject(workspaceFolder);
+    return await fetchCurrentProject(workspaceFolder);
   } catch (error) {
-    vscode.gitLabWorkflow.log(error.detail);
+    vscode.gitLabWorkflow.logError(error);
     return null;
   }
 }
@@ -213,13 +213,13 @@ async function getAllGitlabProjects() {
   let workspaceFolders = [];
   if (vscode.workspace.workspaceFolders) {
     workspaceFolders = vscode.workspace.workspaceFolders.map(workspaceFolder => ({
-      label: fetchCurrentProjectSwallowError(workspaceFolder.uri.fsPath),
+      label: fetchCurrentProject(workspaceFolder.uri.fsPath),
       uri: workspaceFolder.uri.fsPath,
     }));
 
-    const labels = await Promise.all(workspaceFolders.map(workspaceFolder => workspaceFolder.label))
-      .then(res => res)
-      .catch(err => console.log(err));
+    const labels = await Promise.all(
+      workspaceFolders.map(workspaceFolder => workspaceFolder.label),
+    );
 
     // Temporarily disable eslint to be able to start enforcing stricter rules
     // eslint-disable-next-line no-plusplus

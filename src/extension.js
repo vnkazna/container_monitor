@@ -14,18 +14,21 @@ const CurrentBranchDataProvider = require('./data_providers/current_branch').Dat
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
   log: () => {},
+  logError: e => vscode.gitLabWorkflow.log(e.details || `${e.message}\n${e.stack}`),
+  handleError: async e => {
+    vscode.gitLabWorkflow.logError(e);
+    const choice = await vscode.window.showErrorMessage(e.message, null, 'Show logs');
+    if (choice === 'Show logs') {
+      await vscode.commands.executeCommand('gl.showOutput');
+    }
+  },
 };
 
 const wrapWithCatch = command => async () => {
   try {
     await command();
   } catch (e) {
-    vscode.gitLabWorkflow.log(e.details || `${e.message}\n${e.stack}`);
-
-    const choice = await vscode.window.showErrorMessage(e.message, null, 'Show logs');
-    if (choice === 'Show logs') {
-      vscode.commands.executeCommand('gl.showOutput');
-    }
+    await vscode.gitLabWorkflow.handleError(e);
   }
 };
 
