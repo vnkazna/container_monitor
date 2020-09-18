@@ -5,8 +5,19 @@ const tokenService = require('./token_service');
 
 const openUrl = url => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
 
-const createGitService = workspaceFolder =>
-  new GitService(workspaceFolder, vscode.workspace.getConfiguration('gitlab'), tokenService);
+const createGitService = workspaceFolder => {
+  const { instanceUrl, remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration(
+    'gitlab',
+  );
+  return new GitService(
+    workspaceFolder,
+    instanceUrl,
+    remoteName,
+    pipelineGitRemoteName,
+    tokenService,
+    vscode.gitLabWorkflow.log,
+  );
+};
 
 /**
  * Fetches user and project before opening a link.
