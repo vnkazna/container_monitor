@@ -1,5 +1,6 @@
 const execa = require('execa');
 const url = require('url');
+const { GITLAB_COM_URL } = require('./constants');
 const { parseGitRemote } = require('./git/git_remote_parser');
 
 class GitService {
@@ -178,7 +179,7 @@ class GitService {
     }
 
     // default to Gitlab cloud
-    return 'https://gitlab.com';
+    return GITLAB_COM_URL;
   }
 }
 
