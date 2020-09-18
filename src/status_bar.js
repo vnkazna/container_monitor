@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const openers = require('./openers');
 const gitLabService = require('./gitlab_service');
+const { UserFriendlyError } = require('./errors');
 
 let context = null;
 let pipelineStatusBarItem = null;
@@ -59,6 +60,7 @@ async function refreshPipeline() {
       pipelineStatusBarItem.hide();
     }
   } catch (e) {
+    vscode.gitLabWorkflow.logError(e);
     if (!project) {
       pipelineStatusBarItem.hide();
       return;
@@ -84,7 +86,9 @@ async function refreshPipeline() {
           }
         }
       } catch (e) {
-        vscode.window.showErrorMessage(`GitLab Workflow: Failed to fetch jobs for pipeline.`);
+        vscode.gitLabWorkflow.handleError(
+          new UserFriendlyError('Failed to fetch jobs for pipeline.', e),
+        );
       }
     }
 
@@ -143,7 +147,7 @@ async function fetchBranchMR() {
 
   try {
     workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
-    project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
+    project = await gitLabService.fetchCurrentProject(workspaceFolder);
     if (project != null) {
       mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
       mrStatusBarItem.show();
@@ -151,6 +155,7 @@ async function fetchBranchMR() {
       mrStatusBarItem.hide();
     }
   } catch (e) {
+    vscode.gitLabWorkflow.logError(e);
     mrStatusBarItem.hide();
   }
 

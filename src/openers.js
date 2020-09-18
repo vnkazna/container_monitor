@@ -46,33 +46,32 @@ async function getActiveFile() {
   const editor = vscode.window.activeTextEditor;
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
 
-  if (editor) {
-    const currentProject = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
-
-    if (currentProject) {
-      const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
-      const filePath = editor.document.uri.path.replace(`${workspaceFolder}/`, '');
-      const fileUrl = `${currentProject.web_url}/blob/${branchName}/${filePath}`;
-      let anchor = '';
-
-      if (editor.selection) {
-        const { start, end } = editor.selection;
-        anchor = `#L${start.line + 1}`;
-
-        if (end.line > start.line) {
-          anchor += `-${end.line + 1}`;
-        }
-      }
-
-      return `${fileUrl}${anchor}`;
-    }
-    vscode.window.showInformationMessage(
-      'GitLab Workflow: Failed to get file from web. No GitLab project.',
-    );
-  } else {
+  if (!editor) {
     vscode.window.showInformationMessage('GitLab Workflow: No open file.');
+    return undefined;
   }
-  return undefined;
+  let currentProject;
+  try {
+    currentProject = await gitLabService.fetchCurrentProject(workspaceFolder);
+  } catch (e) {
+    vscode.gitLabWorkflow.handleError(e);
+    return undefined;
+  }
+  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+  const filePath = editor.document.uri.path.replace(`${workspaceFolder}/`, '');
+  const fileUrl = `${currentProject.web_url}/blob/${branchName}/${filePath}`;
+  let anchor = '';
+
+  if (editor.selection) {
+    const { start, end } = editor.selection;
+    anchor = `#L${start.line + 1}`;
+
+    if (end.line > start.line) {
+      anchor += `-${end.line + 1}`;
+    }
+  }
+
+  return `${fileUrl}${anchor}`;
 }
 
 async function openActiveFile() {
@@ -100,18 +99,10 @@ async function openCreateNewIssue() {
 
 async function openCreateNewMr() {
   const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
-
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
-  if (project) {
-    const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
-
-    openUrl(`${project.web_url}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
-  } else {
-    vscode.window.showInformationMessage(
-      'GitLab Workflow: Failed to open file on web. No GitLab project.',
-    );
-  }
+  openUrl(`${project.web_url}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
 }
 
 async function openProjectPage() {
