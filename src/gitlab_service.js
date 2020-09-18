@@ -5,7 +5,7 @@ const GitService = require('./git_service');
 const tokenService = require('./token_service');
 const statusBar = require('./status_bar');
 const gitlabProjectInput = require('./gitlab_project_input');
-const { ApiError } = require('./errors');
+const { ApiError, UserFriendlyError } = require('./errors');
 
 const projectCache = [];
 let versionCache = null;
@@ -68,8 +68,7 @@ async function fetch(path, method = 'GET', data = null) {
     }
 
     vscode.window.showInformationMessage(err);
-    console.error(err);
-    throw err;
+    throw new Error(err);
   }
 
   const config = {
@@ -90,7 +89,7 @@ async function fetch(path, method = 'GET', data = null) {
     try {
       config.ca = fs.readFileSync(ca);
     } catch (e) {
-      vscode.window.showErrorMessage(`GitLab Workflow: Cannot read CA '${ca}'`);
+      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Cannot read CA '${ca}'`, e));
     }
   }
 
@@ -98,7 +97,7 @@ async function fetch(path, method = 'GET', data = null) {
     try {
       config.cert = fs.readFileSync(cert);
     } catch (e) {
-      vscode.window.showErrorMessage(`GitLab Workflow: Cannot read CA '${cert}'`);
+      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Cannot read CA '${cert}'`, e));
     }
   }
 
@@ -106,7 +105,7 @@ async function fetch(path, method = 'GET', data = null) {
     try {
       config.key = fs.readFileSync(certKey);
     } catch (e) {
-      vscode.window.showErrorMessage(`GitLab Workflow: Cannot read CA '${certKey}'`);
+      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Cannot read CA '${certKey}'`, e));
     }
   }
 
@@ -121,8 +120,9 @@ async function fetch(path, method = 'GET', data = null) {
         headers: response.headers,
       };
     } catch (e) {
-      vscode.window.showInformationMessage('GitLab Workflow: Failed to perform your operation.');
-      console.log('Failed to execute fetch', e);
+      vscode.gitLabWorkflow.handleError(
+        new UserFriendlyError('Failed to parse GitLab API response', e, `Response body: ${body}`),
+      );
       return { error: e };
     }
   };
@@ -169,8 +169,7 @@ async function fetchCurrentPipelineProject(workspaceFolder) {
 
     return await fetchProjectData(remote);
   } catch (e) {
-    console.log('Failed to execute fetch', e);
-
+    vscode.gitLabWorkflow.logError(e);
     return null;
   }
 }
@@ -189,9 +188,7 @@ async function fetchFirstUserByUsername(userName) {
     const { response: users } = await fetch(`/users?username=${userName}`);
     return users[0];
   } catch (e) {
-    console.error(e);
-    const message = 'GitLab Workflow: GitLab user not found.';
-    vscode.window.showInformationMessage(message);
+    vscode.gitLabWorkflow.handleError(new UserFriendlyError('Error when fetching GitLab user.', e));
     return undefined;
   }
 }
@@ -203,7 +200,7 @@ async function fetchVersion() {
       versionCache = response.version;
     }
   } catch (e) {
-    console.error(e);
+    vscode.gitLabWorkflow.logError(e);
   }
 
   return versionCache;
@@ -496,7 +493,7 @@ async function handlePipelineAction(action, workspaceFolder) {
       const { response } = await fetch(endpoint, 'POST');
       newPipeline = response;
     } catch (e) {
-      vscode.window.showErrorMessage(`GitLab Workflow: Failed to ${action} pipeline.`);
+      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Failed to ${action} pipeline.`, e));
     }
 
     if (newPipeline) {
@@ -518,7 +515,7 @@ async function fetchMRIssues(mrId, workspaceFolder) {
       );
       issues = response;
     } catch (e) {
-      console.log('Failed to execute fetchMRIssue', e);
+      vscode.gitLabWorkflow.logError(e);
     }
   }
 
@@ -537,7 +534,7 @@ async function createSnippet(data) {
     const { response } = await fetch(path, 'POST', data);
     snippet = response;
   } catch (e) {
-    vscode.window.showInformationMessage('GitLab Workflow: Failed to create your snippet.');
+    vscode.gitLabWorkflow.handleError(new UserFriendlyError('Failed to create your snippet.', e));
   }
 
   return snippet;
@@ -550,7 +547,9 @@ async function validateCIConfig(content) {
     const { response } = await fetch('/ci/lint', 'POST', { content });
     validCIConfig = response;
   } catch (e) {
-    vscode.window.showInformationMessage('GitLab Workflow: Failed to validate CI configuration.');
+    vscode.gitLabWorkflow.handleError(
+      new UserFriendlyError('Failed to validate CI configuration.', e),
+    );
   }
 
   return validCIConfig;
@@ -566,8 +565,8 @@ async function fetchLabelEvents(issuable) {
     );
     labelEvents = response;
   } catch (e) {
-    vscode.window.showInformationMessage(
-      'GitLab Workflow: Failed to fetch label events for this issuable.',
+    vscode.gitLabWorkflow.handleError(
+      new UserFriendlyError('Failed to fetch label events for this issuable.', e),
     );
   }
 
@@ -597,21 +596,15 @@ async function fetchDiscussions(issuable, page = 1) {
       for (let i = 2; i <= headers['x-total-pages']; i++) {
         pages.push(fetchDiscussions(issuable, i));
       }
-      const results = await Promise.all(pages)
-        .then(val => {
-          return val;
-        })
-        .catch(e => {
-          throw e;
-        });
+      const results = await Promise.all(pages);
       results.forEach(result => {
         discussions = discussions.concat(result);
       });
       delete discussions.headers;
     }
   } catch (e) {
-    vscode.window.showInformationMessage(
-      'GitLab Workflow: Failed to fetch discussions for this issuable.',
+    vscode.gitLabWorkflow.handleError(
+      new UserFriendlyError('Failed to fetch discussions for this issuable.', e),
     );
   }
 
@@ -631,7 +624,7 @@ async function renderMarkdown(markdown, workspaceFolder) {
   }
 
   try {
-    const project = await fetchCurrentProjectSwallowError(workspaceFolder);
+    const project = await fetchCurrentProject(workspaceFolder);
     const { response } = await fetch('/markdown', 'POST', {
       text: markdown,
       project: project.path_with_namespace,
@@ -639,6 +632,7 @@ async function renderMarkdown(markdown, workspaceFolder) {
     });
     rendered = response;
   } catch (e) {
+    vscode.gitLabWorkflow.logError(e);
     return markdown;
   }
 
@@ -655,7 +649,7 @@ async function saveNote({ issuable, note, noteType }) {
     });
     return response;
   } catch (e) {
-    console.error(e);
+    vscode.gitLabWorkflow.logError(e);
   }
 
   return { success: false };
