@@ -24,9 +24,9 @@ vscode.gitLabWorkflow = {
   },
 };
 
-const wrapWithCatch = command => async () => {
+const wrapWithCatch = command => async (...args) => {
   try {
-    await command();
+    await command(...args);
   } catch (e) {
     await vscode.gitLabWorkflow.handleError(e);
   }

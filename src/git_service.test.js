@@ -29,7 +29,7 @@ describe('git_service', () => {
       await git.addConfig('user.name', 'Test Name');
       await git.addRemote(ORIGIN, 'git@test.gitlab.com:gitlab-org/gitlab.git');
 
-      gitService = new GitService(workspaceFolder, { instanceUrl: 'https://gitlab.com' });
+      gitService = new GitService(workspaceFolder, 'https://gitlab.com');
     });
 
     describe('fetchGitRemote', () => {
@@ -45,10 +45,7 @@ describe('git_service', () => {
 
       it('gets the remote url for user configured remote name', async () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        gitService = new GitService(workspaceFolder, {
-          instanceUrl: 'https://gitlab.com',
-          remoteName: SECOND_REMOTE,
-        });
+        gitService = new GitService(workspaceFolder, 'https://gitlab.com', SECOND_REMOTE);
 
         const remoteUrl = await gitService.fetchGitRemote();
 
@@ -99,10 +96,12 @@ describe('git_service', () => {
 
       it('returns url for the configured pipelineGitRemoteName remote', async () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        gitService = new GitService(workspaceFolder, {
-          instanceUrl: 'https://gitlab.com',
-          pipelineGitRemoteName: SECOND_REMOTE,
-        });
+        gitService = new GitService(
+          workspaceFolder,
+          'https://gitlab.com',
+          undefined,
+          SECOND_REMOTE,
+        );
 
         const remoteUrl = await gitService.fetchGitRemotePipeline();
 
@@ -137,7 +136,7 @@ describe('git_service', () => {
     beforeEach(async () => {
       workspaceFolder = await createTempFolder();
       const tokenService = { getInstanceUrls: () => [] };
-      gitService = new GitService(workspaceFolder, {}, tokenService);
+      gitService = new GitService(workspaceFolder, undefined, undefined, undefined, tokenService);
     });
 
     it('fetchGitRemote returns null', async () => {

@@ -10,8 +10,19 @@ const { ApiError, UserFriendlyError } = require('./errors');
 const projectCache = [];
 let versionCache = null;
 
-const createGitService = workspaceFolder =>
-  new GitService(workspaceFolder, vscode.workspace.getConfiguration('gitlab'), tokenService);
+const createGitService = workspaceFolder => {
+  const { instanceUrl, remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration(
+    'gitlab',
+  );
+  return new GitService(
+    workspaceFolder,
+    instanceUrl,
+    remoteName,
+    pipelineGitRemoteName,
+    tokenService,
+    vscode.gitLabWorkflow.log,
+  );
+};
 
 async function getCurrentWorkspaceFolder() {
   const editor = vscode.window.activeTextEditor;
