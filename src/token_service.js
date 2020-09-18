@@ -1,11 +1,13 @@
 const vscode = require('vscode');
+const { GITLAB_COM_URL } = require('./constants');
 const openers = require('./openers');
 const statusBar = require('./status_bar');
 
 let context = null;
 let active = false;
 
-const currentInstanceUrl = () => vscode.workspace.getConfiguration('gitlab').instanceUrl;
+const currentInstanceUrl = () =>
+  vscode.workspace.getConfiguration('gitlab').instanceUrl || GITLAB_COM_URL;
 
 const getGlTokenMap = () => context.globalState.get('glTokens', {});
 

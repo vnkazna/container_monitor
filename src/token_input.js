@@ -1,10 +1,11 @@
 const vscode = require('vscode');
+const { GITLAB_COM_URL } = require('./constants');
 const tokenService = require('./token_service');
 
 async function showInput() {
   const instance = await vscode.window.showInputBox({
     ignoreFocusOut: true,
-    value: 'https://gitlab.com',
+    value: GITLAB_COM_URL,
     placeHolder: 'E.g. https://gitlab.com',
     prompt: 'URL to Gitlab instance',
   });
