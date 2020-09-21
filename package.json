@@ -2,7 +2,7 @@
   "name": "gitlab-workflow",
   "displayName": "GitLab Workflow",
   "description": "GitLab VSCode integration",
-  "version": "3.2.1",
+  "version": "3.3.0",
   "publisher": "GitLab",
   "license": "MIT",
   "repository": {
@@ -152,7 +152,10 @@
       "title": "GitLab Workflow (GitLab VSCode Extension)",
       "properties": {
         "gitlab.instanceUrl": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "default": null,
           "description": "Your GitLab instance URL (default is https://gitlab.com)"
         },
