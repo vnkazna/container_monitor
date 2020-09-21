@@ -15,26 +15,26 @@ https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues?scope=all&utf8=%E2%
 
 ### Summary
 
-(Summarize the bug encountered concisely)
+<!-- Summarize the bug encountered concisely -->
 
 ### Steps to reproduce
 
-(How one can reproduce the issue - this is very important)
+<!-- How one can reproduce the issue - this is very important -->
 
 ### What is the current *bug* behavior?
 
-(What actually happens)
+<!-- What actually happens -->
 
 ### What is the expected *correct* behavior?
 
-(What you should see instead)
+<!-- What you should see instead -->
 
 ### Relevant logs and/or screenshots
 
-(Logs can be found by running `Developer: Show Logs ...` command (using `cmd+shift+p`) and selecting `Extension Host`)
+<!-- Logs can be found by running `GitLab: Show extension logs` command (using `cmd+shift+p`) -->
 
 ### Possible fixes
 
-(If you can, link to the line of code that might be responsible for the problem)
+<!-- If you can, link to the line of code that might be responsible for the problem -->
 
 /label ~bug ~"devops::create"  ~"group::editor" ~"Category:Editor Extension" ~"VS Code"
