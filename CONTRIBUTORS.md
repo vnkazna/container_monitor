@@ -25,3 +25,4 @@
 - Philip Nicolai [@philip-n](https://gitlab.com/philip-n)
 - Massimeddu Cireddu [@massimeddu](https://gitlab.com/massimeddu)
 - John [@VeenarM](https://gitlab.com/VeenarM)
+- Murad Yusufov [@flood4life](https://gitlab.com/flood4life)
