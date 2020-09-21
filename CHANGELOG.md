@@ -15,7 +15,7 @@
 
 - No user facing changes. Release fixes `README.md` images [#226](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/226)
 
-## v3.2.0 - 2020-08-03
+# v3.2.0 - 2020-08-03
 
 - Publish GitLab Workflow extension to Open VSX Registry [#205](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/205)
 
@@ -23,7 +23,7 @@
 
 - Command to create a new issue is not working [#218](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/218)
 
-## v3.1.0 - 2020-07-28
+# v3.1.0 - 2020-07-28
 
 - Copy GitLab link for the active file to the clipboard [#209](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/209)
   - Implemented by [@vegerot](https://gitlab.com/vegerot) with [MR !74](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/74) 👍
@@ -37,7 +37,7 @@
 - No user-facing changes.
 - Fixed automated releasing of the extension [#206](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/206)
 
-## v3.0.0 - 2020-06-25
+# v3.0.0 - 2020-06-25
 
 - Support multi root workspaces.
 - Enable custom queries in GitLab panel.
@@ -62,7 +62,7 @@
 
 - [CVE-2020-13279](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-13279) Prevent possible client side code execution, https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/170
 
-## v2.2.0 - 2019-11-06
+# v2.2.0 - 2019-11-06
 
 - [Experimental Feature](https://gitlab.com/fatihacet/gitlab-vscode-extension#experimental-features): View Merge Request details and comments in VSCode. Click a Merge Request link from the sidebar and VSCode will open a new tab to show the Merge Request details. You can also directly comment on the Merge Request.
 
@@ -72,7 +72,7 @@
 
 - Showing issue details and discussions in VSCode was not working properly. Extension was only showing loading screen.
 
-## v2.1.0 - 2019-05-10
+# v2.1.0 - 2019-05-10
 
 ### Fixed
 
@@ -86,7 +86,7 @@
 - [@renestalder](https://gitlab.com/renestalder) improved documentation for additional custom domain information with [MR !35](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/35) 👍
 - [@jparkrr](https://gitlab.com/jparkrr) fixed some typos with [MR !36](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/36) 👍
 
-## v2.0.0 - 2019-02-14
+# v2.0.0 - 2019-02-14
 
 - [Experimental Feature](https://gitlab.com/fatihacet/gitlab-vscode-extension#experimental-features): View issue details and comments right in the VSCode. Click an issue link from the sidebar and VSCode will open a new tab to show the issue details. You can also comment to the issue from VSCode.
 
@@ -116,21 +116,21 @@
 - [#28](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/28) Creating a snippet doesn't work when only 2 lines selected
   - Fixed by by [@joshanne](https://gitlab.com/joshanne) with [MR !30](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/30) 👍
 
-## v1.9.0 - 2019-01-17
+# v1.9.0 - 2019-01-17
 
 ### Added
 
 - Support for crt/key pair certificates for users that may use a \*.p12 certificate
   - Implemented by [@joshanne](https://gitlab.com/joshanne) with [MR !29](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/29) 👍
 
-## v1.8.0 - 2019-01-02
+# v1.8.0 - 2019-01-02
 
 ### Added
 
 - A new panel in the GitLab sidebar to show all MRs in the current project
   - Implemented by [@jkdufair](https://gitlab.com/jkdufair) with [MR !27](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/27) 👍
 
-## v1.7.0 - 2018-12-13
+# v1.7.0 - 2018-12-13
 
 ### Added
 
@@ -138,7 +138,7 @@
   - Implemented by [@tuomoa](https://gitlab.com/tuomoa) with [MR !11](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/11) 👍
   - Special thanks to [@Turmio](https://gitlab.com/Turmio) for helping to test this. 👍
 
-## v1.6.0 - 2018-12-12
+# v1.6.0 - 2018-12-12
 
 ### Security
 
@@ -161,14 +161,14 @@
 - View in GitLab button in the pipeline updated notification was not visible
   - Fixed by [@Clapfire](https://gitlab.com/Clapfire) with [MR !24](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/24) 👍
 
-## v1.5.0 - 2018-11-08
+# v1.5.0 - 2018-11-08
 
 ### Added
 
 - A new config option to fetch pipeline data from a different Git remote [Read more](https://gitlab.com/fatihacet/gitlab-vscode-extension#configuration-options)
   - Implemented by [@jduponchelle](https://gitlab.com/jduponchelle) with [MR !22](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/22) and closes [Issue #59](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/59) 👍
 
-## v1.4.0 - 2018-11-06
+# v1.4.0 - 2018-11-06
 
 ### Added
 
@@ -178,7 +178,7 @@
 
 - Pipeline notifications introduced in v1.3.0 will not be on by default with this version. You need to manually set the option to true.
 
-## v1.3.0 - 2018-11-05
+# v1.3.0 - 2018-11-05
 
 ### Added
 
@@ -192,7 +192,7 @@
 - Pipeline action will not open the pipeline on the default browser
   - Changed by [@Clapfire](https://gitlab.com/Clapfire) with [MR !20](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/20) and closes [#31](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/31) 👍
 
-## v1.2.0 - 2018-10-03
+# v1.2.0 - 2018-10-03
 
 ### Added
 
@@ -205,7 +205,7 @@
 
 - Invalid date parsing for unfinished pipelines.
 
-## v1.1.0 - 2018-10-02
+# v1.1.0 - 2018-10-02
 
 ### Added
 
@@ -217,7 +217,7 @@
 - [#57](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/57) Can't use extension with self-hosted gitlab - scope validity
   - Fixed with [this commit](https://gitlab.com/fatihacet/gitlab-vscode-extension/commit/cf2fafec91df042ada35609848f251b6ebb02aeb)
 
-## v1.0.0 - 2018-09-26
+# v1.0.0 - 2018-09-26
 
 ### Added
 
@@ -230,7 +230,7 @@
 - Respect VSCode http.proxy settings
   - Implemented by [@martianboy](https://gitlab.com/martianboy) with [MR !13](https://gitlab.com/fatihacet/gitlab-vscode-extension/merge_requests/13) 👍
 
-## v0.6.0 - 2018-03-02
+# v0.6.0 - 2018-03-02
 
 ### Added
 
@@ -263,7 +263,7 @@
 
 - Add an option to turn off the issue link in the status bar
 
-## v0.5.0 - 2018-02-25
+# v0.5.0 - 2018-02-25
 
 ### Added
 
@@ -296,7 +296,7 @@
 
 - [#17](https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/17) Cross project closing issue goes to wrong URL.
 
-## v0.4.0 - 2018-02-02
+# v0.4.0 - 2018-02-02
 
 ### Added
 
@@ -339,7 +339,7 @@
 
 - Clicking the pipeline status text on status bar now opens Pipeline action picker.
 
-## v0.3.0 - 2018-01-30
+# v0.3.0 - 2018-01-30
 
 ### Added
 
@@ -367,7 +367,7 @@
 
 - Update pipeline status on status bar.
 
-## v0.2.0 - 2018-01-27
+# v0.2.0 - 2018-01-27
 
 ### Added
 
