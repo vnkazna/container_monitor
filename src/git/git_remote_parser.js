@@ -14,13 +14,9 @@ const escapeForRegExp = str => {
 function parseGitRemote(instanceUrl, remote) {
   assert(instanceUrl);
   // Regex to match gitlab potential starting names for ssh remotes.
-  if (remote.match(`^[a-zA-Z0-9_-]+@`)) {
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-param-reassign
-    remote = `ssh://${remote}`;
-  }
+  const normalizedRemote = remote.match(`^[a-zA-Z0-9_-]+@`) ? `ssh://${remote}` : remote;
 
-  const { protocol, host, pathname } = url.parse(remote);
+  const { host, pathname } = url.parse(normalizedRemote);
 
   if (!host || !pathname) {
     return null;
@@ -34,7 +30,7 @@ function parseGitRemote(instanceUrl, remote) {
 
   const [namespace, project] = match.slice(1, 3);
 
-  return { protocol, host, namespace, project };
+  return { host, namespace, project };
 }
 
 module.exports = { parseGitRemote };
