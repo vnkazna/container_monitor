@@ -137,10 +137,7 @@ class GitService {
 
     const instanceUrls = this.tokenService.getInstanceUrls();
     const gitRemotes = await this._fetchGitRemoteUrls();
-    const gitRemoteHosts = gitRemotes.map(remote => {
-      const [, host] = parseGitRemote(null, remote);
-      return host;
-    });
+    const gitRemoteHosts = gitRemotes.map(uriHostname);
 
     return instanceUrls.filter(host => gitRemoteHosts.includes(uriHostname(host)));
   }

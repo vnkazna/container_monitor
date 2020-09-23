@@ -1,3 +1,4 @@
+const assert = require('assert');
 const url = require('url');
 
 // returns path without the trailing slash or empty string if there is no path
@@ -11,6 +12,7 @@ const escapeForRegExp = str => {
 };
 
 function parseGitRemote(instanceUrl, remote) {
+  assert(instanceUrl);
   // Regex to match gitlab potential starting names for ssh remotes.
   if (remote.match(`^[a-zA-Z0-9_-]+@`)) {
     // Temporarily disable eslint to be able to start enforcing stricter rules
@@ -22,10 +24,6 @@ function parseGitRemote(instanceUrl, remote) {
 
   if (!host || !pathname) {
     return null;
-  }
-
-  if (!instanceUrl) {
-    return [protocol, host, pathname];
   }
 
   const pathRegExp = escapeForRegExp(getInstancePath(instanceUrl));
