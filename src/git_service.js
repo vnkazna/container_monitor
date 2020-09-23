@@ -56,12 +56,7 @@ class GitService {
     }
 
     if (remoteUrl) {
-      const [schema, host, namespace, project] = parseGitRemote(
-        await this.fetchCurrentInstanceUrl(),
-        remoteUrl,
-      );
-
-      return { schema, host, namespace, project };
+      return parseGitRemote(await this.fetchCurrentInstanceUrl(), remoteUrl);
     }
 
     return null;

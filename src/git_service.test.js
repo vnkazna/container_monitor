@@ -39,7 +39,7 @@ describe('git_service', () => {
           host: 'test.gitlab.com',
           namespace: 'gitlab-org',
           project: 'gitlab',
-          schema: 'ssh:',
+          protocol: 'ssh:',
         });
       });
 

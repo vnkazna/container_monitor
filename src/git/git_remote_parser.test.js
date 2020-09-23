@@ -47,7 +47,13 @@ describe('git_remote_parser', () => {
       ['https:', 'gitlab.company.com:8443', 'fatihacet', 'gitlab-vscode-extension'],
     ],
   ])('should parse %s', (remote, parsed) => {
-    expect(parseGitRemote('https://gitlab.com', remote)).toEqual(parsed);
+    const [protocol, host, namespace, project] = parsed;
+    expect(parseGitRemote('https://gitlab.com', remote)).toEqual({
+      protocol,
+      host,
+      namespace,
+      project,
+    });
   });
 
   // For more details see https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/11
@@ -57,6 +63,11 @@ describe('git_remote_parser', () => {
         'https://example.com/gitlab',
         'https://example.com/gitlab/fatihacet/gitlab-vscode-extension',
       ),
-    ).toEqual(['https:', 'example.com', 'fatihacet', 'gitlab-vscode-extension']);
+    ).toEqual({
+      protocol: 'https:',
+      host: 'example.com',
+      namespace: 'fatihacet',
+      project: 'gitlab-vscode-extension',
+    });
   });
 });

@@ -32,7 +32,9 @@ function parseGitRemote(instanceUrl, remote) {
     return null;
   }
 
-  return [protocol, host, ...match.slice(1, 3)];
+  const [namespace, project] = match.slice(1, 3);
+
+  return { protocol, host, namespace, project };
 }
 
 module.exports = { parseGitRemote };
