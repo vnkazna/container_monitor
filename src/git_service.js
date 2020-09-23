@@ -27,17 +27,16 @@ class GitService {
     if (currentWorkspaceFolder == null) {
       currentWorkspaceFolder = '';
     }
-    let output = null;
     try {
-      output = await execa.stdout(git, args, {
+      const { stdout } = await execa(git, args, {
         cwd: currentWorkspaceFolder,
         preferLocal: false,
       });
+      return stdout;
     } catch (e) {
       this.log(`${e.message}\n${e.stack}`);
     }
-
-    return output;
+    return null;
   }
 
   async _fetchRemoteUrl(remoteName) {
