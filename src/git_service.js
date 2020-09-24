@@ -27,17 +27,16 @@ class GitService {
     if (currentWorkspaceFolder == null) {
       currentWorkspaceFolder = '';
     }
-    let output = null;
     try {
-      output = await execa.stdout(git, args, {
+      const { stdout } = await execa(git, args, {
         cwd: currentWorkspaceFolder,
         preferLocal: false,
       });
+      return stdout;
     } catch (e) {
       this.log(`${e.message}\n${e.stack}`);
     }
-
-    return output;
+    return null;
   }
 
   async _fetchRemoteUrl(remoteName) {
@@ -56,12 +55,7 @@ class GitService {
     }
 
     if (remoteUrl) {
-      const [schema, host, namespace, project] = parseGitRemote(
-        await this.fetchCurrentInstanceUrl(),
-        remoteUrl,
-      );
-
-      return { schema, host, namespace, project };
+      return parseGitRemote(await this.fetchCurrentInstanceUrl(), remoteUrl);
     }
 
     return null;
@@ -137,10 +131,7 @@ class GitService {
 
     const instanceUrls = this.tokenService.getInstanceUrls();
     const gitRemotes = await this._fetchGitRemoteUrls();
-    const gitRemoteHosts = gitRemotes.map(remote => {
-      const [, host] = parseGitRemote(null, remote);
-      return host;
-    });
+    const gitRemoteHosts = gitRemotes.map(uriHostname);
 
     return instanceUrls.filter(host => gitRemoteHosts.includes(uriHostname(host)));
   }
