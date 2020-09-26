@@ -44,7 +44,7 @@ export default {
       Fetching issuable details and discussions. This may take a while.
       <br />
       If it doesn't work, please
-      <a href="https://gitlab.com/fatihacet/gitlab-vscode-extension/issues/new">create an issue.</a>
+      <a href="https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/new">create an issue.</a>
     </p>
     <template v-else>
       <issuable-details :issuable="issuable" />
