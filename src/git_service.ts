@@ -1,26 +1,44 @@
-const execa = require('execa');
-const url = require('url');
-const { GITLAB_COM_URL } = require('./constants');
-const { parseGitRemote } = require('./git/git_remote_parser');
+import * as execa from 'execa';
+import * as url from 'url';
+import { GITLAB_COM_URL } from './constants';
+import { parseGitRemote, GitRemote } from './git/git_remote_parser';
 
-class GitService {
-  constructor(
-    workspaceFolder,
-    instanceUrl,
-    remoteName,
-    pipelineGitRemoteName,
-    tokenService,
-    log = () => {},
-  ) {
-    this.instanceUrl = instanceUrl;
-    this.remoteName = remoteName;
-    this.pipelineGitRemoteName = pipelineGitRemoteName;
-    this.workspaceFolder = workspaceFolder;
-    this.tokenService = tokenService;
-    this.log = log;
+interface TokenService {
+  getInstanceUrls(): string[];
+}
+
+export interface GitServiceOptions {
+  workspaceFolder: string;
+  instanceUrl?: string;
+  remoteName?: string;
+  pipelineGitRemoteName?: string;
+  tokenService: TokenService;
+  log: (line: string) => void;
+}
+
+export class GitService {
+  workspaceFolder: string;
+
+  instanceUrl?: string;
+
+  remoteName?: string;
+
+  pipelineGitRemoteName?: string;
+
+  tokenService: TokenService;
+
+  log: (line: string) => void;
+
+  constructor(options: GitServiceOptions) {
+    this.instanceUrl = options.instanceUrl;
+    this.remoteName = options.remoteName;
+    this.pipelineGitRemoteName = options.pipelineGitRemoteName;
+    this.workspaceFolder = options.workspaceFolder;
+    this.tokenService = options.tokenService;
+    this.log = options.log;
   }
 
-  async _fetch(cmd) {
+  private async fetch(cmd: string): Promise<string | null> {
     const [git, ...args] = cmd.trim().split(' ');
     let currentWorkspaceFolder = this.workspaceFolder;
 
@@ -39,12 +57,13 @@ class GitService {
     return null;
   }
 
-  async _fetchRemoteUrl(remoteName) {
+  private async fetchRemoteUrl(remoteName = ''): Promise<GitRemote | null> {
     // If remote name isn't provided, the command returns default remote for the current branch
-    const getUrlForRemoteName = async name => this._fetch(`git ls-remote --get-url ${name || ''}`);
+    const getUrlForRemoteName = async (name: string) =>
+      this.fetch(`git ls-remote --get-url ${name}`);
 
     const getFirstRemoteName = async () => {
-      const multilineRemotes = await this._fetch('git remote');
+      const multilineRemotes = await this.fetch('git remote');
       return (multilineRemotes || '').split('\n')[0];
     };
 
@@ -61,20 +80,20 @@ class GitService {
     return null;
   }
 
-  async fetchGitRemote() {
-    return await this._fetchRemoteUrl(this.remoteName);
+  async fetchGitRemote(): Promise<GitRemote | null> {
+    return await this.fetchRemoteUrl(this.remoteName);
   }
 
-  async fetchBranchName() {
-    return await this._fetch('git rev-parse --abbrev-ref HEAD');
+  async fetchBranchName(): Promise<string | null> {
+    return await this.fetch('git rev-parse --abbrev-ref HEAD');
   }
 
-  async fetchLastCommitId() {
-    return await this._fetch('git log --format=%H -n 1');
+  async fetchLastCommitId(): Promise<string | null> {
+    return await this.fetch('git log --format=%H -n 1');
   }
 
-  async fetchGitRemotePipeline() {
-    return await this._fetchRemoteUrl(this.pipelineGitRemoteName);
+  async fetchGitRemotePipeline(): Promise<GitRemote | null> {
+    return await this.fetchRemoteUrl(this.pipelineGitRemoteName);
   }
 
   /**
@@ -84,11 +103,11 @@ class GitService {
    * Fixes #1 where local branch name is renamed and doesn't exists on remote but
    * local branch still tracks another branch on remote.
    */
-  async fetchTrackingBranchName() {
+  async fetchTrackingBranchName(): Promise<string | null> {
     const branchName = await this.fetchBranchName();
 
     try {
-      const ref = await this._fetch(`git config --get branch.${branchName}.merge`);
+      const ref = await this.fetch(`git config --get branch.${branchName}.merge`);
 
       if (ref) {
         return ref.replace('refs/heads/', '');
@@ -103,14 +122,14 @@ class GitService {
     return branchName;
   }
 
-  async _fetchGitRemoteUrls() {
-    const fetchGitRemotesVerbose = async () => {
-      const output = await this._fetch('git remote -v');
+  private async fetchGitRemoteUrls(): Promise<string[]> {
+    const fetchGitRemotesVerbose = async (): Promise<string[]> => {
+      const output = await this.fetch('git remote -v');
 
       return (output || '').split('\n');
     };
 
-    const parseRemoteFromVerboseLine = line => {
+    const parseRemoteFromVerboseLine = (line: string) => {
       // git remote -v output looks like
       // origin[TAB]git@gitlab.com:gitlab-org/gitlab-vscode-extension.git[WHITESPACE](fetch)
       // the interesting part is surrounded by a tab symbol and a whitespace
@@ -126,20 +145,20 @@ class GitService {
     return [...new Set(remoteUrls)];
   }
 
-  async _intersectionOfInstanceAndTokenUrls() {
-    const uriHostname = uri => url.parse(uri).host;
+  private async intersectionOfInstanceAndTokenUrls() {
+    const uriHostname = (uri: string) => url.parse(uri).host;
 
     const instanceUrls = this.tokenService.getInstanceUrls();
-    const gitRemotes = await this._fetchGitRemoteUrls();
+    const gitRemotes = await this.fetchGitRemoteUrls();
     const gitRemoteHosts = gitRemotes.map(uriHostname);
 
     return instanceUrls.filter(host => gitRemoteHosts.includes(uriHostname(host)));
   }
 
-  async _heuristicInstanceUrl() {
+  private async heuristicInstanceUrl() {
     // if the intersection of git remotes and configured PATs exists and is exactly
     // one hostname, use it
-    const intersection = await this._intersectionOfInstanceAndTokenUrls();
+    const intersection = await this.intersectionOfInstanceAndTokenUrls();
     if (intersection.length === 1) {
       const heuristicUrl = intersection[0];
       this.log(
@@ -157,14 +176,14 @@ class GitService {
     return null;
   }
 
-  async fetchCurrentInstanceUrl() {
+  async fetchCurrentInstanceUrl(): Promise<string> {
     // if the workspace setting exists, use it
     if (this.instanceUrl) {
       return this.instanceUrl;
     }
 
     // try to determine the instance URL heuristically
-    const heuristicUrl = await this._heuristicInstanceUrl();
+    const heuristicUrl = await this.heuristicInstanceUrl();
     if (heuristicUrl) {
       return heuristicUrl;
     }
@@ -173,5 +192,3 @@ class GitService {
     return GITLAB_COM_URL;
   }
 }
-
-module.exports = GitService;

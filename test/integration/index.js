@@ -12,8 +12,6 @@ const getAllTestFiles = testsRoot =>
     });
   });
 
-// This function is a public interface that VS Code uses to run the tests
-// eslint-disable-next-line import/prefer-default-export
 async function run(testsRoot) {
   // Create the mocha test
   const mocha = new Mocha();

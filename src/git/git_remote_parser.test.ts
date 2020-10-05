@@ -1,4 +1,4 @@
-const { parseGitRemote } = require('./git_remote_parser');
+import { parseGitRemote } from './git_remote_parser';
 
 describe('git_remote_parser', () => {
   it.each([

@@ -1,24 +1,35 @@
-const temp = require('temp');
-const simpleGit = require('simple-git');
-const GitService = require('./git_service');
+import * as temp from 'temp';
+import simpleGit, { SimpleGit } from 'simple-git';
+import { GitService, GitServiceOptions } from './git_service';
 
 describe('git_service', () => {
   const ORIGIN = 'origin';
   const SECOND_REMOTE = 'second'; // name is important, we need this remote to be alphabetically behind origin
 
-  let gitService;
-  let workspaceFolder;
-  let git;
+  let gitService: GitService;
+  let workspaceFolder: string;
+  let git: SimpleGit;
 
   temp.track(); // clean temporary folders after the tests finish
 
-  const createTempFolder = () =>
+  const createTempFolder = (): Promise<string> =>
     new Promise((resolve, reject) => {
       temp.mkdir('vscodeWorkplace', (err, dirPath) => {
         if (err) reject(err);
         resolve(dirPath);
       });
     });
+
+  const getDefaultOptions = (): GitServiceOptions => ({
+    workspaceFolder,
+    instanceUrl: 'https://gitlab.com',
+    remoteName: undefined,
+    pipelineGitRemoteName: undefined,
+    tokenService: { getInstanceUrls: () => [] },
+    log: () => {
+      //
+    },
+  });
 
   describe('with initialized git repository', () => {
     beforeEach(async () => {
@@ -29,7 +40,7 @@ describe('git_service', () => {
       await git.addConfig('user.name', 'Test Name');
       await git.addRemote(ORIGIN, 'git@test.gitlab.com:gitlab-org/gitlab.git');
 
-      gitService = new GitService(workspaceFolder, 'https://gitlab.com');
+      gitService = new GitService(getDefaultOptions());
     });
 
     describe('fetchGitRemote', () => {
@@ -44,11 +55,12 @@ describe('git_service', () => {
 
       it('gets the remote url for user configured remote name', async () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        gitService = new GitService(workspaceFolder, 'https://gitlab.com', SECOND_REMOTE);
+        const options = { ...getDefaultOptions(), remoteName: SECOND_REMOTE };
+        gitService = new GitService(options);
 
         const remoteUrl = await gitService.fetchGitRemote();
 
-        expect(remoteUrl.host).toEqual('test.another.com');
+        expect(remoteUrl?.host).toEqual('test.another.com');
       });
 
       it('gets default remote for a branch', async () => {
@@ -58,7 +70,7 @@ describe('git_service', () => {
 
         const remoteUrl = await gitService.fetchGitRemote();
 
-        expect(remoteUrl.host).toEqual('test.another.com');
+        expect(remoteUrl?.host).toEqual('test.another.com');
       });
     });
 
@@ -66,7 +78,7 @@ describe('git_service', () => {
       it('gets the current branch name', async () => {
         await git.checkout(['-b', 'new-branch']);
         // TODO if we use git branch command, we don't have to create a commit
-        await git.commit({ '--allow-empty': null, '-m': 'Test commit' });
+        await git.commit('Test commit', [], { '--allow-empty': null });
 
         const branchName = await gitService.fetchBranchName();
 
@@ -76,8 +88,8 @@ describe('git_service', () => {
 
     describe('fetchLastCommitId', () => {
       it('returns the last commit sha', async () => {
-        await git.commit({ '--allow-empty': null, '-m': 'Test commit' });
-        const lastCommitSha = await git.revparse('HEAD');
+        await git.commit('Test commit', [], { '--allow-empty': null });
+        const lastCommitSha = await git.revparse(['HEAD']);
 
         const result = await gitService.fetchLastCommitId();
 
@@ -90,21 +102,17 @@ describe('git_service', () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
         const remoteUrl = await gitService.fetchGitRemotePipeline();
 
-        expect(remoteUrl.host).toEqual('test.gitlab.com');
+        expect(remoteUrl?.host).toEqual('test.gitlab.com');
       });
 
       it('returns url for the configured pipelineGitRemoteName remote', async () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        gitService = new GitService(
-          workspaceFolder,
-          'https://gitlab.com',
-          undefined,
-          SECOND_REMOTE,
-        );
+        const options = { ...getDefaultOptions(), pipelineGitRemoteName: SECOND_REMOTE };
+        gitService = new GitService(options);
 
         const remoteUrl = await gitService.fetchGitRemotePipeline();
 
-        expect(remoteUrl.host).toEqual('test.another.com');
+        expect(remoteUrl?.host).toEqual('test.another.com');
       });
     });
 
@@ -112,7 +120,7 @@ describe('git_service', () => {
       beforeEach(async () => {
         await git.checkout(['-b', 'new-branch']);
         // TODO if we use git branch command, we don't have to create a commit
-        await git.commit({ '--allow-empty': null, '-m': 'Test commit' });
+        await git.commit('Test commit', [], { '--allow-empty': null });
       });
 
       it('returns local branch name if tracking branch is not defined', async () => {
@@ -134,8 +142,8 @@ describe('git_service', () => {
   describe('without initialized git repository', () => {
     beforeEach(async () => {
       workspaceFolder = await createTempFolder();
-      const tokenService = { getInstanceUrls: () => [] };
-      gitService = new GitService(workspaceFolder, undefined, undefined, undefined, tokenService);
+      const options = { ...getDefaultOptions(), instanceUrl: undefined };
+      gitService = new GitService(options);
     });
 
     it('fetchGitRemote returns null', async () => {

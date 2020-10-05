@@ -14,7 +14,6 @@
   ],
   "rules": {
     "no-console": "off",
-    "no-underscore-dangle": "off",
     "no-return-await": "off",
     "import/no-unresolved": [
       2,
@@ -24,9 +23,11 @@
     ],
     "prettier/prettier": ["error"]
   },
+  "reportUnusedDisableDirectives": true,
   "overrides": [
     {
-      "files": ["**/*.ts", "**/*.tsx"],
+      "files": ["**/*.ts"],
+      "parser": "@typescript-eslint/parser",
       "extends": [
         "plugin:@typescript-eslint/recommended",
         "prettier/@typescript-eslint"
@@ -40,12 +41,12 @@
           "error",
           "ignorePackages",
           {
-            "ts": "never",
-            "tsx": "never"
+            "ts": "never"
           }
-        ]
+        ],
+        "import/prefer-default-export": "off",
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.ts", "test/**/*"]}]
       },
-      "parser": "@typescript-eslint/parser",
       "settings": {
         "import/resolver": {
           "node": {

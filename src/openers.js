@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const GitService = require('./git_service');
+const { GitService } = require('./git_service');
 const gitLabService = require('./gitlab_service');
 const tokenService = require('./token_service');
 
@@ -9,14 +9,14 @@ const createGitService = workspaceFolder => {
   const { instanceUrl, remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration(
     'gitlab',
   );
-  return new GitService(
+  return new GitService({
     workspaceFolder,
-    instanceUrl,
-    remoteName,
-    pipelineGitRemoteName,
+    instanceUrl: instanceUrl || undefined,
+    remoteName: remoteName || undefined,
+    pipelineGitRemoteName: pipelineGitRemoteName || undefined,
     tokenService,
-    vscode.gitLabWorkflow.log,
-  );
+    log: vscode.gitLabWorkflow.log,
+  });
 };
 
 /**
