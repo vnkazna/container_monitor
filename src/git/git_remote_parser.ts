@@ -1,18 +1,22 @@
-const assert = require('assert');
-const url = require('url');
+import * as url from 'url';
+
+export interface GitRemote {
+  host: string;
+  namespace: string;
+  project: string;
+}
 
 // returns path without the trailing slash or empty string if there is no path
-const getInstancePath = instanceUrl => {
+const getInstancePath = (instanceUrl: string) => {
   const { pathname } = url.parse(instanceUrl);
-  return pathname.replace(/\/$/, '');
+  return pathname ? pathname.replace(/\/$/, '') : '';
 };
 
-const escapeForRegExp = str => {
+const escapeForRegExp = (str: string) => {
   return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
 };
 
-function parseGitRemote(instanceUrl, remote) {
-  assert(instanceUrl);
+export function parseGitRemote(instanceUrl: string, remote: string): GitRemote | null {
   // Regex to match gitlab potential starting names for ssh remotes.
   const normalizedRemote = remote.match(`^[a-zA-Z0-9_-]+@`) ? `ssh://${remote}` : remote;
 
