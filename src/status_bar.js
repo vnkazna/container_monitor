@@ -37,7 +37,6 @@ const commandRegisterHelper = (cmdName, callback) => {
 };
 
 async function refreshPipeline() {
-  const editor = vscode.window.activeTextEditor;
   let workspaceFolder = null;
   let project = null;
   let pipeline = null;
@@ -52,7 +51,7 @@ async function refreshPipeline() {
   };
 
   try {
-    workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
+    workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
     project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
     if (project != null) {
       pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
@@ -114,7 +113,7 @@ async function refreshPipeline() {
   firstRun = false;
 }
 
-const initPipelineStatus = () => {
+const initPipelineStatus = async () => {
   pipelineStatusBarItem = createStatusBarItem(
     '$(info) GitLab: Fetching pipeline...',
     'gl.pipelineActions',
@@ -124,7 +123,7 @@ const initPipelineStatus = () => {
     refreshPipeline();
   }, 30000);
 
-  refreshPipeline();
+  await refreshPipeline();
 };
 
 async function fetchMRIssues(workspaceFolder) {
@@ -161,7 +160,7 @@ async function fetchBranchMR() {
 
   if (project && mr) {
     text = `$(git-pull-request) GitLab: MR !${mr.iid}`;
-    fetchMRIssues(workspaceFolder);
+    await fetchMRIssues(workspaceFolder);
     mrIssueStatusBarItem.show();
   } else if (project) {
     mrIssueStatusBarItem.text = `$(code) GitLab: No issue.`;
@@ -173,7 +172,7 @@ async function fetchBranchMR() {
   mrStatusBarItem.text = text;
 }
 
-const initMrStatus = () => {
+const initMrStatus = async () => {
   const cmdName = `gl.mrOpener${Date.now()}`;
   commandRegisterHelper(cmdName, () => {
     if (mr) {
@@ -188,7 +187,7 @@ const initMrStatus = () => {
     fetchBranchMR();
   }, 60000);
 
-  fetchBranchMR();
+  await fetchBranchMR();
 };
 
 const initMrIssueStatus = () => {
@@ -204,17 +203,17 @@ const initMrIssueStatus = () => {
   mrIssueStatusBarItem = createStatusBarItem('$(info) GitLab: Fetching closing issue...', cmdName);
 };
 
-const init = ctx => {
+const init = async ctx => {
   context = ctx;
 
   if (showStatusBarLinks) {
-    initPipelineStatus();
+    await initPipelineStatus();
 
     if (showIssueLinkOnStatusBar) {
       initMrIssueStatus();
     }
     if (showMrStatusOnStatusBar) {
-      initMrStatus();
+      await initMrStatus();
     }
   }
 };

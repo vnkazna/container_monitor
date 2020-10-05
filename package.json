@@ -530,6 +530,7 @@
     "prettier": "^1.19.1",
     "rewire": "^4.0.1",
     "simple-git": "^2.14.0",
+    "sinon": "^9.1.0",
     "temp": "^0.9.1",
     "ts-jest": "^26.1.4",
     "typescript": "^3.9.7",

@@ -10,7 +10,6 @@ describe('GitLab tree view', () => {
 
   before(() => {
     server = getServer();
-    server.listen({ onUnhandledRequest: 'error' }); // TODO this behaviour is going to be supported in the next msw release
     tokenService.setToken(`https://${GITLAB_HOST}`, 'abcd-secret');
   });
 
