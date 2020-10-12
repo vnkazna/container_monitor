@@ -69,7 +69,7 @@ const askForToken = () => {
         if (action === 'set') {
           vscode.commands.executeCommand('gl.setToken');
         } else {
-          openers.openUrl('https://gitlab.com/fatihacet/gitlab-vscode-extension#setup');
+          openers.openUrl('https://gitlab.com/gitlab-org/gitlab-vscode-extension#setup');
         }
       }
     });
