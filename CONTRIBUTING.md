@@ -43,6 +43,8 @@ For general information how to develop and debug VS Code Extensions, please see 
 
 The following instructions will help you run the GitLab Workflow Extension locally.
 
+Please review our [Coding guidelines](docs/coding-guidelines.md) before writing new code.
+
 #### Step - 1 : Installation Prerequisites
 
 We're assuming that you already have [Visual Studio Code](https://code.visualstudio.com/) installed along
