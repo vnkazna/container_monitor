@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
+const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 
 async function showPicker() {
   const items = [
@@ -22,7 +23,7 @@ async function showPicker() {
     },
   ];
 
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
 
   const selected = await vscode.window.showQuickPick(items);
 

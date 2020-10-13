@@ -4,8 +4,8 @@ const fs = require('fs');
 const { GitService } = require('./git_service');
 const tokenService = require('./token_service_wrapper');
 const statusBar = require('./status_bar');
-const gitlabProjectInput = require('./gitlab_project_input');
 const { ApiError, UserFriendlyError } = require('./errors');
+const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
 
 const projectCache = [];
 let versionCache = null;
@@ -24,43 +24,12 @@ const createGitService = workspaceFolder => {
   });
 };
 
-async function getCurrentWorkspaceFolder() {
-  const editor = vscode.window.activeTextEditor;
-
-  if (
-    editor &&
-    editor.document &&
-    vscode.workspace.getWorkspaceFolder(editor.document.uri) !== undefined
-  ) {
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
-    return workspaceFolder;
-  }
-
-  if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
-    return vscode.workspace.workspaceFolders[0].uri.fsPath;
-  }
-
-  return null;
-}
-
-async function getCurrentWorkspaceFolderOrSelectOne() {
-  let workspaceFolder = null;
-
-  workspaceFolder = await getCurrentWorkspaceFolder();
-
-  if (workspaceFolder == null) {
-    workspaceFolder = await gitlabProjectInput.show();
-  }
-
-  return workspaceFolder;
-}
-
 async function fetch(path, method = 'GET', data = null) {
   const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
     'gitlab',
   );
   const instanceUrl = await createGitService(
-    await getCurrentWorkspaceFolderOrSelectOne(),
+    await getCurrentWorkspaceFolder(),
   ).fetchCurrentInstanceUrl();
   const { proxy } = vscode.workspace.getConfiguration('http');
   const apiRoot = `${instanceUrl}/api/v4`;
@@ -682,8 +651,6 @@ exports.fetchVersion = fetchVersion;
 exports.fetchDiscussions = fetchDiscussions;
 exports.renderMarkdown = renderMarkdown;
 exports.saveNote = saveNote;
-exports.getCurrentWorkspaceFolderOrSelectOne = getCurrentWorkspaceFolderOrSelectOne;
 exports.getAllGitlabProjects = getAllGitlabProjects;
-exports.getCurrenWorkspaceFolder = getCurrentWorkspaceFolder;
 exports.fetchLabelEvents = fetchLabelEvents;
 exports.createGitService = createGitService;

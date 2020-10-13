@@ -34,6 +34,7 @@
         "--extensionTestsPath=${workspaceRoot}/out/test/integration/",
         "<paste the last line of `npm run create-test-workspace` output here>"
       ],
+      "preLaunchTask": "${defaultBuildTask}",
       "stopOnEntry": false
     }
   ]

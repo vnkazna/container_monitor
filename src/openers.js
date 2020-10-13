@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const { GitService } = require('./git_service');
 const gitLabService = require('./gitlab_service');
 const tokenService = require('./token_service_wrapper');
+const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 
 const openUrl = url => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
 
@@ -44,12 +45,12 @@ async function openLink(linkTemplate, workspaceFolder) {
 }
 
 async function showIssues() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   await openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder);
 }
 
 async function showMergeRequests() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   await openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder);
 }
 
@@ -95,7 +96,7 @@ async function copyLinkToActiveFile() {
 }
 
 async function openCurrentMergeRequest() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
 
   if (mr) {
@@ -104,12 +105,12 @@ async function openCurrentMergeRequest() {
 }
 
 async function openCreateNewIssue() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   openLink('$projectUrl/issues/new', workspaceFolder);
 }
 
 async function openCreateNewMr() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
@@ -117,7 +118,7 @@ async function openCreateNewMr() {
 }
 
 async function openProjectPage() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   openLink('$projectUrl', workspaceFolder);
 }
 
@@ -125,7 +126,7 @@ async function openCurrentPipeline(workspaceFolder) {
   if (!workspaceFolder) {
     // Temporarily disable eslint to be able to start enforcing stricter rules
     // eslint-disable-next-line no-param-reassign
-    workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+    workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   }
   const project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
 
@@ -141,7 +142,7 @@ async function openCurrentPipeline(workspaceFolder) {
 async function compareCurrentBranch() {
   let project = null;
   let lastCommitId = null;
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
 
   project = await gitLabService.fetchCurrentProject(workspaceFolder);
   lastCommitId = await createGitService(workspaceFolder).fetchLastCommitId();

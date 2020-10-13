@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const openers = require('./openers');
 const gitLabService = require('./gitlab_service');
+const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
 const { UserFriendlyError } = require('./errors');
 
 let context = null;
@@ -51,7 +52,7 @@ async function refreshPipeline() {
   };
 
   try {
-    workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
+    workspaceFolder = await getCurrentWorkspaceFolder();
     project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
     if (project != null) {
       pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
@@ -139,13 +140,12 @@ async function fetchMRIssues(workspaceFolder) {
 }
 
 async function fetchBranchMR() {
-  const editor = vscode.window.activeTextEditor;
   let text = '$(git-pull-request) GitLab: No MR.';
   let workspaceFolder = null;
   let project = null;
 
   try {
-    workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
+    workspaceFolder = await getCurrentWorkspaceFolder();
     project = await gitLabService.fetchCurrentProject(workspaceFolder);
     if (project != null) {
       mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);

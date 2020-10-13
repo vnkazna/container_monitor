@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const openers = require('./openers');
 const gitLabService = require('./gitlab_service');
 const gitlabProjectInput = require('./gitlab_project_input');
+const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
 
 const visibilityOptions = [
   {
@@ -67,7 +68,7 @@ async function showPicker() {
   let project = null;
 
   if (editor) {
-    workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
+    workspaceFolder = await getCurrentWorkspaceFolder();
     project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
 
     if (project == null) {
