@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const { GITLAB_COM_URL } = require('./constants');
-const tokenService = require('./token_service');
+const tokenService = require('./token_service_wrapper');
 
 async function showInput() {
   const instance = await vscode.window.showInputBox({
