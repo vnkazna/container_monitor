@@ -1,23 +1,25 @@
+import * as assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 
 export class TokenService {
-  context: ExtensionContext;
-
-  constructor(context: ExtensionContext) {
-    this.context = context;
-  }
+  context?: ExtensionContext;
 
   private onDidChangeEmitter = new EventEmitter<void>();
+
+  init(context: ExtensionContext) {
+    this.context = context;
+  }
 
   get onDidChange(): Event<void> {
     return this.onDidChangeEmitter.event;
   }
 
   private get glTokenMap() {
+    assert(this.context);
     return this.context.globalState.get<Record<string, string>>('glTokens', {});
   }
 
-  get instanceUrls() {
+  getInstanceUrls() {
     return Object.keys(this.glTokenMap);
   }
 
@@ -26,6 +28,7 @@ export class TokenService {
   }
 
   setToken(instanceUrl: string, token: string | undefined) {
+    assert(this.context);
     const tokenMap = this.glTokenMap;
 
     if (token) {
@@ -38,3 +41,5 @@ export class TokenService {
     this.onDidChangeEmitter.fire();
   }
 }
+
+export const tokenService: TokenService = new TokenService();

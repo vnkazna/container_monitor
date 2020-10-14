@@ -14,7 +14,8 @@ describe('TokenService', () => {
         },
       },
     };
-    tokenService = new TokenService(fakeContext);
+    tokenService = new TokenService();
+    tokenService.init(fakeContext);
   });
 
   it('can set and get one token', async () => {
@@ -27,7 +28,7 @@ describe('TokenService', () => {
   it('can retrieve all instance URLs', async () => {
     tokenService.setToken('https://gitlab.com', 'abc');
     tokenService.setToken('https://dev.gitlab.com', 'def');
-    assert.deepStrictEqual(tokenService.instanceUrls, [
+    assert.deepStrictEqual(tokenService.getInstanceUrls(), [
       'https://gitlab.com',
       'https://dev.gitlab.com',
     ]);

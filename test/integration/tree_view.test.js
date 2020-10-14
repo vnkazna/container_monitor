@@ -1,6 +1,6 @@
 const assert = require('assert');
 const IssuableDataProvider = require('../../src/data_providers/issuable').DataProvider;
-const tokenService = require('../../src/token_service_wrapper');
+const { tokenService } = require('../../src/services/token_service');
 const getServer = require('./test_infrastructure/mock_server');
 const { GITLAB_HOST } = require('./test_infrastructure/constants');
 

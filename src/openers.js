@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const { GitService } = require('./git_service');
 const gitLabService = require('./gitlab_service');
-const tokenService = require('./token_service_wrapper');
+const { tokenService } = require('./services/token_service');
 const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 
 const openUrl = url => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
