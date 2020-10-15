@@ -74,14 +74,14 @@ async function refreshPipeline() {
       try {
         const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder);
         if (jobs) {
-          const jobsName = jobs.filter(job => job.status === status).map(job => job.name);
-          if (jobsName.length > maxJobs) {
+          const jobNames = jobs.filter(job => job.status === status).map(job => job.name);
+          if (jobNames.length > maxJobs) {
             statusText += ' (';
-            statusText += jobsName.slice(0, maxJobs).join(', ');
-            statusText += `, +${jobsName.length - maxJobs} jobs`;
+            statusText += jobNames.slice(0, maxJobs).join(', ');
+            statusText += `, +${jobNames.length - maxJobs} jobs`;
             statusText += ')';
-          } else {
-            statusText += ` (${jobsName.join(', ')})`;
+          } else if (jobNames.length > 0) {
+            statusText += ` (${jobNames.join(', ')})`;
           }
         }
       } catch (e) {
