@@ -26,9 +26,9 @@ Advanced pipeline actions allow you to view pipeline on GitLab, create a new pip
 
 ### Commands
 
-- `GitLab: Search project issues - (Supports advanced usage)`
-- `GitLab: Search project merge requests - (Supports advanced usage)`
-  - Issue and MR search including simple and advanced search. [Read more](#advanced-search).
+- `GitLab: Search project issues (Supports filters)`. [Read more](#search-with-filters)
+- `GitLab: Search project merge requests (Supports filters)`. [Read more](#search-with-filters)
+- `GitLab: Project Advanced Search (Issues, MR's, commits, comments...)`. [Read more](#search-with-advanced-search)
 - `GitLab: Create snippet` - Create public, internal or private snippet from entire file or selection. [Read more](#create-snippet).
 - `GitLab: Compare current branch with master` - Compare your branch with master and view changes on GitLab. [Read more](#compare-with-master).
 - `GitLab: Open active file on GitLab` - View active file on GitLab with highlighting active line number and selected text block. [Read more](#open-active-file).
@@ -269,13 +269,14 @@ If your current project is a GitLab project, the extension will do the following
 - Show open MR for current branch and show it on the status bar. Clicking this item will open MR on GitLab.
 - Fetch closing issue of that MR and show it on the status bar. Clicking this item will open Issue on GitLab.
 
-### Advanced Search
+### Search
 
-GitLab Workflow extension provides you two types of search. Basic and advanced search. Basic search is quick however advanced search is more powerful which allows you to filter issues by author, assignee, milestone, title etc.
+GitLab Workflow extension provides you two types of search. Search with filters and Advanced Search.
 
-To use the basic search, in the search input, you can type your search term and hit Enter. This will search issues/MRs against their title and description fields. Example: `Inconsistent line endings for HEX files` or `Pipelines should ignore retried builds`.
+#### Search with filters
+It allows users to search issues/MRs against their title and description fields. In the search input, you can type your search term and hit Enter, for example, `Inconsistent line endings for HEX files` or `Pipelines should ignore retried builds`.
 
-You can perform advanced issue/MR search by using some predefined tokens. Full list below.
+It can become more powerful by allowing you to filter issues/MRs by author, assignee, milestone, title etc. Below is the full list of supported filter tokens
 
 | Token     | Description                                                                                                                             | Example                                                            |
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
@@ -299,6 +300,9 @@ You can perform advanced issue/MR search by using some predefined tokens. Full l
 - You can have `labels` and `label` tokens at the same time. `labels: fronted discussion label: performance` is a valid query and all labels will be included in your search query. It's equal with `labels: fronted discussion performance`. You can also have multiple `label` tokens. `label: frontend label: discussion label: performance` is valid and equals to `labels: fronted discussion performance`.
 
 ![_advanced-search.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_advanced-search.gif)
+
+#### Search with Advanced Search
+GitLab provides [Advanced Search feature which is backed by Elasticsearch](https://docs.gitlab.com/ee/integration/elasticsearch.html). Please see [Advanced Search syntax](https://docs.gitlab.com/ee/user/search/advanced_search_syntax.html) for more details.
 
 ### Create snippet
 

@@ -86,22 +86,22 @@ const parseQuery = (query, noteableType) => {
   return queryParams.length ? `?${queryParams.join('&')}` : '';
 };
 
-async function showSearchInputFor(noteableType) {
-  const query = await vscode.window.showInputBox({
+async function getSearchInput(description) {
+  return await vscode.window.showInputBox({
     ignoreFocusOut: true,
-    placeHolder: 'Search in title or description. (Check project page for advanced usage)',
+    placeHolder: description,
   });
+}
 
+async function showSearchInputFor(noteableType) {
   const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
-
+  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  const query = await getSearchInput(
+    'Search in title or description. (Check extension page for search with filters)',
+  );
   const queryString = await parseQuery(query, noteableType);
-  const project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
 
-  if (project) {
-    openers.openUrl(`${project.web_url}/${noteableType}${queryString}`);
-  } else {
-    vscode.window.showErrorMessage('GitLab Workflow: No project found to search issues');
-  }
+  await openers.openUrl(`${project.web_url}/${noteableType}${queryString}`);
 }
 
 async function showIssueSearchInput() {
@@ -112,5 +112,23 @@ async function showMergeRequestSearchInput() {
   showSearchInputFor('merge_requests');
 }
 
+async function showProjectAdvancedSearchInput() {
+  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  const query = await getSearchInput(
+    'Project Advanced Search. (Check extension page for Advanced Search)',
+  );
+  const queryString = await encodeURIComponent(query);
+  const instanceUrl = await gitLabService
+    .createGitService(workspaceFolder)
+    .fetchCurrentInstanceUrl();
+
+  // Select issues tab by default for Advanced Search
+  await openers.openUrl(
+    `${instanceUrl}/search?search=${queryString}&project_id=${project.id}&scope=issues`,
+  );
+}
+
 exports.showIssueSearchInput = showIssueSearchInput;
 exports.showMergeRequestSearchInput = showMergeRequestSearchInput;
+exports.showProjectAdvancedSearchInput = showProjectAdvancedSearchInput;
