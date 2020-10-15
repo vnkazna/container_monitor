@@ -87,11 +87,15 @@
       },
       {
         "command": "gl.issueSearch",
-        "title": "GitLab: Search project issues - (Supports advanced usage)"
+        "title": "GitLab: Search project issues (Supports filters)"
       },
       {
         "command": "gl.mergeRequestSearch",
-        "title": "GitLab: Search project merge requests - (Supports advanced usage)"
+        "title": "GitLab: Search project merge requests (Supports filters)"
+      },
+      {
+        "command": "gl.projectAdvancedSearch",
+        "title": "GitLab: Project Advanced Search (Issues, MR's, commits, comments...)"
       },
       {
         "command": "gl.compareCurrentBranch",

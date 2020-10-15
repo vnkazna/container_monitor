@@ -62,6 +62,7 @@ const registerCommands = (context, outputChannel) => {
     'gl.pipelineActions': pipelineActionsPicker.showPicker,
     'gl.issueSearch': searchInput.showIssueSearchInput,
     'gl.mergeRequestSearch': searchInput.showMergeRequestSearchInput,
+    'gl.projectAdvancedSearch': searchInput.showProjectAdvancedSearchInput,
     'gl.compareCurrentBranch': openers.compareCurrentBranch,
     'gl.createSnippet': snippetInput.show,
     'gl.validateCIConfig': ciConfigValidator.validate,

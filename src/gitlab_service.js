@@ -686,3 +686,4 @@ exports.getCurrentWorkspaceFolderOrSelectOne = getCurrentWorkspaceFolderOrSelect
 exports.getAllGitlabProjects = getAllGitlabProjects;
 exports.getCurrenWorkspaceFolder = getCurrentWorkspaceFolder;
 exports.fetchLabelEvents = fetchLabelEvents;
+exports.createGitService = createGitService;
