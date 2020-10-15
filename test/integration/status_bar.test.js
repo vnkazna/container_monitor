@@ -2,7 +2,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const vscode = require('vscode');
 const statusBar = require('../../src/status_bar');
-const tokenService = require('../../src/token_service');
+const { tokenService } = require('../../src/services/token_service');
 const getServer = require('./test_infrastructure/mock_server');
 const { GITLAB_HOST } = require('./test_infrastructure/constants');
 
@@ -35,6 +35,7 @@ describe('GitLab status bar', () => {
 
   after(() => {
     server.close();
+    tokenService.setToken(`https://${GITLAB_HOST}`, undefined);
   });
 
   it('shows the correct pipeline item', async () => {

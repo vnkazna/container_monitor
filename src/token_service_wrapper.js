@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const { GITLAB_COM_URL } = require('./constants');
 const openers = require('./openers');
 const statusBar = require('./status_bar');
+const { tokenService } = require('./services/token_service');
 
 let context = null;
 let active = false;
@@ -9,11 +10,7 @@ let active = false;
 const currentInstanceUrl = () =>
   vscode.workspace.getConfiguration('gitlab').instanceUrl || GITLAB_COM_URL;
 
-const getGlTokenMap = () => context.globalState.get('glTokens', {});
-
-const getToken = (instanceUrl = currentInstanceUrl()) => getGlTokenMap()[instanceUrl];
-
-const getInstanceUrls = () => Object.keys(getGlTokenMap());
+const getToken = (instanceUrl = currentInstanceUrl()) => tokenService.getToken(instanceUrl);
 
 const updateExtensionStatus = () => {
   const tokenExists = !!getToken();
@@ -24,33 +21,6 @@ const updateExtensionStatus = () => {
   } else if (active && !tokenExists) {
     statusBar.dispose();
     active = false;
-  }
-};
-
-const setToken = (instanceUrl, token) => {
-  const tokenMap = getGlTokenMap();
-
-  if (token) {
-    tokenMap[instanceUrl] = token;
-  } else {
-    delete tokenMap[instanceUrl];
-  }
-
-  context.globalState.update('glTokens', tokenMap);
-  updateExtensionStatus();
-};
-
-const migrateLegacyToken = () => {
-  const token = context.globalState.get('glToken');
-
-  if (token) {
-    const instanceUrl = currentInstanceUrl();
-
-    if (!getToken(instanceUrl)) {
-      setToken(instanceUrl, token);
-    }
-
-    context.globalState.update('glToken', null);
   }
 };
 
@@ -86,14 +56,10 @@ const watchConfigurationChanges = () => {
 
 const init = ctx => {
   context = ctx;
-
-  migrateLegacyToken();
+  tokenService.onDidChange(() => updateExtensionStatus());
   askForToken();
   updateExtensionStatus();
   watchConfigurationChanges();
 };
 
 exports.init = init;
-exports.getToken = getToken;
-exports.setToken = setToken;
-exports.getInstanceUrls = getInstanceUrls;

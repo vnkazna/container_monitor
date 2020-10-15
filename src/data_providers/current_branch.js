@@ -3,6 +3,7 @@ const moment = require('moment');
 const gitLabService = require('../gitlab_service');
 const { SidebarTreeItem } = require('./sidebar_tree_item');
 const ErrorItem = require('./error_item');
+const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
 
 class DataProvider {
   constructor() {
@@ -94,7 +95,7 @@ class DataProvider {
 
   async getChildren() {
     try {
-      const workspaceFolder = await gitLabService.getCurrenWorkspaceFolder();
+      const workspaceFolder = await getCurrentWorkspaceFolder();
       this.project = await gitLabService.fetchCurrentProject(workspaceFolder);
       await this.fetchPipeline(workspaceFolder);
       await this.fetchMR(workspaceFolder);

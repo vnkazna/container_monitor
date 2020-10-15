@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
+const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 
 const parseQuery = (query, noteableType) => {
   const params = {};
@@ -94,7 +95,7 @@ async function getSearchInput(description) {
 }
 
 async function showSearchInputFor(noteableType) {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
   const query = await getSearchInput(
     'Search in title or description. (Check extension page for search with filters)',
@@ -113,7 +114,7 @@ async function showMergeRequestSearchInput() {
 }
 
 async function showProjectAdvancedSearchInput() {
-  const workspaceFolder = await gitLabService.getCurrentWorkspaceFolderOrSelectOne();
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
   const query = await getSearchInput(
     'Project Advanced Search. (Check extension page for Advanced Search)',

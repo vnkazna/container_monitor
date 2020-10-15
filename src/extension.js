@@ -1,7 +1,8 @@
 const vscode = require('vscode');
 const openers = require('./openers');
 const tokenInput = require('./token_input');
-const tokenService = require('./token_service');
+const { tokenService } = require('./services/token_service');
+const tokenServiceWrapper = require('./token_service_wrapper');
 const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
 const snippetInput = require('./snippet_input');
@@ -85,6 +86,7 @@ const activate = context => {
   registerCommands(context, outputChannel);
   webviewController.addDeps(context);
   tokenService.init(context);
+  tokenServiceWrapper.init(context);
 };
 
 exports.activate = activate;
