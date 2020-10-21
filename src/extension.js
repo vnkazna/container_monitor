@@ -13,6 +13,7 @@ const webviewController = require('./webview_controller');
 const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
 const { initializeLogging, handleError } = require('./log');
+const checkDeprecatedCertificateSettings = require('./check_deprecated_certificate_settings');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -81,6 +82,7 @@ const activate = context => {
   webviewController.addDeps(context);
   tokenService.init(context);
   tokenServiceWrapper.init(context);
+  checkDeprecatedCertificateSettings(context);
 };
 
 exports.activate = activate;
