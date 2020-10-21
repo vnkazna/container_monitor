@@ -1,8 +1,8 @@
 const vscode = require('vscode');
-const openers = require('./openers');
-const gitLabService = require('./gitlab_service');
-const gitlabProjectInput = require('./gitlab_project_input');
-const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
+const openers = require('../openers');
+const gitLabService = require('../gitlab_service');
+const gitlabProjectInput = require('../gitlab_project_input');
+const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
 
 const visibilityOptions = [
   {
@@ -30,7 +30,7 @@ const contextOptions = [
   },
 ];
 
-async function createSnippet(project, editor, visibility, context) {
+async function uploadSnippet(project, editor, visibility, context) {
   let content = '';
   const fileName = editor.document.fileName.split('/').reverse()[0];
 
@@ -62,7 +62,7 @@ async function createSnippet(project, editor, visibility, context) {
   openers.openUrl(snippet.web_url);
 }
 
-async function showPicker() {
+async function createSnippet() {
   const editor = vscode.window.activeTextEditor;
   let workspaceFolder = null;
   let project = null;
@@ -90,7 +90,7 @@ async function showPicker() {
       const context = await vscode.window.showQuickPick(contextOptions);
 
       if (context) {
-        createSnippet(project, editor, visibility.type, context.type);
+        uploadSnippet(project, editor, visibility.type, context.type);
       }
     }
   } else {
@@ -98,4 +98,6 @@ async function showPicker() {
   }
 }
 
-exports.show = showPicker;
+module.exports = {
+  createSnippet,
+};

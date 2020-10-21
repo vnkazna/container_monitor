@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
 const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
+const { createGitService } = require('./git_service_factory');
 
 const parseQuery = (query, noteableType) => {
   const params = {};
@@ -120,9 +121,7 @@ async function showProjectAdvancedSearchInput() {
     'Project Advanced Search. (Check extension page for Advanced Search)',
   );
   const queryString = await encodeURIComponent(query);
-  const instanceUrl = await gitLabService
-    .createGitService(workspaceFolder)
-    .fetchCurrentInstanceUrl();
+  const instanceUrl = await createGitService(workspaceFolder).fetchCurrentInstanceUrl();
 
   // Select issues tab by default for Advanced Search
   await openers.openUrl(

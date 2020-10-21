@@ -1,9 +1,5 @@
-/* eslint-disable max-classes-per-file */
-
 const { StatusCodeError } = require('request-promise/errors');
-
-const prettyJson = obj => JSON.stringify(obj, null, 2);
-const stackToArray = stack => stack && stack.split('\n');
+const { prettyJson, stackToArray } = require('./common');
 
 class ApiError extends Error {
   constructor(error, action) {
@@ -33,24 +29,4 @@ class ApiError extends Error {
   }
 }
 
-class UserFriendlyError extends Error {
-  constructor(message, originalError, additionalInfo) {
-    super(message);
-    this.originalError = originalError;
-    this.additionalInfo = additionalInfo;
-  }
-
-  get details() {
-    return prettyJson({
-      userMessage: this.message,
-      errorMessage: this.originalError.message,
-      stack: stackToArray(this.originalError.stack),
-      additionalInfo: this.additionalInfo,
-    });
-  }
-}
-
-module.exports = {
-  ApiError,
-  UserFriendlyError,
-};
+module.exports = { ApiError };
