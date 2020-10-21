@@ -30,7 +30,7 @@ Advanced pipeline actions allow you to view pipeline on GitLab, create a new pip
 - `GitLab: Search project merge requests (Supports filters)`. [Read more](#search-with-filters)
 - `GitLab: Project Advanced Search (Issues, MR's, commits, comments...)`. [Read more](#search-with-advanced-search)
 - `GitLab: Create snippet` - Create public, internal or private snippet from entire file or selection. [Read more](#create-snippet).
-- `GitLab: Insert snippet` - Insert a project snippet, supports multi-file snippets.
+- `GitLab: Insert snippet` - Insert a project snippet, supports multi-file snippets. [Read more](#insert-snippet).
 - `GitLab: Compare current branch with master` - Compare your branch with master and view changes on GitLab. [Read more](#compare-with-master).
 - `GitLab: Open active file on GitLab` - View active file on GitLab with highlighting active line number and selected text block. [Read more](#open-active-file).
 - `GitLab: Validate GitLab CI config` - Validate GitLab CI configuration file `.gitlab-ci.yml`. [Read more](#validate-gitlab-ci-configuration).
@@ -310,6 +310,12 @@ GitLab provides [Advanced Search feature which is backed by Elasticsearch](https
 You can create a snippet from selection or entire file. You can also select visibility level of your snippet.
 
 ![_create-snippet.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_create-snippet.gif)
+
+### Insert snippet
+
+You can insert public and private project snippets. The insert supports [multi-file snippets](https://docs.gitlab.com/ee/user/snippets.html#multiple-files-by-snippet).
+
+![insert-multi-file-snippet](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/insert-multi-file-snippet.gif)
 
 ### Compare with master
 
