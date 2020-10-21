@@ -1,0 +1,39 @@
+{
+  "project": {
+    "id": "gid://gitlab/Project/278964",
+    "snippets": {
+      "nodes": [
+        {
+          "id": "gid://gitlab/ProjectSnippet/111",
+          "title": "Test snippet",
+          "description": "test description",
+          "blobs": {
+            "nodes": [
+              {
+                "name": "test.js",
+                "path": "test.js"
+              }
+            ]
+          }
+        },
+        {
+          "id": "gid://gitlab/ProjectSnippet/222",
+          "title": "Test snippet",
+          "description": "test description",
+          "blobs": {
+            "nodes": [
+              {
+                "name": "test1.js",
+                "path": "test1.js"
+              },
+              {
+                "name": "test2.js",
+                "path": "test2.js"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

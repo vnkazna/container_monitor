@@ -4,6 +4,7 @@ const gitLabService = require('../gitlab_service');
 const { SidebarTreeItem } = require('./sidebar_tree_item');
 const ErrorItem = require('./error_item');
 const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
+const { handleError } = require('../log');
 
 class DataProvider {
   constructor() {
@@ -101,7 +102,7 @@ class DataProvider {
       await this.fetchMR(workspaceFolder);
       await this.fetchClosingIssue(workspaceFolder);
     } catch (e) {
-      vscode.gitLabWorkflow.handleError(e);
+      handleError(e);
       this.children.push(new ErrorItem());
     }
 

@@ -106,6 +106,10 @@
         "title": "GitLab: Create snippet"
       },
       {
+        "command": "gl.insertSnippet",
+        "title": "GitLab: Insert snippet"
+      },
+      {
         "command": "gl.validateCIConfig",
         "title": "GitLab: Validate GitLab CI config"
       },
@@ -542,7 +546,11 @@
     "vscode-test": "^1.4.0"
   },
   "dependencies": {
+    "cross-fetch": "^3.0.6",
     "execa": "^4.0.3",
+    "graphql": "^15.3.0",
+    "graphql-request": "^3.2.0",
+    "https-proxy-agent": "^5.0.0",
     "moment": "^2.24.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",

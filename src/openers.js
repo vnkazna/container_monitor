@@ -1,24 +1,10 @@
 const vscode = require('vscode');
-const { GitService } = require('./git_service');
 const gitLabService = require('./gitlab_service');
-const { tokenService } = require('./services/token_service');
 const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
+const { createGitService } = require('./git_service_factory');
+const { handleError } = require('./log');
 
 const openUrl = url => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
-
-const createGitService = workspaceFolder => {
-  const { instanceUrl, remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration(
-    'gitlab',
-  );
-  return new GitService({
-    workspaceFolder,
-    instanceUrl: instanceUrl || undefined,
-    remoteName: remoteName || undefined,
-    pipelineGitRemoteName: pipelineGitRemoteName || undefined,
-    tokenService,
-    log: vscode.gitLabWorkflow.log,
-  });
-};
 
 /**
  * Fetches user and project before opening a link.
@@ -66,7 +52,7 @@ async function getActiveFile() {
   try {
     currentProject = await gitLabService.fetchCurrentProject(workspaceFolder);
   } catch (e) {
-    vscode.gitLabWorkflow.handleError(e);
+    handleError(e);
     return undefined;
   }
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();

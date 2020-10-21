@@ -1,28 +1,16 @@
 const vscode = require('vscode');
 const request = require('request-promise');
 const fs = require('fs');
-const { GitService } = require('./git_service');
 const { tokenService } = require('./services/token_service');
 const statusBar = require('./status_bar');
-const { ApiError, UserFriendlyError } = require('./errors');
+const { UserFriendlyError } = require('./errors/user_friendly_error');
+const { ApiError } = require('./errors/api_error');
 const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
+const { createGitService } = require('./git_service_factory');
+const { handleError, logError } = require('./log');
 
 const projectCache = [];
 let versionCache = null;
-
-const createGitService = workspaceFolder => {
-  const { instanceUrl, remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration(
-    'gitlab',
-  );
-  return new GitService({
-    workspaceFolder,
-    instanceUrl: instanceUrl || undefined,
-    remoteName: remoteName || undefined,
-    pipelineGitRemoteName: pipelineGitRemoteName || undefined,
-    tokenService,
-    log: vscode.gitLabWorkflow.log,
-  });
-};
 
 async function fetch(path, method = 'GET', data = null) {
   const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
@@ -69,7 +57,7 @@ async function fetch(path, method = 'GET', data = null) {
     try {
       config.ca = fs.readFileSync(ca);
     } catch (e) {
-      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Cannot read CA '${ca}'`, e));
+      handleError(new UserFriendlyError(`Cannot read CA '${ca}'`, e));
     }
   }
 
@@ -77,7 +65,7 @@ async function fetch(path, method = 'GET', data = null) {
     try {
       config.cert = fs.readFileSync(cert);
     } catch (e) {
-      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Cannot read CA '${cert}'`, e));
+      handleError(new UserFriendlyError(`Cannot read CA '${cert}'`, e));
     }
   }
 
@@ -85,7 +73,7 @@ async function fetch(path, method = 'GET', data = null) {
     try {
       config.key = fs.readFileSync(certKey);
     } catch (e) {
-      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Cannot read CA '${certKey}'`, e));
+      handleError(new UserFriendlyError(`Cannot read CA '${certKey}'`, e));
     }
   }
 
@@ -100,7 +88,7 @@ async function fetch(path, method = 'GET', data = null) {
         headers: response.headers,
       };
     } catch (e) {
-      vscode.gitLabWorkflow.handleError(
+      handleError(
         new UserFriendlyError('Failed to parse GitLab API response', e, `Response body: ${body}`),
       );
       return { error: e };
@@ -138,7 +126,7 @@ async function fetchCurrentProjectSwallowError(workspaceFolder) {
   try {
     return await fetchCurrentProject(workspaceFolder);
   } catch (error) {
-    vscode.gitLabWorkflow.logError(error);
+    logError(error);
     return null;
   }
 }
@@ -149,7 +137,7 @@ async function fetchCurrentPipelineProject(workspaceFolder) {
 
     return await fetchProjectData(remote);
   } catch (e) {
-    vscode.gitLabWorkflow.logError(e);
+    logError(e);
     return null;
   }
 }
@@ -168,7 +156,7 @@ async function fetchFirstUserByUsername(userName) {
     const { response: users } = await fetch(`/users?username=${userName}`);
     return users[0];
   } catch (e) {
-    vscode.gitLabWorkflow.handleError(new UserFriendlyError('Error when fetching GitLab user.', e));
+    handleError(new UserFriendlyError('Error when fetching GitLab user.', e));
     return undefined;
   }
 }
@@ -180,7 +168,7 @@ async function fetchVersion() {
       versionCache = response.version;
     }
   } catch (e) {
-    vscode.gitLabWorkflow.logError(e);
+    logError(e);
   }
 
   return versionCache;
@@ -473,7 +461,7 @@ async function handlePipelineAction(action, workspaceFolder) {
       const { response } = await fetch(endpoint, 'POST');
       newPipeline = response;
     } catch (e) {
-      vscode.gitLabWorkflow.handleError(new UserFriendlyError(`Failed to ${action} pipeline.`, e));
+      handleError(new UserFriendlyError(`Failed to ${action} pipeline.`, e));
     }
 
     if (newPipeline) {
@@ -495,7 +483,7 @@ async function fetchMRIssues(mrId, workspaceFolder) {
       );
       issues = response;
     } catch (e) {
-      vscode.gitLabWorkflow.logError(e);
+      logError(e);
     }
   }
 
@@ -514,7 +502,7 @@ async function createSnippet(data) {
     const { response } = await fetch(path, 'POST', data);
     snippet = response;
   } catch (e) {
-    vscode.gitLabWorkflow.handleError(new UserFriendlyError('Failed to create your snippet.', e));
+    handleError(new UserFriendlyError('Failed to create your snippet.', e));
   }
 
   return snippet;
@@ -527,9 +515,7 @@ async function validateCIConfig(content) {
     const { response } = await fetch('/ci/lint', 'POST', { content });
     validCIConfig = response;
   } catch (e) {
-    vscode.gitLabWorkflow.handleError(
-      new UserFriendlyError('Failed to validate CI configuration.', e),
-    );
+    handleError(new UserFriendlyError('Failed to validate CI configuration.', e));
   }
 
   return validCIConfig;
@@ -545,9 +531,7 @@ async function fetchLabelEvents(issuable) {
     );
     labelEvents = response;
   } catch (e) {
-    vscode.gitLabWorkflow.handleError(
-      new UserFriendlyError('Failed to fetch label events for this issuable.', e),
-    );
+    handleError(new UserFriendlyError('Failed to fetch label events for this issuable.', e));
   }
 
   labelEvents.forEach(el => {
@@ -583,9 +567,7 @@ async function fetchDiscussions(issuable, page = 1) {
       delete discussions.headers;
     }
   } catch (e) {
-    vscode.gitLabWorkflow.handleError(
-      new UserFriendlyError('Failed to fetch discussions for this issuable.', e),
-    );
+    handleError(new UserFriendlyError('Failed to fetch discussions for this issuable.', e));
   }
 
   return discussions;
@@ -612,7 +594,7 @@ async function renderMarkdown(markdown, workspaceFolder) {
     });
     rendered = response;
   } catch (e) {
-    vscode.gitLabWorkflow.logError(e);
+    logError(e);
     return markdown;
   }
 
@@ -629,7 +611,7 @@ async function saveNote({ issuable, note, noteType }) {
     });
     return response;
   } catch (e) {
-    vscode.gitLabWorkflow.logError(e);
+    logError(e);
   }
 
   return { success: false };
@@ -653,4 +635,3 @@ exports.renderMarkdown = renderMarkdown;
 exports.saveNote = saveNote;
 exports.getAllGitlabProjects = getAllGitlabProjects;
 exports.fetchLabelEvents = fetchLabelEvents;
-exports.createGitService = createGitService;

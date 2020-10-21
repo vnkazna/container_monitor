@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const gitLabService = require('../gitlab_service');
 const { SidebarTreeItem } = require('./sidebar_tree_item');
 const ErrorItem = require('./error_item');
+const { handleError } = require('../log');
 
 class DataProvider {
   constructor() {
@@ -48,7 +49,7 @@ class DataProvider {
     try {
       return await this.collectIssuables(el);
     } catch (e) {
-      vscode.gitLabWorkflow.handleError(e);
+      handleError(e);
       return [new ErrorItem()];
     }
   }

@@ -2,6 +2,11 @@ const assert = require('assert');
 const sinon = require('sinon');
 const vscode = require('vscode');
 const workspaceService = require('../../../src/services/workspace_service');
+const {
+  createAndOpenFile,
+  closeAndDeleteFile,
+  simulateQuickPickChoice,
+} = require('../test_infrastructure/helpers');
 
 describe('workspace_service', () => {
   const sandbox = sinon.createSandbox();
@@ -48,9 +53,7 @@ describe('workspace_service', () => {
 
     it('getCurrentWorkspaceFolderOrSelectOne lets user select a workspace', async () => {
       // simulating user selecting second option
-      sandbox.stub(vscode.window, 'showQuickPick').callsFake(async options => {
-        return options[1];
-      });
+      simulateQuickPickChoice(sandbox, 1);
       const result = await workspaceService.getCurrentWorkspaceFolderOrSelectOne();
       assert.strictEqual(result, '/ws2');
     });
@@ -59,16 +62,11 @@ describe('workspace_service', () => {
       let testFileUri;
       beforeEach(async () => {
         testFileUri = vscode.Uri.parse(`${originalWorkspace.uri.fsPath}/newfile.js`);
-        const createFileEdit = new vscode.WorkspaceEdit();
-        createFileEdit.createFile(testFileUri);
-        await vscode.workspace.applyEdit(createFileEdit);
-        await vscode.window.showTextDocument(testFileUri);
+        await createAndOpenFile(testFileUri);
       });
 
       afterEach(async () => {
-        const edit = new vscode.WorkspaceEdit();
-        edit.deleteFile(testFileUri);
-        await vscode.workspace.applyEdit(edit);
+        await closeAndDeleteFile(testFileUri);
       });
 
       it('getCurrentWorkspaceFolder returns workspace folder', async () => {

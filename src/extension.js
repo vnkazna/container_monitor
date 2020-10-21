@@ -5,31 +5,24 @@ const { tokenService } = require('./services/token_service');
 const tokenServiceWrapper = require('./token_service_wrapper');
 const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
-const snippetInput = require('./snippet_input');
+const { createSnippet } = require('./commands/create_snippet');
+const { insertSnippet } = require('./commands/insert_snippet');
 const sidebar = require('./sidebar');
 const ciConfigValidator = require('./ci_config_validator');
 const webviewController = require('./webview_controller');
 const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
+const { initializeLogging, handleError } = require('./log');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
-  log: () => {},
-  logError: e => vscode.gitLabWorkflow.log(e.details || `${e.message}\n${e.stack}`),
-  handleError: async e => {
-    vscode.gitLabWorkflow.logError(e);
-    const choice = await vscode.window.showErrorMessage(e.message, null, 'Show logs');
-    if (choice === 'Show logs') {
-      await vscode.commands.executeCommand('gl.showOutput');
-    }
-  },
 };
 
 const wrapWithCatch = command => async (...args) => {
   try {
     await command(...args);
   } catch (e) {
-    await vscode.gitLabWorkflow.handleError(e);
+    await handleError(e);
   }
 };
 
@@ -65,7 +58,8 @@ const registerCommands = (context, outputChannel) => {
     'gl.mergeRequestSearch': searchInput.showMergeRequestSearchInput,
     'gl.projectAdvancedSearch': searchInput.showProjectAdvancedSearchInput,
     'gl.compareCurrentBranch': openers.compareCurrentBranch,
-    'gl.createSnippet': snippetInput.show,
+    'gl.createSnippet': createSnippet,
+    'gl.insertSnippet': insertSnippet,
     'gl.validateCIConfig': ciConfigValidator.validate,
     'gl.refreshSidebar': sidebar.refresh,
     'gl.showRichContent': webviewController.create,
@@ -81,7 +75,7 @@ const registerCommands = (context, outputChannel) => {
 
 const activate = context => {
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
-  vscode.gitLabWorkflow.log = line => outputChannel.appendLine(line);
+  initializeLogging(line => outputChannel.appendLine(line));
 
   registerCommands(context, outputChannel);
   webviewController.addDeps(context);
