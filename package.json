@@ -224,7 +224,7 @@
         },
         "gitlab.enableExperimentalFeatures": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Enable experimental features including showing Issue details in VSCode"
         },
         "gitlab.customQueries": {

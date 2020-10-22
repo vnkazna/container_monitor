@@ -52,7 +52,8 @@ Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitl
 
 ### Experimental Features
 
-Experimental features are behind a feature flag. To enable them, you can set `gitlab.enableExperimentalFeatures` to `true` in your VS Code settings.
+Experimental features are behind a feature flag. These are currently enabled by default.
+To disable them, you can set `gitlab.enableExperimentalFeatures` to `false` in your VS Code settings.
 
 #### View issue and MR details and comments in VS Code
 
