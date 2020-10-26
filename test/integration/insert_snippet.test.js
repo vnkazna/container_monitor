@@ -5,7 +5,7 @@ const simpleGit = require('simple-git');
 const { insertSnippet } = require('../../src/commands/insert_snippet');
 const { tokenService } = require('../../src/services/token_service');
 const getServer = require('./test_infrastructure/mock_server');
-const { GITLAB_HOST, REMOTE } = require('./test_infrastructure/constants');
+const { GITLAB_URL, REMOTE } = require('./test_infrastructure/constants');
 const {
   createAndOpenFile,
   closeAndDeleteFile,
@@ -17,9 +17,9 @@ describe('Insert snippet', async () => {
   let testFileUri;
   const sandbox = sinon.createSandbox();
 
-  before(() => {
+  before(async () => {
     server = getServer();
-    tokenService.setToken(`https://${GITLAB_HOST}`, 'abcd-secret');
+    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   beforeEach(async () => {
@@ -36,9 +36,9 @@ describe('Insert snippet', async () => {
     await closeAndDeleteFile(testFileUri);
   });
 
-  after(() => {
+  after(async () => {
     server.close();
-    tokenService.setToken(`https://${GITLAB_HOST}`, undefined);
+    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('inserts snippet when there is only one blob', async () => {

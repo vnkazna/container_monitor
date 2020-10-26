@@ -27,7 +27,7 @@ export class TokenService {
     return this.glTokenMap[instanceUrl];
   }
 
-  setToken(instanceUrl: string, token: string | undefined) {
+  async setToken(instanceUrl: string, token: string | undefined) {
     assert(this.context);
     const tokenMap = this.glTokenMap;
 
@@ -37,7 +37,7 @@ export class TokenService {
       delete tokenMap[instanceUrl];
     }
 
-    this.context.globalState.update('glTokens', tokenMap);
+    await this.context.globalState.update('glTokens', tokenMap);
     this.onDidChangeEmitter.fire();
   }
 }

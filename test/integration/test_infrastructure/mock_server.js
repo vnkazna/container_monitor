@@ -1,6 +1,6 @@
 const { setupServer } = require('msw/node');
 const { rest, graphql } = require('msw');
-const { GITLAB_HOST } = require('./constants');
+const { API_URL_PREFIX } = require('./constants');
 const projectResponse = require('../fixtures/rest/project.json');
 const versionResponse = require('../fixtures/rest/version.json');
 const openIssueResponse = require('../fixtures/rest/open_issue.json');
@@ -9,15 +9,13 @@ const pipelinesResponse = require('../fixtures/rest/pipelines.json');
 const pipelineResponse = require('../fixtures/rest/pipeline.json');
 const snippetsResponse = require('../fixtures/graphql/snippets.json');
 
-const instancePrefix = `https://${GITLAB_HOST}/api/v4`;
-
 const createJsonEndpoint = (path, response) =>
-  rest.get(`${instancePrefix}${path}`, (req, res, ctx) => {
+  rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
     return res(ctx.status(200), ctx.json(response));
   });
 
 const createTextEndpoint = (path, response) =>
-  rest.get(`${instancePrefix}${path}`, (req, res, ctx) => {
+  rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
     return res(ctx.status(200), ctx.text(response));
   });
 

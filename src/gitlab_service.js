@@ -8,6 +8,7 @@ const { ApiError } = require('./errors/api_error');
 const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
 const { createGitService } = require('./git_service_factory');
 const { handleError, logError } = require('./log');
+const { getUserAgentHeader } = require('./utils/get_user_agent_header');
 
 const projectCache = [];
 let versionCache = null;
@@ -44,6 +45,7 @@ async function fetch(path, method = 'GET', data = null) {
     method,
     headers: {
       'PRIVATE-TOKEN': glToken,
+      ...getUserAgentHeader(),
     },
     ecdhCurve: 'auto',
     rejectUnauthorized: !ignoreCertificateErrors,

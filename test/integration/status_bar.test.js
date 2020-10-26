@@ -4,7 +4,7 @@ const vscode = require('vscode');
 const statusBar = require('../../src/status_bar');
 const { tokenService } = require('../../src/services/token_service');
 const getServer = require('./test_infrastructure/mock_server');
-const { GITLAB_HOST } = require('./test_infrastructure/constants');
+const { GITLAB_URL } = require('./test_infrastructure/constants');
 
 describe('GitLab status bar', () => {
   let server;
@@ -17,9 +17,9 @@ describe('GitLab status bar', () => {
     return fakeItem;
   };
 
-  before(() => {
+  before(async () => {
     server = getServer();
-    tokenService.setToken(`https://${GITLAB_HOST}`, 'abcd-secret');
+    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   beforeEach(() => {
@@ -33,9 +33,9 @@ describe('GitLab status bar', () => {
     returnedItems = [];
   });
 
-  after(() => {
+  after(async () => {
     server.close();
-    tokenService.setToken(`https://${GITLAB_HOST}`, undefined);
+    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('shows the correct pipeline item', async () => {
