@@ -5,6 +5,7 @@ import { URL } from 'url';
 import * as createHttpProxyAgent from 'https-proxy-agent';
 import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
+import { getUserAgentHeader } from '../utils/get_user_agent_header';
 
 interface Node<T> {
   nodes: T[];
@@ -51,12 +52,6 @@ const queryGetSnippets = gql`
   }
 `;
 
-const getUserAgent = () => {
-  const extension = vscode.extensions.getExtension('GitLab.gitlab-workflow');
-  const packageJson: Record<string, string | undefined> = extension?.packageJSON;
-  return `vs-code-gitlab-workflow/${packageJson.version}`;
-};
-
 export class GitLabNewService {
   client: GraphQLClient;
 
@@ -75,7 +70,7 @@ export class GitLabNewService {
     return {
       headers: {
         Authorization: `Bearer ${token}`,
-        'User-Agent': getUserAgent(),
+        ...getUserAgentHeader(),
       },
       agent,
     };

@@ -17,7 +17,7 @@ async function showInput() {
   });
 
   if (instance && token) {
-    tokenService.setToken(instance, token);
+    await tokenService.setToken(instance, token);
   }
 }
 
@@ -29,7 +29,7 @@ async function removeTokenPicker() {
   });
 
   if (selectedInstanceUrl) {
-    tokenService.setToken(selectedInstanceUrl, undefined);
+    await tokenService.setToken(selectedInstanceUrl, undefined);
   }
 }
 
