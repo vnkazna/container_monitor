@@ -4,3 +4,7 @@ export const REMOTE = {
   NAME: 'origin',
   URL: 'git@test.gitlab.com:gitlab-org/gitlab.git',
 };
+export const DEFAULT_VS_CODE_SETTINGS = {
+  'gitlab.instanceUrl': GITLAB_URL,
+  'files.enableTrash': false,
+};

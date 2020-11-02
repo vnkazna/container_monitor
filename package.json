@@ -232,7 +232,7 @@
           "minItems": 1,
           "items": {
             "type": "object",
-            "title": "Custom GitLab Quety",
+            "title": "Custom GitLab Query",
             "required": [
               "name"
             ],
@@ -347,22 +347,22 @@
               "createdAfter": {
                 "type": "string",
                 "format": "date",
-                "description": "Return GitLab items created after the given date. It is not applicable for vulnerabilities"
+                "description": "Return GitLab items created after the given date. ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z. It is not applicable for vulnerabilities"
               },
               "createdBefore": {
                 "type": "string",
                 "format": "date",
-                "description": "Return GitLab items created before the given date. It is not applicable for vulnerabilities"
+                "description": "Return GitLab items created before the given date. ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z. It is not applicable for vulnerabilities"
               },
               "updatedAfter": {
                 "type": "string",
                 "format": "date",
-                "description": "Return GitLab items updated after the given date. It is not applicable for vulnerabilities"
+                "description": "Return GitLab items updated after the given date. ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z. It is not applicable for vulnerabilities"
               },
               "updatedBefore": {
                 "type": "string",
                 "format": "date",
-                "description": "Return GitLab items updated before the given date. It is not applicable for vulnerabilities"
+                "description": "Return GitLab items updated before the given date. ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z. It is not applicable for vulnerabilities"
               },
               "wip": {
                 "type": "string",
@@ -522,6 +522,8 @@
   "devDependencies": {
     "@types/jest": "^26.0.14",
     "@types/node": "^13.7.0",
+    "@types/request-promise": "^4.1.46",
+    "@types/sinon": "^9.0.4",
     "@types/temp": "^0.8.34",
     "@types/vscode": "^1.41.0",
     "@typescript-eslint/eslint-plugin": "^3.7.0",

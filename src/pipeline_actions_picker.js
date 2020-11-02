@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
+const statusBar = require('./status_bar');
 const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 
 async function showPicker() {
@@ -33,7 +34,8 @@ async function showPicker() {
       return;
     }
 
-    gitLabService.handlePipelineAction(selected.action, workspaceFolder);
+    const newPipeline = await gitLabService.handlePipelineAction(selected.action, workspaceFolder);
+    if (newPipeline) statusBar.refreshPipeline();
   }
 }
 

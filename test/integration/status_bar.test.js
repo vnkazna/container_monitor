@@ -3,7 +3,9 @@ const sinon = require('sinon');
 const vscode = require('vscode');
 const statusBar = require('../../src/status_bar');
 const { tokenService } = require('../../src/services/token_service');
-const getServer = require('./test_infrastructure/mock_server');
+const pipelinesResponse = require('./fixtures/rest/pipelines.json');
+const pipelineResponse = require('./fixtures/rest/pipeline.json');
+const { getServer, createJsonEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 
 describe('GitLab status bar', () => {
@@ -18,7 +20,10 @@ describe('GitLab status bar', () => {
   };
 
   before(async () => {
-    server = getServer();
+    server = getServer([
+      createJsonEndpoint('/projects/278964/pipelines?ref=master', pipelinesResponse),
+      createJsonEndpoint('/projects/278964/pipelines/47', pipelineResponse),
+    ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 

@@ -2,9 +2,11 @@ const assert = require('assert');
 const sinon = require('sinon');
 const vscode = require('vscode');
 const simpleGit = require('simple-git');
+const { graphql } = require('msw');
 const { insertSnippet } = require('../../src/commands/insert_snippet');
 const { tokenService } = require('../../src/services/token_service');
-const getServer = require('./test_infrastructure/mock_server');
+const snippetsResponse = require('./fixtures/graphql/snippets.json');
+const { getServer, createTextEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL, REMOTE } = require('./test_infrastructure/constants');
 const {
   createAndOpenFile,
@@ -18,7 +20,21 @@ describe('Insert snippet', async () => {
   const sandbox = sinon.createSandbox();
 
   before(async () => {
-    server = getServer();
+    server = getServer([
+      createTextEndpoint(
+        '/projects/278964/snippets/111/files/master/test.js/raw',
+        'snippet content',
+      ),
+      createTextEndpoint(
+        '/projects/278964/snippets/222/files/master/test2.js/raw',
+        'second blob content',
+      ),
+      graphql.query('GetSnippets', (req, res, ctx) => {
+        if (req.variables.projectPath === 'gitlab-org/gitlab')
+          return res(ctx.data(snippetsResponse));
+        return res(ctx.data({ project: null }));
+      }),
+    ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 

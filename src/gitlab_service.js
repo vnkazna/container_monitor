@@ -2,7 +2,6 @@ const vscode = require('vscode');
 const request = require('request-promise');
 const fs = require('fs');
 const { tokenService } = require('./services/token_service');
-const statusBar = require('./status_bar');
 const { UserFriendlyError } = require('./errors/user_friendly_error');
 const { ApiError } = require('./errors/api_error');
 const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
@@ -452,7 +451,6 @@ async function handlePipelineAction(action, workspaceFolder) {
 
   if (pipeline && project) {
     let endpoint = `/projects/${project.id}/pipelines/${pipeline.id}/${action}`;
-    let newPipeline = null;
 
     if (action === 'create') {
       const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
@@ -461,16 +459,13 @@ async function handlePipelineAction(action, workspaceFolder) {
 
     try {
       const { response } = await fetch(endpoint, 'POST');
-      newPipeline = response;
+      return response;
     } catch (e) {
-      handleError(new UserFriendlyError(`Failed to ${action} pipeline.`, e));
-    }
-
-    if (newPipeline) {
-      statusBar.refreshPipeline();
+      throw new UserFriendlyError(`Failed to ${action} pipeline.`, e);
     }
   } else {
     vscode.window.showErrorMessage('GitLab Workflow: No project or pipeline found.');
+    return undefined;
   }
 }
 

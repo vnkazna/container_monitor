@@ -2,12 +2,7 @@ import * as temp from 'temp';
 import simpleGit from 'simple-git';
 import * as path from 'path';
 import * as fs from 'fs';
-import { REMOTE } from './integration/test_infrastructure/constants';
-
-const vsCodeSettings = {
-  'gitlab.instanceUrl': 'https://test.gitlab.com',
-  'files.enableTrash': false,
-};
+import { REMOTE, DEFAULT_VS_CODE_SETTINGS } from './integration/test_infrastructure/constants';
 
 async function createTempFolder(): Promise<string> {
   return new Promise<string>((resolve, reject) => {
@@ -34,6 +29,6 @@ export default async function createTmpWorkspace(autoCleanUp = true): Promise<st
   const git = simpleGit(dirPath, { binary: 'git' });
   await git.init();
   await git.addRemote(REMOTE.NAME, REMOTE.URL);
-  await addFile(dirPath, '/.vscode/settings.json', JSON.stringify(vsCodeSettings));
+  await addFile(dirPath, '/.vscode/settings.json', JSON.stringify(DEFAULT_VS_CODE_SETTINGS));
   return dirPath;
 }
