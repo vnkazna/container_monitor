@@ -3,9 +3,9 @@ import { prettyJson, stackToArray, IDetailedError } from './common';
 export class UserFriendlyError extends Error implements IDetailedError {
   originalError: Error;
 
-  additionalInfo: string;
+  additionalInfo?: string;
 
-  constructor(message: string, originalError: Error, additionalInfo: string) {
+  constructor(message: string, originalError: Error, additionalInfo?: string) {
     super(message);
     this.originalError = originalError;
     this.additionalInfo = additionalInfo;

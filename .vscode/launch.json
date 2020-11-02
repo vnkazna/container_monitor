@@ -32,7 +32,7 @@
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceRoot}",
         "--extensionTestsPath=${workspaceRoot}/out/test/integration/",
-        "<paste the last line of `npm run create-test-workspace` output here>"
+        "<run `npm run create-test-workspace` to generate a test folder>"
       ],
       "preLaunchTask": "${defaultBuildTask}",
       "stopOnEntry": false

@@ -43,7 +43,7 @@ We use [`msw`](https://mswjs.io/docs/) to intercept any requests and return prep
 
 ### Debugging integration tests
 
-For debugging of the integration tests, we first need to create a test workspace (the `npm run test-integration` task doesn't need this step because it does it automatically). We can do that by running ```npm run create-test-workspace``` script. Then we copy the output to `.vscode/launch.json` instead of the placeholder in the "Integration Tests" launch configuration arguments.
+For debugging of the integration tests, we first need to create a test workspace (the `npm run test-integration` task doesn't need this step because it does it automatically). We can do that by running ```npm run create-test-workspace``` script. This script pastes the reference to generated workspace in `.vscode/launch.json`.
 
 Then we can debug the by running the "Integration Tests" [Launch configuration].
 
