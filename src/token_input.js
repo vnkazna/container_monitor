@@ -10,15 +10,17 @@ async function showInput() {
     prompt: 'URL to Gitlab instance',
   });
 
+  if (!instance) return;
+
   const token = await vscode.window.showInputBox({
     ignoreFocusOut: true,
     password: true,
     placeHolder: 'Paste your GitLab Personal Access Token...',
   });
 
-  if (instance && token) {
-    await tokenService.setToken(instance, token);
-  }
+  if (!token) return;
+
+  await tokenService.setToken(instance, token);
 }
 
 async function removeTokenPicker() {

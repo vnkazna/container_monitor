@@ -7,7 +7,7 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceRoot}"],
+      "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceRoot}", "/Users/tomas/workspace/tmp/test-project/"],
       "stopOnEntry": false,
       "preLaunchTask": "${defaultBuildTask}"
 

@@ -1,5 +1,4 @@
 const vscode = require('vscode');
-const path = require('path');
 
 class SidebarTreeItem extends vscode.TreeItem {
   constructor(title, data = null, type = 'merge_requests', collapsibleState = null, uri) {
@@ -7,13 +6,13 @@ class SidebarTreeItem extends vscode.TreeItem {
 
     const { enableExperimentalFeatures } = vscode.workspace.getConfiguration('gitlab');
 
-    let iconPathLight = `/assets/images/light/stop.svg`;
-    let iconPathDark = `/assets/images/dark/stop.svg`;
+    if (!data && type === 'merge_requests') {
+      this.iconPath = new vscode.ThemeIcon('git-pull-request');
+    }
+
     if (data) {
       let command = 'gl.showRichContent';
       let arg = [data, uri];
-      iconPathLight = `/assets/images/light/${type}.svg`;
-      iconPathDark = `/assets/images/dark/${type}.svg`;
 
       if (type === 'custom_query' || data == null) {
         command = '';
@@ -49,10 +48,6 @@ class SidebarTreeItem extends vscode.TreeItem {
         };
       }
     }
-    this.iconPath = {
-      light: path.join(__dirname, iconPathLight),
-      dark: path.join(__dirname, iconPathDark),
-    };
   }
 }
 

@@ -14,6 +14,7 @@ const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
 const { initializeLogging, handleError } = require('./log');
 const checkDeprecatedCertificateSettings = require('./check_deprecated_certificate_settings');
+const { GitContentProvider } = require('./review/file_diff_provider');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -83,6 +84,9 @@ const activate = context => {
   tokenService.init(context);
   tokenServiceWrapper.init(context);
   checkDeprecatedCertificateSettings(context);
+  context.subscriptions.push(
+    vscode.workspace.registerTextDocumentContentProvider('gl-review', new GitContentProvider()),
+  );
 };
 
 exports.activate = activate;

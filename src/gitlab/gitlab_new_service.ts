@@ -6,6 +6,7 @@ import * as createHttpProxyAgent from 'https-proxy-agent';
 import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
+import { GitRemote } from '../git/git_remote_parser';
 
 interface Node<T> {
   nodes: T[];
@@ -29,6 +30,11 @@ export interface GraphQLSnippet {
 export interface GraphQLBlob {
   name: string;
   path: string;
+}
+
+interface RestMR {
+  iid: number;
+  project_id: number;
 }
 
 const queryGetSnippets = gql`
@@ -107,5 +113,19 @@ export class GitLabNewService {
       throw new FetchError(`Fetching snippet from ${url} failed`, result);
     }
     return result.text();
+  }
+
+  async getMrDiff(mr: RestMR, remote: GitRemote) {
+    const versionsResult = await crossFetch(
+      `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions`,
+      this.fetchOptions,
+    );
+    const versions = await versionsResult.json();
+    const lastVersion = versions[0];
+    const diffResult = await crossFetch(
+      `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions/${lastVersion.id}`,
+      this.fetchOptions,
+    );
+    return diffResult.json();
   }
 }

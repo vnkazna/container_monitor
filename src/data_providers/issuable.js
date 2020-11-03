@@ -1,8 +1,24 @@
 const vscode = require('vscode');
 const gitLabService = require('../gitlab_service');
 const { SidebarTreeItem } = require('./sidebar_tree_item');
+const { MrItem } = require('./mr_item');
 const ErrorItem = require('./error_item');
 const { handleError } = require('../log');
+
+const getSign = type => {
+  switch (type) {
+    case 'issues':
+      return '#';
+    case 'epics':
+      return '&';
+    case 'snippets':
+      return '$';
+    case 'vulnerabilities':
+      return '-';
+    default:
+      return '!';
+  }
+};
 
 class DataProvider {
   constructor() {
@@ -16,37 +32,31 @@ class DataProvider {
 
   // eslint-disable-next-line class-methods-use-this
   async getProjectIssues(parameters, projectUri) {
-    const items = [];
     const issues = await gitLabService.fetchIssuables(parameters, projectUri);
-    let issuableSign = '!';
-    if (parameters.type === 'issues') {
-      issuableSign = '#';
-    } else if (parameters.type === 'epics') {
-      issuableSign = '&';
-    } else if (parameters.type === 'snippets') {
-      issuableSign = '$';
-    } else if (parameters.type === 'vulnerabilities') {
-      issuableSign = '-';
-    }
+    const issuableSign = getSign(parameters.type);
     if (issues.length) {
-      issues.forEach(issue => {
+      if (parameters.type === 'merge_requests') {
+        return issues.map(i => new MrItem(i, projectUri));
+      }
+      return issues.map(issue => {
         let title = `${issuableSign}${issue.iid} · ${issue.title}`;
         if (issuableSign === '$') {
           title = `${issuableSign}${issue.id} · ${issue.title}`;
         } else if (issuableSign === '-') {
           title = `[${issue.severity}] - ${issue.name}`;
         }
-        items.push(new SidebarTreeItem(title, issue, parameters.type, null, projectUri));
+        return new SidebarTreeItem(title, issue, parameters.type, true, projectUri);
       });
-    } else {
-      const noItemText = parameters.noItemText || 'No items found.';
-      items.push(new SidebarTreeItem(noItemText));
     }
-    return items;
+    const noItemText = parameters.noItemText || 'No items found.';
+    return [new SidebarTreeItem(noItemText)];
   }
 
   async getChildren(el) {
     try {
+      if (el && el.getChildren) {
+        return await el.getChildren();
+      }
       return await this.collectIssuables(el);
     } catch (e) {
       handleError(e);
