@@ -246,7 +246,7 @@
                 "description": "The maximum number of results to show",
                 "default": 20,
                 "maximum": 100,
-                "minItems": 1
+                "minimum": 1
               },
               "orderBy": {
                 "type": "string",

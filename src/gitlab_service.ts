@@ -1,23 +1,54 @@
-const vscode = require('vscode');
-const request = require('request-promise');
-const fs = require('fs');
-const { tokenService } = require('./services/token_service');
-const { UserFriendlyError } = require('./errors/user_friendly_error');
-const { ApiError } = require('./errors/api_error');
-const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
-const { createGitService } = require('./git_service_factory');
-const { handleError, logError } = require('./log');
-const { getUserAgentHeader } = require('./utils/get_user_agent_header');
+import * as vscode from 'vscode';
+import * as request from 'request-promise';
+import * as fs from 'fs';
+import { tokenService } from './services/token_service';
+import { UserFriendlyError } from './errors/user_friendly_error';
+import { ApiError } from './errors/api_error';
+import { getCurrentWorkspaceFolder } from './services/workspace_service';
+import { createGitService } from './git_service_factory';
+import { GitRemote } from './git/git_remote_parser';
+import { handleError, logError } from './log';
+import { getUserAgentHeader } from './utils/get_user_agent_header';
 
-const projectCache = [];
-let versionCache = null;
+interface GitLabProject {
+  id: number;
+  name: string;
+  namespace: {
+    id: number;
+    kind: string;
+  };
+  // eslint-disable-next-line camelcase
+  path_with_namespace: string;
+}
 
-async function fetch(path, method = 'GET', data = null) {
+interface GitLabIssuable {
+  sha: string;
+  // eslint-disable-next-line camelcase
+  project_id: number;
+  iid: number;
+}
+
+interface GitLabPipeline {
+  id: number;
+}
+
+interface GitLabJob {
+  name: string;
+  // eslint-disable-next-line camelcase
+  created_at: string;
+}
+
+const projectCache: Record<string, GitLabProject> = {};
+let versionCache: string | null = null;
+
+async function fetch(path: string, method = 'GET', data?: Record<string, unknown>) {
   const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
     'gitlab',
   );
   const instanceUrl = await createGitService(
-    await getCurrentWorkspaceFolder(),
+    // fetching of instanceUrl is the only GitService method that doesn't need workspaceFolder
+    // TODO: remove this default value once we implement https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/260
+    (await getCurrentWorkspaceFolder()) || '',
   ).fetchCurrentInstanceUrl();
   const { proxy } = vscode.workspace.getConfiguration('http');
   const apiRoot = `${instanceUrl}/api/v4`;
@@ -39,14 +70,12 @@ async function fetch(path, method = 'GET', data = null) {
     throw new Error(err);
   }
 
-  const config = {
-    url: `${apiRoot}${path}`,
+  const config: request.RequestPromiseOptions = {
     method,
     headers: {
       'PRIVATE-TOKEN': glToken,
       ...getUserAgentHeader(),
     },
-    ecdhCurve: 'auto',
     rejectUnauthorized: !ignoreCertificateErrors,
   };
 
@@ -96,10 +125,10 @@ async function fetch(path, method = 'GET', data = null) {
     }
   };
 
-  return await request(config);
+  return await request(`${apiRoot}${path}`, config);
 }
 
-async function fetchProjectData(remote) {
+async function fetchProjectData(remote: GitRemote | null) {
   if (remote) {
     if (!(`${remote.namespace}_${remote.project}` in projectCache)) {
       const { namespace, project } = remote;
@@ -113,7 +142,7 @@ async function fetchProjectData(remote) {
   return null;
 }
 
-async function fetchCurrentProject(workspaceFolder) {
+export async function fetchCurrentProject(workspaceFolder: string): Promise<GitLabProject | null> {
   try {
     const remote = await createGitService(workspaceFolder).fetchGitRemote();
 
@@ -123,7 +152,7 @@ async function fetchCurrentProject(workspaceFolder) {
   }
 }
 
-async function fetchCurrentProjectSwallowError(workspaceFolder) {
+export async function fetchCurrentProjectSwallowError(workspaceFolder: string) {
   try {
     return await fetchCurrentProject(workspaceFolder);
   } catch (error) {
@@ -132,7 +161,7 @@ async function fetchCurrentProjectSwallowError(workspaceFolder) {
   }
 }
 
-async function fetchCurrentPipelineProject(workspaceFolder) {
+export async function fetchCurrentPipelineProject(workspaceFolder: string) {
   try {
     const remote = await createGitService(workspaceFolder).fetchGitRemotePipeline();
 
@@ -143,7 +172,7 @@ async function fetchCurrentPipelineProject(workspaceFolder) {
   }
 }
 
-async function fetchCurrentUser() {
+export async function fetchCurrentUser() {
   try {
     const { response: user } = await fetch('/user');
     return user;
@@ -152,7 +181,7 @@ async function fetchCurrentUser() {
   }
 }
 
-async function fetchFirstUserByUsername(userName) {
+async function fetchFirstUserByUsername(userName: string) {
   try {
     const { response: users } = await fetch(`/users?username=${userName}`);
     return users[0];
@@ -162,7 +191,7 @@ async function fetchFirstUserByUsername(userName) {
   }
 }
 
-async function fetchVersion() {
+export async function fetchVersion() {
   try {
     if (!versionCache) {
       const { response } = await fetch('/version');
@@ -175,34 +204,21 @@ async function fetchVersion() {
   return versionCache;
 }
 
-async function getAllGitlabProjects() {
-  let workspaceFolders = [];
-  if (vscode.workspace.workspaceFolders) {
-    workspaceFolders = vscode.workspace.workspaceFolders.map(workspaceFolder => ({
-      label: fetchCurrentProject(workspaceFolder.uri.fsPath),
-      uri: workspaceFolder.uri.fsPath,
-    }));
-
-    const labels = await Promise.all(
-      workspaceFolders.map(workspaceFolder => workspaceFolder.label),
-    );
-
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < workspaceFolders.length; i++) {
-      if (labels[i] != null) {
-        workspaceFolders[i].label = labels[i].name;
-      } else {
-        workspaceFolders[i].label = null;
-      }
-    }
-
-    workspaceFolders = workspaceFolders.filter(workspaceFolder => workspaceFolder.label != null);
+export async function getAllGitlabProjects() {
+  if (!vscode.workspace.workspaceFolders) {
+    return [];
   }
-  return workspaceFolders;
+  const projectsWithUri = vscode.workspace.workspaceFolders.map(async workspaceFolder => ({
+    label: (await fetchCurrentProject(workspaceFolder.uri.fsPath))?.name,
+    uri: workspaceFolder.uri.fsPath,
+  }));
+
+  const fetchedProjectsWithUri = await Promise.all(projectsWithUri);
+
+  return fetchedProjectsWithUri.filter(p => p.label);
 }
 
-async function fetchLastPipelineForCurrentBranch(workspaceFolder) {
+export async function fetchLastPipelineForCurrentBranch(workspaceFolder: string) {
   const project = await fetchCurrentPipelineProject(workspaceFolder);
   let pipeline = null;
 
@@ -221,35 +237,41 @@ async function fetchLastPipelineForCurrentBranch(workspaceFolder) {
   return pipeline;
 }
 
-async function fetchIssuables(params = {}, projectUri) {
-  const {
-    type,
-    maxResults,
-    scope,
-    state,
-    labels,
-    milestone,
-    author,
-    assignee,
-    search,
-    createdBefore,
-    createdAfter,
-    updatedBefore,
-    updatedAfter,
-    wip,
-    confidential,
-    excludeLabels,
-    excludeMilestone,
-    excludeAuthor,
-    excludeAssignee,
-    excludeSearch,
-    excludeSearchIn,
-    orderBy,
-    sort,
-    reportTypes,
-    severityLevels,
-    confidenceLevels,
-  } = params;
+interface IssuableSearchParams {
+  type: string;
+  maxResults: number;
+  scope: string;
+  state: string;
+  labels?: string[];
+  milestone?: string;
+  author?: string;
+  assignee?: string;
+  search?: string;
+  createdBefore?: string;
+  createdAfter?: string;
+  updatedBefore?: string;
+  updatedAfter?: string;
+  wip: string;
+  confidential: boolean;
+  excludeLabels?: string[];
+  excludeMilestone?: string;
+  excludeAuthor?: string;
+  excludeAssignee?: string;
+  excludeSearch?: string;
+  excludeSearchIn: string;
+  orderBy: string;
+  sort: string;
+  reportTypes?: string[];
+  severityLevels?: string[];
+  confidenceLevels?: string[];
+  searchIn: string;
+  pipelineId?: string;
+}
+
+type QueryValue = string | boolean | string[] | number | undefined;
+
+export async function fetchIssuables(params: IssuableSearchParams, workspaceFolder: string) {
+  const { type, scope, state, author, assignee, wip } = params;
   let { searchIn, pipelineId } = params;
   const config = {
     type: type || 'merge_requests',
@@ -263,7 +285,7 @@ async function fetchIssuables(params = {}, projectUri) {
     return [];
   }
 
-  const project = await fetchCurrentProjectSwallowError(projectUri);
+  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
   if (project) {
     if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
       config.scope = 'all';
@@ -295,12 +317,6 @@ async function fetchIssuables(params = {}, projectUri) {
     } else {
       path = `/projects/${project.id}/${config.type}?scope=${config.scope}&state=${config.state}`;
     }
-    if (labels) {
-      path = `${path}&labels=${labels}`;
-    }
-    if (milestone) {
-      path = `${path}&milestone=${milestone}`;
-    }
     if (config.type === 'issues') {
       if (author) {
         path = `${path}&author_username=${author}`;
@@ -325,88 +341,72 @@ async function fetchIssuables(params = {}, projectUri) {
         path = `${path}&assignee_id=-1`;
       }
     }
-    if (search) {
-      path = `${path}&search=${search}`;
-    }
     if (searchIn) {
       if (searchIn === 'all') {
         searchIn = 'title,description';
       }
       path = `${path}&in=${searchIn}`;
     }
-    if (createdBefore) {
-      path = `${path}&created_before=${createdBefore}`;
-    }
-    if (createdAfter) {
-      path = `${path}&created_after=${createdAfter}`;
-    }
-    if (updatedBefore) {
-      path = `${path}&updated_before=${updatedBefore}`;
-    }
-    if (updatedAfter) {
-      path = `${path}&updated_after=${updatedAfter}`;
-    }
     if (config.type === 'merge_requests' && wip) {
       path = `${path}&wip=${wip}`;
     }
+    let issueQueryParams: Record<string, QueryValue> = {};
     if (config.type === 'issues') {
-      if (confidential) {
-        path = `${path}&confidential=${confidential}`;
-      }
-      if (excludeLabels) {
-        path = `${path}&not[labels]=${excludeLabels}`;
-      }
-      if (excludeMilestone) {
-        path = `${path}&not[milestone]=${excludeMilestone}`;
-      }
-      if (excludeAuthor) {
-        path = `${path}&not[author_username]=${excludeAuthor}`;
-      }
-      if (excludeAssignee) {
-        path = `${path}&not[assignee_username]=${excludeAssignee}`;
-      }
-      if (excludeSearch) {
-        path = `${path}&not[search]=${excludeSearch}`;
-      }
-      if (excludeSearchIn) {
-        path = `${path}&not[in]=${excludeSearchIn}`;
-      }
-    }
-    if (orderBy) {
-      path = `${path}&order_by=${orderBy}`;
-    }
-    if (sort) {
-      path = `${path}&sort=${sort}`;
-    }
-    if (maxResults) {
-      path = `${path}&per_page=${parseInt(maxResults, 10)}`;
-    }
-    if (reportTypes) {
-      path = `${path}&report_type=${reportTypes}`;
-    }
-    if (severityLevels) {
-      path = `${path}&severity=${severityLevels}`;
-    }
-    if (confidenceLevels) {
-      path = `${path}&confidence=${confidenceLevels}`;
+      issueQueryParams = {
+        confidential: params.confidential,
+        'not[labels]': params.excludeLabels,
+        'not[milestone]': params.excludeMilestone,
+        'not[author_username]': params.excludeAuthor,
+        'not[assignee_username]': params.excludeAssignee,
+        'not[search]': params.excludeSearch,
+        'not[in]': params.excludeSearchIn,
+      };
     }
     if (pipelineId) {
       if (pipelineId === 'branch') {
-        pipelineId = await fetchLastPipelineForCurrentBranch(project);
+        const workspace = await getCurrentWorkspaceFolder();
+        if (workspace) {
+          pipelineId = await fetchLastPipelineForCurrentBranch(workspace);
+        }
       }
       path = `${path}&pipeline_id=${pipelineId}`;
     }
+    const queryParams: Record<string, QueryValue> = {
+      labels: params.labels,
+      milestone: params.milestone,
+      search: params.search,
+      created_before: params.createdBefore,
+      created_after: params.createdAfter,
+      updated_before: params.updatedBefore,
+      updated_after: params.updatedAfter,
+      order_by: params.orderBy,
+      sort: params.sort,
+      per_page: params.maxResults,
+      report_type: params.reportTypes,
+      severity: params.severityLevels,
+      confidence: params.confidenceLevels,
+      ...issueQueryParams,
+    };
+    const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
+    const urlQuery = usedQueryParamNames.reduce(
+      (acc, name) => `${acc}&${name}=${queryParams[name]}`,
+      '',
+    );
+    path = `${path}${urlQuery}`;
     const { response } = await fetch(path);
     issuable = response;
   }
   return issuable;
 }
 
-async function fetchLastJobsForCurrentBranch(pipeline, workspaceFolder) {
+export async function fetchLastJobsForCurrentBranch(
+  pipeline: GitLabPipeline,
+  workspaceFolder: string,
+) {
   const project = await fetchCurrentPipelineProject(workspaceFolder);
   if (project) {
     const { response } = await fetch(`/projects/${project.id}/pipelines/${pipeline.id}/jobs`);
-    let jobs = response;
+    let jobs: GitLabJob[] = response;
 
     // Gitlab return multiple jobs if you retry the pipeline we filter to keep only the last
     const alreadyProcessedJob = new Set();
@@ -425,11 +425,11 @@ async function fetchLastJobsForCurrentBranch(pipeline, workspaceFolder) {
   return null;
 }
 
-async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder) {
+export async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder: string) {
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
-  const path = `/projects/${project.id}/merge_requests?state=opened&source_branch=${branchName}`;
+  const path = `/projects/${project?.id}/merge_requests?state=opened&source_branch=${branchName}`;
   const { response } = await fetch(path);
   const mrs = response;
 
@@ -445,7 +445,7 @@ async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder) {
  *
  * @param {string} action create|retry|cancel
  */
-async function handlePipelineAction(action, workspaceFolder) {
+export async function handlePipelineAction(action: string, workspaceFolder: string) {
   const pipeline = await fetchLastPipelineForCurrentBranch(workspaceFolder);
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
 
@@ -469,7 +469,7 @@ async function handlePipelineAction(action, workspaceFolder) {
   }
 }
 
-async function fetchMRIssues(mrId, workspaceFolder) {
+export async function fetchMRIssues(mrId: number, workspaceFolder: string) {
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
   let issues = [];
 
@@ -487,7 +487,8 @@ async function fetchMRIssues(mrId, workspaceFolder) {
   return issues;
 }
 
-async function createSnippet(data) {
+// TODO specify the correct interface when we convert `create_snippet.js`
+export async function createSnippet(data: { id: string }) {
   let snippet;
   let path = '/snippets';
 
@@ -505,7 +506,7 @@ async function createSnippet(data) {
   return snippet;
 }
 
-async function validateCIConfig(content) {
+export async function validateCIConfig(content: string) {
   let validCIConfig = null;
 
   try {
@@ -518,8 +519,8 @@ async function validateCIConfig(content) {
   return validCIConfig;
 }
 
-async function fetchLabelEvents(issuable) {
-  let labelEvents = [];
+export async function fetchLabelEvents(issuable: GitLabIssuable) {
+  let labelEvents: { body: string }[] = [];
 
   try {
     const type = issuable.sha ? 'merge_requests' : 'issues';
@@ -539,15 +540,13 @@ async function fetchLabelEvents(issuable) {
   return labelEvents;
 }
 
-async function fetchDiscussions(issuable, page = 1) {
-  let discussions = [];
+export async function fetchDiscussions(issuable: GitLabIssuable, page = 1) {
+  let discussions: unknown[] = [];
 
   try {
     const type = issuable.sha ? 'merge_requests' : 'issues';
     const { response, headers } = await fetch(
       `/projects/${issuable.project_id}/${type}/${issuable.iid}/discussions?sort=asc&per_page=5&page=${page}`,
-      'GET',
-      null,
     );
     discussions = response;
     if (page === 1 && headers['x-next-page'] !== '') {
@@ -561,7 +560,6 @@ async function fetchDiscussions(issuable, page = 1) {
       results.forEach(result => {
         discussions = discussions.concat(result);
       });
-      delete discussions.headers;
     }
   } catch (e) {
     handleError(new UserFriendlyError('Failed to fetch discussions for this issuable.', e));
@@ -570,7 +568,7 @@ async function fetchDiscussions(issuable, page = 1) {
   return discussions;
 }
 
-async function renderMarkdown(markdown, workspaceFolder) {
+export async function renderMarkdown(markdown: string, workspaceFolder: string) {
   let rendered = { html: markdown };
   const version = await fetchVersion();
   if (!version) {
@@ -586,7 +584,8 @@ async function renderMarkdown(markdown, workspaceFolder) {
     const project = await fetchCurrentProject(workspaceFolder);
     const { response } = await fetch('/markdown', 'POST', {
       text: markdown,
-      project: project.path_with_namespace,
+      // eslint-disable-next-line camelcase
+      project: project?.path_with_namespace,
       gfm: 'true', // Needs to be a string for the API
     });
     rendered = response;
@@ -598,13 +597,17 @@ async function renderMarkdown(markdown, workspaceFolder) {
   return rendered.html;
 }
 
-async function saveNote({ issuable, note, noteType }) {
+export async function saveNote(params: {
+  issuable: GitLabIssuable;
+  note: string;
+  noteType: { path: string };
+}) {
   try {
-    const projectId = issuable.project_id;
-    const { iid } = issuable;
-    const { path } = noteType;
+    const projectId = params.issuable.project_id;
+    const { iid } = params.issuable;
+    const { path } = params.noteType;
     const { response } = await fetch(`/projects/${projectId}/${path}/${iid}/notes`, 'POST', {
-      body: note,
+      body: params.note,
     });
     return response;
   } catch (e) {
@@ -613,22 +616,3 @@ async function saveNote({ issuable, note, noteType }) {
 
   return { success: false };
 }
-
-exports.fetchCurrentUser = fetchCurrentUser;
-exports.fetchIssuables = fetchIssuables;
-exports.fetchOpenMergeRequestForCurrentBranch = fetchOpenMergeRequestForCurrentBranch;
-exports.fetchLastPipelineForCurrentBranch = fetchLastPipelineForCurrentBranch;
-exports.fetchLastJobsForCurrentBranch = fetchLastJobsForCurrentBranch;
-exports.fetchCurrentProject = fetchCurrentProject;
-exports.fetchCurrentProjectSwallowError = fetchCurrentProjectSwallowError;
-exports.fetchCurrentPipelineProject = fetchCurrentPipelineProject;
-exports.handlePipelineAction = handlePipelineAction;
-exports.fetchMRIssues = fetchMRIssues;
-exports.createSnippet = createSnippet;
-exports.validateCIConfig = validateCIConfig;
-exports.fetchVersion = fetchVersion;
-exports.fetchDiscussions = fetchDiscussions;
-exports.renderMarkdown = renderMarkdown;
-exports.saveNote = saveNote;
-exports.getAllGitlabProjects = getAllGitlabProjects;
-exports.fetchLabelEvents = fetchLabelEvents;
