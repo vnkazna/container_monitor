@@ -35,6 +35,14 @@ describe('git_remote_parser', () => {
       ['gitlab.com', 'fatihacet', 'gitlab-vscode-extension'],
     ],
     [
+      'git@gitlab.com:group/subgroup/gitlab-vscode-extension.git',
+      ['gitlab.com', 'group/subgroup', 'gitlab-vscode-extension'],
+    ],
+    [
+      'http://gitlab.com/group/subgroup/gitlab-vscode-extension.git',
+      ['gitlab.com', 'group/subgroup', 'gitlab-vscode-extension'],
+    ],
+    [
       'https://gitlab.com/fatihacet/gitlab-vscode-extension',
       ['gitlab.com', 'fatihacet', 'gitlab-vscode-extension'],
     ],
@@ -44,6 +52,11 @@ describe('git_remote_parser', () => {
     ],
     [
       'https://gitlab.company.com:8443/fatihacet/gitlab-vscode-extension.git',
+      ['gitlab.company.com:8443', 'fatihacet', 'gitlab-vscode-extension'],
+    ],
+    [
+      // trailing / can be present if user copied the repo URL from the browser navigation bar
+      'https://gitlab.company.com:8443/fatihacet/gitlab-vscode-extension/',
       ['gitlab.company.com:8443', 'fatihacet', 'gitlab-vscode-extension'],
     ],
   ])('should parse %s', (remote, parsed) => {
