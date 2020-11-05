@@ -27,7 +27,7 @@ export function parseGitRemote(instanceUrl: string, remote: string): GitRemote |
   }
 
   const pathRegExp = escapeForRegExp(getInstancePath(instanceUrl));
-  const match = pathname.match(`${pathRegExp}/:?(.+)/(.*?)(?:.git)?$`);
+  const match = pathname.match(`${pathRegExp}/:?(.+)/([^/]+?)(?:.git)?/?$`);
   if (!match) {
     return null;
   }
