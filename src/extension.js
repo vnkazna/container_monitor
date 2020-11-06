@@ -15,6 +15,8 @@ const CurrentBranchDataProvider = require('./data_providers/current_branch').Dat
 const { initializeLogging, handleError } = require('./log');
 const checkDeprecatedCertificateSettings = require('./check_deprecated_certificate_settings');
 const { GitContentProvider } = require('./review/file_diff_provider');
+const { ReviewCommentController } = require('./review/comment_provider');
+const { REVIEW_URI_SCHEME } = require('./constants');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -84,8 +86,14 @@ const activate = context => {
   tokenService.init(context);
   tokenServiceWrapper.init(context);
   checkDeprecatedCertificateSettings(context);
+  const commentController = vscode.comments.createCommentController('id', 'MR comment controller');
+  commentController.commentingRangeProvider = new ReviewCommentController();
   context.subscriptions.push(
-    vscode.workspace.registerTextDocumentContentProvider('gl-review', new GitContentProvider()),
+    vscode.workspace.registerTextDocumentContentProvider(
+      REVIEW_URI_SCHEME,
+      new GitContentProvider(),
+    ),
+    commentController.dispose,
   );
 };
 

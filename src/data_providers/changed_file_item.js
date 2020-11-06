@@ -1,6 +1,7 @@
 const { TreeItem, TreeItemCollapsibleState } = require('vscode');
 const vscode = require('vscode');
 const path = require('path');
+const { REVIEW_URI_SCHEME } = require('../constants');
 
 class ChangedFileItem extends TreeItem {
   constructor(fileDiff, mr, projectUri, headCommit, baseCommit) {
@@ -10,18 +11,24 @@ class ChangedFileItem extends TreeItem {
     this.projectUri = projectUri;
     this.fileDiff = fileDiff;
     const baseFileUri = vscode.Uri.parse(
-      `gl-review://authority/${
+      `${REVIEW_URI_SCHEME}://authority/${
         fileDiff.old_path
       }?commit=${baseCommit}&workspace=${encodeURIComponent(projectUri)}`,
     );
     const headFileUri = vscode.Uri.parse(
-      `gl-review://authority/${
+      `${REVIEW_URI_SCHEME}://authority/${
         fileDiff.new_path
       }?commit=${headCommit}&workspace=${encodeURIComponent(projectUri)}`,
     );
+    // const headFileUri = new vscode.Uri(
+    //   REVIEW_URI_SCHEME,
+    //   `authority`,
+    //   `/${fileDiff.new_path}`,
+    //   `commit=${headCommit}&workspace=${encodeURIComponent(projectUri)}`,
+    //   '',
+    // );
     this.command = {
       command: 'vscode.diff',
-      // arguments: [vscode.Uri.parse(`gl-review://${fileDiff.new_path}`)],
       arguments: [baseFileUri, headFileUri, path.basename(fileDiff.new_path)],
     };
   }
