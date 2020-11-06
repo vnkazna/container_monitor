@@ -1,7 +1,6 @@
 const { TreeItem, TreeItemCollapsibleState } = require('vscode');
-const vscode = require('vscode');
 const path = require('path');
-const { REVIEW_URI_SCHEME } = require('../constants');
+const { getReviewUri } = require('../utils/get_review_uri');
 
 class ChangedFileItem extends TreeItem {
   constructor(fileDiff, mr, projectUri, headCommit, baseCommit) {
@@ -10,16 +9,16 @@ class ChangedFileItem extends TreeItem {
     this.mr = mr;
     this.projectUri = projectUri;
     this.fileDiff = fileDiff;
-    const baseFileUri = vscode.Uri.parse(
-      `${REVIEW_URI_SCHEME}://authority/${
-        fileDiff.old_path
-      }?commit=${baseCommit}&workspace=${encodeURIComponent(projectUri)}`,
-    );
-    const headFileUri = vscode.Uri.parse(
-      `${REVIEW_URI_SCHEME}://authority/${
-        fileDiff.new_path
-      }?commit=${headCommit}&workspace=${encodeURIComponent(projectUri)}`,
-    );
+    const baseFileUri = getReviewUri({
+      path: fileDiff.old_path,
+      commit: baseCommit,
+      workspace: projectUri,
+    });
+    const headFileUri = getReviewUri({
+      path: fileDiff.new_path,
+      commit: headCommit,
+      workspace: projectUri,
+    });
     // const headFileUri = new vscode.Uri(
     //   REVIEW_URI_SCHEME,
     //   `authority`,

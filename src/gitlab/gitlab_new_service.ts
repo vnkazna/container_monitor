@@ -37,6 +37,44 @@ interface RestMR {
   project_id: number;
 }
 
+interface GraphQLMrProjectResult {
+  project?: {
+    mergeRequest: GraphQLMergeRequest;
+  };
+}
+
+interface GraphQLMergeRequest {
+  discussions: Node<GraphQlDiscussion>;
+}
+
+interface GraphQlDiscussion {
+  notes: Node<GraphQlNote>;
+}
+
+interface GraphQlNote {
+  body: string;
+  author: GraphQlAuthor;
+  position?: GraphQlPosition;
+}
+
+interface GraphQlAuthor {
+  name: string;
+  avatarUrl: string;
+}
+
+interface GraphQlPosition {
+  diffRefs: {
+    baseSha: string;
+    headSha: string;
+  };
+  filePath: string;
+  positionType: string;
+  newLine?: number;
+  oldLine?: number;
+  newPath?: string;
+  oldPath?: string;
+}
+
 const queryGetSnippets = gql`
   query GetSnippets($projectPath: ID!) {
     project(fullPath: $projectPath) {
@@ -50,6 +88,40 @@ const queryGetSnippets = gql`
             nodes {
               name
               path
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const getMrDiscussionsQuery = gql`
+  query GetDiscussions($projectPath: ID!, $iid: String!) {
+    project(fullPath: $projectPath) {
+      mergeRequest(iid: $iid) {
+        discussions {
+          nodes {
+            notes {
+              nodes {
+                body
+                author {
+                  name
+                  avatarUrl
+                }
+                position {
+                  diffRefs {
+                    baseSha
+                    headSha
+                  }
+                  filePath
+                  positionType
+                  newLine
+                  oldLine
+                  newPath
+                  oldPath
+                }
+              }
             }
           }
         }
@@ -115,7 +187,7 @@ export class GitLabNewService {
     return result.text();
   }
 
-  async getMrDiff(mr: RestMR, remote: GitRemote) {
+  async getMrDiff(mr: RestMR) {
     const versionsResult = await crossFetch(
       `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions`,
       this.fetchOptions,
@@ -127,5 +199,13 @@ export class GitLabNewService {
       this.fetchOptions,
     );
     return diffResult.json();
+  }
+
+  async getMrComments(projectPath: string, iid: string): Promise<GraphQlDiscussion[] | undefined> {
+    const result = await this.client.request<GraphQLMrProjectResult>(getMrDiscussionsQuery, {
+      projectPath,
+      iid,
+    });
+    return result.project?.mergeRequest.discussions.nodes;
   }
 }
