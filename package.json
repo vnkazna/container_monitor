@@ -38,6 +38,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "gl.startReview",
+        "title": "Start Review",
+        "enablement": "!commentIsEmpty"
+      },
+      {
         "command": "gl.setToken",
         "title": "GitLab: Set GitLab Personal Access Token"
       },
@@ -132,6 +137,12 @@
           "command": "gl.refreshSidebar",
           "when": "view =~ /(currentBranchInfo|issuesAndMrs)/",
           "group": "navigation"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "gl.startReview",
+          "group": "inline"
         }
       ]
     },

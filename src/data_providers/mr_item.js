@@ -20,7 +20,12 @@ class MrItem extends TreeItem {
       'id',
       'MR comment controller',
     );
+    commentController.options = {
+      placeHolder: 'this is a placeholder',
+      prompt: 'this is a prompt',
+    };
     commentController.commentingRangeProvider = new ReviewCommentController();
+
     const gitlabService = new GitLabNewService(instanceUrl);
     const diff = await gitlabService.getMrDiff(this.mr);
     const discussions = await gitlabService.getMrComments(
@@ -57,7 +62,12 @@ class MrItem extends TreeItem {
           };
         });
         commentController.createCommentThread(
-          getReviewUri({ path, commit, workspace: this.projectUri }),
+          getReviewUri({
+            path,
+            commit,
+            workspace: this.projectUri,
+            version: old ? 'base' : 'head',
+          }),
           new vscode.Range(vsPosition, vsPosition),
           comments,
         );

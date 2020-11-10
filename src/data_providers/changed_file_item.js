@@ -14,15 +14,17 @@ class ChangedFileItem extends TreeItem {
       path: fileDiff.old_path,
       commit: baseCommit,
       workspace: projectUri,
+      version: 'base',
     });
     const headFileUri = getReviewUri({
       path: fileDiff.new_path,
       commit: headCommit,
       workspace: projectUri,
+      version: 'head',
     });
     this.command = {
       command: 'vscode.diff',
-      arguments: [baseFileUri, headFileUri, path.basename(fileDiff.new_path)],
+      arguments: [baseFileUri, headFileUri, `${path.basename(fileDiff.new_path)} (MR)`],
     };
   }
 }

@@ -12,7 +12,7 @@ const ciConfigValidator = require('./ci_config_validator');
 const webviewController = require('./webview_controller');
 const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
-const { initializeLogging, handleError } = require('./log');
+const { initializeLogging, handleError, log } = require('./log');
 const checkDeprecatedCertificateSettings = require('./check_deprecated_certificate_settings');
 const { GitContentProvider } = require('./review/file_diff_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
@@ -67,6 +67,7 @@ const registerCommands = (context, outputChannel) => {
     'gl.refreshSidebar': sidebar.refresh,
     'gl.showRichContent': webviewController.create,
     'gl.showOutput': () => outputChannel.show(),
+    'gl.startReview': arg => log(arg),
   };
 
   Object.keys(commands).forEach(cmd => {

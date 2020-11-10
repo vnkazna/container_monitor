@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as path from 'path';
 import { GitExtension } from '../api/git.d';
+import { parseUriQuery } from '../utils/parse_uri_query';
 
 export class GitContentProvider implements vscode.TextDocumentContentProvider {
   private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
@@ -22,14 +23,7 @@ export class GitContentProvider implements vscode.TextDocumentContentProvider {
     const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
     assert(gitExtension);
     const git = gitExtension.getAPI(1);
-    const parseQuery = (query: string): Record<string, string | undefined> => {
-      const parts = query.split('&');
-      return parts.reduce((acc, part) => {
-        const keyVal = part.split('=');
-        return { ...acc, [keyVal[0]]: keyVal[1] };
-      }, {});
-    };
-    const query = parseQuery(uri.query);
+    const query = parseUriQuery(uri.query);
     const { workspace } = query;
     assert(workspace);
     const repository = git.getRepository(vscode.Uri.parse(workspace));
