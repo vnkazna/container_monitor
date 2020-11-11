@@ -16,6 +16,7 @@ const { initializeLogging, handleError, log } = require('./log');
 const checkDeprecatedCertificateSettings = require('./check_deprecated_certificate_settings');
 const { GitContentProvider } = require('./review/file_diff_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
+const { createComment } = require('./review/create_comment_command');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -67,7 +68,7 @@ const registerCommands = (context, outputChannel) => {
     'gl.refreshSidebar': sidebar.refresh,
     'gl.showRichContent': webviewController.create,
     'gl.showOutput': () => outputChannel.show(),
-    'gl.startReview': arg => log(arg),
+    'gl.startReview': createComment,
   };
 
   Object.keys(commands).forEach(cmd => {
