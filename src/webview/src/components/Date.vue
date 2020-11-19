@@ -1,8 +1,7 @@
 <script>
-
 const moment = require('moment-timezone');
-moment.tz.setDefault(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
+moment.tz.setDefault(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
 export default {
   props: {
@@ -20,10 +19,9 @@ export default {
     },
   },
 };
-
 </script>
 <template>
-  <span v-tooltip="{ content: formatedDate, placement: 'top'}">
+  <span v-tooltip="{ content: formatedDate, placement: 'top' }">
     {{ dateAgo }}
   </span>
 </template>
@@ -49,7 +47,7 @@ export default {
     z-index: 1;
   }
 
-  &[x-placement^="top"] {
+  &[x-placement^='top'] {
     margin-bottom: 5px;
 
     .tooltip-arrow {
@@ -64,7 +62,7 @@ export default {
     }
   }
 
-  &[x-placement^="bottom"] {
+  &[x-placement^='bottom'] {
     margin-top: 5px;
 
     .tooltip-arrow {
@@ -79,7 +77,7 @@ export default {
     }
   }
 
-  &[x-placement^="right"] {
+  &[x-placement^='right'] {
     margin-left: 5px;
 
     .tooltip-arrow {
@@ -94,7 +92,7 @@ export default {
     }
   }
 
-  &[x-placement^="left"] {
+  &[x-placement^='left'] {
     margin-right: 5px;
 
     .tooltip-arrow {
@@ -112,13 +110,13 @@ export default {
   &[aria-hidden='true'] {
     visibility: hidden;
     opacity: 0;
-    transition: opacity .15s, visibility .15s;
+    transition: opacity 0.15s, visibility 0.15s;
   }
 
   &[aria-hidden='false'] {
     visibility: visible;
     opacity: 1;
-    transition: opacity .15s;
+    transition: opacity 0.15s;
   }
 }
 </style>

@@ -48,26 +48,13 @@ export default {
 </script>
 
 <template>
-  <div
-    :class="{ collapsed: !isRepliesVisible }"
-    class="discussion"
-  >
+  <div :class="{ collapsed: !isRepliesVisible }" class="discussion">
     <note :noteable="initialDiscussion" />
-    <div
-      v-if="hasReplies"
-      @click="toggleReplies"
-      class="toggle-widget"
-    >
-      <span
-        class="chevron"
-        v-html="toggleRepliesIcon"></span> {{ toggleRepliesText }}
+    <div v-if="hasReplies" @click="toggleReplies" class="toggle-widget">
+      <span class="chevron" v-html="toggleRepliesIcon" /> {{ toggleRepliesText }}
     </div>
     <template v-if="isRepliesVisible">
-      <note
-        v-for="note in replies"
-        :key="note.id"
-        :noteable="note"
-      />
+      <note v-for="note in replies" :key="note.id" :noteable="note" />
     </template>
   </div>
 </template>

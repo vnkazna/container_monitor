@@ -1,37 +1,27 @@
 {
-  "extends": ["airbnb-base", "prettier" ],
-  "plugins": ["import", "prettier"],
+  "extends": ["airbnb-base", "prettier"],
+  "plugins": ["import"],
   "env": {
     "mocha": true,
     "jest": true
   },
-  "ignorePatterns": [
-    "node_modules/",
-    "src/webview/node_modules/",
-    "src/webview/dist/",
-    ".vscode-test/",
-    "out"
-  ],
+  "ignorePatterns": ["node_modules/", "src/webview/", "out"],
   "rules": {
     "no-console": "off",
     "no-return-await": "off",
     "import/no-unresolved": [
       2,
       {
-        "ignore": ["vscode", "vue", "v-tooltip"]
+        "ignore": ["vscode"]
       }
-    ],
-    "prettier/prettier": ["error"]
+    ]
   },
   "reportUnusedDisableDirectives": true,
   "overrides": [
     {
       "files": ["**/*.ts"],
       "parser": "@typescript-eslint/parser",
-      "extends": [
-        "plugin:@typescript-eslint/recommended",
-        "prettier/@typescript-eslint"
-      ],
+      "extends": ["plugin:@typescript-eslint/recommended", "prettier/@typescript-eslint"],
       "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
@@ -45,7 +35,10 @@
           }
         ],
         "import/prefer-default-export": "off",
-        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.ts", "test/**/*"]}]
+        "import/no-extraneous-dependencies": [
+          "error",
+          { "devDependencies": ["**/*.test.ts", "test/**/*"] }
+        ]
       },
       "settings": {
         "import/resolver": {
@@ -54,10 +47,7 @@
           }
         }
       },
-      "plugins": [
-        "@typescript-eslint",
-        "prettier"
-      ]
+      "plugins": ["@typescript-eslint"]
     }
   ]
 }

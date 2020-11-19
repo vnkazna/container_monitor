@@ -26,7 +26,7 @@ export default {
     window.addEventListener('message', event => {
       if (event.data.type === 'markdownRendered') {
         const { ref, object, markdown } = event.data;
-        if (object == 'note' && ref == this.note.id) {
+        if (object === 'note' && ref === this.note.id) {
           this.note.markdownRenderedOnServer = true;
           this.note.body = markdown;
         }
@@ -38,7 +38,7 @@ export default {
 
 <template>
   <div class="note-body">
-    <div class="body" v-html="renderedNoteBody"></div>
+    <div class="body" v-html="renderedNoteBody" />
   </div>
 </template>
 

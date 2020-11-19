@@ -21,7 +21,9 @@ export default {
   },
   methods: {
     getNoteType() {
-      return this.issuable.sha ? { type: 'merge_request', path: 'merge_requests' } : { type: 'issue', path: 'issues' };
+      return this.issuable.sha
+        ? { type: 'merge_request', path: 'merge_requests' }
+        : { type: 'issue', path: 'issues' };
     },
     addComment() {
       const { issuable, note, command } = this;
@@ -50,7 +52,7 @@ export default {
 
 <template>
   <div class="main-comment-form">
-    <textarea v-model="note" placeholder="Write a comment..."></textarea>
+    <textarea v-model="note" placeholder="Write a comment..." />
     <button @click="addComment" :disabled="isSaving || !note.length">
       {{ buttonTitle }}
     </button>
@@ -92,7 +94,7 @@ export default {
     cursor: pointer;
 
     &:disabled {
-      opacity: .9;
+      opacity: 0.9;
       cursor: default;
     }
 
