@@ -26,7 +26,8 @@ lint:
   stage: test
   script:
     - npm ci
-    - npm run eslint
+    - cd src/webview && npm ci && cd ../.. # webview dependencies
+    - npm run lint
 
 lint_commit:
   stage: test

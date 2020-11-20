@@ -21,12 +21,14 @@ export default {
       return this.noteable.user;
     },
     note() {
-      if(this.noteable.body === '') {
-        const action = this.noteable.action == 'add' ? 'added': 'removed';
-        this.noteable.body = action + ' ~' + this.noteable.label.name + ' label';
+      if (this.noteable.body === '') {
+        const action = this.noteable.action === 'add' ? 'added' : 'removed';
+        // FIXME: disabling rule to limit changes to production code when introducing eslint
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.noteable.body = `${action} ~${this.noteable.label.name} label`;
       }
       return this.noteable;
-    }
+    },
   },
   created() {
     this.icon = icons.label;
@@ -38,11 +40,13 @@ export default {
   <li class="note label-note">
     <div class="timeline-entry-inner">
       <div class="timelineIcon">
-        <span class="avatar" v-html="icon"></span>
+        <span class="avatar" v-html="icon" />
       </div>
       <div class="timelineContent">
         <div class="note-header">
-          <user-avatar :user="author" :show-avatar="false" style="margin-right: 2px;" /> <note-body :note="note" style="margin-right: 2px;" /> · <date :date="noteable.created_at"  style="margin-left: 2px;" />
+          <user-avatar :user="author" :show-avatar="false" style="margin-right: 2px;" />
+          <note-body :note="note" style="margin-right: 2px;" /> ·
+          <date :date="noteable.created_at" style="margin-left: 2px;" />
         </div>
       </div>
     </div>
@@ -52,10 +56,10 @@ export default {
 <style lang="scss">
 .label-note {
   border: none;
-  padding-bottom:4px;
-  padding-left:20px;
-  padding-right:20px;
-  padding-top:4px;
+  padding-bottom: 4px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 4px;
   position: static;
 
   &:last-child {

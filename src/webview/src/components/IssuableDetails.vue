@@ -49,7 +49,7 @@ export default {
     window.addEventListener('message', event => {
       if (event.data.type === 'markdownRendered') {
         const { ref, object, markdown } = event.data;
-        if (object == 'issuable' && ref == this.issuable.id) {
+        if (object === 'issuable' && ref === this.issuable.id) {
           this.issuable.markdownRenderedOnServer = true;
           this.issuable.description = markdown;
         }
@@ -62,17 +62,11 @@ export default {
 <template>
   <div class="issuable-details">
     <div class="header">
-      <span
-        :class="{ [issuable.state]: true }"
-        class="state"
-      >{{ stateText }}</span>
+      <span :class="{ [issuable.state]: true }" class="state">{{ stateText }}</span>
       <span class="capitalize"> opened</span>
-      <date :date='issuable.created_at' />
+      <date :date="issuable.created_at" />
       by
-      <user-avatar
-        :user="issuable.author"
-        :show-handle="false"
-      />
+      <user-avatar :user="issuable.author" :show-handle="false" />
       <a :href="issuable.web_url" class="view-link">
         Open in GitLab
       </a>
@@ -80,10 +74,7 @@ export default {
     <div class="title">
       <h2>{{ issuable.title }}</h2>
     </div>
-    <div
-      class="description"
-      v-html="description"
-    ></div>
+    <div class="description" v-html="description" />
   </div>
 </template>
 
@@ -121,11 +112,11 @@ export default {
       font-size: 12px;
 
       &.opened {
-        background-color: #2A9D3F;
+        background-color: #2a9d3f;
       }
 
       &.closed {
-        background-color: #1D64C9;
+        background-color: #1d64c9;
       }
     }
   }

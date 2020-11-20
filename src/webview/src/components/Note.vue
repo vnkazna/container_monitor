@@ -1,6 +1,6 @@
 <script>
 import UserAvatar from './UserAvatar';
-import NoteBody from './NoteBody'
+import NoteBody from './NoteBody';
 import Date from './Date';
 
 export default {
@@ -9,7 +9,7 @@ export default {
     noteable: {
       type: Object,
       required: true,
-    }
+    },
   },
   components: {
     UserAvatar,
@@ -28,11 +28,13 @@ export default {
   <li class="note">
     <div class="timeline-entry-inner">
       <div class="timelineIcon">
-        <user-avatar :user="author" :size="40" :showUsername="false" />
+        <user-avatar :user="author" :size="40" :show-username="false" />
       </div>
       <div class="timelineContent">
         <div class="note-header">
-          <user-avatar :user="author" :size="40" :showAvatar="false" style="margin-right: 2px;" /> · <date :date='noteable.created_at' style="margin-left: 2px;" />
+          <user-avatar :user="author" :size="40" :show-avatar="false" style="margin-right: 2px;" />
+          ·
+          <date :date="noteable.created_at" style="margin-left: 2px;" />
         </div>
         <note-body :note="noteable" />
       </div>

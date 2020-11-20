@@ -25,8 +25,9 @@ export default {
         }
 
         return Note;
-      } else if (discussion.label) {
-          return LabelNote;
+      }
+      if (discussion.label) {
+        return LabelNote;
       }
 
       return Discussion;

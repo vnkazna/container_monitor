@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "node_modules/.bin/vue-cli-service serve",
-    "build": "node_modules/.bin/vue-cli-service build",
-    "watch": "node_modules/.bin/vue-cli-service build --watch",
-    "test:unit": "node_modules/.bin/vue-cli-service test:unit"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "watch": "vue-cli-service build --watch",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "eslint --ext .js --ext .vue .",
+    "autofix": "eslint --ext .js --ext .vue --fix ."
   },
   "dependencies": {
     "markdown-it": "^10.0.0",
@@ -21,6 +23,11 @@
     "@vue/cli-service": "^4.4.6",
     "@vue/test-utils": "^1.1.0",
     "chai": "^4.2.0",
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-vue": "^6.2.2",
     "node-sass": "^4.14.1",
     "sass-loader": "^8.0.2",
     "vue-template-compiler": "^2.6.11"
