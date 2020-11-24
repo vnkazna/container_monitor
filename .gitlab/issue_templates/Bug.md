@@ -37,4 +37,4 @@ https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues?scope=all&utf8=%E2%
 
 <!-- If you can, link to the line of code that might be responsible for the problem -->
 
-/label ~bug ~"devops::create"  ~"group::editor" ~"Category:Editor Extension" ~"VS Code"
+/label ~bug ~"devops::create"  ~"group::code review"  ~"Category:Editor Extension" ~"VS Code"
