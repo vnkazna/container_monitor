@@ -9,7 +9,10 @@
       "runtimeExecutable": "${execPath}",
       "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceRoot}"],
       "stopOnEntry": false,
-      "preLaunchTask": "${defaultBuildTask}"
+      "preLaunchTask": "${defaultBuildTask}",
+      "env": {
+        "NODE_ENV": "development"
+      }
     },
 
     {

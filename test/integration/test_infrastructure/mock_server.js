@@ -24,6 +24,11 @@ const createTextEndpoint = (path, response) =>
     return res(ctx.status(200), ctx.text(response));
   });
 
+const createPostEndpoint = (path, response) =>
+  rest.post(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
+    return res(ctx.status(201), ctx.json(response));
+  });
+
 const notFoundByDefault = rest.get(/.*/, (req, res, ctx) => res(ctx.status(404)));
 
 const getServer = (handlers = []) => {
@@ -37,4 +42,10 @@ const getServer = (handlers = []) => {
   return server;
 };
 
-module.exports = { getServer, createJsonEndpoint, createQueryJsonEndpoint, createTextEndpoint };
+module.exports = {
+  getServer,
+  createJsonEndpoint,
+  createQueryJsonEndpoint,
+  createTextEndpoint,
+  createPostEndpoint,
+};
