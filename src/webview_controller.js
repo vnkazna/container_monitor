@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 
@@ -7,19 +8,6 @@ let context = null;
 
 const addDeps = ctx => {
   context = ctx;
-};
-
-const getNonce = () => {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  // Temporarily disable eslint to be able to start enforcing stricter rules
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-
-  return text;
 };
 
 const getResources = panel => {
@@ -40,17 +28,18 @@ const getResources = panel => {
 };
 
 const getIndexPath = () => {
-  const isDev = !fs.existsSync(path.join(context.extensionPath, 'src/webview/dist/js/app.js'));
+  const isDev = process.env.NODE_ENV === 'development';
 
   return isDev ? 'src/webview/public/dev.html' : 'src/webview/public/index.html';
 };
 
 const replaceResources = panel => {
   const { appScriptUri, vendorUri, styleUri, devScriptUri } = getResources(panel);
+  const nonce = crypto.randomBytes(20).toString('hex');
 
   return fs
     .readFileSync(path.join(context.extensionPath, getIndexPath()), 'UTF-8')
-    .replace(/{{nonce}}/gm, getNonce())
+    .replace(/{{nonce}}/gm, nonce)
     .replace('{{styleUri}}', styleUri)
     .replace('{{vendorUri}}', vendorUri)
     .replace('{{appScriptUri}}', appScriptUri)
@@ -66,101 +55,96 @@ const createPanel = issuable => {
   });
 };
 
-function sendIssuableAndDiscussions(panel, issuable, discussions, appIsReady) {
-  if (!discussions || !appIsReady) return;
-  panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions });
-}
+const createMessageHandler = (panel, issuable, workspaceFolder) => async message => {
+  if (message.command === 'renderMarkdown') {
+    const alteredMarkdown = message.markdown.replace(
+      /\(\/.*(\/-)?\/merge_requests\//,
+      '(/-/merge_requests/',
+    );
+    let rendered = await gitLabService.renderMarkdown(alteredMarkdown, workspaceFolder);
+    rendered = (rendered || '')
+      .replace(/ src=".*" alt/gim, ' alt')
+      .replace(/" data-src/gim, '" src')
+      .replace(/ href="\//gim, ` href="${vscode.workspace.getConfiguration('gitlab').instanceUrl}/`)
+      .replace(/\/master\/-\/merge_requests\//gim, '/-/merge_requests/');
 
-async function handleCreate(panel, issuable, workspaceFolder) {
-  let discussions = false;
-  let labelEvents = false;
-  let appIsReady = false;
-  panel.webview.onDidReceiveMessage(async message => {
-    if (message.command === 'appReady') {
-      appIsReady = true;
-      sendIssuableAndDiscussions(panel, issuable, discussions, appIsReady);
+    panel.webview.postMessage({
+      type: 'markdownRendered',
+      ref: message.ref,
+      object: message.object,
+      markdown: rendered,
+    });
+  }
+
+  if (message.command === 'saveNote') {
+    const response = await gitLabService.saveNote({
+      issuable: message.issuable,
+      note: message.note,
+      noteType: message.noteType,
+    });
+
+    if (response.success !== false) {
+      const newDiscussions = await gitLabService.fetchDiscussions(issuable);
+      panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: newDiscussions });
+      panel.webview.postMessage({ type: 'noteSaved' });
+    } else {
+      panel.webview.postMessage({ type: 'noteSaved', status: false });
     }
+  }
+};
 
-    if (message.command === 'renderMarkdown') {
-      // Temporarily disable eslint to be able to start enforcing stricter rules
-      // eslint-disable-next-line no-param-reassign
-      message.markdown = message.markdown.replace(
-        /\(\/.*(\/-)?\/merge_requests\//,
-        '(/-/merge_requests/',
-      );
-      let rendered = await gitLabService.renderMarkdown(message.markdown, workspaceFolder);
-      rendered = (rendered || '')
-        .replace(/ src=".*" alt/gim, ' alt')
-        .replace(/" data-src/gim, '" src')
-        .replace(
-          / href="\//gim,
-          ` href="${vscode.workspace.getConfiguration('gitlab').instanceUrl}/`,
-        )
-        .replace(/\/master\/-\/merge_requests\//gim, '/-/merge_requests/');
+async function handleChangeViewState(panel, issuable) {
+  if (!panel.active) return;
 
-      panel.webview.postMessage({
-        type: 'markdownRendered',
-        ref: message.ref,
-        object: message.object,
-        markdown: rendered,
-      });
-    }
-
-    if (message.command === 'saveNote') {
-      const response = await gitLabService.saveNote({
-        issuable: message.issuable,
-        note: message.note,
-        noteType: message.noteType,
-      });
-
-      if (response.status !== false) {
-        const newDiscussions = await gitLabService.fetchDiscussions(issuable);
-        panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: newDiscussions });
-        panel.webview.postMessage({ type: 'noteSaved' });
-      } else {
-        panel.webview.postMessage({ type: 'noteSaved', status: false });
+  const appReadyPromise = new Promise(resolve => {
+    const sub = panel.webview.onDidReceiveMessage(async message => {
+      if (message.command === 'appReady') {
+        sub.dispose();
+        resolve();
       }
-    }
+    });
   });
 
-  // TODO: Call APIs in parallel
-  discussions = await gitLabService.fetchDiscussions(issuable);
-  labelEvents = await gitLabService.fetchLabelEvents(issuable);
-  discussions = discussions.concat(labelEvents);
-  discussions.sort((a, b) => {
+  const [discussions, labelEvents] = await Promise.all([
+    gitLabService.fetchDiscussions(issuable),
+    gitLabService.fetchLabelEvents(issuable),
+  ]);
+
+  const combinedEvents = discussions.concat(labelEvents);
+  combinedEvents.sort((a, b) => {
     const aCreatedAt = a.label ? a.created_at : a.notes[0].created_at;
     const bCreatedAt = b.label ? b.created_at : b.notes[0].created_at;
     return aCreatedAt < bCreatedAt ? -1 : 1;
   });
-  sendIssuableAndDiscussions(panel, issuable, discussions, appIsReady);
+  await appReadyPromise;
+  panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: combinedEvents });
 }
+
+const getIconPathForIssuable = issuable => {
+  const getIconUri = (shade, file) =>
+    vscode.Uri.file(path.join(context.extensionPath, 'src', 'assets', 'images', shade, file));
+  const lightIssueIcon = getIconUri('light', 'issues.svg');
+  const lightMrIcon = getIconUri('light', 'merge_requests.svg');
+  const darkIssueIcon = getIconUri('dark', 'issues.svg');
+  const darkMrIcon = getIconUri('dark', 'merge_requests.svg');
+  const isMr = issuable.squash_commit_sha !== undefined;
+  return isMr
+    ? { light: lightMrIcon, dark: darkMrIcon }
+    : { light: lightIssueIcon, dark: darkIssueIcon };
+};
 
 async function create(issuable, workspaceFolder) {
   const panel = createPanel(issuable);
   const html = replaceResources(panel);
   panel.webview.html = html;
-
-  let lightIconUri = vscode.Uri.file(
-    path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'issues.svg'),
-  );
-  let darkIconUri = vscode.Uri.file(
-    path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'issues.svg'),
-  );
-  if (issuable.squash_commit_sha !== undefined) {
-    lightIconUri = vscode.Uri.file(
-      path.join(context.extensionPath, 'src', 'assets', 'images', 'light', 'merge_requests.svg'),
-    );
-    darkIconUri = vscode.Uri.file(
-      path.join(context.extensionPath, 'src', 'assets', 'images', 'dark', 'merge_requests.svg'),
-    );
-  }
-  panel.iconPath = { light: lightIconUri, dark: darkIconUri };
+  panel.iconPath = getIconPathForIssuable(issuable);
 
   panel.onDidChangeViewState(() => {
-    handleCreate(panel, issuable, workspaceFolder);
+    handleChangeViewState(panel, issuable);
   });
 
-  handleCreate(panel, issuable, workspaceFolder);
+  panel.webview.onDidReceiveMessage(createMessageHandler(panel, issuable, workspaceFolder));
+  return panel;
 }
 
 exports.addDeps = addDeps;
