@@ -15,7 +15,7 @@ class SidebarTreeItem extends vscode.TreeItem {
       iconPathLight = `/assets/images/light/${type}.svg`;
       iconPathDark = `/assets/images/dark/${type}.svg`;
 
-      if (type === 'custom_query' || data == null) {
+      if (data == null) {
         command = '';
         arg = null;
       } else if (type === 'pipelines') {
@@ -30,24 +30,10 @@ class SidebarTreeItem extends vscode.TreeItem {
         arg = [vscode.Uri.parse(data.web_url)];
       }
 
-      if (type === 'custom_query' || type === 'project') {
-        this.contextValue = 'custom-query-';
-        Object.entries(data).forEach(entry => {
-          if (Array.isArray(entry[1])) {
-            this.contextValue += `${entry[0]}:${entry[1].join(',')};`;
-          } else {
-            this.contextValue += `${entry[0]}:${entry[1]};`;
-          }
-        });
-        if (type === 'project') {
-          this.contextValue += `project_uri:${uri};`;
-        }
-      } else {
-        this.command = {
-          command,
-          arguments: arg,
-        };
-      }
+      this.command = {
+        command,
+        arguments: arg,
+      };
     }
     this.iconPath = {
       light: path.join(__dirname, iconPathLight),
