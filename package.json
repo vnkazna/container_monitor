@@ -156,6 +156,18 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "issuesAndMrs",
+        "contents": "Hey. Welcome to the GitLab Workflow extension. It seems that you have not yet set up your access token.\nIf you use GitLab.com, click [here](https://gitlab.com/profile/personal_access_tokens). If you have a self-managed GitLab, then: \n1. Go to 'Settings'\n2. Click 'Access Tokens' on the left navigation menu\n3. Click on 'Add a personal access token'\nNow you can set your token by clicking on the following button\n[Set Personal Access Token](command:gl.setToken)\nTo learn more, please [read our docs](https://gitlab.com/gitlab-org/gitlab-vscode-extension#setup).",
+      "when": "gitlab:noToken"
+     },
+     {
+      "view": "issuesAndMrs",
+      "contents": "It seems like your current workspace doesn't contain a GitLab project (or the project has been moved).",
+    "when": "gitlab:noProject"
+   }
+    ],
     "configuration": {
       "title": "GitLab Workflow (GitLab VSCode Extension)",
       "properties": {

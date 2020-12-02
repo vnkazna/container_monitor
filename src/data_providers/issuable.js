@@ -6,6 +6,7 @@ const gitLabService = require('../gitlab_service');
 
 class DataProvider {
   constructor() {
+    this.noToken = false;
     // Temporarily disable eslint to be able to start enforcing stricter rules
     // eslint-disable-next-line no-underscore-dangle
     this._onDidChangeTreeData = new vscode.EventEmitter();
@@ -18,11 +19,16 @@ class DataProvider {
   async getChildren(el) {
     if (el) return el.getChildren(el);
     const projects = await gitLabService.getAllGitlabProjects();
-    const { customQueries } = vscode.workspace.getConfiguration('gitlab');
+    // const { customQueries } = vscode.workspace.getConfiguration('gitlab');
     if (projects.length === 0) return new SidebarTreeItem('No projects found');
-    if (projects.length === 1)
-      return customQueries.map(customQuery => new CustomQueryItem(customQuery, projects[0]));
-    return customQueries.map(customQuery => new MultirootCustomQueryItem(customQuery, projects));
+    // if (projects.length === 1)
+    //   return customQueries.map(customQuery => new CustomQueryItem(customQuery, projects[0]));
+    // return customQueries.map(customQuery => new MultirootCustomQueryItem(customQuery, projects));
+    // await this.extensionContext.workspaceState.update('gitlab:noToken', true);
+    this.noToken = !this.noToken;
+    await vscode.commands.executeCommand('setContext', 'gitlab:noToken', this.noToken);
+    await vscode.commands.executeCommand('setContext', 'gitlab:noProject', !this.noToken);
+    return [];
   }
 
   // eslint-disable-next-line class-methods-use-this
