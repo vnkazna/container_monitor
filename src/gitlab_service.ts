@@ -9,6 +9,8 @@ import { createGitService } from './git_service_factory';
 import { GitRemote } from './git/git_remote_parser';
 import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
+import { CustomQueryType } from './gitlab/custom_query_type';
+import { CustomQuery } from './gitlab/custom_query';
 
 interface GitLabProject {
   id: number;
@@ -19,13 +21,6 @@ interface GitLabProject {
   };
   // eslint-disable-next-line camelcase
   path_with_namespace: string;
-}
-
-interface GitLabIssuable {
-  sha: string;
-  // eslint-disable-next-line camelcase
-  project_id: number;
-  iid: number;
 }
 
 interface GitLabPipeline {
@@ -237,40 +232,9 @@ export async function fetchLastPipelineForCurrentBranch(workspaceFolder: string)
   return pipeline;
 }
 
-interface IssuableSearchParams {
-  type: string;
-  maxResults: number;
-  scope: string;
-  state: string;
-  labels?: string[];
-  milestone?: string;
-  author?: string;
-  assignee?: string;
-  search?: string;
-  createdBefore?: string;
-  createdAfter?: string;
-  updatedBefore?: string;
-  updatedAfter?: string;
-  wip: string;
-  confidential: boolean;
-  excludeLabels?: string[];
-  excludeMilestone?: string;
-  excludeAuthor?: string;
-  excludeAssignee?: string;
-  excludeSearch?: string;
-  excludeSearchIn: string;
-  orderBy: string;
-  sort: string;
-  reportTypes?: string[];
-  severityLevels?: string[];
-  confidenceLevels?: string[];
-  searchIn: string;
-  pipelineId?: string;
-}
-
 type QueryValue = string | boolean | string[] | number | undefined;
 
-export async function fetchIssuables(params: IssuableSearchParams, workspaceFolder: string) {
+export async function fetchIssuables(params: CustomQuery, workspaceFolder: string) {
   const { type, scope, state, author, assignee, wip } = params;
   let { searchIn, pipelineId } = params;
   const config = {
@@ -296,9 +260,6 @@ export async function fetchIssuables(params: IssuableSearchParams, workspaceFold
     ) {
       config.scope = 'all';
     }
-    if (config.type === 'vulnerabilities') {
-      config.type = 'vulnerability_findings';
-    }
 
     // Normalize scope parameter for version < 11 instances.
     const [major] = version.split('.');
@@ -315,7 +276,9 @@ export async function fetchIssuables(params: IssuableSearchParams, workspaceFold
         return [];
       }
     } else {
-      path = `/projects/${project.id}/${config.type}?scope=${config.scope}&state=${config.state}`;
+      const searchKind =
+        config.type === CustomQueryType.VULNERABILITY ? 'vulnerability_findings' : config.type;
+      path = `/projects/${project.id}/${searchKind}?scope=${config.scope}&state=${config.state}`;
     }
     if (config.type === 'issues') {
       if (author) {
@@ -519,7 +482,7 @@ export async function validateCIConfig(content: string) {
   return validCIConfig;
 }
 
-export async function fetchLabelEvents(issuable: GitLabIssuable) {
+export async function fetchLabelEvents(issuable: RestIssuable) {
   let labelEvents: { body: string }[] = [];
 
   try {
@@ -540,7 +503,7 @@ export async function fetchLabelEvents(issuable: GitLabIssuable) {
   return labelEvents;
 }
 
-export async function fetchDiscussions(issuable: GitLabIssuable, page = 1) {
+export async function fetchDiscussions(issuable: RestIssuable, page = 1) {
   let discussions: unknown[] = [];
 
   try {
@@ -598,7 +561,7 @@ export async function renderMarkdown(markdown: string, workspaceFolder: string) 
 }
 
 export async function saveNote(params: {
-  issuable: GitLabIssuable;
+  issuable: RestIssuable;
   note: string;
   noteType: { path: string };
 }) {

@@ -1,10 +1,12 @@
 const vscode = require('vscode');
 const moment = require('moment');
 const gitLabService = require('../gitlab_service');
-const { SidebarTreeItem } = require('./sidebar_tree_item');
-const ErrorItem = require('./error_item');
+const { ErrorItem } = require('./items/error_item');
 const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
 const { handleError } = require('../log');
+const { MrItem } = require('./items/mr_item');
+const { IssueItem } = require('./items/issue_item');
+const { ExternalUrlItem } = require('./items/external_url_item');
 
 class DataProvider {
   constructor() {
@@ -15,98 +17,68 @@ class DataProvider {
     // eslint-disable-next-line no-underscore-dangle
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-    this.children = [];
     this.project = null;
     this.mr = null;
   }
 
   async fetchPipeline(workspaceFolder) {
-    let message = 'No pipeline found.';
-    let url = null;
-    // TODO project is always present (we throw if we fail to fetch it)
-    if (this.project) {
-      const pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
+    const pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
 
-      if (pipeline) {
-        const statusText = pipeline.status === 'success' ? 'passed' : pipeline.status;
-        const actions = {
-          running: 'Started',
-          pending: 'Created',
-          success: 'Finished',
-          failed: 'Failed',
-          canceled: 'Canceled',
-          skipped: 'Skipped',
-        };
-        const timeAgo = moment(pipeline.updated_at).fromNow();
-        const actionText = actions[pipeline.status] || '';
-
-        message = `Pipeline #${pipeline.id} ${statusText} · ${actionText} ${timeAgo}`;
-        url = `${this.project.web_url}/pipelines/${pipeline.id}`;
-      }
+    if (!pipeline) {
+      return new vscode.TreeItem('No pipeline found.');
     }
-    this.children.push(new SidebarTreeItem(message, url, 'pipelines', null, workspaceFolder));
+    const statusText = pipeline.status === 'success' ? 'passed' : pipeline.status;
+    const actions = {
+      running: 'Started',
+      pending: 'Created',
+      success: 'Finished',
+      failed: 'Failed',
+      canceled: 'Canceled',
+      skipped: 'Skipped',
+    };
+    const timeAgo = moment(pipeline.updated_at).fromNow();
+    const actionText = actions[pipeline.status] || '';
+
+    const message = `Pipeline #${pipeline.id} ${statusText} · ${actionText} ${timeAgo}`;
+    const url = `${this.project.web_url}/pipelines/${pipeline.id}`;
+
+    return new ExternalUrlItem(message, url);
   }
 
   async fetchMR(workspaceFolder) {
-    this.mr = null;
-    let message = 'No merge request found.';
+    const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
 
-    // TODO project is always present (we throw if we fail to fetch it)
-    if (this.project) {
-      const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
-
-      if (mr) {
-        this.mr = mr;
-        message = `MR: !${mr.iid} · ${mr.title}`;
-      }
+    if (mr) {
+      this.mr = mr;
+      return new MrItem(this.mr, this.project);
     }
-    this.children.push(
-      new SidebarTreeItem(message, this.mr, 'merge_requests', null, workspaceFolder),
-    );
+    return new vscode.TreeItem('No merge request found.');
   }
 
   async fetchClosingIssue(workspaceFolder) {
-    // TODO project is always present (we throw if we fail to fetch it)
-    if (this.project) {
-      if (this.mr) {
-        const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
+    if (this.mr) {
+      const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
 
-        if (issues.length) {
-          issues.forEach(issue => {
-            this.children.push(
-              new SidebarTreeItem(
-                `Issue: #${issue.iid} · ${issue.title}`,
-                issue,
-                'issues',
-                null,
-                workspaceFolder,
-              ),
-            );
-          });
-        } else {
-          this.children.push(new SidebarTreeItem('No closing issue found.'));
-        }
-      } else {
-        this.children.push(new SidebarTreeItem('No closing issue found.'));
+      if (issues.length) {
+        return issues.map(issue => new IssueItem(issue, this.project));
       }
-    } else {
-      this.children.push(new SidebarTreeItem('No closing issue found.'));
     }
+    return [new vscode.TreeItem('No closing issue found.')];
   }
 
-  async getChildren() {
+  async getChildren(item) {
+    if (item) return item.getChildren();
     try {
       const workspaceFolder = await getCurrentWorkspaceFolder();
       this.project = await gitLabService.fetchCurrentProject(workspaceFolder);
-      await this.fetchPipeline(workspaceFolder);
-      await this.fetchMR(workspaceFolder);
-      await this.fetchClosingIssue(workspaceFolder);
+      const pipelineItem = await this.fetchPipeline(workspaceFolder);
+      const mrItem = await this.fetchMR(workspaceFolder);
+      const closingIssuesItems = await this.fetchClosingIssue(workspaceFolder);
+      return [pipelineItem, mrItem, ...closingIssuesItems];
     } catch (e) {
       handleError(e);
-      this.children.push(new ErrorItem());
+      return [new ErrorItem()];
     }
-
-    return this.children;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -120,7 +92,6 @@ class DataProvider {
   }
 
   refresh() {
-    this.children = [];
     // Temporarily disable eslint to be able to start enforcing stricter rules
     // eslint-disable-next-line no-underscore-dangle
     this._onDidChangeTreeData.fire();

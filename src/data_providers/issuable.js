@@ -1,7 +1,6 @@
 const vscode = require('vscode');
-const { CustomQueryItem } = require('./custom_query_item');
-const { MultirootCustomQueryItem } = require('./multiroot_custom_query_item');
-const { SidebarTreeItem } = require('./sidebar_tree_item');
+const { CustomQueryItem } = require('./items/custom_query_item');
+const { MultirootCustomQueryItem } = require('./items/multiroot_custom_query_item');
 const gitLabService = require('../gitlab_service');
 
 class DataProvider {
@@ -19,7 +18,7 @@ class DataProvider {
     if (el) return el.getChildren(el);
     const projects = await gitLabService.getAllGitlabProjects();
     const { customQueries } = vscode.workspace.getConfiguration('gitlab');
-    if (projects.length === 0) return new SidebarTreeItem('No projects found');
+    if (projects.length === 0) return new vscode.TreeItem('No projects found');
     if (projects.length === 1)
       return customQueries.map(customQuery => new CustomQueryItem(customQuery, projects[0]));
     return customQueries.map(customQuery => new MultirootCustomQueryItem(customQuery, projects));

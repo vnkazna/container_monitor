@@ -3,7 +3,7 @@
 // This script creates a temporary workspace that can be used for debugging integration tests
 const { readFileSync, writeFileSync } = require('fs');
 const path = require('path');
-const { default: createTmpWorkspace } = require('../out/create_tmp_workspace');
+const { default: createTmpWorkspace } = require('../out/test/create_tmp_workspace');
 
 const PLACEHOLDER = `<run \`npm run create-test-workspace\` to generate a test folder>`;
 
