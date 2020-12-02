@@ -29,7 +29,10 @@ const createPostEndpoint = (path, response) =>
     return res(ctx.status(201), ctx.json(response));
   });
 
-const notFoundByDefault = rest.get(/.*/, (req, res, ctx) => res(ctx.status(404)));
+const notFoundByDefault = rest.get(/.*/, (req, res, ctx) => {
+  console.warn(`API call ${req.url.toString()} doesn't have a query handler.`);
+  res(ctx.status(404));
+});
 
 const getServer = (handlers = []) => {
   const server = setupServer(

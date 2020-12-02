@@ -5,7 +5,13 @@ const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const userResponse = require('./fixtures/rest/user.json');
-const { getServer, createQueryJsonEndpoint } = require('./test_infrastructure/mock_server');
+const versionsResponse = require('./fixtures/rest/versions.json');
+const versionResponse = require('./fixtures/rest/mr_version.json');
+const {
+  getServer,
+  createQueryJsonEndpoint,
+  createJsonEndpoint,
+} = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 
 describe('GitLab tree view', () => {
@@ -74,6 +80,11 @@ describe('GitLab tree view', () => {
           { ...openMergeRequestResponse, title: 'Custom Query MR' },
         ],
       }),
+      createJsonEndpoint('/projects/278964/merge_requests/33824/versions', versionsResponse),
+      createJsonEndpoint(
+        '/projects/278964/merge_requests/33824/versions/127919672',
+        versionResponse,
+      ),
       createQueryJsonEndpoint('/projects/278964/issues', {
         '?scope=assigned_to_me&state=opened': [openIssueResponse],
         '?scope=assigned_to_me&state=opened&confidential=true&not[labels]=backstage&not[milestone]=13.5&not[author_username]=johndoe&not[assignee_username]=johndoe&not[search]=bug&not[in]=description': [
@@ -119,13 +130,24 @@ describe('GitLab tree view', () => {
     );
   });
 
-  it('shows project merge requests assigned to me', async () => {
+  it('shows project merge requests assigned to me with changed files', async () => {
     const mergeRequestsAssignedToMe = await openCategory('Merge requests assigned to me');
 
     assert.strictEqual(mergeRequestsAssignedToMe.length, 1);
-    assert.strictEqual(
-      mergeRequestsAssignedToMe[0].label,
-      '!33824 · Web IDE - remove unused actions (mappings)',
+    const mrItem = mergeRequestsAssignedToMe[0];
+    assert.strictEqual(mrItem.label, '!33824 · Web IDE - remove unused actions (mappings)');
+
+    const mrContent = await dataProvider.getChildren(mrItem);
+    assert.strictEqual(mrContent[0].label, 'Description');
+
+    const mrFiles = mrContent.slice(1);
+    assert.deepStrictEqual(
+      mrFiles.map(f => f.resourceUri.path),
+      ['/.gitlab-ci.yml', '/README1.md', '/new_file.ts', '/test.js'],
+    );
+    assert.deepStrictEqual(
+      mrFiles.map(f => f.description),
+      ['[deleted] .', '[renamed] .', '[added] .', '.'],
     );
   });
 

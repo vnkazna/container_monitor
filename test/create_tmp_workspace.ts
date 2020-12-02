@@ -29,6 +29,11 @@ export default async function createTmpWorkspace(autoCleanUp = true): Promise<st
   const git = simpleGit(dirPath, { binary: 'git' });
   await git.init();
   await git.addRemote(REMOTE.NAME, REMOTE.URL);
+  await git.addConfig('user.email', 'test@example.com');
+  await git.addConfig('user.name', 'Test Name');
+  await git.commit('Test commit', [], {
+    '--allow-empty': null,
+  });
   await addFile(dirPath, '/.vscode/settings.json', JSON.stringify(DEFAULT_VS_CODE_SETTINGS));
   return dirPath;
 }

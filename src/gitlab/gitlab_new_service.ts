@@ -108,4 +108,22 @@ export class GitLabNewService {
     }
     return result.text();
   }
+
+  // This method has to use REST API till https://gitlab.com/gitlab-org/gitlab/-/issues/280803 gets done
+  async getMrDiff(mr: RestIssuable): Promise<RestDiffFile[]> {
+    const versionsUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions`;
+    const versionsResult = await crossFetch(versionsUrl, this.fetchOptions);
+    if (!versionsResult.ok) {
+      throw new FetchError(`Fetching versions from ${versionsUrl} failed`, versionsResult);
+    }
+    const versions = await versionsResult.json();
+    const lastVersion = versions[0];
+    const lastVersionUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions/${lastVersion.id}`;
+    const diffResult = await crossFetch(lastVersionUrl, this.fetchOptions);
+    if (!diffResult.ok) {
+      throw new FetchError(`Fetching MR diff from ${lastVersionUrl} failed`, diffResult);
+    }
+    const result = await diffResult.json();
+    return result.diffs;
+  }
 }

@@ -1,0 +1,33 @@
+/* eslint-disable camelcase */
+interface RestIssuable {
+  id: number;
+  iid: number;
+  title: string;
+  project_id: number;
+  web_url: string;
+  sha?: string; // only present in MR, legacy logic uses the presence to decide issuable type
+}
+
+interface RestDiffFile {
+  head_commit_sha: string;
+  base_commit_sha: string;
+  new_path: string;
+  old_path: string;
+  deleted_file: boolean;
+  new_file: boolean;
+  renamed_file: boolean;
+}
+
+interface VsProject {
+  label: string;
+  uri: string;
+}
+
+interface RestVulnerability {
+  location?: {
+    file: string;
+  };
+  web_url: string;
+  severity: string;
+  name: string;
+}
