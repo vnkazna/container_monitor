@@ -3,29 +3,30 @@ const moment = require('moment');
 const gitLabService = require('../gitlab_service');
 const { ErrorItem } = require('./items/error_item');
 const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
-const { handleError } = require('../log');
+const { handleError, logError } = require('../log');
 const { MrItem } = require('./items/mr_item');
 const { IssueItem } = require('./items/issue_item');
 const { ExternalUrlItem } = require('./items/external_url_item');
 
 class DataProvider {
   constructor() {
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-underscore-dangle
-    this._onDidChangeTreeData = new vscode.EventEmitter();
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-underscore-dangle
-    this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-
+    this.eventEmitter = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this.eventEmitter.event;
     this.project = null;
     this.mr = null;
   }
 
   async fetchPipeline(workspaceFolder) {
-    const pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
+    let pipeline;
+    try {
+      pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
+    } catch (e) {
+      logError(e);
+      return new ErrorItem('Fetching pipeline failed');
+    }
 
     if (!pipeline) {
-      return new vscode.TreeItem('No pipeline found.');
+      return new vscode.TreeItem('No pipeline found');
     }
     const statusText = pipeline.status === 'success' ? 'passed' : pipeline.status;
     const actions = {
@@ -46,13 +47,18 @@ class DataProvider {
   }
 
   async fetchMR(workspaceFolder) {
-    const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
-
+    let mr;
+    try {
+      mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
+    } catch (e) {
+      logError(e);
+      return new ErrorItem('Fetching MR failed');
+    }
     if (mr) {
       this.mr = mr;
       return new MrItem(this.mr, this.project);
     }
-    return new vscode.TreeItem('No merge request found.');
+    return new vscode.TreeItem('No merge request found');
   }
 
   async fetchClosingIssue(workspaceFolder) {
@@ -63,7 +69,7 @@ class DataProvider {
         return issues.map(issue => new IssueItem(issue, this.project));
       }
     }
-    return [new vscode.TreeItem('No closing issue found.')];
+    return [new vscode.TreeItem('No closing issue found')];
   }
 
   async getChildren(item) {
@@ -82,19 +88,12 @@ class DataProvider {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getParent() {
-    return null;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
   getTreeItem(item) {
     return item;
   }
 
   refresh() {
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-underscore-dangle
-    this._onDidChangeTreeData.fire();
+    this.eventEmitter.fire();
   }
 }
 
