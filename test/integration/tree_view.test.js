@@ -11,8 +11,10 @@ const {
   getServer,
   createQueryJsonEndpoint,
   createJsonEndpoint,
+  createQueryTextEndpoint,
 } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
+const { ApiContentProvider } = require('../../src/review/api_content_provider');
 
 describe('GitLab tree view', () => {
   let server;
@@ -91,6 +93,10 @@ describe('GitLab tree view', () => {
           { ...openIssueResponse, title: 'Custom Query Issue' },
         ],
       }),
+      createQueryTextEndpoint(`/projects/278964/repository/files/src%2Ftest.js/raw`, {
+        '?ref=1f0fa02de1f6b913d674a8be10899fb8540237a9': 'Old Version',
+        '?ref=b6d6f6fd17b52b8cf4e961218c572805e9aa7463': 'New Version',
+      }),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
     await vscode.workspace.getConfiguration().update('gitlab.customQueries', customQuerySettings);
@@ -143,12 +149,90 @@ describe('GitLab tree view', () => {
     const mrFiles = mrContent.slice(1);
     assert.deepStrictEqual(
       mrFiles.map(f => f.resourceUri.path),
-      ['/.gitlab-ci.yml', '/README1.md', '/new_file.ts', '/test.js'],
+      [
+        '/.deleted.yml',
+        '/README1.md',
+        '/new_file.ts',
+        '/src/test.js',
+        '/src/assets/insert-multi-file-snippet.gif',
+        '/Screenshot.png',
+      ],
     );
     assert.deepStrictEqual(
       mrFiles.map(f => f.description),
-      ['[deleted] .', '[renamed] .', '[added] .', '.'],
+      ['[deleted] /', '[renamed] /', '[added] /', '/src', '[added] /src/assets', '[renamed] /'],
     );
+  });
+
+  describe('clicking on a changed file', () => {
+    let mrFiles;
+
+    const getItem = filePath => mrFiles.filter(f => f.resourceUri.path === filePath).pop();
+
+    const getDiffArgs = item => {
+      assert.strictEqual(item.command.command, 'vscode.diff');
+      return item.command.arguments;
+    };
+
+    before(async () => {
+      const mergeRequestsAssignedToMe = await openCategory('Merge requests assigned to me');
+
+      assert.strictEqual(mergeRequestsAssignedToMe.length, 1);
+      const mrItem = mergeRequestsAssignedToMe[0];
+      assert.strictEqual(mrItem.label, '!33824 · Web IDE - remove unused actions (mappings)');
+
+      const mrContent = await dataProvider.getChildren(mrItem);
+      assert.strictEqual(mrContent[0].label, 'Description');
+
+      mrFiles = mrContent.slice(1);
+    });
+
+    it('should show the correct diff title', () => {
+      const item = getItem('/README1.md');
+      const [, , diffTitle] = getDiffArgs(item);
+      assert.strictEqual(diffTitle, 'README1.md (!33824)');
+    });
+
+    it('should not show diff for images', () => {
+      const item = getItem('/Screenshot.png');
+      assert.strictEqual(item.command.command, 'gl.noImageReview');
+    });
+
+    describe('Api content provider', () => {
+      let apiContentProvider;
+
+      before(() => {
+        apiContentProvider = new ApiContentProvider();
+      });
+
+      it('should fetch base content for a diff URI', async () => {
+        const item = getItem('/src/test.js');
+        const [baseUri] = getDiffArgs(item);
+        const content = await apiContentProvider.provideTextDocumentContent(baseUri);
+        assert.strictEqual(content, 'Old Version');
+      });
+
+      it('should fetch head content for a diff URI', async () => {
+        const item = getItem('/src/test.js');
+        const [, headUri] = getDiffArgs(item);
+        const content = await apiContentProvider.provideTextDocumentContent(headUri);
+        assert.strictEqual(content, 'New Version');
+      });
+
+      it('should show empty file when asked to fetch base content for added file', async () => {
+        const item = getItem('/new_file.ts');
+        const [baseUri] = getDiffArgs(item);
+        const content = await apiContentProvider.provideTextDocumentContent(baseUri);
+        assert.strictEqual(content, '');
+      });
+
+      it('should show empty file when asked to fetch head content for deleted file', async () => {
+        const item = getItem('/.deleted.yml');
+        const [, headUri] = getDiffArgs(item);
+        const content = await apiContentProvider.provideTextDocumentContent(headUri);
+        assert.strictEqual(content, '');
+      });
+    });
   });
 
   it('handles full custom query for MR', async () => {
