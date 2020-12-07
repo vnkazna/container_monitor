@@ -14,6 +14,8 @@ const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
 const { initializeLogging, handleError } = require('./log');
 const checkDeprecatedCertificateSettings = require('./check_deprecated_certificate_settings');
+const { ApiContentProvider } = require('./review/api_content_provider');
+const { REVIEW_URI_SCHEME } = require('./constants');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -65,6 +67,8 @@ const registerCommands = (context, outputChannel) => {
     'gl.refreshSidebar': sidebar.refresh,
     'gl.showRichContent': webviewController.create,
     'gl.showOutput': () => outputChannel.show(),
+    'gl.noImageReview': () =>
+      vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
 
   Object.keys(commands).forEach(cmd => {
@@ -77,7 +81,7 @@ const registerCommands = (context, outputChannel) => {
 const activate = context => {
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
-
+  vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new ApiContentProvider());
   registerCommands(context, outputChannel);
   webviewController.addDeps(context);
   tokenService.init(context);

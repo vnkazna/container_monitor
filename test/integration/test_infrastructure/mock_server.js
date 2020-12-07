@@ -24,6 +24,16 @@ const createTextEndpoint = (path, response) =>
     return res(ctx.status(200), ctx.text(response));
   });
 
+const createQueryTextEndpoint = (path, queryResponseMap) =>
+  rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
+    const response = queryResponseMap[req.url.search];
+    if (!response) {
+      console.warn(`API call ${req.url.toString()} doesn't have a query handler.`);
+      return res(ctx.status(404));
+    }
+    return res(ctx.status(200), ctx.text(response));
+  });
+
 const createPostEndpoint = (path, response) =>
   rest.post(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
     return res(ctx.status(201), ctx.json(response));
@@ -50,5 +60,6 @@ module.exports = {
   createJsonEndpoint,
   createQueryJsonEndpoint,
   createTextEndpoint,
+  createQueryTextEndpoint,
   createPostEndpoint,
 };

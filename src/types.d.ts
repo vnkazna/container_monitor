@@ -8,9 +8,13 @@ interface RestIssuable {
   sha?: string; // only present in MR, legacy logic uses the presence to decide issuable type
 }
 
-interface RestDiffFile {
+interface RestMrVersion {
   head_commit_sha: string;
   base_commit_sha: string;
+  diffs: RestDiffFile[];
+}
+
+interface RestDiffFile {
   new_path: string;
   old_path: string;
   deleted_file: boolean;
