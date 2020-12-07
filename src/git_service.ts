@@ -116,7 +116,6 @@ export class GitService {
       this.log(
         `Couldn't find tracking branch. Extension will fallback to branch name ${branchName}`,
       );
-      this.log(`${e.message}\n${e.stack}`);
     }
 
     return branchName;
