@@ -50,11 +50,6 @@ Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
 
 Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
 
-### Experimental Features
-
-Experimental features are behind a feature flag. These are currently enabled by default.
-To disable them, you can set `gitlab.enableExperimentalFeatures` to `false` in your VS Code settings.
-
 #### View issue and MR details and comments in VS Code
 
 ![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_issues-in-vscode.png)
