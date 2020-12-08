@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { USER_COMMANDS } from './command_names';
 import { IDetailedError } from './errors/common';
 
 function isDetailedError(object: any): object is IDetailedError {
@@ -22,6 +23,6 @@ export const handleError = async (e: Error | IDetailedError): Promise<void> => {
   logError(e);
   const choice = await vscode.window.showErrorMessage(e.message, 'Show logs');
   if (choice === 'Show logs') {
-    await vscode.commands.executeCommand('gl.showOutput');
+    await vscode.commands.executeCommand(USER_COMMANDS.SHOW_OUTPUT);
   }
 };

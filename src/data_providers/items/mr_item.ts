@@ -1,4 +1,5 @@
 import { TreeItem, TreeItemCollapsibleState, ThemeIcon } from 'vscode';
+import { PROGRAMMATIC_COMMANDS } from '../../command_names';
 import { GitLabNewService } from '../../gitlab/gitlab_new_service';
 import { createGitService } from '../../git_service_factory';
 import { ChangedFileItem } from './changed_file_item';
@@ -18,7 +19,7 @@ export class MrItem extends TreeItem {
     const description = new TreeItem('Description');
     description.iconPath = new ThemeIcon('note');
     description.command = {
-      command: 'gl.showRichContent',
+      command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
       arguments: [this.mr, this.project.uri],
       title: 'Show MR',
     };

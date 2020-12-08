@@ -3,8 +3,9 @@ const gitLabService = require('./gitlab_service');
 const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 const { createGitService } = require('./git_service_factory');
 const { handleError } = require('./log');
+const { VS_COMMANDS } = require('./command_names');
 
-const openUrl = url => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+const openUrl = url => vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
 
 /**
  * Fetches user and project before opening a link.

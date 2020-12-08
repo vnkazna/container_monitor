@@ -1,6 +1,7 @@
 import { TreeItem, Uri } from 'vscode';
 import { posix as path } from 'path';
 import { toReviewUri } from '../../review/review_uri';
+import { PROGRAMMATIC_COMMANDS, VS_COMMANDS } from '../../command_names';
 
 const getChangeTypeIndicator = (diff: RestDiffFile): string => {
   if (diff.new_file) return '[added] ';
@@ -45,7 +46,7 @@ export class ChangedFileItem extends TreeItem {
     if (looksLikeImage(file.old_path) || looksLikeImage(file.new_path)) {
       this.command = {
         title: 'Images are not supported',
-        command: 'gl.noImageReview',
+        command: PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW,
       };
       return;
     }
@@ -70,7 +71,7 @@ export class ChangedFileItem extends TreeItem {
 
     this.command = {
       title: 'Show changes',
-      command: 'vscode.diff',
+      command: VS_COMMANDS.DIFF,
       arguments: [baseFileUri, headFileUri, `${path.basename(file.new_path)} (!${mr.iid})`],
     };
   }

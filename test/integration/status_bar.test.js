@@ -7,6 +7,7 @@ const pipelinesResponse = require('./fixtures/rest/pipelines.json');
 const pipelineResponse = require('./fixtures/rest/pipeline.json');
 const { getServer, createJsonEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
+const { USER_COMMANDS } = require('../../src/command_names');
 
 describe('GitLab status bar', () => {
   let server;
@@ -54,6 +55,6 @@ describe('GitLab status bar', () => {
     assert.strictEqual(pipelineItem.text, '$(check) GitLab: Pipeline passed');
     assert.strictEqual(pipelineItem.show.called, true);
     assert.strictEqual(pipelineItem.hide.called, false);
-    assert.strictEqual(pipelineItem.command, 'gl.pipelineActions');
+    assert.strictEqual(pipelineItem.command, USER_COMMANDS.PIPELINE_ACTIONS);
   });
 });
