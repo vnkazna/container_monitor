@@ -4,7 +4,6 @@
 ### Bug Fixes
 
 * handle disabled pipelines or MRs ([125af41](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/125af415403cdee697a6ecb19cd4a51f0feecdee))
-* remove noisy logging for git error that's part of normal flow ([55cbad7](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/55cbad7adebbf3cb1f2602b8c520f7f5bc7705ca))
 
 
 ### Features
