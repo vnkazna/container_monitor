@@ -13,7 +13,7 @@ _You need to set up your access token to use these features, please see [Setup](
 
 ### Sidebar
 
-See your issues, MRs and other [custom search results](#custom-queries) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
+See your issues, MRs (including changed files) and other [custom search results](#custom-queries) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
 
 ### Status bar
 
@@ -243,7 +243,7 @@ Each query is an entry of the json array. Each entry can have the following valu
 
 Extension will add a GitLab Workflow panel to sidebar of your VS Code. The dedicated panel will allow you to see the list of your issues and MRs. Also you will be able to see pipeline, MR and issue links for your current branch.
 
-In the current version, clicking the links will open them on your default browser but the next version will allow you to interact with your issues and MRs right in your VS Code. With the upcoming versions, the extension will allow you to see the MR changes and discussions in VS Code.
+You can see the issue and MR details by clicking on the issue item or by expanding the MR item and clicking on "Description". When you expand the MR, you can see all the changed files. When you click on a changed file, the extension opens the MR diff.
 
 ![_sidebar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_sidebar.gif)
 
