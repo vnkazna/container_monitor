@@ -15,6 +15,7 @@ const {
 } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { ApiContentProvider } = require('../../src/review/api_content_provider');
+const { PROGRAMMATIC_COMMANDS } = require('../../src/command_names');
 
 describe('GitLab tree view', () => {
   let server;
@@ -195,7 +196,7 @@ describe('GitLab tree view', () => {
 
     it('should not show diff for images', () => {
       const item = getItem('/Screenshot.png');
-      assert.strictEqual(item.command.command, 'gl.noImageReview');
+      assert.strictEqual(item.command.command, PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW);
     });
 
     describe('Api content provider', () => {

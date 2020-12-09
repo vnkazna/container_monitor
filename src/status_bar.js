@@ -4,6 +4,7 @@ const gitLabService = require('./gitlab_service');
 const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
 const { UserFriendlyError } = require('./errors/user_friendly_error');
 const { handleError, logError } = require('./log');
+const { USER_COMMANDS } = require('./command_names');
 
 let context = null;
 let pipelineStatusBarItem = null;
@@ -116,7 +117,7 @@ async function refreshPipeline() {
 const initPipelineStatus = async () => {
   pipelineStatusBarItem = createStatusBarItem(
     '$(info) GitLab: Fetching pipeline...',
-    'gl.pipelineActions',
+    USER_COMMANDS.PIPELINE_ACTIONS,
   );
 
   pipelinesStatusTimer = setInterval(() => {

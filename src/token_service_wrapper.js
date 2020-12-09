@@ -3,6 +3,7 @@ const { GITLAB_COM_URL } = require('./constants');
 const openers = require('./openers');
 const statusBar = require('./status_bar');
 const { tokenService } = require('./services/token_service');
+const { USER_COMMANDS } = require('./command_names');
 
 let context = null;
 let active = false;
@@ -37,7 +38,7 @@ const askForToken = () => {
         const { action } = item;
 
         if (action === 'set') {
-          vscode.commands.executeCommand('gl.setToken');
+          vscode.commands.executeCommand(USER_COMMANDS.SET_TOKEN);
         } else {
           openers.openUrl('https://gitlab.com/gitlab-org/gitlab-vscode-extension#setup');
         }

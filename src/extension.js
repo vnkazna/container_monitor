@@ -16,6 +16,7 @@ const { initializeLogging, handleError } = require('./log');
 const checkDeprecatedCertificateSettings = require('./check_deprecated_certificate_settings');
 const { ApiContentProvider } = require('./review/api_content_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
+const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -45,29 +46,29 @@ const registerSidebarTreeDataProviders = () => {
 
 const registerCommands = (context, outputChannel) => {
   const commands = {
-    'gl.showIssuesAssignedToMe': openers.showIssues,
-    'gl.showMergeRequestsAssignedToMe': openers.showMergeRequests,
-    'gl.setToken': tokenInput.showInput,
-    'gl.removeToken': tokenInput.removeTokenPicker,
-    'gl.openActiveFile': openers.openActiveFile,
-    'gl.copyLinkToActiveFile': openers.copyLinkToActiveFile,
-    'gl.openCurrentMergeRequest': openers.openCurrentMergeRequest,
-    'gl.openCreateNewIssue': openers.openCreateNewIssue,
-    'gl.openCreateNewMR': openers.openCreateNewMr,
-    'gl.openProjectPage': openers.openProjectPage,
-    'gl.openCurrentPipeline': openers.openCurrentPipeline,
-    'gl.pipelineActions': pipelineActionsPicker.showPicker,
-    'gl.issueSearch': searchInput.showIssueSearchInput,
-    'gl.mergeRequestSearch': searchInput.showMergeRequestSearchInput,
-    'gl.projectAdvancedSearch': searchInput.showProjectAdvancedSearchInput,
-    'gl.compareCurrentBranch': openers.compareCurrentBranch,
-    'gl.createSnippet': createSnippet,
-    'gl.insertSnippet': insertSnippet,
-    'gl.validateCIConfig': ciConfigValidator.validate,
-    'gl.refreshSidebar': sidebar.refresh,
-    'gl.showRichContent': webviewController.create,
-    'gl.showOutput': () => outputChannel.show(),
-    'gl.noImageReview': () =>
+    [USER_COMMANDS.SHOW_ISSUES_ASSIGNED_TO_ME]: openers.showIssues,
+    [USER_COMMANDS.SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME]: openers.showMergeRequests,
+    [USER_COMMANDS.SET_TOKEN]: tokenInput.showInput,
+    [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
+    [USER_COMMANDS.OPEN_ACTIVE_FILE]: openers.openActiveFile,
+    [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: openers.copyLinkToActiveFile,
+    [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: openers.openCurrentMergeRequest,
+    [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: openers.openCreateNewIssue,
+    [USER_COMMANDS.OPEN_CREATE_NEW_MR]: openers.openCreateNewMr,
+    [USER_COMMANDS.OPEN_PROJECT_PAGE]: openers.openProjectPage,
+    [USER_COMMANDS.OPEN_CURRENT_PIPELINE]: openers.openCurrentPipeline,
+    [USER_COMMANDS.PIPELINE_ACTIONS]: pipelineActionsPicker.showPicker,
+    [USER_COMMANDS.ISSUE_SEARCH]: searchInput.showIssueSearchInput,
+    [USER_COMMANDS.MERGE_REQUEST_SEARCH]: searchInput.showMergeRequestSearchInput,
+    [USER_COMMANDS.PROJECT_ADVANCED_SEARCH]: searchInput.showProjectAdvancedSearchInput,
+    [USER_COMMANDS.COMPARE_CURRENT_BRANCH]: openers.compareCurrentBranch,
+    [USER_COMMANDS.CREATE_SNIPPET]: createSnippet,
+    [USER_COMMANDS.INSERT_SNIPPET]: insertSnippet,
+    [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
+    [USER_COMMANDS.REFRESH_SIDEBAR]: sidebar.refresh,
+    [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.create,
+    [USER_COMMANDS.SHOW_OUTPUT]: () => outputChannel.show(),
+    [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
 

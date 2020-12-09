@@ -1,4 +1,5 @@
 import { TreeItem } from 'vscode';
+import { PROGRAMMATIC_COMMANDS } from '../../command_names';
 
 export class IssueItem extends TreeItem {
   issue: RestIssuable;
@@ -10,7 +11,7 @@ export class IssueItem extends TreeItem {
     this.issue = issue;
     this.project = project;
     this.command = {
-      command: 'gl.showRichContent',
+      command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
       arguments: [this.issue, this.project.uri],
       title: 'Show Issue',
     };
