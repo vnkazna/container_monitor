@@ -18,6 +18,9 @@ export default {
     buttonTitle() {
       return this.isSaving ? 'Saving...' : 'Comment';
     },
+    canSubmit() {
+      return !this.isSaving && this.note.length > 0;
+    },
   },
   methods: {
     getNoteType() {
@@ -26,12 +29,21 @@ export default {
         : { type: 'issue', path: 'issues' };
     },
     addComment() {
+      if (!this.canSubmit) {
+        return;
+      }
+
       const { issuable, note, command } = this;
 
       this.isSaving = true;
       this.isFailed = false;
       const noteType = this.getNoteType();
       window.vsCodeApi.postMessage({ command, issuable, note, noteType });
+    },
+    handleKeydown({ key, ctrlKey, shiftKey, metaKey, altKey }) {
+      if (key === 'Enter' && (ctrlKey || metaKey) && !shiftKey && !altKey) {
+        this.addComment();
+      }
     },
   },
   mounted() {
@@ -52,8 +64,8 @@ export default {
 
 <template>
   <div class="main-comment-form">
-    <textarea v-model="note" placeholder="Write a comment..." />
-    <button @click="addComment" :disabled="isSaving || !note.length">
+    <textarea v-model="note" @keydown="handleKeydown" placeholder="Write a comment..." />
+    <button @click="addComment" :disabled="!canSubmit">
       {{ buttonTitle }}
     </button>
     <span v-if="isFailed">Failed to save your comment. Please try again.</span>
