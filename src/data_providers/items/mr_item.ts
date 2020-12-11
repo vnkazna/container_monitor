@@ -1,4 +1,4 @@
-import { TreeItem, TreeItemCollapsibleState, ThemeIcon } from 'vscode';
+import { TreeItem, TreeItemCollapsibleState, ThemeIcon, Uri } from 'vscode';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
 import { GitLabNewService } from '../../gitlab/gitlab_new_service';
 import { createGitService } from '../../git_service_factory';
@@ -13,6 +13,7 @@ export class MrItem extends TreeItem {
     super(`!${mr.iid} · ${mr.title}`, TreeItemCollapsibleState.Collapsed);
     this.mr = mr;
     this.project = project;
+    this.iconPath = Uri.parse(mr.author.avatar_url);
   }
 
   async getChildren(): Promise<TreeItem[]> {

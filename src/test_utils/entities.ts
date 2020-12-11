@@ -6,6 +6,11 @@ export const issuable: RestIssuable = {
   title: 'Issuable Title',
   project_id: 9999,
   web_url: 'https://gitlab.example.com/group/project/issues/1',
+  author: {
+    avatar_url:
+      'https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon',
+    name: 'Tomas Vik',
+  },
 };
 
 export const diffFile: RestDiffFile = {
