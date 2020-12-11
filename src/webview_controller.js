@@ -84,8 +84,8 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
     });
 
     if (response.success !== false) {
-      const newDiscussions = await gitLabService.fetchDiscussions(issuable);
-      panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: newDiscussions });
+      const discussions = await gitLabService.fetchDiscussionsAndLabelEvents(issuable);
+      panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions });
       panel.webview.postMessage({ type: 'noteSaved' });
     } else {
       panel.webview.postMessage({ type: 'noteSaved', status: false });
@@ -105,19 +105,9 @@ async function handleChangeViewState(panel, issuable) {
     });
   });
 
-  const [discussions, labelEvents] = await Promise.all([
-    gitLabService.fetchDiscussions(issuable),
-    gitLabService.fetchLabelEvents(issuable),
-  ]);
-
-  const combinedEvents = discussions.concat(labelEvents);
-  combinedEvents.sort((a, b) => {
-    const aCreatedAt = a.label ? a.created_at : a.notes[0].created_at;
-    const bCreatedAt = b.label ? b.created_at : b.notes[0].created_at;
-    return aCreatedAt < bCreatedAt ? -1 : 1;
-  });
+  const discussonsAndLabels = await gitLabService.fetchDiscussionsAndLabelEvents(issuable);
   await appReadyPromise;
-  panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: combinedEvents });
+  panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: discussonsAndLabels });
 }
 
 const getIconPathForIssuable = issuable => {

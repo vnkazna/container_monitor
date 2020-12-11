@@ -482,8 +482,15 @@ export async function validateCIConfig(content: string) {
   return validCIConfig;
 }
 
-export async function fetchLabelEvents(issuable: RestIssuable) {
-  let labelEvents: { body: string }[] = [];
+interface LabelEvent {
+  label: unknown;
+  body: string;
+  // eslint-disable-next-line camelcase
+  created_at: string;
+}
+
+export async function fetchLabelEvents(issuable: RestIssuable): Promise<LabelEvent[]> {
+  let labelEvents: LabelEvent[] = [];
 
   try {
     const type = issuable.sha ? 'merge_requests' : 'issues';
@@ -503,8 +510,15 @@ export async function fetchLabelEvents(issuable: RestIssuable) {
   return labelEvents;
 }
 
-export async function fetchDiscussions(issuable: RestIssuable, page = 1) {
-  let discussions: unknown[] = [];
+interface Discussion {
+  notes: {
+    // eslint-disable-next-line camelcase
+    created_at: string;
+  }[];
+}
+
+export async function fetchDiscussions(issuable: RestIssuable, page = 1): Promise<Discussion[]> {
+  let discussions: Discussion[] = [];
 
   try {
     const type = issuable.sha ? 'merge_requests' : 'issues';
@@ -578,4 +592,26 @@ export async function saveNote(params: {
   }
 
   return { success: false };
+}
+
+type note = Discussion | LabelEvent;
+
+function isLabelEvent(object: any): object is LabelEvent {
+  return Boolean(object.label);
+}
+
+export async function fetchDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<note[]> {
+  const [discussions, labelEvents] = await Promise.all([
+    fetchDiscussions(issuable),
+    fetchLabelEvents(issuable),
+  ]);
+
+  const combinedEvents: note[] = [...discussions, ...labelEvents];
+  combinedEvents.sort((a: note, b: note) => {
+    const aCreatedAt = isLabelEvent(a) ? a.created_at : a.notes[0].created_at;
+    const bCreatedAt = isLabelEvent(b) ? b.created_at : b.notes[0].created_at;
+    return aCreatedAt < bCreatedAt ? -1 : 1;
+  });
+
+  return combinedEvents;
 }
