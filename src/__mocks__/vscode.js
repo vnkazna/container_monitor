@@ -22,6 +22,12 @@ module.exports = {
   comments: {
     createCommentController: jest.fn(),
   },
+  window: {
+    showErrorMessage: jest.fn(),
+  },
+  commands: {
+    executeCommand: jest.fn(),
+  },
   CommentMode: { Preview: 1 },
   CommentThreadCollapsibleState: { Expanded: 1 },
   Position: function Position(x, y) {
