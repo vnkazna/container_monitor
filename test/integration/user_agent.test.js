@@ -6,12 +6,15 @@ const { tokenService } = require('../../src/services/token_service');
 const gitLabService = require('../../src/gitlab_service');
 const { GitLabNewService } = require('../../src/gitlab/gitlab_new_service');
 const snippetsResponse = require('./fixtures/graphql/snippets.json');
+const packageJson = require('../../package.json');
 
 const validateUserAgent = req => {
   const userAgent = req.headers.get('User-Agent');
-  assert(
-    userAgent.startsWith('vs-code-gitlab-workflow/'),
-    `User-Agent header ${userAgent} must start with vs-code-gitlab-workflow/`,
+  const nodeJsVersion = `${process.version.substr(1)} (${process.platform}; ${process.arch})`;
+
+  assert.strictEqual(
+    userAgent,
+    `vs-code-gitlab-workflow/${packageJson.version} VSCode/1.52.1 Node.js/${nodeJsVersion}`,
   );
 };
 
