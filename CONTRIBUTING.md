@@ -118,3 +118,5 @@ as available [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issu
 Steps to opening a merge request to contribute code to GitLab Workflow is similar to any other open source project.
 You develop in a separate branch of your own fork and the merge request should have a related issue open in the project.
 Any Merge Request you wish to open in order to contribute to GitLab Workflow, be sure you have followed through the steps from [Configuring Development Environment](#configuring-development-environment).
+
+In this project, we don't [close issues automatically when the MR gets merged](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically). Instead, we close the issues when the MR change is [released](docs/release-process.md). Please replace `Closes #<issueId>` in the MR description with `Relates to #<issueId>`.
