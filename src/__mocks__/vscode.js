@@ -12,9 +12,9 @@ module.exports = {
   Uri: {
     file: path => ({
       path,
-      with: (...args) => ({
+      with: args => ({
         path,
-        args,
+        ...args,
       }),
     }),
     parse: str => str,
