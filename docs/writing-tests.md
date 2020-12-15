@@ -8,7 +8,7 @@ We are using [Jest](https://jestjs.io/) for our unit tests[^1]. For integration 
 
 ## Unit tests `npm run test-unit`
 
-Modules that **don't depend on `vscode` module** can be unit tested. Unit tests for a module are placed in the same folder. The name of the test file has `.test.js` suffix.
+Modules that don't depend on the `vscode` module can be unit tested. Place unit tests for a module in the same folder as the production code. The name of the test file has `.test.js` suffix. If the code under test depends on the `vscode` module, you must add the `vscode` methods and objects to the [`vscode.js`](src/__mocks__/vscode.js) [manual Jest mock](https://jestjs.io/docs/en/manual-mocks#mocking-node-modules).
 
 - `src/git/git_remote_parser.js` - production file
 - `src/git/git_remote_parser.test.js` - test file
