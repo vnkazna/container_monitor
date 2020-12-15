@@ -52,7 +52,10 @@ with [GitLab Workflow](https://marketplace.visualstudio.com/items?itemName=GitLa
 and configured, if not, do that first! If already done, proceed ahead.
 
 *  [Git](https://git-scm.com/)
-*  [NodeJS](https://nodejs.org/en/) (LTS or Current, any of it works)
+*  [NodeJS](https://nodejs.org/en/)
+   *  Version is specified in [`.tool-versions`](.tool-versions))
+   *  We use the same major node version as VS Code
+   *  You can use [`asdf`](https://asdf-vm.com/#/) to manage your node version
 *  [Npm](https://www.npmjs.com/get-npm)
 
 #### Step - 2 : Fork and Clone
