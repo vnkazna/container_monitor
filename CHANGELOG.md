@@ -4,13 +4,17 @@
 ### Bug Fixes
 
 * **mr review:** showing MR Diff on Windows uses correct file path ([0dcd5e0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0dcd5e0aa749f1d1e4e5b6ee14b08c867bfa9d03))
-* label notes dissapear after submitting a comment ([89b1fee](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/89b1fee3f3e14e991d72d6f7805da1de876290a5))
+  * Implemented by [@Codekrafter](https://gitlab.com/Codekrafter) with [MR !144](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/144) 👍
+* label notes disappear after submitting a comment ([89b1fee](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/89b1fee3f3e14e991d72d6f7805da1de876290a5))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !137](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/137) 👍
 
 
 ### Features
 
 * **sidebar:** add avatar to merge request item ([126b4c9](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/126b4c93fb0113d0d6e2dbec047c2cf5c06aa9db))
-* **webview:** allow submitting comments with strg+enter ([fb93040](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fb93040aad8e07000942a1ff4c9d8f680e8e02cc))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !142](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/142) 👍
+* **webview:** allow submitting comments with ctrl+enter ([fb93040](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fb93040aad8e07000942a1ff4c9d8f680e8e02cc))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !138](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/138) 👍
 
 
 
