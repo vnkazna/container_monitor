@@ -43,7 +43,7 @@ async function getCommitsInMr() {
 }
 
 async function isConventional(message) {
-  return lint(message, { ...config.rules, ...customRules });
+  return lint(message, { ...config.rules, ...customRules }, { defaultIgnores: false });
 }
 
 const isMultiline = commit => {
