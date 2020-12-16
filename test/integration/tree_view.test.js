@@ -143,6 +143,10 @@ describe('GitLab tree view', () => {
     assert.strictEqual(mergeRequestsAssignedToMe.length, 1);
     const mrItem = mergeRequestsAssignedToMe[0];
     assert.strictEqual(mrItem.label, '!33824 · Web IDE - remove unused actions (mappings)');
+    assert.strictEqual(
+      mrItem.iconPath.toString(true),
+      'https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon',
+    );
 
     const mrContent = await dataProvider.getChildren(mrItem);
     assert.strictEqual(mrContent[0].label, 'Description');
