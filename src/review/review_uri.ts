@@ -18,7 +18,7 @@ export function toReviewUri({ path = '', commit, workspacePath, projectId }: Rev
 export function fromReviewUri(uri: Uri): ReviewParams {
   const { commit, workspacePath, projectId } = JSON.parse(uri.query);
   return {
-    path: uri.fsPath || undefined,
+    path: uri.path || undefined,
     commit,
     workspacePath,
     projectId,
