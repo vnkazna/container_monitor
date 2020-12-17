@@ -5,4 +5,5 @@ test/**
 .history
 jsconfig.json
 src/webview/node_modules
+src/assets/_*
 .eslintrc.json
