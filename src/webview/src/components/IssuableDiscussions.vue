@@ -4,6 +4,8 @@ import Discussion from './Discussion';
 import SystemNote from './SystemNote';
 import LabelNote from './LabelNote';
 
+const hasSingleNote = discussion => discussion.notes && discussion.notes.nodes.length === 1;
+
 export default {
   props: {
     discussions: {
@@ -19,8 +21,8 @@ export default {
   },
   methods: {
     getComponentName(discussion) {
-      if (discussion.individual_note) {
-        if (discussion.notes[0].system) {
+      if (hasSingleNote(discussion)) {
+        if (discussion.notes.nodes[0].system) {
           return SystemNote;
         }
 
@@ -36,7 +38,7 @@ export default {
       if (discussion.label) {
         return discussion;
       }
-      return discussion.individual_note ? discussion.notes[0] : discussion;
+      return hasSingleNote(discussion) ? discussion.notes.nodes[0] : discussion;
     },
   },
 };

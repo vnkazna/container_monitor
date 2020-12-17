@@ -124,7 +124,7 @@ export default {
       <div class="timelineContent" v-if="multiLine">
         <div class="note-header">
           <user-avatar :user="author" :show-avatar="false" style="margin-right: 2px;" />
-          {{ firstLine }} <date :date="noteable.created_at" style="margin-left: 2px;" />
+          {{ firstLine }} <date :date="noteable.createdAt" style="margin-left: 2px;" />
         </div>
         <note-body :note="noteable" style="margin-left: 25px;" />
       </div>
@@ -132,7 +132,7 @@ export default {
         <div class="note-header">
           <user-avatar :user="author" :show-avatar="false" style="margin-right: 2px;" />
           <note-body :note="noteable" style="margin-right: 2px;" /> ·
-          <date :date="noteable.created_at" style="margin-left: 2px;" />
+          <date :date="noteable.createdAt" style="margin-left: 2px;" />
         </div>
       </div>
     </div>

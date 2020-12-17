@@ -1,6 +1,5 @@
 <script>
 import UserAvatar from './UserAvatar';
-import NoteBody from './NoteBody';
 import Date from './Date';
 
 export default {
@@ -13,7 +12,6 @@ export default {
   },
   components: {
     UserAvatar,
-    NoteBody,
     Date,
   },
   computed: {
@@ -34,9 +32,11 @@ export default {
         <div class="note-header">
           <user-avatar :user="author" :size="40" :show-avatar="false" style="margin-right: 2px;" />
           ·
-          <date :date="noteable.created_at" style="margin-left: 2px;" />
+          <date :date="noteable.createdAt" style="margin-left: 2px;" />
         </div>
-        <note-body :note="noteable" />
+        <div class="note-body">
+          <div class="body" v-html="noteable.bodyHtml" />
+        </div>
       </div>
     </div>
   </li>

@@ -2,9 +2,11 @@ const assert = require('assert');
 const vscode = require('vscode');
 const sinon = require('sinon');
 const EventEmitter = require('events');
+const { graphql } = require('msw');
 const webviewController = require('../../src/webview_controller');
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
+const discussionsResponse = require('./fixtures/graphql/discussions.json');
 
 const {
   getServer,
@@ -29,10 +31,11 @@ describe('GitLab webview', () => {
 
   before(async () => {
     server = getServer([
-      createJsonEndpoint(
-        `/projects/${openIssueResponse.project_id}/issues/${openIssueResponse.iid}/discussions`,
-        [],
-      ),
+      graphql.query('GetIssueDiscussions', (req, res, ctx) => {
+        if (req.variables.projectPath === 'gitlab-org/gitlab')
+          return res(ctx.data(discussionsResponse));
+        return res(ctx.data({ project: null }));
+      }),
       createJsonEndpoint(
         `/projects/${openIssueResponse.project_id}/issues/${openIssueResponse.iid}/resource_label_events`,
         [],

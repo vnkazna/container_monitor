@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { GitLabNewService, GraphQLSnippet, GraphQLBlob } from '../gitlab/gitlab_new_service';
+import { GitLabNewService, GqlSnippet, GqlBlob } from '../gitlab/gitlab_new_service';
 import { createGitService } from '../git_service_factory';
 import { getCurrentWorkspaceFolderOrSelectOne } from '../services/workspace_service';
 
-const pickSnippet = async (snippets: GraphQLSnippet[]) => {
+const pickSnippet = async (snippets: GqlSnippet[]) => {
   const quickPickItems = snippets.map(s => ({
     label: s.title,
     description: s.description,
@@ -13,7 +13,7 @@ const pickSnippet = async (snippets: GraphQLSnippet[]) => {
   return vscode.window.showQuickPick(quickPickItems);
 };
 
-const pickBlob = async (blobs: GraphQLBlob[]) => {
+const pickBlob = async (blobs: GqlBlob[]) => {
   const quickPickItems = blobs.map(b => ({
     label: b.name,
     original: b,

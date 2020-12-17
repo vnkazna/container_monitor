@@ -1,0 +1,653 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IssuableDiscussions renders 1`] = `
+<ul
+  class="issuable-discussions"
+>
+  <li
+    class="note system-note"
+  >
+    <div
+      class="timeline-entry-inner"
+    >
+      <div
+        class="timelineIcon"
+      >
+        <span>
+          <svg
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11.8759,8.99237 C11.4346,10.7215 9.86658,12 8,12 C6.13342,12 4.56545,10.7215 4.12406,8.99238 C4.08342,8.99741 4.04201,9 4,9 L1,9 C0.447715,9 0,8.55228 0,8 C0,7.44771 0.447715,7 1,7 L4,7 C4.04201,7 4.08342,7.00259 4.12406,7.00762 C4.56545,5.27853 6.13342,4 8,4 C9.86658,4 11.4346,5.27853 11.8759,7.00763 C11.9166,7.00259 11.958,7 12,7 L15,7 C15.5523,7 16,7.44772 16,8 C16,8.55228 15.5523,9 15,9 L12,9 C11.958,9 11.9166,8.9974 11.8759,8.99237 Z M8,10 C9.10457,10 10,9.10457 10,8 C10,6.89543 9.10457,6 8,6 C6.89543,6 6,6.89543 6,8 C6,9.10457 6.89543,10 8,10 Z"
+              fill="currentColor"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </span>
+      </div>
+       
+      <div
+        class="timelineContent"
+      >
+        <div
+          class="note-header"
+        >
+          <span
+            style="margin-right: 2px;"
+          >
+            <a
+              href="https://gitlab.com/vymarkov"
+              target="_blank"
+            >
+              <!---->
+               
+              <span
+                class="author"
+              >
+                <strong>
+                   Vitaly Markov
+                </strong>
+                 
+                <span>
+                   @vymarkov
+                </span>
+              </span>
+            </a>
+          </span>
+          
+        added 2 commits 
+          <date-stub
+            date="2020-12-02T09:44:11Z"
+            style="margin-left: 2px;"
+          />
+        </div>
+         
+        <div
+          class="note-body"
+          style="margin-left: 25px;"
+        >
+          <div
+            class="body"
+          >
+            <p>
+              &lt;ul&gt;&lt;li&gt;5b63a281 - fix(lint): Fix linter errors&lt;/li&gt;&lt;li&gt;618c91eb - docs: Update CONTRIBUTING.md&lt;/li&gt;&lt;/ul&gt;
+            </p>
+            
+
+            <p>
+              <a
+                href="/gitlab-org/gitlab-vscode-extension/-/merge_requests/130/diffs?diff_id=128320927&start_sha=2a7d1c93417adaafaee85b0345fdf8ea3f28c847"
+              >
+                Compare with previous version
+              </a>
+            </p>
+            
+
+          </div>
+        </div>
+      </div>
+       
+      <!---->
+    </div>
+  </li>
+  <li
+    class="note"
+  >
+    <div
+      class="timeline-entry-inner"
+    >
+      <div
+        class="timelineIcon"
+      >
+        <span>
+          <a
+            href="https://gitlab.com/viktomas"
+            target="_blank"
+          >
+            <img
+              class="avatar s40"
+              src="https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon"
+            />
+             
+            <!---->
+          </a>
+        </span>
+      </div>
+       
+      <div
+        class="timelineContent"
+      >
+        <div
+          class="note-header"
+        >
+          <span
+            style="margin-right: 2px;"
+          >
+            <a
+              href="https://gitlab.com/viktomas"
+              target="_blank"
+            >
+              <!---->
+               
+              <span
+                class="author"
+              >
+                <strong>
+                   Tomas Vik
+                </strong>
+                 
+                <span>
+                   @viktomas
+                </span>
+              </span>
+            </a>
+          </span>
+          
+        ·
+        
+          <date-stub
+            date="2020-12-02T17:00:04Z"
+            style="margin-left: 2px;"
+          />
+        </div>
+         
+        <div
+          class="note-body"
+        >
+          <div
+            class="body"
+          >
+            <p
+              data-sourcepos="1:1-1:59"
+              dir="auto"
+            >
+              <a
+                class="gfm gfm-project_member js-user-link"
+                data-container="body"
+                data-placement="top"
+                data-reference-type="user"
+                data-user="359491"
+                href="/vymarkov"
+                title="Vitaly Markov"
+              >
+                @vymarkov
+              </a>
+               Thank you for fixing the 
+              <code>
+                CONTRIBUTING.md
+              </code>
+               
+              <gl-emoji
+                data-name="tada"
+                data-unicode-version="6.0"
+                title="party popper"
+              >
+                🎉
+              </gl-emoji>
+            </p>
+            
+
+            <p
+              data-sourcepos="3:1-3:182"
+              dir="auto"
+            >
+              Regarding the change in 
+              <code>
+                src/gitlab_service.ts
+              </code>
+              , I think we should still show some message to the user when they try to run 
+              <code>
+                GitLab: *
+              </code>
+               command and the extension fails to execute it.
+            </p>
+            
+
+            <p
+              data-sourcepos="5:1-5:217"
+              dir="auto"
+            >
+              We had a lot of troubles in the past when we were swallowing errors and then we weren't able to help the extension users debug any potential issues. (
+              <a
+                class="gfm gfm-issue has-tooltip"
+                data-container="body"
+                data-issue="30087182"
+                data-link="false"
+                data-link-reference="true"
+                data-original="https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/145"
+                data-placement="top"
+                data-project="278964"
+                data-reference-type="issue"
+                href="https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/145"
+                title="Error reporting to VSCode OutputChannel"
+              >
+                #145 (closed)
+              </a>
+              )
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </li>
+  <li
+    class="note system-note"
+  >
+    <div
+      class="timeline-entry-inner"
+    >
+      <div
+        class="timelineIcon"
+      >
+        <span>
+          <svg
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11.325 7.225a4 4 0 1 0-6.65 0A4.002 4.002 0 0 0 2 11v4h12v-4a4.002 4.002 0 0 0-2.675-3.775zM10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 9a2 2 0 0 0-2 2v2h8v-2a2 2 0 0 0-2-2H6z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+      </div>
+       
+      <!---->
+       
+      <div
+        class="timelineContent"
+      >
+        <div
+          class="note-header"
+        >
+          <span
+            style="margin-right: 2px;"
+          >
+            <a
+              href="https://gitlab.com/viktomas"
+              target="_blank"
+            >
+              <!---->
+               
+              <span
+                class="author"
+              >
+                <strong>
+                   Tomas Vik
+                </strong>
+                 
+                <span>
+                   @viktomas
+                </span>
+              </span>
+            </a>
+          </span>
+           
+          <div
+            class="note-body"
+            style="margin-right: 2px;"
+          >
+            <div
+              class="body"
+            >
+              <p>
+                assigned to @viktomas
+              </p>
+              
+
+            </div>
+          </div>
+           ·
+        
+          <date-stub
+            date="2020-12-02T17:00:15Z"
+            style="margin-left: 2px;"
+          />
+        </div>
+      </div>
+    </div>
+  </li>
+  <li
+    class="note system-note"
+  >
+    <div
+      class="timeline-entry-inner"
+    >
+      <div
+        class="timelineIcon"
+      >
+        <span>
+          <svg
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11.325 7.225a4 4 0 1 0-6.65 0A4.002 4.002 0 0 0 2 11v4h12v-4a4.002 4.002 0 0 0-2.675-3.775zM10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 9a2 2 0 0 0-2 2v2h8v-2a2 2 0 0 0-2-2H6z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+      </div>
+       
+      <!---->
+       
+      <div
+        class="timelineContent"
+      >
+        <div
+          class="note-header"
+        >
+          <span
+            style="margin-right: 2px;"
+          >
+            <a
+              href="https://gitlab.com/viktomas"
+              target="_blank"
+            >
+              <!---->
+               
+              <span
+                class="author"
+              >
+                <strong>
+                   Tomas Vik
+                </strong>
+                 
+                <span>
+                   @viktomas
+                </span>
+              </span>
+            </a>
+          </span>
+           
+          <div
+            class="note-body"
+            style="margin-right: 2px;"
+          >
+            <div
+              class="body"
+            >
+              <p>
+                assigned to @vymarkov
+              </p>
+              
+
+            </div>
+          </div>
+           ·
+        
+          <date-stub
+            date="2020-12-02T17:00:22Z"
+            style="margin-left: 2px;"
+          />
+        </div>
+      </div>
+    </div>
+  </li>
+  <li
+    class="note system-note"
+  >
+    <div
+      class="timeline-entry-inner"
+    >
+      <div
+        class="timelineIcon"
+      >
+        <span>
+          <svg
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14 1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.71L1.5 14.855A1 1 0 0 1 0 13.99V3a2 2 0 0 1 2-2h12zm0 2H2v9.257L4.175 11H14V3zM5 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+      </div>
+       
+      <!---->
+       
+      <div
+        class="timelineContent"
+      >
+        <div
+          class="note-header"
+        >
+          <span
+            style="margin-right: 2px;"
+          >
+            <a
+              href="https://gitlab.com/gitlab-bot"
+              target="_blank"
+            >
+              <!---->
+               
+              <span
+                class="author"
+              >
+                <strong>
+                   🤖 GitLab Bot 🤖
+                </strong>
+                 
+                <span>
+                   @gitlab-bot
+                </span>
+              </span>
+            </a>
+          </span>
+           
+          <div
+            class="note-body"
+            style="margin-right: 2px;"
+          >
+            <div
+              class="body"
+            >
+              <p>
+                mentioned in issue gitlab-org/quality/triage-reports#1062
+              </p>
+              
+
+            </div>
+          </div>
+           ·
+        
+          <date-stub
+            date="2020-12-03T00:11:43Z"
+            style="margin-left: 2px;"
+          />
+        </div>
+      </div>
+    </div>
+  </li>
+  <li
+    class="note"
+  >
+    <div
+      class="timeline-entry-inner"
+    >
+      <div
+        class="timelineIcon"
+      >
+        <span>
+          <a
+            href="https://gitlab.com/vymarkov"
+            target="_blank"
+          >
+            <img
+              class="avatar s40"
+              src="https://secure.gravatar.com/avatar/24d3a696fcc9592d18db6e623c0e654e?s=80&d=identicon"
+            />
+             
+            <!---->
+          </a>
+        </span>
+      </div>
+       
+      <div
+        class="timelineContent"
+      >
+        <div
+          class="note-header"
+        >
+          <span
+            style="margin-right: 2px;"
+          >
+            <a
+              href="https://gitlab.com/vymarkov"
+              target="_blank"
+            >
+              <!---->
+               
+              <span
+                class="author"
+              >
+                <strong>
+                   Vitaly Markov
+                </strong>
+                 
+                <span>
+                   @vymarkov
+                </span>
+              </span>
+            </a>
+          </span>
+          
+        ·
+        
+          <date-stub
+            date="2020-12-03T10:58:37Z"
+            style="margin-left: 2px;"
+          />
+        </div>
+         
+        <div
+          class="note-body"
+        >
+          <div
+            class="body"
+          >
+            <blockquote
+              data-sourcepos="1:1-1:135"
+              dir="auto"
+            >
+              
+
+              <p
+                data-sourcepos="1:3-1:135"
+              >
+                I think we should still show some message to the user when they try to run 
+                <code>
+                  GitLab: *
+                </code>
+                 command and the extension fails to execute it.
+              </p>
+              
+
+            </blockquote>
+            
+
+            <p
+              data-sourcepos="3:1-3:64"
+              dir="auto"
+            >
+              Will it be enough to log the error message 
+              <code>
+                project not found
+              </code>
+              ?
+            </p>
+            
+
+            <p
+              data-sourcepos="5:1-5:129"
+              dir="auto"
+            >
+              It's critical issue, I can't use ext cause I have on my workspace some repo from Github, it lead to issue what I'm trying to fix.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </li>
+  <li
+    class="note system-note"
+  >
+    <div
+      class="timeline-entry-inner"
+    >
+      <div
+        class="timelineIcon"
+      >
+        <span>
+          <svg
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14 1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.71L1.5 14.855A1 1 0 0 1 0 13.99V3a2 2 0 0 1 2-2h12zm0 2H2v9.257L4.175 11H14V3zM5 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+      </div>
+       
+      <!---->
+       
+      <div
+        class="timelineContent"
+      >
+        <div
+          class="note-header"
+        >
+          <span
+            style="margin-right: 2px;"
+          >
+            <a
+              href="https://gitlab.com/viktomas"
+              target="_blank"
+            >
+              <!---->
+               
+              <span
+                class="author"
+              >
+                <strong>
+                   Tomas Vik
+                </strong>
+                 
+                <span>
+                   @viktomas
+                </span>
+              </span>
+            </a>
+          </span>
+           
+          <div
+            class="note-body"
+            style="margin-right: 2px;"
+          >
+            <div
+              class="body"
+            >
+              <p>
+                mentioned in issue #275
+              </p>
+              
+
+            </div>
+          </div>
+           ·
+        
+          <date-stub
+            date="2020-12-03T12:50:21Z"
+            style="margin-left: 2px;"
+          />
+        </div>
+      </div>
+    </div>
+  </li>
+</ul>
+`;

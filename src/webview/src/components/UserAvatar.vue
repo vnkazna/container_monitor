@@ -35,14 +35,17 @@ export default {
     sizeClass() {
       return `s${this.size}`;
     },
+    userUrl() {
+      return this.user.webUrl || this.user.web_url; // labels contain snake_case variables
+    },
   },
 };
 </script>
 
 <template>
   <span>
-    <component :is="showLink ? 'a' : 'span'" :href="user.web_url" target="_blank">
-      <img v-if="showAvatar" :src="user.avatar_url" :class="sizeClass" class="avatar" />
+    <component :is="showLink ? 'a' : 'span'" :href="userUrl" target="_blank">
+      <img v-if="showAvatar" :src="user.avatarUrl" :class="sizeClass" class="avatar" />
       <span v-if="showUsername" class="author">
         <strong> {{ user.name }}</strong>
         <span v-if="showHandle"> @{{ user.username }}</span>

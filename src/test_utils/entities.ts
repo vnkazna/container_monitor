@@ -11,6 +11,9 @@ export const issuable: RestIssuable = {
       'https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon',
     name: 'Tomas Vik',
   },
+  references: {
+    full: 'gitlab-org/gitlab#1000',
+  },
 };
 
 export const diffFile: RestDiffFile = {

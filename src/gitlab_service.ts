@@ -11,6 +11,7 @@ import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
 import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
+import { GitLabNewService, GqlDiscussion } from './gitlab/gitlab_new_service';
 
 interface GitLabProject {
   id: number;
@@ -517,34 +518,6 @@ interface Discussion {
   }[];
 }
 
-export async function fetchDiscussions(issuable: RestIssuable, page = 1): Promise<Discussion[]> {
-  let discussions: Discussion[] = [];
-
-  try {
-    const type = issuable.sha ? 'merge_requests' : 'issues';
-    const { response, headers } = await fetch(
-      `/projects/${issuable.project_id}/${type}/${issuable.iid}/discussions?sort=asc&per_page=5&page=${page}`,
-    );
-    discussions = response;
-    if (page === 1 && headers['x-next-page'] !== '') {
-      const pages = [];
-      // Temporarily disable eslint to be able to start enforcing stricter rules
-      // eslint-disable-next-line no-plusplus
-      for (let i = 2; i <= headers['x-total-pages']; i++) {
-        pages.push(fetchDiscussions(issuable, i));
-      }
-      const results = await Promise.all(pages);
-      results.forEach(result => {
-        discussions = discussions.concat(result);
-      });
-    }
-  } catch (e) {
-    handleError(new UserFriendlyError('Failed to fetch discussions for this issuable.', e));
-  }
-
-  return discussions;
-}
-
 export async function renderMarkdown(markdown: string, workspaceFolder: string) {
   let rendered = { html: markdown };
   const version = await fetchVersion();
@@ -594,22 +567,27 @@ export async function saveNote(params: {
   return { success: false };
 }
 
-type note = Discussion | LabelEvent;
+type note = GqlDiscussion | LabelEvent;
 
 function isLabelEvent(object: any): object is LabelEvent {
   return Boolean(object.label);
 }
 
 export async function fetchDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<note[]> {
+  // obtaining GitLabNewService in GitLabService is temporary and will be removed in this or the next MR
+  const instanceUrl = await createGitService(
+    (await getCurrentWorkspaceFolder()) || '',
+  ).fetchCurrentInstanceUrl();
+  const gitlabNewService = new GitLabNewService(instanceUrl);
   const [discussions, labelEvents] = await Promise.all([
-    fetchDiscussions(issuable),
+    gitlabNewService.getDiscussions(issuable),
     fetchLabelEvents(issuable),
   ]);
 
   const combinedEvents: note[] = [...discussions, ...labelEvents];
   combinedEvents.sort((a: note, b: note) => {
-    const aCreatedAt = isLabelEvent(a) ? a.created_at : a.notes[0].created_at;
-    const bCreatedAt = isLabelEvent(b) ? b.created_at : b.notes[0].created_at;
+    const aCreatedAt = isLabelEvent(a) ? a.created_at : a.createdAt;
+    const bCreatedAt = isLabelEvent(b) ? b.created_at : b.createdAt;
     return aCreatedAt < bCreatedAt ? -1 : 1;
   });
 
