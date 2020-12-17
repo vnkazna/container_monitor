@@ -1,7 +1,14 @@
 <script>
-const moment = require('moment-timezone');
+const dayjs = require('dayjs');
+const dayjsUtc = require('dayjs/plugin/utc');
+const dayjsTimezone = require('dayjs/plugin/timezone');
+const dayjsRelativeTime = require('dayjs/plugin/relativeTime');
 
-moment.tz.setDefault(Intl.DateTimeFormat().resolvedOptions().timeZone);
+dayjs.extend(dayjsRelativeTime);
+dayjs.extend(dayjsUtc);
+dayjs.extend(dayjsTimezone);
+
+dayjs.tz.setDefault(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
 export default {
   props: {
@@ -12,10 +19,10 @@ export default {
   },
   computed: {
     dateAgo() {
-      return moment(this.date).fromNow();
+      return dayjs(this.date).fromNow();
     },
     formatedDate() {
-      return moment(this.date).format('MMM D, YYYY h:mma [GMT]ZZ');
+      return dayjs(this.date).format('MMM D, YYYY h:mma [GMT]ZZ');
     },
   },
 };

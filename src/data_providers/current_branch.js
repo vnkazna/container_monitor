@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const moment = require('moment');
+const dayjs = require('dayjs');
 const gitLabService = require('../gitlab_service');
 const { ErrorItem } = require('./items/error_item');
 const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
@@ -7,6 +7,8 @@ const { handleError, logError } = require('../log');
 const { MrItem } = require('./items/mr_item');
 const { IssueItem } = require('./items/issue_item');
 const { ExternalUrlItem } = require('./items/external_url_item');
+
+dayjs.extend(require('dayjs/plugin/relativeTime'));
 
 class DataProvider {
   constructor() {
@@ -37,7 +39,7 @@ class DataProvider {
       canceled: 'Canceled',
       skipped: 'Skipped',
     };
-    const timeAgo = moment(pipeline.updated_at).fromNow();
+    const timeAgo = dayjs(pipeline.updated_at).fromNow();
     const actionText = actions[pipeline.status] || '';
 
     const message = `Pipeline #${pipeline.id} ${statusText} · ${actionText} ${timeAgo}`;
