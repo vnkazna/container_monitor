@@ -20,10 +20,10 @@ export default {
   },
   computed: {
     initialDiscussion() {
-      return this.noteable.notes[0];
+      return this.noteable.notes.nodes[0];
     },
     replies() {
-      return this.noteable.notes.slice(1);
+      return this.noteable.notes.nodes.slice(1);
     },
     hasReplies() {
       return this.replies.length > 0;

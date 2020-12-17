@@ -8,5 +8,6 @@ module.exports = {
   coverageProvider: 'v8',
   coverageReporters: ['lcov'],
   roots: ['src'],
+  testPathIgnorePatterns: ['/node_modules/', '/src/webview/'],
   testEnvironment: 'node',
 };

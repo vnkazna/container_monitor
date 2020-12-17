@@ -15,6 +15,9 @@ interface RestIssuable {
   web_url: string;
   author: { name: string; avatar_url: string };
   sha?: string; // only present in MR, legacy logic uses the presence to decide issuable type
+  references: {
+    full: string; // e.g. "gitlab-org/gitlab#219925"
+  };
 }
 
 interface RestMrVersion {
