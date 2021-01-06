@@ -52,7 +52,7 @@ interface GqlNote {
   body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
   bodyHtml: string;
 }
-export interface GqlDiscussion {
+interface GqlDiscussion {
   replyId: string;
   createdAt: string;
   notes: Node<GqlNote>;
@@ -65,6 +65,19 @@ interface GqlDiscussionsProject {
   issue?: {
     discussions: Node<GqlDiscussion>;
   };
+}
+
+interface RestLabelEvent {
+  label: unknown;
+  body: string;
+  // eslint-disable-next-line camelcase
+  created_at: string;
+}
+
+type Note = GqlDiscussion | RestLabelEvent;
+
+function isLabelEvent(note: Note): note is RestLabelEvent {
+  return (note as RestLabelEvent).label !== undefined;
 }
 
 const queryGetSnippets = gql`
@@ -253,7 +266,10 @@ export class GitLabNewService {
     };
   }
 
-  async getDiscussions(issuable: RestIssuable, endCursor?: string): Promise<GqlDiscussion[]> {
+  private async getDiscussions(
+    issuable: RestIssuable,
+    endCursor?: string,
+  ): Promise<GqlDiscussion[]> {
     const [projectPath] = issuable.references.full.split(/[#!]/);
     const query = issuable.sha ? queryGetMrDiscussions : queryGetIssueDiscussions;
     const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
@@ -271,5 +287,31 @@ export class GitLabNewService {
       return [...discussions.nodes, ...remainingPages];
     }
     return discussions.nodes.map(n => this.addHostToUrl(n));
+  }
+
+  private async getLabelEvents(issuable: RestIssuable): Promise<RestLabelEvent[]> {
+    const type = issuable.sha ? 'merge_requests' : 'issues';
+    const labelEventsUrl = `${this.instanceUrl}/api/v4/projects/${issuable.project_id}/${type}/${issuable.iid}/resource_label_events?sort=asc&per_page=100`;
+    const result = await crossFetch(labelEventsUrl, this.fetchOptions);
+    if (!result.ok) {
+      throw new FetchError(`Fetching file from ${labelEventsUrl} failed`, result);
+    }
+    return result.json();
+  }
+
+  async getDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<Note[]> {
+    const [discussions, labelEvents] = await Promise.all([
+      this.getDiscussions(issuable),
+      this.getLabelEvents(issuable),
+    ]);
+
+    const combinedEvents: Note[] = [...discussions, ...labelEvents];
+    combinedEvents.sort((a: Note, b: Note) => {
+      const aCreatedAt = isLabelEvent(a) ? a.created_at : a.createdAt;
+      const bCreatedAt = isLabelEvent(b) ? b.created_at : b.createdAt;
+      return aCreatedAt < bCreatedAt ? -1 : 1;
+    });
+
+    return combinedEvents;
   }
 }

@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
-const { createGitService } = require('./git_service_factory');
+const { createGitService } = require('./service_factory');
 const { handleError } = require('./log');
 const { VS_COMMANDS } = require('./command_names');
 

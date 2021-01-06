@@ -5,13 +5,12 @@ import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
 import { getCurrentWorkspaceFolder } from './services/workspace_service';
-import { createGitService } from './git_service_factory';
+import { createGitService } from './service_factory';
 import { GitRemote } from './git/git_remote_parser';
 import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
 import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
-import { GitLabNewService, GqlDiscussion } from './gitlab/gitlab_new_service';
 
 interface GitLabProject {
   id: number;
@@ -482,35 +481,6 @@ export async function validateCIConfig(content: string) {
 
   return validCIConfig;
 }
-
-interface LabelEvent {
-  label: unknown;
-  body: string;
-  // eslint-disable-next-line camelcase
-  created_at: string;
-}
-
-export async function fetchLabelEvents(issuable: RestIssuable): Promise<LabelEvent[]> {
-  let labelEvents: LabelEvent[] = [];
-
-  try {
-    const type = issuable.sha ? 'merge_requests' : 'issues';
-    const { response } = await fetch(
-      `/projects/${issuable.project_id}/${type}/${issuable.iid}/resource_label_events?sort=asc&per_page=100`,
-    );
-    labelEvents = response;
-  } catch (e) {
-    handleError(new UserFriendlyError('Failed to fetch label events for this issuable.', e));
-  }
-
-  labelEvents.forEach(el => {
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-param-reassign
-    el.body = '';
-  });
-  return labelEvents;
-}
-
 interface Discussion {
   notes: {
     // eslint-disable-next-line camelcase
@@ -565,31 +535,4 @@ export async function saveNote(params: {
   }
 
   return { success: false };
-}
-
-type note = GqlDiscussion | LabelEvent;
-
-function isLabelEvent(object: any): object is LabelEvent {
-  return Boolean(object.label);
-}
-
-export async function fetchDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<note[]> {
-  // obtaining GitLabNewService in GitLabService is temporary and will be removed in this or the next MR
-  const instanceUrl = await createGitService(
-    (await getCurrentWorkspaceFolder()) || '',
-  ).fetchCurrentInstanceUrl();
-  const gitlabNewService = new GitLabNewService(instanceUrl);
-  const [discussions, labelEvents] = await Promise.all([
-    gitlabNewService.getDiscussions(issuable),
-    fetchLabelEvents(issuable),
-  ]);
-
-  const combinedEvents: note[] = [...discussions, ...labelEvents];
-  combinedEvents.sort((a: note, b: note) => {
-    const aCreatedAt = isLabelEvent(a) ? a.created_at : a.createdAt;
-    const bCreatedAt = isLabelEvent(b) ? b.created_at : b.createdAt;
-    return aCreatedAt < bCreatedAt ? -1 : 1;
-  });
-
-  return combinedEvents;
 }

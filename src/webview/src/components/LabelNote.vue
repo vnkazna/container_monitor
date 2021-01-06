@@ -1,5 +1,4 @@
 <script>
-import NoteBody from './NoteBody';
 import UserAvatar from './UserAvatar';
 import icons from '../assets/icons';
 import Date from './Date';
@@ -12,26 +11,25 @@ export default {
     },
   },
   components: {
-    NoteBody,
     UserAvatar,
     Date,
   },
+  data: () => ({
+    icon: icons.label,
+  }),
   computed: {
     author() {
       return this.noteable.user;
     },
-    note() {
-      if (this.noteable.body === '') {
-        const action = this.noteable.action === 'add' ? 'added' : 'removed';
-        // FIXME: disabling rule to limit changes to production code when introducing eslint
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.noteable.body = `${action} ~${this.noteable.label.name} label`;
-      }
-      return this.noteable;
+    action() {
+      return this.noteable.action === 'add' ? 'added' : 'removed';
     },
-  },
-  created() {
-    this.icon = icons.label;
+    labelName() {
+      return this.noteable.label.name.split('::')[0];
+    },
+    scopedName() {
+      return this.noteable.label.name.split('::')[1];
+    },
   },
 };
 </script>
@@ -44,9 +42,30 @@ export default {
       </div>
       <div class="timelineContent">
         <div class="note-header">
-          <user-avatar :user="author" :show-avatar="false" style="margin-right: 2px;" />
-          <note-body :note="note" style="margin-right: 2px;" /> ·
-          <date :date="noteable.created_at" style="margin-left: 2px;" />
+          <user-avatar :user="author" :show-avatar="false" />
+          <span class="label-action">{{ action }}</span>
+          <span
+            class="label-pill"
+            v-tooltip="noteable.label.description"
+            :style="{
+              backgroundColor: noteable.label.color,
+              color: noteable.label.text_color,
+              borderColor: noteable.label.color,
+            }"
+          >
+            <span class="label-name">{{ labelName }}</span>
+            <span
+              class="scoped-pill"
+              v-if="scopedName"
+              :style="{
+                backgroundColor: noteable.label.text_color,
+                color: noteable.label.color,
+              }"
+              >{{ scopedName }}</span
+            >
+          </span>
+          <span class="label-divider">label ·</span>
+          <date :date="noteable.created_at" />
         </div>
       </div>
     </div>
@@ -89,6 +108,34 @@ export default {
       overflow-x: hidden;
       overflow-y: hidden;
       display: block;
+    }
+  }
+
+  .note-header {
+    align-items: baseline;
+    .label-action,
+    .label-divider,
+    .label-pill {
+      margin-right: 3px;
+    }
+  }
+
+  .label-pill {
+    line-height: 1rem;
+    font-size: 0.75rem;
+    border-radius: 0.6rem; // slightly larger than the line-height because of the 1px border
+    border-width: 1px;
+    border-style: solid;
+    display: flex;
+    .label-name,
+    .scoped-pill {
+      padding: 0 3px;
+    }
+
+    .scoped-pill {
+      border-top-right-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+      height: 100%;
     }
   }
 
