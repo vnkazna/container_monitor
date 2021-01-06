@@ -1,7 +1,6 @@
 import { TreeItem, TreeItemCollapsibleState, ThemeIcon, Uri } from 'vscode';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
-import { GitLabNewService } from '../../gitlab/gitlab_new_service';
-import { createGitService } from '../../git_service_factory';
+import { createGitLabNewService } from '../../service_factory';
 import { ChangedFileItem } from './changed_file_item';
 
 export class MrItem extends TreeItem {
@@ -29,9 +28,7 @@ export class MrItem extends TreeItem {
   }
 
   private async getChangedFiles(): Promise<TreeItem[]> {
-    const gitService = createGitService(this.project.uri);
-    const instanceUrl = await gitService.fetchCurrentInstanceUrl();
-    const gitlabService = new GitLabNewService(instanceUrl);
+    const gitlabService = await createGitLabNewService(this.project.uri);
     const mrVersion = await gitlabService.getMrDiff(this.mr);
     return mrVersion.diffs.map(d => new ChangedFileItem(this.mr, mrVersion, d, this.project));
   }

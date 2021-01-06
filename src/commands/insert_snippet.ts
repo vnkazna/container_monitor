@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { GitLabNewService, GqlSnippet, GqlBlob } from '../gitlab/gitlab_new_service';
-import { createGitService } from '../git_service_factory';
+import { GqlSnippet, GqlBlob } from '../gitlab/gitlab_new_service';
+import { createGitService, createGitLabNewService } from '../service_factory';
 import { getCurrentWorkspaceFolderOrSelectOne } from '../services/workspace_service';
 
 const pickSnippet = async (snippets: GqlSnippet[]) => {
@@ -32,8 +32,7 @@ export const insertSnippet = async (): Promise<void> => {
     return;
   }
   const gitService = createGitService(workspaceFolder);
-  const instanceUrl = await gitService.fetchCurrentInstanceUrl();
-  const gitLabService = new GitLabNewService(instanceUrl);
+  const gitLabService = await createGitLabNewService(workspaceFolder);
   const remote = await gitService.fetchGitRemote();
   if (!remote) {
     throw new Error('Could not get parsed remote for your workspace');

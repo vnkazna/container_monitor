@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { GitService } from './git_service';
 import { tokenService } from './services/token_service';
 import { log } from './log';
+import { GitLabNewService } from './gitlab/gitlab_new_service';
 
 export function createGitService(workspaceFolder: string): GitService {
   const { instanceUrl, remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration(
@@ -17,4 +18,9 @@ export function createGitService(workspaceFolder: string): GitService {
     tokenService,
     log,
   });
+}
+
+export async function createGitLabNewService(workspaceFolder: string): Promise<GitLabNewService> {
+  const gitService = createGitService(workspaceFolder);
+  return new GitLabNewService(await gitService.fetchCurrentInstanceUrl());
 }

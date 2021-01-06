@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
+const { createGitLabNewService } = require('./service_factory');
 
 let context = null;
 
@@ -84,8 +85,13 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
     });
 
     if (response.success !== false) {
-      const discussions = await gitLabService.fetchDiscussionsAndLabelEvents(issuable);
-      panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions });
+      const gitlabNewService = await createGitLabNewService(workspaceFolder);
+      const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(issuable);
+      panel.webview.postMessage({
+        type: 'issuableFetch',
+        issuable,
+        discussions: discussionsAndLabels,
+      });
       panel.webview.postMessage({ type: 'noteSaved' });
     } else {
       panel.webview.postMessage({ type: 'noteSaved', status: false });
@@ -93,7 +99,7 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
   }
 };
 
-async function handleChangeViewState(panel, issuable) {
+async function handleChangeViewState(panel, issuable, workspaceFolder) {
   if (!panel.active) return;
 
   const appReadyPromise = new Promise(resolve => {
@@ -105,9 +111,10 @@ async function handleChangeViewState(panel, issuable) {
     });
   });
 
-  const discussonsAndLabels = await gitLabService.fetchDiscussionsAndLabelEvents(issuable);
+  const gitlabNewService = await createGitLabNewService(workspaceFolder);
+  const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(issuable);
   await appReadyPromise;
-  panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: discussonsAndLabels });
+  panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: discussionsAndLabels });
 }
 
 const getIconPathForIssuable = issuable => {
@@ -130,7 +137,7 @@ async function create(issuable, workspaceFolder) {
   panel.iconPath = getIconPathForIssuable(issuable);
 
   panel.onDidChangeViewState(() => {
-    handleChangeViewState(panel, issuable);
+    handleChangeViewState(panel, issuable, workspaceFolder);
   });
 
   panel.webview.onDidReceiveMessage(createMessageHandler(panel, issuable, workspaceFolder));
