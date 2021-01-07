@@ -140,7 +140,7 @@ async function fetchMRIssues(workspaceFolder) {
 }
 
 async function fetchBranchMR() {
-  let text = '$(git-pull-request) GitLab: No MR.';
+  let text = '$(git-pull-request) GitLab: Create MR.';
   let workspaceFolder = null;
   let project = null;
 
@@ -178,7 +178,7 @@ const initMrStatus = async () => {
     if (mr) {
       openers.openUrl(mr.web_url);
     } else {
-      vscode.window.showInformationMessage('GitLab Workflow: No MR found for this branch.');
+      openers.openCreateNewMr();
     }
   });
 
