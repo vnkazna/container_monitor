@@ -118,6 +118,9 @@ export default {
     .label-pill {
       margin-right: 3px;
     }
+    .label-action {
+      margin-left: 3px;
+    }
   }
 
   .label-pill {
