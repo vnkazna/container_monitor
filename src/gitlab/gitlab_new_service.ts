@@ -132,12 +132,15 @@ const discussionsFragment = gql`
     }
   }
 `;
-const queryGetMrDiscussions = gql`
+
+const constructGetDiscussionsQuery = (isMr: boolean) => gql`
   ${discussionsFragment}
-  query GetMrDiscussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
+  query Get${
+    isMr ? 'Mr' : 'Issue'
+  }Discussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
     project(fullPath: $projectPath) {
       id
-      mergeRequest(iid: $iid) {
+      ${isMr ? 'mergeRequest' : 'issue'}(iid: $iid) {
         discussions(after: $afterCursor) {
           ...discussions
         }
@@ -146,19 +149,18 @@ const queryGetMrDiscussions = gql`
   }
 `;
 
-const queryGetIssueDiscussions = gql`
-  ${discussionsFragment}
-  query GetIssueDiscussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
-    project(fullPath: $projectPath) {
-      id
-      issue(iid: $iid) {
-        discussions(after: $afterCursor) {
-          ...discussions
-        }
-      }
+const createNoteMutation = gql`
+  mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
+    createNote(input: { noteableId: $issuableId, body: $body, discussionId: $replyId }) {
+      errors
     }
   }
 `;
+
+const getProjectPath = (issuable: RestIssuable) => issuable.references.full.split(/[#!]/)[0];
+const isMr = (issuable: RestIssuable) => Boolean(issuable.sha);
+const getIssuableGqlId = (issuable: RestIssuable) =>
+  `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
 
 export class GitLabNewService {
   client: GraphQLClient;
@@ -270,8 +272,8 @@ export class GitLabNewService {
     issuable: RestIssuable,
     endCursor?: string,
   ): Promise<GqlDiscussion[]> {
-    const [projectPath] = issuable.references.full.split(/[#!]/);
-    const query = issuable.sha ? queryGetMrDiscussions : queryGetIssueDiscussions;
+    const projectPath = getProjectPath(issuable);
+    const query = constructGetDiscussionsQuery(isMr(issuable));
     const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
       projectPath,
       iid: String(issuable.iid),
@@ -280,7 +282,7 @@ export class GitLabNewService {
     assert(result.project, `Project ${projectPath} was not found.`);
     const discussions =
       result.project.issue?.discussions || result.project.mergeRequest?.discussions;
-    assert(discussions, `Discussions for issuable ${projectPath}#!${issuable.iid} were not found.`);
+    assert(discussions, `Discussions for issuable ${issuable.references.full} were not found.`);
     if (discussions.pageInfo?.hasNextPage) {
       assert(discussions.pageInfo.endCursor);
       const remainingPages = await this.getDiscussions(issuable, discussions.pageInfo.endCursor);
@@ -290,7 +292,7 @@ export class GitLabNewService {
   }
 
   private async getLabelEvents(issuable: RestIssuable): Promise<RestLabelEvent[]> {
-    const type = issuable.sha ? 'merge_requests' : 'issues';
+    const type = isMr(issuable) ? 'merge_requests' : 'issues';
     const labelEventsUrl = `${this.instanceUrl}/api/v4/projects/${issuable.project_id}/${type}/${issuable.iid}/resource_label_events?sort=asc&per_page=100`;
     const result = await crossFetch(labelEventsUrl, this.fetchOptions);
     if (!result.ok) {
@@ -313,5 +315,13 @@ export class GitLabNewService {
     });
 
     return combinedEvents;
+  }
+
+  async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<void> {
+    await this.client.request<void>(createNoteMutation, {
+      issuableId: getIssuableGqlId(issuable),
+      body,
+      replyId,
+    });
   }
 }

@@ -4,7 +4,8 @@ import Discussion from './Discussion';
 import SystemNote from './SystemNote';
 import LabelNote from './LabelNote';
 
-const hasSingleNote = discussion => discussion.notes && discussion.notes.nodes.length === 1;
+const isLabel = discussion => Boolean(discussion.label);
+const isSystem = discussion => discussion.notes && discussion.notes.nodes[0].system;
 
 export default {
   props: {
@@ -21,24 +22,18 @@ export default {
   },
   methods: {
     getComponentName(discussion) {
-      if (hasSingleNote(discussion)) {
-        if (discussion.notes.nodes[0].system) {
-          return SystemNote;
-        }
-
-        return Note;
-      }
-      if (discussion.label) {
+      if (isLabel(discussion)) {
         return LabelNote;
+      }
+      if (isSystem(discussion)) {
+        return SystemNote;
       }
 
       return Discussion;
     },
     getComponentData(discussion) {
-      if (discussion.label) {
-        return discussion;
-      }
-      return hasSingleNote(discussion) ? discussion.notes.nodes[0] : discussion;
+      // only system component needs us to pass down the first (and only) note
+      return isSystem(discussion) ? discussion.notes.nodes[0] : discussion;
     },
   },
 };
@@ -79,7 +74,7 @@ export default {
     bottom: 0;
     width: 2px;
     box-sizing: border-box;
-    z-index: 4px;
+    z-index: -1;
   }
 }
 </style>

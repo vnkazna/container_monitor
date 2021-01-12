@@ -1,5 +1,6 @@
 <script>
 import Note from './Note';
+import CommentForm from './CommentForm';
 import icons from '../assets/icons';
 
 export default {
@@ -13,10 +14,13 @@ export default {
   data() {
     return {
       isRepliesVisible: true,
+      isEditing: false,
+      reply: '',
     };
   },
   components: {
     Note,
+    CommentForm,
   },
   computed: {
     initialDiscussion() {
@@ -39,6 +43,9 @@ export default {
     toggleReplies() {
       this.isRepliesVisible = !this.isRepliesVisible;
     },
+    toggleEditting() {
+      this.isEditing = !this.isEditing;
+    },
   },
   created() {
     this.chevronDownSvg = icons.chevronDown;
@@ -48,13 +55,17 @@ export default {
 </script>
 
 <template>
-  <div :class="{ collapsed: !isRepliesVisible }" class="discussion">
+  <div class="discussion">
     <note :noteable="initialDiscussion" />
-    <div v-if="hasReplies" @click="toggleReplies" class="toggle-widget">
+    <button v-if="hasReplies" @click="toggleReplies" class="collapse js-collapse">
       <span class="chevron" v-html="toggleRepliesIcon" /> {{ toggleRepliesText }}
-    </div>
+    </button>
     <template v-if="isRepliesVisible">
       <note v-for="note in replies" :key="note.id" :noteable="note" />
+      <button v-if="!isEditing" class="reply js-reply" @click="toggleEditting">
+        Reply
+      </button>
+      <comment-form v-if="isEditing" :reply-id="noteable.replyId" @cancel-edit="toggleEditting" />
     </template>
   </div>
 </template>
@@ -67,28 +78,34 @@ export default {
   border-radius: 4px;
   background: var(--vscode-editor-background);
 
-  &.collapsed {
-    .toggle-widget {
-      border-radius: 0 0 4px 4px;
-    }
-  }
-
   > .note {
     border: none;
     margin: 0;
   }
 
-  .toggle-widget {
-    background: var(--vscode-activityBar-dropBackground);
-    padding: 8px 16px;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-  }
-
   .chevron svg {
     width: 10px;
     height: 10px;
+  }
+
+  .collapse,
+  .reply {
+    display: inline-block;
+    border: none;
+    color: inherit;
+    background: inherit;
+    margin: 8px 16px;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-size: inherit;
+    outline: 0;
+    &:hover,
+    &:focus {
+      text-decoration: underline;
+    }
+    &:last-child {
+      margin-bottom: 16px;
+    }
   }
 }
 </style>

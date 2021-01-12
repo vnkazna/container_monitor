@@ -51,7 +51,7 @@ export default {
     <template v-else>
       <issuable-details :issuable="issuable" />
       <issuable-discussions :discussions="discussions" />
-      <comment-form :issuable="issuable" />
+      <comment-form />
     </template>
   </div>
 </template>
@@ -88,7 +88,7 @@ export default {
 
 #app {
   margin-bottom: 600px; // to give editor scroll past end effect
-
+  max-width: 960px;
   .loading {
     text-align: center;
     font-size: 14px;

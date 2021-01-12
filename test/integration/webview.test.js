@@ -6,13 +6,9 @@ const { graphql } = require('msw');
 const webviewController = require('../../src/webview_controller');
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
-const discussionsResponse = require('./fixtures/graphql/discussions.json');
+const { projectWithDiscussions } = require('./fixtures/graphql/discussions');
 
-const {
-  getServer,
-  createJsonEndpoint,
-  createPostEndpoint,
-} = require('./test_infrastructure/mock_server');
+const { getServer, createJsonEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 
 const waitForMessage = (panel, type) =>
@@ -33,16 +29,24 @@ describe('GitLab webview', () => {
     server = getServer([
       graphql.query('GetIssueDiscussions', (req, res, ctx) => {
         if (req.variables.projectPath === 'gitlab-org/gitlab')
-          return res(ctx.data(discussionsResponse));
+          return res(ctx.data(projectWithDiscussions));
         return res(ctx.data({ project: null }));
+      }),
+      graphql.mutation('CreateNote', (req, res, ctx) => {
+        const { issuableId, body } = req.variables;
+        if (issuableId === 'gid://gitlab/Issue/35284557' && body === 'Hello')
+          return res(
+            ctx.data({
+              createNote: {
+                errors: [],
+              },
+            }),
+          );
+        return res(ctx.status(500));
       }),
       createJsonEndpoint(
         `/projects/${openIssueResponse.project_id}/issues/${openIssueResponse.iid}/resource_label_events`,
         [],
-      ),
-      createPostEndpoint(
-        `/projects/${openIssueResponse.project_id}/issues/${openIssueResponse.iid}/notes`,
-        {},
       ),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
@@ -91,9 +95,7 @@ describe('GitLab webview', () => {
   it('sends a message', async () => {
     webviewPanel.webview.postMessage({
       command: 'saveNote',
-      issuable: openIssueResponse,
       note: 'Hello',
-      noteType: { path: 'issues' },
     });
     const sentMessage = await waitForMessage(webviewPanel, 'noteSaved');
     assert.strictEqual(sentMessage.type, 'noteSaved');

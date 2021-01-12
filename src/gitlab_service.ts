@@ -516,23 +516,3 @@ export async function renderMarkdown(markdown: string, workspaceFolder: string) 
 
   return rendered.html;
 }
-
-export async function saveNote(params: {
-  issuable: RestIssuable;
-  note: string;
-  noteType: { path: string };
-}) {
-  try {
-    const projectId = params.issuable.project_id;
-    const { iid } = params.issuable;
-    const { path } = params.noteType;
-    const { response } = await fetch(`/projects/${projectId}/${path}/${iid}/notes`, 'POST', {
-      body: params.note,
-    });
-    return response;
-  } catch (e) {
-    logError(e);
-  }
-
-  return { success: false };
-}
