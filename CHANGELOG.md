@@ -1,3 +1,26 @@
+# [3.9.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.8.0...v3.9.0) (2021-01-12)
+
+
+### Bug Fixes
+
+* **webview:** can't respond in comment thread in webview for MR/Issue ([32c38f5](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/32c38f58c471fea2aafce55777bdfc29d4c980a2))
+* **webview:** cosmetic fix of label note component ([7ce85cb](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/7ce85cba466ada35c1adb547296b5aeb4ef29fdc))
+* **webview:** highlighting labels (including scoped) ([b30a7fd](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b30a7fd3fdfd828a8a029c8fa61211d8a5a317b0))
+
+
+### Features
+
+* **statusbar:** create merge request when none exist for current branch ([33822ff](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/33822ff2a2a23d22a446d2fff3856fa1943aa47a)), closes [#291](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/291)
+
+
+### Performance Improvements
+
+* **webview:** use GraphQL to load MR/Issue discussions ([bdcd20f](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bdcd20fdb652f20a1eebffcdc001256860ac485f))
+* reduce packaged extension size ([8d616d2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/8d616d2be2e010d98f6992fdc62c942e458e7307))
+* replace moment with dayjs dependency ([4df1b48](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/4df1b4838f1cb5608771ac1978cdb484daa4a7e5))
+
+
+
 # [3.8.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.7.0...v3.8.0) (2020-12-16)
 
 
