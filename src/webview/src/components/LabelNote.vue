@@ -82,7 +82,8 @@ export default {
   position: static;
 
   &:last-child {
-    position: relative;
+    // hides the timeline that connects all notes (through avatar pictures)
+    background: var(--vscode-editor-background);
   }
 
   .timelineContent {

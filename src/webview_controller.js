@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const { createGitLabNewService } = require('./service_factory');
+const { logError } = require('./log');
 
 let context = null;
 
@@ -53,6 +54,7 @@ const createPanel = issuable => {
   return vscode.window.createWebviewPanel('glWorkflow', title, vscode.ViewColumn.One, {
     enableScripts: true,
     localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'src'))],
+    retainContextWhenHidden: true,
   });
 };
 
@@ -78,14 +80,9 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
   }
 
   if (message.command === 'saveNote') {
-    const response = await gitLabService.saveNote({
-      issuable: message.issuable,
-      note: message.note,
-      noteType: message.noteType,
-    });
-
-    if (response.success !== false) {
-      const gitlabNewService = await createGitLabNewService(workspaceFolder);
+    const gitlabNewService = await createGitLabNewService(workspaceFolder);
+    try {
+      await gitlabNewService.createNote(issuable, message.note, message.replyId);
       const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(issuable);
       panel.webview.postMessage({
         type: 'issuableFetch',
@@ -93,7 +90,8 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
         discussions: discussionsAndLabels,
       });
       panel.webview.postMessage({ type: 'noteSaved' });
-    } else {
+    } catch (e) {
+      logError(e);
       panel.webview.postMessage({ type: 'noteSaved', status: false });
     }
   }

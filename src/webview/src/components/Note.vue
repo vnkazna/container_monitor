@@ -45,11 +45,9 @@ export default {
 <style lang="scss">
 .note {
   border: 1px solid;
-  border-color: var(--vscode-panel-border);
   border-radius: 4px;
   padding: 16px;
   margin: 16px 0;
-  background: var(--vscode-editor-background);
   box-sizing: border-box;
   display: block;
   position: relative;

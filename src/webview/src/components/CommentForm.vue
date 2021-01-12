@@ -1,9 +1,9 @@
 <script>
 export default {
   props: {
-    issuable: {
-      type: Object,
-      required: true,
+    replyId: {
+      type: String,
+      default: undefined,
     },
   },
   data() {
@@ -21,29 +21,29 @@ export default {
     canSubmit() {
       return !this.isSaving && this.note.length > 0;
     },
+    isThreadReply() {
+      return Boolean(this.replyId);
+    },
   },
   methods: {
-    getNoteType() {
-      return this.issuable.sha
-        ? { type: 'merge_request', path: 'merge_requests' }
-        : { type: 'issue', path: 'issues' };
-    },
     addComment() {
       if (!this.canSubmit) {
         return;
       }
 
-      const { issuable, note, command } = this;
+      const { note, command, replyId } = this;
 
       this.isSaving = true;
       this.isFailed = false;
-      const noteType = this.getNoteType();
-      window.vsCodeApi.postMessage({ command, issuable, note, noteType });
+      window.vsCodeApi.postMessage({ command, note, replyId });
     },
     handleKeydown({ key, ctrlKey, shiftKey, metaKey, altKey }) {
       if (key === 'Enter' && (ctrlKey || metaKey) && !shiftKey && !altKey) {
         this.addComment();
       }
+    },
+    cancelEdit() {
+      this.$emit('cancel-edit');
     },
   },
   mounted() {
@@ -51,6 +51,7 @@ export default {
       if (event.data.type === 'noteSaved') {
         if (event.data.status !== false) {
           this.note = '';
+          this.cancelEdit();
         } else {
           this.isFailed = true;
         }
@@ -63,10 +64,13 @@ export default {
 </script>
 
 <template>
-  <div class="main-comment-form">
+  <div class="main-comment-form" :class="{ 'thread-reply': isThreadReply }">
     <textarea v-model="note" @keydown="handleKeydown" placeholder="Write a comment..." />
-    <button @click="addComment" :disabled="!canSubmit">
+    <button class="primary js-submit" @click="addComment" :disabled="!canSubmit">
       {{ buttonTitle }}
+    </button>
+    <button class="secondary js-cancel" v-if="isThreadReply" @click="cancelEdit">
+      Cancel
     </button>
     <span v-if="isFailed">Failed to save your comment. Please try again.</span>
   </div>
@@ -75,6 +79,11 @@ export default {
 <style lang="scss">
 .main-comment-form {
   margin: 20px 0 30px 0;
+  background: var(--vscode-editor-background);
+  &.thread-reply {
+    padding: 30px;
+    margin: 0px;
+  }
 
   textarea {
     width: 100%;
@@ -84,35 +93,44 @@ export default {
     font-size: 13px;
     box-sizing: border-box;
     border: 1px solid var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
     resize: vertical;
     margin-bottom: 8px;
+    outline: 0;
 
     &:focus {
-      outline: 0;
-      border-color: var(--vscode-focusBorder);
-      box-shadow: 0 0 0 0.2rem var(--vscode-widget-shadow);
+      box-shadow: 0 0 0 1px var(--vscode-focusBorder);
     }
   }
 
   button {
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    border-color: var(--vscode-button-background);
-    border-radius: 3px;
+    border: 0;
     padding: 6px 10px;
     font-size: 14px;
     outline: 0;
     margin-right: 10px;
     cursor: pointer;
 
-    &:disabled {
-      opacity: 0.9;
-      cursor: default;
+    &.primary {
+      background-color: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      &:hover {
+        background-color: var(--vscode-button-hoverBackground);
+      }
     }
 
-    &:hover {
-      background-color: var(--vscode-button-hoverBackground);
-      border-color: var(--vscode-button-hoverBackground);
+    &.secondary {
+      background-color: var(--vscode-button-secondaryBackground);
+      color: var(--vscode-button-secondaryForeground);
+      &:hover {
+        background-color: var(--vscode-button-secondaryHoverBackground);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 }
