@@ -47,7 +47,7 @@ describe('GitLab tree view for current branch', () => {
     server = getServer([pipelinesEndpoint, pipelineEndpoint, mrEndpoint, issueEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
-      forCurrentBranch.map(i => i.label),
+      forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
         'Pipeline #47 passed · Finished 4 years ago',
         '!33824 · Web IDE - remove unused actions (mappings)',
@@ -60,7 +60,7 @@ describe('GitLab tree view for current branch', () => {
     server = getServer([mrEndpoint, issueEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
-      forCurrentBranch.map(i => i.label),
+      forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
         'Fetching pipeline failed',
         '!33824 · Web IDE - remove unused actions (mappings)',
@@ -73,7 +73,7 @@ describe('GitLab tree view for current branch', () => {
     server = getServer([pipelinesEndpoint, pipelineEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
-      forCurrentBranch.map(i => i.label),
+      forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
         'Pipeline #47 passed · Finished 4 years ago',
         'Fetching MR failed',
@@ -86,7 +86,7 @@ describe('GitLab tree view for current branch', () => {
     server = getServer([pipelinesEndpoint, pipelineEndpoint, mrEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
-      forCurrentBranch.map(i => i.label),
+      forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
         'Pipeline #47 passed · Finished 4 years ago',
         '!33824 · Web IDE - remove unused actions (mappings)',
