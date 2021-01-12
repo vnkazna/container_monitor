@@ -11,6 +11,7 @@
 ### Features
 
 * **statusbar:** create merge request when none exist for current branch ([33822ff](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/33822ff2a2a23d22a446d2fff3856fa1943aa47a)), closes [#291](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/291)
+  * Implemented by [@jotoho](https://gitlab.com/jotoho) with [MR !155](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/155) 👍
 
 
 ### Performance Improvements
@@ -18,6 +19,7 @@
 * **webview:** use GraphQL to load MR/Issue discussions ([bdcd20f](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bdcd20fdb652f20a1eebffcdc001256860ac485f))
 * reduce packaged extension size ([8d616d2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/8d616d2be2e010d98f6992fdc62c942e458e7307))
 * replace moment with dayjs dependency ([4df1b48](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/4df1b4838f1cb5608771ac1978cdb484daa4a7e5))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !141](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/141) 👍
 
 
 
