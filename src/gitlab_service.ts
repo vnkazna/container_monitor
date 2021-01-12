@@ -199,7 +199,7 @@ export async function fetchVersion() {
   return versionCache;
 }
 
-export async function getAllGitlabProjects() {
+export async function getAllGitlabProjects(): Promise<VsProject[]> {
   if (!vscode.workspace.workspaceFolders) {
     return [];
   }
@@ -209,8 +209,7 @@ export async function getAllGitlabProjects() {
   }));
 
   const fetchedProjectsWithUri = await Promise.all(projectsWithUri);
-
-  return fetchedProjectsWithUri.filter(p => p.label);
+  return fetchedProjectsWithUri.filter((p): p is VsProject => Boolean(p.label));
 }
 
 export async function fetchLastPipelineForCurrentBranch(workspaceFolder: string) {

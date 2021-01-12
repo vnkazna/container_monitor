@@ -114,15 +114,19 @@ describe('GitLab tree view', () => {
     await vscode.workspace.getConfiguration().update('gitlab.customQueries', undefined);
   });
 
+  const getTreeItem = model => dataProvider.getTreeItem(model);
+
   /**
    * Opens a top level category from the extension issues tree view
    */
   async function openCategory(label) {
     const categories = await dataProvider.getChildren();
-    const [chosenCategory] = categories.filter(c => c.label === label);
+    const [chosenCategory] = categories.filter(c => getTreeItem(c).label === label);
     assert(
       chosenCategory,
-      `Can't open category ${label} because it's not present in ${categories.map(c => c.label)}`,
+      `Can't open category ${label} because it's not present in ${categories.map(
+        c => getTreeItem(c).label,
+      )}`,
     );
     return await dataProvider.getChildren(chosenCategory);
   }
@@ -141,19 +145,20 @@ describe('GitLab tree view', () => {
     const mergeRequestsAssignedToMe = await openCategory('Merge requests assigned to me');
 
     assert.strictEqual(mergeRequestsAssignedToMe.length, 1);
-    const mrItem = mergeRequestsAssignedToMe[0];
+    const mrItemModel = mergeRequestsAssignedToMe[0];
+    const mrItem = getTreeItem(mrItemModel);
     assert.strictEqual(mrItem.label, '!33824 · Web IDE - remove unused actions (mappings)');
     assert.strictEqual(
       mrItem.iconPath.toString(true),
       'https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon',
     );
 
-    const mrContent = await dataProvider.getChildren(mrItem);
-    assert.strictEqual(mrContent[0].label, 'Description');
+    const mrContent = await dataProvider.getChildren(mrItemModel);
+    assert.strictEqual(getTreeItem(mrContent[0]).label, 'Description');
 
     const mrFiles = mrContent.slice(1);
     assert.deepStrictEqual(
-      mrFiles.map(f => f.resourceUri.path),
+      mrFiles.map(f => getTreeItem(f).resourceUri.path),
       [
         '/.deleted.yml',
         '/README1.md',
@@ -164,7 +169,7 @@ describe('GitLab tree view', () => {
       ],
     );
     assert.deepStrictEqual(
-      mrFiles.map(f => f.description),
+      mrFiles.map(f => getTreeItem(f).description),
       ['[deleted] /', '[renamed] /', '[added] /', '/src', '[added] /src/assets', '[renamed] /'],
     );
   });
@@ -183,10 +188,13 @@ describe('GitLab tree view', () => {
       const mergeRequestsAssignedToMe = await openCategory('Merge requests assigned to me');
 
       assert.strictEqual(mergeRequestsAssignedToMe.length, 1);
-      const mrItem = mergeRequestsAssignedToMe[0];
-      assert.strictEqual(mrItem.label, '!33824 · Web IDE - remove unused actions (mappings)');
+      const mrModel = mergeRequestsAssignedToMe[0];
+      assert.strictEqual(
+        getTreeItem(mrModel).label,
+        '!33824 · Web IDE - remove unused actions (mappings)',
+      );
 
-      const mrContent = await dataProvider.getChildren(mrItem);
+      const mrContent = await dataProvider.getChildren(mrModel);
       assert.strictEqual(mrContent[0].label, 'Description');
 
       mrFiles = mrContent.slice(1);
@@ -244,13 +252,13 @@ describe('GitLab tree view', () => {
     const customMergeRequests = await openCategory('Custom GitLab Query for MR');
 
     assert.strictEqual(customMergeRequests.length, 1);
-    assert.strictEqual(customMergeRequests[0].label, '!33824 · Custom Query MR');
+    assert.strictEqual(getTreeItem(customMergeRequests[0]).label, '!33824 · Custom Query MR');
   });
 
   it('handles full custom query for issues', async () => {
     const customMergeRequests = await openCategory('Custom GitLab Query for issues');
 
     assert.strictEqual(customMergeRequests.length, 1);
-    assert.strictEqual(customMergeRequests[0].label, '#219925 · Custom Query Issue');
+    assert.strictEqual(getTreeItem(customMergeRequests[0]).label, '#219925 · Custom Query Issue');
   });
 });

@@ -2,27 +2,34 @@ import * as vscode from 'vscode';
 import * as gitLabService from '../../gitlab_service';
 import { handleError } from '../../log';
 import { ErrorItem } from './error_item';
-import { MrItem } from './mr_item';
+import { MrItemModel } from './mr_item_model';
 import { ExternalUrlItem } from './external_url_item';
 import { IssueItem } from './issue_item';
 import { VulnerabilityItem } from './vulnerability_item';
 import { CustomQuery } from '../../gitlab/custom_query';
 import { CustomQueryType } from '../../gitlab/custom_query_type';
+import { ItemModel } from './item_model';
 
-export class CustomQueryItem extends vscode.TreeItem {
+export class CustomQueryItemModel extends ItemModel {
   private project: VsProject;
 
   private customQuery: CustomQuery;
 
-  constructor(customQuery: CustomQuery, project: VsProject, showProject = false) {
-    super(
-      showProject ? project.label : customQuery.name,
-      vscode.TreeItemCollapsibleState.Collapsed,
-    );
-
+  constructor(customQuery: CustomQuery, project: VsProject, readonly showProject = false) {
+    super();
     this.project = project;
     this.customQuery = customQuery;
-    this.iconPath = showProject ? new vscode.ThemeIcon('project') : new vscode.ThemeIcon('filter');
+  }
+
+  getTreeItem(): vscode.TreeItem {
+    const item = new vscode.TreeItem(
+      this.showProject ? this.project.label : this.customQuery.name,
+      vscode.TreeItemCollapsibleState.Collapsed,
+    );
+    item.iconPath = this.showProject
+      ? new vscode.ThemeIcon('project')
+      : new vscode.ThemeIcon('filter');
+    return item;
   }
 
   private async getProjectIssues(): Promise<vscode.TreeItem[]> {
@@ -34,8 +41,11 @@ export class CustomQueryItem extends vscode.TreeItem {
 
     const { MR, ISSUE, SNIPPET, EPIC, VULNERABILITY } = CustomQueryType;
     switch (this.customQuery.type) {
-      case MR:
-        return issues.map((mr: RestIssuable) => new MrItem(mr, this.project));
+      case MR: {
+        const mrModels = issues.map((mr: RestIssuable) => new MrItemModel(mr, this.project));
+        this.setDisposableChildren(mrModels);
+        return mrModels;
+      }
       case ISSUE:
         return issues.map((issue: RestIssuable) => new IssueItem(issue, this.project));
       case SNIPPET:

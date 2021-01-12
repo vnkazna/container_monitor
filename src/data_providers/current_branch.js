@@ -4,7 +4,8 @@ const gitLabService = require('../gitlab_service');
 const { ErrorItem } = require('./items/error_item');
 const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
 const { handleError, logError } = require('../log');
-const { MrItem } = require('./items/mr_item');
+const { ItemModel } = require('./items/item_model');
+const { MrItemModel } = require('./items/mr_item_model');
 const { IssueItem } = require('./items/issue_item');
 const { ExternalUrlItem } = require('./items/external_url_item');
 
@@ -16,6 +17,7 @@ class DataProvider {
     this.onDidChangeTreeData = this.eventEmitter.event;
     this.project = null;
     this.mr = null;
+    this.disposableChildren = [];
   }
 
   async fetchPipeline(workspaceFolder) {
@@ -58,7 +60,9 @@ class DataProvider {
     }
     if (mr) {
       this.mr = mr;
-      return new MrItem(this.mr, this.project);
+      const item = new MrItemModel(this.mr, this.project);
+      this.disposableChildren.push(item);
+      return item;
     }
     return new vscode.TreeItem('No merge request found');
   }
@@ -76,6 +80,8 @@ class DataProvider {
 
   async getChildren(item) {
     if (item) return item.getChildren();
+    this.disposableChildren.forEach(s => s.dispose());
+    this.disposableChildren = [];
     try {
       const workspaceFolder = await getCurrentWorkspaceFolder();
       this.project = await gitLabService.fetchCurrentProject(workspaceFolder);
@@ -91,6 +97,7 @@ class DataProvider {
 
   // eslint-disable-next-line class-methods-use-this
   getTreeItem(item) {
+    if (item instanceof ItemModel) return item.getTreeItem();
     return item;
   }
 

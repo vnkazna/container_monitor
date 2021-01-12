@@ -1,6 +1,10 @@
 module.exports = {
-  TreeItem: jest.fn(),
-  ThemeIcon: jest.fn(),
+  TreeItem: function TreeItem(label, collapsibleState) {
+    return { label, collapsibleState };
+  },
+  ThemeIcon: function ThemeIcon(id) {
+    return { id };
+  },
   EventEmitter: jest.fn(),
   TreeItemCollapsibleState: {
     Collapsed: 'collapsed',
