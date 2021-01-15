@@ -51,8 +51,22 @@ interface GqlNote {
   system: boolean;
   body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
   bodyHtml: string;
+  position?: GqlPosition;
 }
-interface GqlDiscussion {
+
+export interface GqlPosition {
+  diffRefs: {
+    baseSha: string;
+    headSha: string;
+  };
+  filePath: string;
+  positionType: string;
+  newLine: number | null;
+  oldLine: number | null;
+  newPath: string;
+  oldPath: string;
+}
+export interface GqlDiscussion {
   replyId: string;
   createdAt: string;
   notes: Node<GqlNote>;
@@ -127,6 +141,18 @@ const discussionsFragment = gql`
           }
           body
           bodyHtml
+          position {
+            diffRefs {
+              baseSha
+              headSha
+            }
+            filePath
+            positionType
+            newLine
+            oldLine
+            newPath
+            oldPath
+          }
         }
       }
     }
@@ -268,10 +294,7 @@ export class GitLabNewService {
     };
   }
 
-  private async getDiscussions(
-    issuable: RestIssuable,
-    endCursor?: string,
-  ): Promise<GqlDiscussion[]> {
+  async getDiscussions(issuable: RestIssuable, endCursor?: string): Promise<GqlDiscussion[]> {
     const projectPath = getProjectPath(issuable);
     const query = constructGetDiscussionsQuery(isMr(issuable));
     const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {

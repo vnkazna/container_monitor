@@ -1,6 +1,6 @@
 import { CustomQueryType } from '../gitlab/custom_query_type';
 
-export const issuable: RestIssuable = {
+export const issue: RestIssuable = {
   id: 1,
   iid: 1000,
   title: 'Issuable Title',
@@ -13,6 +13,16 @@ export const issuable: RestIssuable = {
   },
   references: {
     full: 'gitlab-org/gitlab#1000',
+  },
+};
+
+export const mr: RestIssuable = {
+  ...issue,
+  id: 2,
+  iid: 2000,
+  web_url: 'https://gitlab.example.com/group/project/merge_requests//1',
+  references: {
+    full: 'gitlab-org/gitlab!2000',
   },
 };
 
