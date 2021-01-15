@@ -8,7 +8,7 @@ function isDetailedError(object: any): object is IDetailedError {
 
 type logFunction = (line: string) => void;
 
-let globalLog: logFunction;
+let globalLog: logFunction = console.error;
 
 export const initializeLogging = (logLine: logFunction): void => {
   globalLog = logLine;

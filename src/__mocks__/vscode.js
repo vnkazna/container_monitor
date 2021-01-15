@@ -12,7 +12,22 @@ module.exports = {
   Uri: {
     file: path => ({
       path,
-      with: jest.fn(),
+      with: (...args) => ({
+        path,
+        args,
+      }),
     }),
+    parse: str => str,
+  },
+  comments: {
+    createCommentController: jest.fn(),
+  },
+  CommentMode: { Preview: 1 },
+  CommentThreadCollapsibleState: { Expanded: 1 },
+  Position: function Position(x, y) {
+    return { x, y };
+  },
+  Range: function Range(start, end) {
+    return { start, end };
   },
 };

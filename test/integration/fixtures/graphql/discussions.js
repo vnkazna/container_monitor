@@ -68,6 +68,38 @@ const note2 = {
 
 const note2TextSnippet = 'I know that the dependencies are managed separately, but it would';
 
+const noteOnDiff = {
+  id: 'gid://gitlab/DiffNote/469379582',
+  createdAt: '2020-12-17T17:20:14Z',
+  system: false,
+  author: {
+    avatarUrl:
+      'https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon',
+    name: 'Tomas Vik',
+    username: 'viktomas',
+    webUrl: 'https://gitlab.com/viktomas',
+  },
+  body:
+    'This is the core improvement. `NoteBody` sends the `note.body` to our `/api/v4/markdown` endpoint to render HTML. For labels, we can easily render the HTML ourselves, saving all the API requests and complexity.',
+  bodyHtml:
+    '<p data-sourcepos="1:1-1:210" dir="auto">This is the core improvement. <code>NoteBody</code> sends the <code>note.body</code> to our <code>/api/v4/markdown</code> endpoint to render HTML. For labels, we can easily render the HTML ourselves, saving all the API requests and complexity.</p>',
+  position: {
+    diffRefs: {
+      baseSha: '18307069cfc96892bbe93a15249bd91babfa1064',
+      headSha: 'b9c6f9ad70d55a75785fb2702ab8012a69e767d3',
+    },
+    filePath: 'src/webview/src/components/LabelNote.vue',
+    positionType: 'text',
+    newLine: null,
+    oldLine: 48,
+    newPath: 'src/webview/src/components/LabelNote.vue',
+    oldPath: 'src/webview/src/components/LabelNote.vue',
+  },
+};
+
+const noteOnDiffTextSnippet =
+  'For labels, we can easily render the HTML ourselves, saving all the API requests';
+
 const singleNote = {
   replyId: 'gid://gitlab/IndividualNoteDiscussion/afbf8f461a773fc130aa8091c6636f22efb5f4c5',
   createdAt: '2020-12-02T17:00:04Z',
@@ -92,6 +124,18 @@ const multipleNotes = {
   },
 };
 
+const discussionOnDiff = {
+  replyId: 'gid://gitlab/DiffDiscussion/9a702bfa62ab0a6e7c1bee74444086567e5e99e6',
+  createdAt: '2020-12-17T17:20:14Z',
+  notes: {
+    pageInfo: {
+      hasNextPage: false,
+      endCursor: 'MQ',
+    },
+    nodes: [noteOnDiff, note2],
+  },
+};
+
 const projectWithDiscussions = {
   project: {
     id: 'gid://gitlab/Project/278964',
@@ -113,8 +157,11 @@ module.exports = {
   note1TextSnippet,
   note2,
   note2TextSnippet,
+  noteOnDiff,
+  noteOnDiffTextSnippet,
   singleNote,
   multipleNotes,
+  discussionOnDiff,
   systemNote,
   systemNoteTextSnippet,
 };

@@ -10,7 +10,7 @@
     "url": "https://gitlab.com/gitlab-org/gitlab-vscode-extension"
   },
   "engines": {
-    "vscode": "^1.41.0"
+    "vscode": "^1.51.0"
   },
   "categories": [
     "Other"
@@ -521,7 +521,7 @@
     "@types/request-promise": "^4.1.46",
     "@types/sinon": "^9.0.4",
     "@types/temp": "^0.8.34",
-    "@types/vscode": "^1.41.0",
+    "@types/vscode": "^1.51.0",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
     "conventional-changelog-cli": "^2.0.34",
