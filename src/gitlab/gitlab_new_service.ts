@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
+import { getAvatarUrl } from '../utils/get_avatar_url';
 
 interface Node<T> {
   pageInfo?: {
@@ -284,6 +285,10 @@ export class GitLabNewService {
     const prependHost = (note: GqlNote): GqlNote => ({
       ...note,
       bodyHtml: note.bodyHtml.replace(/href="\//, `href="${this.instanceUrl}/`),
+      author: {
+        ...note.author,
+        avatarUrl: getAvatarUrl(this.instanceUrl, note.author.avatarUrl),
+      },
     });
     return {
       ...discussion,

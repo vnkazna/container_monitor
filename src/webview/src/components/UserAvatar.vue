@@ -38,6 +38,9 @@ export default {
     userUrl() {
       return this.user.webUrl || this.user.web_url; // labels contain snake_case variables
     },
+    avatarUrl() {
+      return this.user.avatarUrl || this.user.avatar_url;
+    },
   },
 };
 </script>
@@ -45,7 +48,7 @@ export default {
 <template>
   <span>
     <component :is="showLink ? 'a' : 'span'" :href="userUrl" target="_blank">
-      <img v-if="showAvatar" :src="user.avatarUrl" :class="sizeClass" class="avatar" />
+      <img v-if="showAvatar" :src="avatarUrl" :class="sizeClass" class="avatar js-avatar" />
       <span v-if="showUsername" class="author">
         <strong> {{ user.name }}</strong>
         <span v-if="showHandle"> @{{ user.username }}</span>

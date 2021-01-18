@@ -11,6 +11,7 @@ import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
 import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
+import { getAvatarUrl } from './utils/get_avatar_url';
 
 interface GitLabProject {
   id: number;
@@ -33,18 +34,29 @@ interface GitLabJob {
   created_at: string;
 }
 
+const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => ({
+  ...issuable,
+  author: {
+    ...issuable.author,
+    avatar_url: getAvatarUrl(instanceUrl, issuable.author.avatar_url),
+  },
+});
+
 const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
+
+const getInstanceUrl = async () =>
+  await createGitService(
+    // fetching of instanceUrl is the only GitService method that doesn't need workspaceFolder
+    // TODO: remove this default value once we implement https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/260
+    (await getCurrentWorkspaceFolder()) || '',
+  ).fetchCurrentInstanceUrl();
 
 async function fetch(path: string, method = 'GET', data?: Record<string, unknown>) {
   const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
     'gitlab',
   );
-  const instanceUrl = await createGitService(
-    // fetching of instanceUrl is the only GitService method that doesn't need workspaceFolder
-    // TODO: remove this default value once we implement https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/260
-    (await getCurrentWorkspaceFolder()) || '',
-  ).fetchCurrentInstanceUrl();
+  const instanceUrl = await getInstanceUrl();
   const { proxy } = vscode.workspace.getConfiguration('http');
   const apiRoot = `${instanceUrl}/api/v4`;
   const glToken = tokenService.getToken(instanceUrl);
@@ -358,7 +370,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
     const { response } = await fetch(path);
     issuable = response;
   }
-  return issuable;
+  return issuable.map(normalizeAvatarUrl(await getInstanceUrl()));
 }
 
 export async function fetchLastJobsForCurrentBranch(
