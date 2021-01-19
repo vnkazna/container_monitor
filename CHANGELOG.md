@@ -1,3 +1,18 @@
+# [3.10.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.9.0...v3.10.0) (2021-01-19)
+
+
+### Bug Fixes
+
+* **mr review:** don't query position for webview discussions ([adc7706](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/adc7706d99c7ae471b939765ae4609b0d2846c72))
+* avatars uploaded to GitLab don't show correctly ([6b51e4c](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/6b51e4cab0f6444d30561b0118238356608684be))
+
+
+### Features
+
+* **mr review:** show comments on changed file diff ([cba961a](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/cba961a8953adc1eec2c24c38144e96267aedb7f))
+
+
+
 # [3.9.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.8.0...v3.9.0) (2021-01-12)
 
 
