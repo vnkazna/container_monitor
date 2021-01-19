@@ -91,6 +91,12 @@ interface RestLabelEvent {
 
 type Note = GqlDiscussion | RestLabelEvent;
 
+interface GetDiscussionsOptions {
+  issuable: RestIssuable;
+  includePosition?: boolean;
+  endCursor?: string;
+}
+
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
@@ -116,7 +122,26 @@ const queryGetSnippets = gql`
   }
 `;
 
-const discussionsFragment = gql`
+const positionFragment = gql`
+  fragment position on Note {
+    position {
+      diffRefs {
+        baseSha
+        headSha
+      }
+      filePath
+      positionType
+      newLine
+      oldLine
+      newPath
+      oldPath
+      positionType
+    }
+  }
+`;
+
+const createDiscussionsFragment = (includePosition: boolean) => gql`
+${includePosition ? positionFragment : ''}
   fragment discussions on DiscussionConnection {
     pageInfo {
       hasNextPage
@@ -142,26 +167,15 @@ const discussionsFragment = gql`
           }
           body
           bodyHtml
-          position {
-            diffRefs {
-              baseSha
-              headSha
-            }
-            filePath
-            positionType
-            newLine
-            oldLine
-            newPath
-            oldPath
-          }
+          ${includePosition ? `...position` : ''}
         }
       }
     }
   }
 `;
 
-const constructGetDiscussionsQuery = (isMr: boolean) => gql`
-  ${discussionsFragment}
+const constructGetDiscussionsQuery = (isMr: boolean, includePosition = false) => gql`
+  ${createDiscussionsFragment(includePosition)}
   query Get${
     isMr ? 'Mr' : 'Issue'
   }Discussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
@@ -299,9 +313,13 @@ export class GitLabNewService {
     };
   }
 
-  async getDiscussions(issuable: RestIssuable, endCursor?: string): Promise<GqlDiscussion[]> {
+  async getDiscussions({
+    issuable,
+    includePosition = false,
+    endCursor,
+  }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
     const projectPath = getProjectPath(issuable);
-    const query = constructGetDiscussionsQuery(isMr(issuable));
+    const query = constructGetDiscussionsQuery(isMr(issuable), includePosition);
     const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
       projectPath,
       iid: String(issuable.iid),
@@ -313,7 +331,11 @@ export class GitLabNewService {
     assert(discussions, `Discussions for issuable ${issuable.references.full} were not found.`);
     if (discussions.pageInfo?.hasNextPage) {
       assert(discussions.pageInfo.endCursor);
-      const remainingPages = await this.getDiscussions(issuable, discussions.pageInfo.endCursor);
+      const remainingPages = await this.getDiscussions({
+        issuable,
+        includePosition,
+        endCursor: discussions.pageInfo.endCursor,
+      });
       return [...discussions.nodes, ...remainingPages];
     }
     return discussions.nodes.map(n => this.addHostToUrl(n));
@@ -331,7 +353,7 @@ export class GitLabNewService {
 
   async getDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<Note[]> {
     const [discussions, labelEvents] = await Promise.all([
-      this.getDiscussions(issuable),
+      this.getDiscussions({ issuable }),
       this.getLabelEvents(issuable),
     ]);
 

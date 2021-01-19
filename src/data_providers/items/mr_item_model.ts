@@ -7,6 +7,7 @@ import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';
 import { GqlDiscussion, GqlPosition } from '../../gitlab/gitlab_new_service';
 import { handleError } from '../../log';
+import { UserFriendlyError } from '../../errors/user_friendly_error';
 
 const containsTextPosition = (discussion: GqlDiscussion): boolean => {
   const firstNote = discussion.notes.nodes[0];
@@ -46,7 +47,14 @@ export class MrItemModel extends ItemModel {
     try {
       await this.getMrDiscussions();
     } catch (e) {
-      handleError(e);
+      handleError(
+        new UserFriendlyError(
+          'The extension failed to preload discussions on the MR diff. ' +
+            "If the MR comes from a forked project, it's possible that you run into " +
+            'https://gitlab.com/gitlab-org/gitlab/-/issues/298827.',
+          e,
+        ),
+      );
     }
     const changedFiles = await this.getChangedFiles();
     return [description, ...changedFiles];
@@ -72,7 +80,10 @@ export class MrItemModel extends ItemModel {
 
     const gitlabService = await createGitLabNewService(this.project.uri);
 
-    const discussions = await gitlabService.getDiscussions(this.mr);
+    const discussions = await gitlabService.getDiscussions({
+      issuable: this.mr,
+      includePosition: true,
+    });
     const discussionsOnDiff = discussions.filter(containsTextPosition);
     const threads = discussionsOnDiff.map(({ notes }) => {
       const comments = notes.nodes.map(({ body, author }) => ({
