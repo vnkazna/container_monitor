@@ -50,6 +50,8 @@ Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
 
 Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
 
+You can use [autocompletion of GitLab CI variables](#ci-variable-autocompletion) in your `.gitlab-ci.yml`.
+
 #### View issue and MR details and comments in VS Code
 
 ![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_issues-in-vscode.png)
@@ -170,13 +172,13 @@ Each query is an entry of the json array. Each entry can have the following valu
 
 **`name`** _(required: true)_ : The label to show in the GitLab panel
 
-**`type`** _(required: false, default: merge\_requests)_ : The type of GitLab items to return. If snippets is selected, none of the other filter will work. Epics will work only on GitLab ultimate/gold. Possible values: issues, merge_requests, epics, snippets, vulnerabilities.
+**`type`** _(required: false, default: merge_requests)_ : The type of GitLab items to return. If snippets is selected, none of the other filter will work. Epics will work only on GitLab ultimate/gold. Possible values: issues, merge_requests, epics, snippets, vulnerabilities.
 
 **`noItemText`** _(required: false, default: "No items found.")_ : The text to show if the query returns no items.
 
 **`maxResults`** _(required: false, default: 20)_ : The maximum number of results to show
 
-**`orderBy`** _(required: false, default: created\_at)_ : Return issues ordered by the selected value. It is not applicable for vulnerabilities. Possible values: created_at, updated_at, priority, due_date, relative_position, label_priority, milestone_due, popularity, weight.
+**`orderBy`** _(required: false, default: created_at)_ : Return issues ordered by the selected value. It is not applicable for vulnerabilities. Possible values: created_at, updated_at, priority, due_date, relative_position, label_priority, milestone_due, popularity, weight.
 
 **`sort`** _(required: false, default: desc)_ : Return issues sorted in ascending or descending order. It is not applicable for vulnerabilities. Possible values: asc, desc.
 
@@ -206,7 +208,7 @@ Each query is an entry of the json array. Each entry can have the following valu
 
 **`searchIn`** _(required: false, default: all)_ : Modify the scope of the search attribute. It is not applicable for epics and vulnerabilities. Possible values: all, title, description.
 
-**`searchIn`** _(required: false, default: all)_ :  Modify the scope of the excludeSearch attribute. Works only with issues. Possible values: all, title, description.
+**`searchIn`** _(required: false, default: all)_ : Modify the scope of the excludeSearch attribute. Works only with issues. Possible values: all, title, description.
 
 **`createdAfter`** _(required: false)_ : Return GitLab items created after the given date. It is not applicable for vulnerabilities.
 
@@ -271,6 +273,7 @@ If your current project is a GitLab project, the extension will do the following
 GitLab Workflow extension provides you two types of search. Search with filters and Advanced Search.
 
 #### Search with filters
+
 It allows users to search issues/MRs against their title and description fields. In the search input, you can type your search term and hit Enter, for example, `Inconsistent line endings for HEX files` or `Pipelines should ignore retried builds`.
 
 It can become more powerful by allowing you to filter issues/MRs by author, assignee, milestone, title etc. Below is the full list of supported filter tokens
@@ -299,6 +302,7 @@ It can become more powerful by allowing you to filter issues/MRs by author, assi
 ![_advanced-search.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_advanced-search.gif)
 
 #### Search with Advanced Search
+
 GitLab provides [Advanced Search feature which is backed by Elasticsearch](https://docs.gitlab.com/ee/integration/elasticsearch.html). Please see [Advanced Search syntax](https://docs.gitlab.com/ee/user/search/advanced_search_syntax.html) for more details.
 
 ### Create snippet
@@ -332,6 +336,12 @@ This command allows you to see active file on GitLab. Extension sends active lin
 Using this command, you can quickly validate GitLab CI configuration.
 
 ![_validate-ci-config.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_validate-ci-config.gif)
+
+### CI variable autocompletion
+
+Quickly find the CI variable you are looking for with the CI variable autocompletion.
+
+![screenshot of the CI variable autocompletion](src/assets/_ci_variable_autocomplete.png)
 
 ---
 
