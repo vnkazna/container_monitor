@@ -49,9 +49,9 @@ export class MrItemModel extends ItemModel {
     } catch (e) {
       handleError(
         new UserFriendlyError(
-          'The extension failed to preload discussions on the MR diff. ' +
-            "If the MR comes from a forked project, it's possible that you run into " +
-            'https://gitlab.com/gitlab-org/gitlab/-/issues/298827.',
+          `The extension failed to preload discussions on the MR diff.
+            It's possible that you've encountered
+            https://gitlab.com/gitlab-org/gitlab/-/issues/298827.`,
           e,
         ),
       );
