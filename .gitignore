@@ -5,3 +5,4 @@ node_modules
 .DS_Store
 src/webview/dist/*.hot-update.js*
 out
+/coverage/

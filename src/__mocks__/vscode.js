@@ -12,15 +12,21 @@ module.exports = {
   Uri: {
     file: path => ({
       path,
-      with: (...args) => ({
+      with: args => ({
         path,
-        args,
+        ...args,
       }),
     }),
     parse: str => str,
   },
   comments: {
     createCommentController: jest.fn(),
+  },
+  window: {
+    showErrorMessage: jest.fn(),
+  },
+  commands: {
+    executeCommand: jest.fn(),
   },
   CommentMode: { Preview: 1 },
   CommentThreadCollapsibleState: { Expanded: 1 },
