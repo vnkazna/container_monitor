@@ -513,7 +513,8 @@
     "autofix": "eslint --fix . && prettier --write '**/*.{js,ts,vue,json}' && cd src/webview && npm run autofix",
     "publish": "vsce publish",
     "webview": "cd src/webview && npm run watch",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
+    "update-ci-variables": "node ./scripts/update_ci_variables.js"
   },
   "devDependencies": {
     "@types/jest": "^26.0.14",

@@ -17,6 +17,7 @@ const checkDeprecatedCertificateSettings = require('./check_deprecated_certifica
 const { ApiContentProvider } = require('./review/api_content_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
 const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
+const { CiCompletionProvider } = require('./completion/ci_completion_provider');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -79,6 +80,16 @@ const registerCommands = (context, outputChannel) => {
   registerSidebarTreeDataProviders();
 };
 
+const registerCiCompletion = context => {
+  const subscription = vscode.languages.registerCompletionItemProvider(
+    { pattern: '**/.gitlab-ci.{yml,yaml}' },
+    new CiCompletionProvider(),
+    '$',
+  );
+
+  context.subscriptions.push(subscription);
+};
+
 const activate = context => {
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
@@ -88,6 +99,7 @@ const activate = context => {
   tokenService.init(context);
   tokenServiceWrapper.init(context);
   checkDeprecatedCertificateSettings(context);
+  registerCiCompletion(context);
 };
 
 exports.activate = activate;

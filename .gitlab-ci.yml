@@ -40,6 +40,13 @@ lint_commit:
     - if: '$CI_MERGE_REQUEST_IID && $CI_PROJECT_VISIBILITY == "public"' # lint.js script makes an API call without authentication
       when: always
 
+check-ci-variables:
+  stage: test
+  script:
+    - npm ci
+    - npm run update-ci-variables
+  allow_failure: true # could be caused by changes in gitlab-org/gitlab repo, not related to current branch
+
 test-unit:
   stage: test
   script:
@@ -123,4 +130,4 @@ secret_detection:
   # We can't run the secrets detection on tags: https://gitlab.com/gitlab-org/gitlab/-/issues/254199
   rules:
     - if: $CI_COMMIT_TAG
-      when: "never"
+      when: 'never'
