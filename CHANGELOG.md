@@ -1,3 +1,12 @@
+## [3.11.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.11.0...v3.11.1) (2021-01-25)
+
+
+### Bug Fixes
+
+* **publishing:** readme file has to contain absolute URLs ([2580ba3](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/2580ba3387ff318483a626dc07633be66efd54aa))
+
+
+
 # [3.11.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.10.0...v3.11.0) (2021-01-25)
 
 
