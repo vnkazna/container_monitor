@@ -12,6 +12,7 @@ import { getUserAgentHeader } from './utils/get_user_agent_header';
 import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
 import { getAvatarUrl } from './utils/get_avatar_url';
+import { getHttpAgentOptions } from './utils/get_http_agent_options';
 
 interface GitLabProject {
   id: number;
@@ -53,11 +54,7 @@ const getInstanceUrl = async () =>
   ).fetchCurrentInstanceUrl();
 
 async function fetch(path: string, method = 'GET', data?: Record<string, unknown>) {
-  const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
-    'gitlab',
-  );
   const instanceUrl = await getInstanceUrl();
-  const { proxy } = vscode.workspace.getConfiguration('http');
   const apiRoot = `${instanceUrl}/api/v4`;
   const glToken = tokenService.getToken(instanceUrl);
   const tokens = tokenService.getInstanceUrls().join(', ');
@@ -83,36 +80,8 @@ async function fetch(path: string, method = 'GET', data?: Record<string, unknown
       'PRIVATE-TOKEN': glToken,
       ...getUserAgentHeader(),
     },
-    rejectUnauthorized: !ignoreCertificateErrors,
+    ...getHttpAgentOptions(),
   };
-
-  if (proxy) {
-    config.proxy = proxy;
-  }
-
-  if (ca) {
-    try {
-      config.ca = fs.readFileSync(ca);
-    } catch (e) {
-      handleError(new UserFriendlyError(`Cannot read CA '${ca}'`, e));
-    }
-  }
-
-  if (cert) {
-    try {
-      config.cert = fs.readFileSync(cert);
-    } catch (e) {
-      handleError(new UserFriendlyError(`Cannot read CA '${cert}'`, e));
-    }
-  }
-
-  if (certKey) {
-    try {
-      config.key = fs.readFileSync(certKey);
-    } catch (e) {
-      handleError(new UserFriendlyError(`Cannot read CA '${certKey}'`, e));
-    }
-  }
 
   if (data) {
     config.formData = data;
