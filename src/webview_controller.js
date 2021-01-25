@@ -97,7 +97,7 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
   }
 };
 
-async function handleChangeViewState(panel, issuable, workspaceFolder) {
+async function initPanelIfActive(panel, issuable, workspaceFolder) {
   if (!panel.active) return;
 
   const appReadyPromise = new Promise(resolve => {
@@ -134,8 +134,9 @@ async function create(issuable, workspaceFolder) {
   panel.webview.html = html;
   panel.iconPath = getIconPathForIssuable(issuable);
 
+  initPanelIfActive(panel, issuable, workspaceFolder);
   panel.onDidChangeViewState(() => {
-    handleChangeViewState(panel, issuable, workspaceFolder);
+    initPanelIfActive(panel, issuable, workspaceFolder);
   });
 
   panel.webview.onDidReceiveMessage(createMessageHandler(panel, issuable, workspaceFolder));
