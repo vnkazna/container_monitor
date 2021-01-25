@@ -1,3 +1,18 @@
+# [3.11.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.10.0...v3.11.0) (2021-01-25)
+
+
+### Bug Fixes
+
+* **network:** new API logic supports custom certificates ([58c26f2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/58c26f20eabf15c6a7b74845d9e791be01b57c46))
+* **webview:** issue/mr details not showing for VS Code 1.53.0 (insiders) ([35d6ecd](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/35d6ecd1f5549364fd5376196f922d67026f3bfb))
+
+
+### Features
+
+* **editor:** auto completion for CI variables ([5c37266](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/5c37266f5bb3e21c3ae596fd7411973b4575986a))
+
+
+
 # [3.10.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.9.0...v3.10.0) (2021-01-19)
 
 
