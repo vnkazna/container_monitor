@@ -341,7 +341,7 @@ Using this command, you can quickly validate GitLab CI configuration.
 
 Quickly find the CI variable you are looking for with the CI variable autocompletion.
 
-![screenshot of the CI variable autocompletion](src/assets/_ci_variable_autocomplete.png)
+![screenshot of the CI variable autocompletion](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_ci_variable_autocomplete.png)
 
 ---
 
