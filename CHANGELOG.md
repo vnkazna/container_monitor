@@ -19,6 +19,7 @@
 ### Features
 
 * **editor:** auto completion for CI variables ([5c37266](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/5c37266f5bb3e21c3ae596fd7411973b4575986a))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !140](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/140) 👍
 
 
 
