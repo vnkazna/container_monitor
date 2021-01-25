@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as https from 'https';
 import { GraphQLClient, gql } from 'graphql-request';
 import crossFetch from 'cross-fetch';
 import { URL } from 'url';
@@ -8,6 +9,7 @@ import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
 import { getAvatarUrl } from '../utils/get_avatar_url';
+import { getHttpAgentOptions } from '../utils/get_http_agent_options';
 
 interface Node<T> {
   pageInfo?: {
@@ -214,16 +216,25 @@ export class GitLabNewService {
     this.client = new GraphQLClient(endpoint, this.fetchOptions);
   }
 
+  private get httpAgent() {
+    const agentOptions = getHttpAgentOptions();
+    if (agentOptions.proxy) {
+      return createHttpProxyAgent(agentOptions.proxy);
+    }
+    if (this.instanceUrl.startsWith('https://')) {
+      return new https.Agent(agentOptions);
+    }
+    return undefined;
+  }
+
   private get fetchOptions() {
     const token = tokenService.getToken(this.instanceUrl);
-    const { proxy } = vscode.workspace.getConfiguration('http');
-    const agent = proxy ? createHttpProxyAgent(proxy) : undefined;
     return {
       headers: {
         Authorization: `Bearer ${token}`,
         ...getUserAgentHeader(),
       },
-      agent,
+      agent: this.httpAgent,
     };
   }
 
