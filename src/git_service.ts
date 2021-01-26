@@ -56,7 +56,7 @@ export class GitService {
     }
 
     if (remoteUrl) {
-      return parseGitRemote(await getInstanceUrl(this.workspaceFolder), remoteUrl);
+      return parseGitRemote(remoteUrl, await getInstanceUrl(this.workspaceFolder));
     }
 
     return null;

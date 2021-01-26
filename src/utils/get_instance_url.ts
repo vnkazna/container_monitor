@@ -4,6 +4,7 @@ import * as url from 'url';
 import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
 import { log } from '../log';
+import { parseGitRemote } from '../git/git_remote_parser';
 
 async function fetch(cmd: string, workspaceFolder: string): Promise<string | null> {
   const [git, ...args] = cmd.trim().split(' ');
@@ -38,13 +39,15 @@ async function fetchGitRemoteUrls(workspaceFolder: string): Promise<string[]> {
 }
 
 async function intersectionOfInstanceAndTokenUrls(workspaceFolder: string) {
-  const uriHostname = (uri: string) => url.parse(uri).host;
+  const uriHostname = (uri: string) => parseGitRemote(uri)?.host;
 
   const instanceUrls = tokenService.getInstanceUrls();
   const gitRemotes = await fetchGitRemoteUrls(workspaceFolder);
   const gitRemoteHosts = gitRemotes.map(uriHostname);
 
-  return instanceUrls.filter(host => gitRemoteHosts.includes(uriHostname(host)));
+  return instanceUrls.filter(instanceUrl =>
+    gitRemoteHosts.includes(url.parse(instanceUrl).host || undefined),
+  );
 }
 
 async function heuristicInstanceUrl(workspaceFolder: string) {

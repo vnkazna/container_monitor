@@ -67,7 +67,7 @@ describe('get_instance_url', () => {
       expect(await getInstanceUrl(workspaceFolder)).toBe(GITLAB_COM_URL);
     });
 
-    xit('it works with URLs in git format', async () => {
+    it('it works with URLs in git format', async () => {
       await git.addRemote(SECOND_REMOTE, 'git@test-instance.com:g/extension.git');
       tokens = {
         'https://test-instance.com': 'abc',
