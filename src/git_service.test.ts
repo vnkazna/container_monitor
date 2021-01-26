@@ -1,4 +1,5 @@
 import * as temp from 'temp';
+import * as vscode from 'vscode';
 import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
 
@@ -27,6 +28,16 @@ describe('git_service', () => {
     log: () => {
       //
     },
+  });
+
+  beforeEach(() => {
+    (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
+      instanceUrl: 'https://gitlab.com',
+    });
+  });
+
+  afterEach(() => {
+    (vscode.workspace.getConfiguration as jest.Mock).mockReset();
   });
 
   describe('with initialized git repository', () => {
