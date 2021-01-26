@@ -46,9 +46,9 @@ describe('workspace_service', () => {
       sandbox.restore();
     });
 
-    it('getCurrentWorkspaceFolder returns null', async () => {
+    it('getCurrentWorkspaceFolder returns undefined', async () => {
       const result = await workspaceService.getCurrentWorkspaceFolder();
-      assert.strictEqual(result, null);
+      assert.strictEqual(result, undefined);
     });
 
     it('getCurrentWorkspaceFolderOrSelectOne lets user select a workspace', async () => {

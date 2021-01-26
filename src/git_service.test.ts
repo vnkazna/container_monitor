@@ -22,10 +22,8 @@ describe('git_service', () => {
 
   const getDefaultOptions = (): GitServiceOptions => ({
     workspaceFolder,
-    instanceUrl: 'https://gitlab.com',
     remoteName: undefined,
     pipelineGitRemoteName: undefined,
-    tokenService: { getInstanceUrls: () => [] },
     log: () => {
       //
     },

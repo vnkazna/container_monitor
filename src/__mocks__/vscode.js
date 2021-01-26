@@ -28,6 +28,9 @@ module.exports = {
   commands: {
     executeCommand: jest.fn(),
   },
+  workspace: {
+    getConfiguration: jest.fn().mockReturnValue({ instanceUrl: 'https://gitlab.com' }),
+  },
   CommentMode: { Preview: 1 },
   CommentThreadCollapsibleState: { Expanded: 1 },
   Position: function Position(x, y) {

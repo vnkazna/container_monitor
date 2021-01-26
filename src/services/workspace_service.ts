@@ -9,7 +9,7 @@ async function getWorkspaceFolderForOpenEditor(): Promise<string | undefined> {
   return workspaceFolder?.uri.fsPath;
 }
 
-export async function getCurrentWorkspaceFolder(): Promise<string | null> {
+export async function getCurrentWorkspaceFolder(): Promise<string | undefined> {
   const editorFolder = await getWorkspaceFolderForOpenEditor();
 
   if (editorFolder) {
@@ -21,7 +21,7 @@ export async function getCurrentWorkspaceFolder(): Promise<string | null> {
     return workspaceFolders[0].uri.fsPath;
   }
 
-  return null;
+  return undefined;
 }
 
 export async function getCurrentWorkspaceFolderOrSelectOne(): Promise<string | null> {
