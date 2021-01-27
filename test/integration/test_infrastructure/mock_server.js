@@ -1,7 +1,7 @@
 const { setupServer } = require('msw/node');
-const { rest } = require('msw');
+const { rest, graphql } = require('msw');
 const { API_URL_PREFIX } = require('./constants');
-const projectResponse = require('../fixtures/rest/project.json');
+const projectResponse = require('../fixtures/graphql/project.json');
 const versionResponse = require('../fixtures/rest/version.json');
 
 const createJsonEndpoint = (path, response) =>
@@ -46,7 +46,10 @@ const notFoundByDefault = rest.get(/.*/, (req, res, ctx) => {
 
 const getServer = (handlers = []) => {
   const server = setupServer(
-    createJsonEndpoint('/projects/gitlab-org%2Fgitlab', projectResponse),
+    graphql.query('GetProject', (req, res, ctx) => {
+      if (req.variables.projectPath === 'gitlab-org/gitlab') return res(ctx.data(projectResponse));
+      return res(ctx.data({ project: null }));
+    }),
     createJsonEndpoint('/version', versionResponse),
     ...handlers,
     notFoundByDefault,
