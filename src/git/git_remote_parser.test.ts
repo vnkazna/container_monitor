@@ -61,7 +61,7 @@ describe('git_remote_parser', () => {
     ],
   ])('should parse %s', (remote, parsed) => {
     const [host, namespace, project] = parsed;
-    expect(parseGitRemote('https://gitlab.com', remote)).toEqual({
+    expect(parseGitRemote(remote, 'https://gitlab.com')).toEqual({
       host,
       namespace,
       project,
@@ -72,8 +72,8 @@ describe('git_remote_parser', () => {
   it('should support self managed GitLab on a custom path', () => {
     expect(
       parseGitRemote(
-        'https://example.com/gitlab',
         'https://example.com/gitlab/fatihacet/gitlab-vscode-extension',
+        'https://example.com/gitlab',
       ),
     ).toEqual({
       host: 'example.com',

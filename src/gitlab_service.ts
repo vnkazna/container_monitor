@@ -13,6 +13,7 @@ import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
 import { getAvatarUrl } from './utils/get_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
+import { getInstanceUrl as getInstanceUrlUtil } from './utils/get_instance_url';
 
 interface GitLabProject {
   id: number;
@@ -46,12 +47,7 @@ const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): Re
 const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
 
-const getInstanceUrl = async () =>
-  await createGitService(
-    // fetching of instanceUrl is the only GitService method that doesn't need workspaceFolder
-    // TODO: remove this default value once we implement https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/260
-    (await getCurrentWorkspaceFolder()) || '',
-  ).fetchCurrentInstanceUrl();
+const getInstanceUrl = async () => await getInstanceUrlUtil(await getCurrentWorkspaceFolder());
 
 async function fetch(path: string, method = 'GET', data?: Record<string, unknown>) {
   const instanceUrl = await getInstanceUrl();
