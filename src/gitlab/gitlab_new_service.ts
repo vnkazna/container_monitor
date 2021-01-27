@@ -10,6 +10,8 @@ import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
 import { getAvatarUrl } from '../utils/get_avatar_url';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
+import { GitLabProject, GqlProject } from './gitlab_project';
+import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 
 interface Node<T> {
   pageInfo?: {
@@ -119,6 +121,19 @@ const queryGetSnippets = gql`
             }
           }
         }
+      }
+    }
+  }
+`;
+
+const queryGetProject = gql`
+  query GetProject($projectPath: ID!) {
+    project(fullPath: $projectPath) {
+      id
+      name
+      fullPath
+      group {
+        id
       }
     }
   }
@@ -238,6 +253,13 @@ export class GitLabNewService {
     };
   }
 
+  async getProject(projectPath: string): Promise<GitLabProject | undefined> {
+    const result = await this.client.request<GqlProjectResult<GqlProject>>(queryGetProject, {
+      projectPath,
+    });
+    return result.project && new GitLabProject(result.project);
+  }
+
   async getSnippets(projectPath: string): Promise<GqlSnippet[]> {
     const result = await this.client.request<GqlProjectResult<GqlSnippetProject>>(
       queryGetSnippets,
@@ -264,8 +286,8 @@ export class GitLabNewService {
 
   // TODO change this method to use GraphQL when https://gitlab.com/gitlab-org/gitlab/-/issues/260316 is done
   async getSnippetContent(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
-    const projectId = snippet.projectId.replace('gid://gitlab/Project/', '');
-    const snippetId = snippet.id.replace('gid://gitlab/ProjectSnippet/', '');
+    const projectId = getRestIdFromGraphQLId(snippet.projectId);
+    const snippetId = getRestIdFromGraphQLId(snippet.id);
     const url = `${this.instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/master/${blob.path}/raw`;
     const result = await crossFetch(url, this.fetchOptions);
     if (!result.ok) {

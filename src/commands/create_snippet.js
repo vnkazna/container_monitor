@@ -54,7 +54,7 @@ async function uploadSnippet(project, editor, visibility, context) {
   data.content = content;
 
   if (project) {
-    data.id = project.id;
+    data.id = project.restId;
   }
 
   const snippet = await gitLabService.createSnippet(data);
