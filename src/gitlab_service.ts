@@ -81,7 +81,11 @@ async function fetch(path: string, method = 'GET', data?: Record<string, unknown
       };
     } catch (e) {
       handleError(
-        new UserFriendlyError('Failed to parse GitLab API response', e, `Response body: ${body}`),
+        new UserFriendlyError(
+          'Failed to parse GitLab API response',
+          e,
+          `Response body: ${body}\nRequest URL: ${apiRoot}${path}`,
+        ),
       );
       return { error: e };
     }
