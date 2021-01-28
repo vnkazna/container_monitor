@@ -107,8 +107,8 @@ See also [how to write automated tests](docs/writing-tests.md).
 To run linters, open terminal within the project folder and run following;
 
 ```bash
-npm autofix # Automatically formats your code using prettier and fixes eslint errors
-npm eslint
+npm run autofix # Automatically formats your code using prettier and fixes eslint errors
+npm run lint
 ```
 
 ### Your First Contribution?

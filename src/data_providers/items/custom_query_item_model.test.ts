@@ -33,4 +33,14 @@ describe('CustomQueryItem', () => {
       expect(item.iconPath).toEqual(new vscode.ThemeIcon('project'));
     });
   });
+
+  describe('item with the error field', () => {
+    beforeEach(() => {
+      item = new CustomQueryItemModel(customQuery, { ...project, error: true }, true).getTreeItem();
+    });
+
+    it('should return an error item', () => {
+      expect(item.label).toBe(`${project.label}: Project failed to load`);
+    });
+  });
 });
