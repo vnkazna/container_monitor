@@ -37,6 +37,7 @@ interface RestDiffFile {
 interface VsProject {
   label: string;
   uri: string;
+  error?: boolean;
 }
 
 interface RestVulnerability {

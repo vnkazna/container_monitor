@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as request from 'request-promise';
 import * as fs from 'fs';
+import { basename } from 'path';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
@@ -176,13 +177,21 @@ export async function getAllGitlabProjects(): Promise<VsProject[]> {
   if (!vscode.workspace.workspaceFolders) {
     return [];
   }
-  const projectsWithUri = vscode.workspace.workspaceFolders.map(async workspaceFolder => ({
-    label: (await fetchCurrentProject(workspaceFolder.uri.fsPath))?.name,
-    uri: workspaceFolder.uri.fsPath,
-  }));
+  const projectsWithUri = vscode.workspace.workspaceFolders.map(async workspaceFolder => {
+    const uri = workspaceFolder.uri.fsPath;
+    try {
+      const currentProject = await fetchCurrentProject(uri);
+      return {
+        label: currentProject?.name ?? basename(uri),
+        uri,
+      };
+    } catch (e) {
+      logError(e);
+      return { label: basename(uri), uri, error: true };
+    }
+  });
 
-  const fetchedProjectsWithUri = await Promise.all(projectsWithUri);
-  return fetchedProjectsWithUri.filter((p): p is VsProject => Boolean(p.label));
+  return Promise.all(projectsWithUri);
 }
 
 export async function fetchLastPipelineForCurrentBranch(workspaceFolder: string) {

@@ -22,6 +22,10 @@ export class CustomQueryItemModel extends ItemModel {
   }
 
   getTreeItem(): vscode.TreeItem {
+    if (this.project.error) {
+      return new ErrorItem(`${this.project.label}: Project failed to load`);
+    }
+
     const item = new vscode.TreeItem(
       this.showProject ? this.project.label : this.customQuery.name,
       vscode.TreeItemCollapsibleState.Collapsed,
