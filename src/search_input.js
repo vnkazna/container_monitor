@@ -103,7 +103,7 @@ async function showSearchInputFor(noteableType) {
   );
   const queryString = await parseQuery(query, noteableType);
 
-  await openers.openUrl(`${project.web_url}/${noteableType}${queryString}`);
+  await openers.openUrl(`${project.webUrl}/${noteableType}${queryString}`);
 }
 
 async function showIssueSearchInput() {

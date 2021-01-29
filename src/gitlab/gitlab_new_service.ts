@@ -132,6 +132,7 @@ const queryGetProject = gql`
       id
       name
       fullPath
+      webUrl
       group {
         id
       }

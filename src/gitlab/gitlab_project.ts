@@ -7,6 +7,7 @@ export interface GqlProject {
   id: string;
   name: string;
   fullPath: string;
+  webUrl: string;
   group?: GqlGroup;
 }
 
@@ -27,6 +28,10 @@ export class GitLabProject {
 
   get fullPath(): string {
     return this.gqlProject.fullPath;
+  }
+
+  get webUrl(): string {
+    return this.gqlProject.webUrl;
   }
 
   get groupRestId(): number | undefined {
