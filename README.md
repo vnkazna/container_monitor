@@ -52,14 +52,6 @@ Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitl
 
 You can use [autocompletion of GitLab CI variables](#ci-variable-autocompletion) in your `.gitlab-ci.yml`.
 
-#### View issue and MR details and comments in VS Code
-
-![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_issues-in-vscode.png)
-
-GitLab Workflow allows you to view issue details and comments right in the VS Code. Click an issue link from the sidebar and VS Code will open a new tab to show the issue details. You can also comment to the issue from VS Code. Currently, replying to discussions are not supported.
-
-Updating assignees and labels are also not implemented. However, you can use [GitLab Slash Commands](https://docs.gitlab.com/ee/integration/slash_commands.html) to perform actions directly from VS Code. For example, to assign an issue to `@fatihacet`, simply add a comment `/assign @fatihacet` inside VS Code.
-
 ## Setup
 
 To use this extension, you need to create a GitLab Personal Access Token and give it to the extension.
@@ -240,6 +232,22 @@ Each query is an entry of the json array. Each entry can have the following valu
 ![https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png)
 
 ## Features in-depth
+
+### Issue and Merge Request details and comments in VS Code
+
+![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_issues-in-vscode.png)
+
+GitLab Workflow allows you to view issue details and comments right in the VS Code. Click an issue link from the sidebar and VS Code will open a new tab to show the issue details. You can also comment on the issue from VS Code.
+
+You can use [GitLab Slash Commands](https://docs.gitlab.com/ee/integration/slash_commands.html) to perform actions directly from VS Code. For example, to assign an issue to `@fatihacet`, simply add a comment `/assign @fatihacet` inside VS Code.
+
+#### Merge Request Reviews
+
+GitLab Workflow allows you to review changes and comments on merge requests directly inside the editor. You can navigate to merge requests on the left hand sidebar and expand any relevant merge requests to see both the description and files changed.
+
+When navigating changed files you can review comments that have been made on the diff.
+
+![_diff-comments_.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_diff-comments.gif)
 
 ### Sidebar - details
 
