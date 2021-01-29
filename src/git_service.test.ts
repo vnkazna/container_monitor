@@ -83,18 +83,6 @@ describe('git_service', () => {
       });
     });
 
-    describe('fetchBranchName', () => {
-      it('gets the current branch name', async () => {
-        await git.checkout(['-b', 'new-branch']);
-        // TODO if we use git branch command, we don't have to create a commit
-        await git.commit('Test commit', [], { '--allow-empty': null });
-
-        const branchName = await gitService.fetchBranchName();
-
-        expect(branchName).toEqual('new-branch');
-      });
-    });
-
     describe('fetchLastCommitId', () => {
       it('returns the last commit sha', async () => {
         await git.commit('Test commit', [], { '--allow-empty': null });
@@ -155,24 +143,20 @@ describe('git_service', () => {
       gitService = new GitService(options);
     });
 
-    it('fetchGitRemote returns null', async () => {
-      expect(await gitService.fetchGitRemote()).toEqual(null);
-    });
-
-    it('fetchBranchName returns null', async () => {
-      expect(await gitService.fetchBranchName()).toEqual(null);
+    it('fetchGitRemote returns throws', async () => {
+      expect(gitService.fetchGitRemote()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchLastCommitId returns null', async () => {
-      expect(await gitService.fetchLastCommitId()).toEqual(null);
+      expect(gitService.fetchLastCommitId()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchGitRemotePipeline returns null', async () => {
-      expect(await gitService.fetchGitRemotePipeline()).toEqual(null);
+      expect(gitService.fetchGitRemotePipeline()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchTrackingBranchName returns null', async () => {
-      expect(await gitService.fetchTrackingBranchName()).toEqual(null);
+      expect(gitService.fetchTrackingBranchName()).rejects.toBeInstanceOf(Error);
     });
   });
 });
