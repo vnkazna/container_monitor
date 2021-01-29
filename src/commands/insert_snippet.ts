@@ -34,9 +34,6 @@ export const insertSnippet = async (): Promise<void> => {
   const gitService = createGitService(workspaceFolder);
   const gitLabService = await createGitLabNewService(workspaceFolder);
   const remote = await gitService.fetchGitRemote();
-  if (!remote) {
-    throw new Error('Could not get parsed remote for your workspace');
-  }
   const snippets = await gitLabService.getSnippets(`${remote.namespace}/${remote.project}`);
   if (snippets.length === 0) {
     vscode.window.showInformationMessage('There are no project snippets.');

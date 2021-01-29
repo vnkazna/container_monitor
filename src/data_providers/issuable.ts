@@ -6,6 +6,8 @@ import * as gitLabService from '../gitlab_service';
 import { CustomQuery } from '../gitlab/custom_query';
 import { ItemModel } from './items/item_model';
 import { CONFIG_CUSTOM_QUERIES, CONFIG_NAMESPACE } from '../constants';
+import { logError } from '../log';
+import { ErrorItem } from './items/error_item';
 
 export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
   private eventEmitter = new vscode.EventEmitter<void>();
@@ -19,8 +21,13 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
 
     this.children.forEach(ch => ch.dispose());
     this.children = [];
-
-    const projects = await gitLabService.getAllGitlabProjects();
+    let projects: VsProject[] = [];
+    try {
+      projects = await gitLabService.getAllGitlabProjects();
+    } catch (e) {
+      logError(e);
+      return [new ErrorItem('Fetching Issues and MRs failed')];
+    }
     if (projects.length === 0) return [new vscode.TreeItem('No projects found')];
     const customQueries =
       vscode.workspace
