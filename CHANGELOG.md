@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * **gitlab-service:** do not fail if project could not be found ([a5a4211](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/a5a421141e960e299167dad14587551e11f7f504))
+  * Implemented by [@vymarkov](https://gitlab.com/vymarkov) with [MR !130](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/130) 👍
 * some self-managed GitLab deployments not handling project URLs ([5c4e613](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/5c4e61388a5701d1e7faadc62ca5c6a13b7b0e7e))
 * **gitlab_service:** include request URL when logging error ([9d0c8be](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/9d0c8be3dcf04d08891ad9b8f900e45cf2716722))
 * **instance_url:** heuristic now supports git remote URLs ([56dab86](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/56dab86117c109443a9422b85b58605fa5b774f1))
