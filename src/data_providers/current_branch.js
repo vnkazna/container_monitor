@@ -45,7 +45,7 @@ class DataProvider {
     const actionText = actions[pipeline.status] || '';
 
     const message = `Pipeline #${pipeline.id} ${statusText} · ${actionText} ${timeAgo}`;
-    const url = `${this.project.web_url}/pipelines/${pipeline.id}`;
+    const url = `${this.project.webUrl}/pipelines/${pipeline.id}`;
 
     return new ExternalUrlItem(message, url);
   }
