@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import { fromReviewUri, toReviewUri } from './review_uri';
 
-jest.mock('vscode');
-
 describe('review_uri.ts', () => {
   const uri = {
     path: '/review',

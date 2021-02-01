@@ -1,6 +1,3 @@
-/* eslint-disable import/first */
-jest.mock('../../service_factory');
-
 import * as vscode from 'vscode';
 import { MrItemModel } from './mr_item_model';
 import { mr, project } from '../../test_utils/entities';
@@ -10,6 +7,8 @@ import {
   multipleNotes,
 } from '../../../test/integration/fixtures/graphql/discussions.js';
 import { createGitLabNewService } from '../../service_factory';
+
+jest.mock('../../service_factory');
 
 const createCommentControllerMock = vscode.comments.createCommentController as jest.Mock;
 const createGitLabNewServiceMock = createGitLabNewService as jest.Mock;
