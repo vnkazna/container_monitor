@@ -13,7 +13,7 @@ const webviewController = require('./webview_controller');
 const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
 const { initializeLogging, handleError } = require('./log');
-const { ApiContentProvider } = require('./review/api_content_provider');
+const { GitContentProvider } = require('./review/git_content_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
 const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
 const { CiCompletionProvider } = require('./completion/ci_completion_provider');
@@ -92,7 +92,7 @@ const registerCiCompletion = context => {
 const activate = context => {
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
-  vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new ApiContentProvider());
+  vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new GitContentProvider());
   registerCommands(context, outputChannel);
   webviewController.addDeps(context);
   tokenService.init(context);
