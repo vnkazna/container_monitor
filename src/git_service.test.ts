@@ -25,9 +25,6 @@ describe('git_service', () => {
     workspaceFolder,
     remoteName: undefined,
     pipelineGitRemoteName: undefined,
-    log: () => {
-      //
-    },
   });
 
   beforeEach(() => {

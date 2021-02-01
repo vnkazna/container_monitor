@@ -1,13 +1,13 @@
 import * as execa from 'execa';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { parseGitRemote, GitRemote } from './git/git_remote_parser';
+import { log } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
 
 export interface GitServiceOptions {
   workspaceFolder: string;
   remoteName?: string;
   pipelineGitRemoteName?: string;
-  log: (line: string) => void;
 }
 
 export class GitService {
@@ -17,13 +17,10 @@ export class GitService {
 
   pipelineGitRemoteName?: string;
 
-  log: (line: string) => void;
-
   constructor(options: GitServiceOptions) {
     this.remoteName = options.remoteName;
     this.pipelineGitRemoteName = options.pipelineGitRemoteName;
     this.workspaceFolder = options.workspaceFolder;
-    this.log = options.log;
   }
 
   private async fetch(cmd: string): Promise<string> {
@@ -92,9 +89,7 @@ export class GitService {
           return ref.replace('refs/heads/', '');
         }
       } catch (e) {
-        this.log(
-          `Couldn't find tracking branch. Extension will fallback to branch name ${branchName}`,
-        );
+        log(`Couldn't find tracking branch. Extension will fallback to branch name ${branchName}`);
       }
 
       return branchName;
