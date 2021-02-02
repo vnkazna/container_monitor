@@ -453,7 +453,7 @@
                 }
               },
               "pipelineId": {
-                "type": "string",
+                "type": "number | string",
                 "description": "Returns vulnerabilities belonging to specified pipeline. \"branch\" returns vulnerabilities belonging to latest pipeline of the current branch. Works only with vulnerabilities"
               }
             }

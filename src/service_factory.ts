@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
+import * as assert from 'assert';
 import { GitService } from './git_service';
 import { log } from './log';
 import { GitLabNewService } from './gitlab/gitlab_new_service';
 import { getInstanceUrl } from './utils/get_instance_url';
 
 export function createGitService(workspaceFolder: string): GitService {
+  assert(workspaceFolder, 'git service requires workspaceFolder to function');
   const { remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration('gitlab');
   // the getConfiguration() returns null for missing attributes, we need to convert them to
   // undefined so that we can use optional properties and default function parameters

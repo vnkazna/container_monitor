@@ -48,3 +48,9 @@ interface RestVulnerability {
   severity: string;
   name: string;
 }
+
+interface RestPipeline {
+  status: 'running' | 'pending' | 'success' | 'failed' | 'canceled' | 'skipped';
+  updated_at: string;
+  id: number;
+}
