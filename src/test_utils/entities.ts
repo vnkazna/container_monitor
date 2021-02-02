@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { CustomQueryType } from '../gitlab/custom_query_type';
 
 export const issue: RestIssuable = {
@@ -58,4 +59,17 @@ export const customQuery = {
   sort: 'desc',
   searchIn: 'all',
   noItemText: 'No item',
+};
+
+export const createReviewUri = ({
+  path = 'testFile.txt',
+  commit = '12345abcde',
+  workspacePath = `/path/to/workspace`,
+  projectId = 123456,
+} = {}): vscode.Uri => {
+  return {
+    path,
+    query: JSON.stringify({ commit, workspacePath, projectId }),
+    scheme: 'gl-review',
+  } as vscode.Uri;
 };

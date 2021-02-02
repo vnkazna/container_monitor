@@ -1,21 +1,16 @@
 import * as vscode from 'vscode';
+import { createReviewUri } from '../test_utils/entities';
 import { fromReviewUri, toReviewUri } from './review_uri';
 
-jest.mock('vscode');
-
 describe('review_uri.ts', () => {
-  const uri = {
-    path: '/review',
-    query: '{"commit":"abcdef","workspacePath":"https://gitlab-example.com/test","projectId":1234}',
-    scheme: 'gl-review',
-  };
-
   const params = {
     commit: 'abcdef',
     path: '/review',
     projectId: 1234,
-    workspacePath: 'https://gitlab-example.com/test',
+    workspacePath: 'path/to/workspace',
   };
+
+  const uri = createReviewUri(params);
 
   describe('toReviewUri', () => {
     it('returns the correct Uri', () => {

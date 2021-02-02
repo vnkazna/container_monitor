@@ -3,8 +3,6 @@ import { IDetailedError } from './errors/common';
 import { handleError, initializeLogging, log, logError } from './log';
 import { USER_COMMANDS } from './command_names';
 
-jest.mock('vscode');
-
 describe('logging', () => {
   afterEach(() => {
     expect.hasAssertions();

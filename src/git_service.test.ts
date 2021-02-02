@@ -1,5 +1,6 @@
 import * as temp from 'temp';
 import * as vscode from 'vscode';
+import { promises as fs } from 'fs';
 import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
 
@@ -25,9 +26,6 @@ describe('git_service', () => {
     workspaceFolder,
     remoteName: undefined,
     pipelineGitRemoteName: undefined,
-    log: () => {
-      //
-    },
   });
 
   beforeEach(() => {
@@ -132,6 +130,23 @@ describe('git_service', () => {
         const result = await gitService.fetchTrackingBranchName();
 
         expect(result).toEqual(`${ORIGIN}/test-branch`);
+      });
+    });
+    describe('getFileContent', () => {
+      it('returns null when the file does not exist', async () => {
+        await git.commit('Test commit', [], { '--allow-empty': null });
+        const lastCommitSha = await git.revparse(['HEAD']);
+        const result = await gitService.getFileContent('/non/exising/file', lastCommitSha);
+        expect(result).toEqual(null);
+      });
+
+      it('returns file content on the given sha', async () => {
+        await fs.writeFile(`${workspaceFolder}/test.txt`, 'Test text');
+        await git.add('.');
+        await git.commit('Test commit');
+        const lastCommitSha = await git.revparse(['HEAD']);
+        const result = await gitService.getFileContent('/test.txt', lastCommitSha);
+        expect(result).toEqual('Test text');
       });
     });
   });

@@ -1,13 +1,13 @@
 import * as execa from 'execa';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { parseGitRemote, GitRemote } from './git/git_remote_parser';
+import { log } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
 
 export interface GitServiceOptions {
   workspaceFolder: string;
   remoteName?: string;
   pipelineGitRemoteName?: string;
-  log: (line: string) => void;
 }
 
 export class GitService {
@@ -17,13 +17,10 @@ export class GitService {
 
   pipelineGitRemoteName?: string;
 
-  log: (line: string) => void;
-
   constructor(options: GitServiceOptions) {
     this.remoteName = options.remoteName;
     this.pipelineGitRemoteName = options.pipelineGitRemoteName;
     this.workspaceFolder = options.workspaceFolder;
-    this.log = options.log;
   }
 
   private async fetch(cmd: string): Promise<string> {
@@ -92,14 +89,25 @@ export class GitService {
           return ref.replace('refs/heads/', '');
         }
       } catch (e) {
-        this.log(
-          `Couldn't find tracking branch. Extension will fallback to branch name ${branchName}`,
-        );
+        log(`Couldn't find tracking branch. Extension will fallback to branch name ${branchName}`);
       }
 
       return branchName;
     } catch (e) {
       throw new UserFriendlyError('Cannot get current git branch', e);
+    }
+  }
+
+  async getFileContent(path: string, sha: string): Promise<string | null> {
+    // even on Windows, the git show command accepts only POSIX paths
+    const posixPath = path.replace(/\\/g, '/');
+    const pathWithoutFirstSlash = posixPath.replace(/^\//, '');
+    try {
+      return await this.fetch(`git show ${sha}:${pathWithoutFirstSlash}`);
+    } catch (e) {
+      // null sufficiently signalises that the file has not been found
+      // this scenario is going to happen often (for open and squashed MRs)
+      return null;
     }
   }
 }

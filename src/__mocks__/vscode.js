@@ -29,7 +29,7 @@ module.exports = {
     executeCommand: jest.fn(),
   },
   workspace: {
-    getConfiguration: jest.fn(),
+    getConfiguration: jest.fn().mockReturnValue({}),
   },
   CommentMode: { Preview: 1 },
   CommentThreadCollapsibleState: { Expanded: 1 },

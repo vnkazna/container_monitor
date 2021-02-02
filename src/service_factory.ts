@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { GitService } from './git_service';
-import { log } from './log';
 import { GitLabNewService } from './gitlab/gitlab_new_service';
 import { getInstanceUrl } from './utils/get_instance_url';
 
@@ -12,7 +11,6 @@ export function createGitService(workspaceFolder: string): GitService {
     workspaceFolder,
     remoteName: remoteName || undefined,
     pipelineGitRemoteName: pipelineGitRemoteName || undefined,
-    log,
   });
 }
 
