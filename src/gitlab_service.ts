@@ -194,7 +194,9 @@ export async function getAllGitlabProjects(): Promise<VsProject[]> {
   return Promise.all(projectsWithUri);
 }
 
-export async function fetchLastPipelineForCurrentBranch(workspaceFolder: string) {
+export async function fetchLastPipelineForCurrentBranch(
+  workspaceFolder: string,
+): Promise<RestPipeline | null> {
   const project = await fetchCurrentPipelineProject(workspaceFolder);
   let pipeline = null;
 
@@ -306,11 +308,14 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
         'not[in]': params.excludeSearchIn,
       };
     }
+    // FIXME: this 'branch' or actual numerical ID most likely doesn't make sense from user perspective
+    //        Also, the logic allows for `pipeline_id=branch` query which doesn't make sense
+    //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
     if (pipelineId) {
       if (pipelineId === 'branch') {
         const workspace = await getCurrentWorkspaceFolder();
         if (workspace) {
-          pipelineId = await fetchLastPipelineForCurrentBranch(workspace);
+          pipelineId = (await fetchLastPipelineForCurrentBranch(workspace))?.id;
         }
       }
       path = `${path}&pipeline_id=${pipelineId}`;
@@ -413,7 +418,10 @@ export async function handlePipelineAction(action: string, workspaceFolder: stri
   }
 }
 
-export async function fetchMRIssues(mrId: number, workspaceFolder: string) {
+export async function fetchMRIssues(
+  mrId: number,
+  workspaceFolder: string,
+): Promise<RestIssuable[]> {
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
   let issues = [];
 
