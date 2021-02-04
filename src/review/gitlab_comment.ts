@@ -3,14 +3,14 @@ import { GqlNote } from '../gitlab/gitlab_new_service';
 import { GitLabCommentThread } from './gitlab_comment_thread';
 
 export class GitLabComment implements vscode.Comment {
-  constructor(readonly gqlNote: GqlNote, readonly thread: GitLabCommentThread) {}
+  body: string;
+
+  constructor(readonly gqlNote: GqlNote, readonly thread: GitLabCommentThread) {
+    this.body = gqlNote.body;
+  }
 
   get id(): string {
     return this.gqlNote.id;
-  }
-
-  get body(): string {
-    return this.gqlNote.body;
   }
 
   mode: vscode.CommentMode = vscode.CommentMode.Preview;
