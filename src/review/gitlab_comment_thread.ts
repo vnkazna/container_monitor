@@ -38,6 +38,19 @@ export class GitLabCommentThread {
     this.changeCommentMode(comment, vscode.CommentMode.Preview);
   }
 
+  submitEdit(comment: GitLabComment): void {
+    // const updatedComments = this.vsThread.comments.map(c => {
+    //   if (c instanceof GitLabComment && c.id === comment.id) {
+    //     console.log(`existingBody: ${c.body}; command arg body: ${comment.body}`);
+    //     const editedComment = new GitLabComment(c.gqlNote, this);
+    //     editedComment.body = comment.body;
+    //     return editedComment;
+    //   }
+    //   return comment;
+    // });
+    // this.vsThread.comments = updatedComments;
+  }
+
   private changeCommentMode(comment: GitLabComment, mode: vscode.CommentMode) {
     const updatedComments = this.vsThread.comments.map(c => {
       if (c instanceof GitLabComment && c.id === comment.id) {

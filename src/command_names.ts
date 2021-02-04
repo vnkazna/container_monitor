@@ -26,6 +26,7 @@ export const USER_COMMANDS = {
   REFRESH_SIDEBAR: 'gl.refreshSidebar',
   EDIT_COMMENT: 'gl.editComment',
   CANCEL_COMMENT_EDIT: 'gl.cancelCommentEdit',
+  SUBMIT_COMMENT_EDIT: 'gl.submitCommentEdit',
 };
 
 /*

@@ -148,6 +148,11 @@
         "command": "gl.cancelCommentEdit",
         "title": "Cancel",
         "category": "GitLab"
+      },
+      {
+        "command": "gl.submitCommentEdit",
+        "title": "Submit",
+        "category": "GitLab"
       }
     ],
     "menus": {
@@ -182,8 +187,12 @@
       ],
       "comments/comment/context": [
         {
-          "command": "gl.cancelCommentEdit",
+          "command": "gl.submitCommentEdit",
           "group": "inline@1"
+        },
+        {
+          "command": "gl.cancelCommentEdit",
+          "group": "inline@2"
         }
       ],
       "comments/commentThread/title": [
