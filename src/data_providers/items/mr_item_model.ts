@@ -1,26 +1,14 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
-import { toReviewUri } from '../../review/review_uri';
 import { createGitLabNewService } from '../../service_factory';
 import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';
-import { GqlDiscussion, GqlPosition } from '../../gitlab/gitlab_new_service';
 import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
-import { GitLabComment } from '../../review/gitlab_comment';
-
-const containsTextPosition = (discussion: GqlDiscussion): boolean => {
-  const firstNote = discussion.notes.nodes[0];
-  return firstNote?.position?.positionType === 'text';
-};
-
-const commentRangeFromPosition = (position: GqlPosition): vscode.Range => {
-  const glLine = position.oldLine || position.newLine;
-  assert(glLine, 'there is always eitehr new or old line');
-  const vsPosition = new vscode.Position(glLine - 1, 0);
-  return new vscode.Range(vsPosition, vsPosition);
-};
+import { GitLabCommentThread } from '../../review/gitlab_comment_thread';
+import { toReviewUri } from '../../review/review_uri';
+import { GqlPosition } from '../../gitlab/gitlab_new_service';
 
 export class MrItemModel extends ItemModel {
   constructor(readonly mr: RestIssuable, readonly project: VsProject) {
@@ -63,18 +51,6 @@ export class MrItemModel extends ItemModel {
     return [description, ...changedFiles];
   }
 
-  private uriFromPosition(position: GqlPosition): vscode.Uri {
-    const onOldVersion = Boolean(position.oldLine);
-    const path = onOldVersion ? position.oldPath : position.newPath;
-    const commit = onOldVersion ? position.diffRefs.baseSha : position.diffRefs.headSha;
-    return toReviewUri({
-      path,
-      commit,
-      workspacePath: this.project.uri,
-      projectId: this.mr.project_id,
-    });
-  }
-
   private async getMrDiscussions(): Promise<void> {
     const commentController = vscode.comments.createCommentController(
       this.mr.references.full,
@@ -87,20 +63,27 @@ export class MrItemModel extends ItemModel {
       issuable: this.mr,
       includePosition: true,
     });
-    const discussionsOnDiff = discussions.filter(containsTextPosition);
+    const discussionsOnDiff = discussions.filter(d =>
+      GitLabCommentThread.isThreadOnDiff(d.notes.nodes),
+    );
     const threads = discussionsOnDiff.map(({ notes }) => {
-      const position = notes.nodes[0]?.position as GqlPosition; // we filtered out all discussions without position
-      const thread = commentController.createCommentThread(
-        this.uriFromPosition(position),
-        commentRangeFromPosition(position),
-        [],
-      );
-      thread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-      const comments = notes.nodes.map(gqlNote => new GitLabComment(gqlNote, thread));
-      thread.comments = comments;
-      return thread;
+      assert(notes.nodes[0]?.position);
+      const threadUri = this.uriFromPosition(notes.nodes[0].position);
+      return new GitLabCommentThread(commentController, notes.nodes, threadUri);
     });
     this.setDisposableChildren([...threads, commentController]);
+  }
+
+  private uriFromPosition(position: GqlPosition): vscode.Uri {
+    const onOldVersion = Boolean(position.oldLine);
+    const path = onOldVersion ? position.oldPath : position.newPath;
+    const commit = onOldVersion ? position.diffRefs.baseSha : position.diffRefs.headSha;
+    return toReviewUri({
+      path,
+      commit,
+      workspacePath: this.project.uri,
+      projectId: this.mr.project_id,
+    });
   }
 
   private async getChangedFiles(): Promise<vscode.TreeItem[]> {

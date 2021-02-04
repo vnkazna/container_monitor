@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { GqlNote } from '../gitlab/gitlab_new_service';
+import { GitLabCommentThread } from './gitlab_comment_thread';
 
 export class GitLabComment implements vscode.Comment {
-  constructor(readonly gqlNote: GqlNote, readonly thread: vscode.CommentThread) {}
+  constructor(readonly gqlNote: GqlNote, readonly thread: GitLabCommentThread) {}
 
   get id(): string {
     return this.gqlNote.id;
@@ -29,16 +30,4 @@ export class GitLabComment implements vscode.Comment {
   reactions: undefined;
 
   label: undefined;
-
-  startEdit(): void {
-    const updatedComments = this.thread.comments.map(comment => {
-      if (comment instanceof GitLabComment && comment.id === this.id) {
-        const editedComment = new GitLabComment(comment.gqlNote, this.thread);
-        editedComment.mode = vscode.CommentMode.Editing;
-        return editedComment;
-      }
-      return comment;
-    });
-    this.thread.comments = updatedComments;
-  }
 }

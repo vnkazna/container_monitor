@@ -82,7 +82,7 @@ export interface GqlPosition {
   newPath: string;
   oldPath: string;
 }
-export interface GqlDiscussion {
+interface GqlDiscussion {
   replyId: string;
   createdAt: string;
   notes: Node<GqlNote>;

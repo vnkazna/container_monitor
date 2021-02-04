@@ -72,7 +72,7 @@ const registerCommands = (context, outputChannel) => {
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
     [USER_COMMANDS.EDIT_COMMENT]: comment => {
-      comment.startEdit();
+      comment.thread.startEdit(comment);
     },
   };
 
