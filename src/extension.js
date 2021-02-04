@@ -74,6 +74,9 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.EDIT_COMMENT]: comment => {
       comment.thread.startEdit(comment);
     },
+    [USER_COMMANDS.CANCEL_COMMENT_EDIT]: comment => {
+      comment.thread.cancelEdit(comment);
+    },
   };
 
   Object.keys(commands).forEach(cmd => {

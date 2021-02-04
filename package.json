@@ -143,12 +143,21 @@
         "title": "Resolve thread",
         "category": "GitLab",
         "icon": "$(check)"
+      },
+      {
+        "command": "gl.cancelCommentEdit",
+        "title": "Cancel",
+        "category": "GitLab"
       }
     ],
     "menus": {
       "commandPalette": [
         {
           "command": "gl.editComment",
+          "when": "false"
+        },
+        {
+          "command": "gl.deleteComment",
           "when": "false"
         }
       ],
@@ -171,7 +180,13 @@
           "when": "comment =~ /canAdmin/"
         }
       ],
-      "comments/commentThread/context": [
+      "comments/comment/context": [
+        {
+          "command": "gl.cancelCommentEdit",
+          "group": "inline@1"
+        }
+      ],
+      "comments/commentThread/title": [
         {
           "command": "gl.resolveThread",
           "group": "inline@1"
