@@ -71,6 +71,9 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.SHOW_OUTPUT]: () => outputChannel.show(),
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
+    [USER_COMMANDS.EDIT_COMMENT]: comment => {
+      comment.startEdit();
+    },
   };
 
   Object.keys(commands).forEach(cmd => {

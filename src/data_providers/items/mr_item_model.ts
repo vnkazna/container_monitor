@@ -8,6 +8,7 @@ import { ItemModel } from './item_model';
 import { GqlDiscussion, GqlPosition } from '../../gitlab/gitlab_new_service';
 import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
+import { GitLabComment } from '../../review/gitlab_comment';
 
 const containsTextPosition = (discussion: GqlDiscussion): boolean => {
   const firstNote = discussion.notes.nodes[0];
@@ -88,22 +89,15 @@ export class MrItemModel extends ItemModel {
     });
     const discussionsOnDiff = discussions.filter(containsTextPosition);
     const threads = discussionsOnDiff.map(({ notes }) => {
-      const comments = notes.nodes.map(({ body, author }) => ({
-        body,
-        mode: vscode.CommentMode.Preview,
-        author: {
-          name: author.name,
-          iconPath: author.avatarUrl !== null ? vscode.Uri.parse(author.avatarUrl) : undefined,
-        },
-      }));
       const position = notes.nodes[0]?.position as GqlPosition; // we filtered out all discussions without position
       const thread = commentController.createCommentThread(
         this.uriFromPosition(position),
         commentRangeFromPosition(position),
-        comments,
+        [],
       );
       thread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-      thread.canReply = false;
+      const comments = notes.nodes.map(gqlNote => new GitLabComment(gqlNote, thread));
+      thread.comments = comments;
       return thread;
     });
     this.setDisposableChildren([...threads, commentController]);

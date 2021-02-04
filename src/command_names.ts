@@ -24,6 +24,7 @@ export const USER_COMMANDS = {
   VALIDATE_CI_CONFIG: 'gl.validateCIConfig',
   SHOW_OUTPUT: 'gl.showOutput',
   REFRESH_SIDEBAR: 'gl.refreshSidebar',
+  EDIT_COMMENT: 'gl.editComment',
 };
 
 /*

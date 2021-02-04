@@ -120,18 +120,61 @@
       {
         "command": "gl.refreshSidebar",
         "title": "GitLab: Refresh sidebar",
+        "category": "GitLab",
         "icon": {
           "light": "src/assets/images/light/refresh.svg",
           "dark": "src/assets/images/dark/refresh.svg"
         }
+      },
+      {
+        "command": "gl.editComment",
+        "title": "Edit Comment",
+        "category": "GitLab",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "gl.deleteComment",
+        "title": "Delete Comment",
+        "category": "GitLab",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "gl.resolveThread",
+        "title": "Resolve thread",
+        "category": "GitLab",
+        "icon": "$(check)"
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "gl.editComment",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "gl.refreshSidebar",
           "when": "view =~ /(currentBranchInfo|issuesAndMrs)/",
           "group": "navigation"
+        }
+      ],
+      "comments/comment/title": [
+        {
+          "command": "gl.editComment",
+          "group": "inline@1",
+          "when": "comment =~ /canAdmin/"
+        },
+        {
+          "command": "gl.deleteComment",
+          "group": "inline@2",
+          "when": "comment =~ /canAdmin/"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "gl.resolveThread",
+          "group": "inline@1"
         }
       ]
     },

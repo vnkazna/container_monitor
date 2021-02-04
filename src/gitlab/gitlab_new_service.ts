@@ -55,7 +55,7 @@ interface GqlUser {
   username: string;
   webUrl: string;
 }
-interface GqlNote {
+export interface GqlNote {
   id: string;
   author: GqlUser;
   createdAt: string;
@@ -63,6 +63,11 @@ interface GqlNote {
   body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
   bodyHtml: string;
   position?: GqlPosition;
+  userPermissions: GqlNotePermissions;
+}
+
+interface GqlNotePermissions {
+  adminNote: boolean;
 }
 
 export interface GqlPosition {
@@ -222,6 +227,9 @@ ${includePosition ? positionFragment : ''}
           }
           body
           bodyHtml
+          userPermissions {
+            adminNote
+          }
           ${includePosition ? `...position` : ''}
         }
       }
