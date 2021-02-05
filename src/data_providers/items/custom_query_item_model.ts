@@ -70,7 +70,7 @@ export class CustomQueryItemModel extends ItemModel {
 
   async getChildren(): Promise<vscode.TreeItem[]> {
     try {
-      return this.getProjectIssues();
+      return await this.getProjectIssues();
     } catch (e) {
       handleError(e);
       return [new ErrorItem()];
