@@ -1,3 +1,4 @@
+const vscode = require('vscode');
 const { setupServer } = require('msw/node');
 const { rest, graphql } = require('msw');
 const assert = require('assert');
@@ -14,7 +15,7 @@ const validateUserAgent = req => {
 
   assert.strictEqual(
     userAgent,
-    `vs-code-gitlab-workflow/${packageJson.version} VSCode/1.52.1 Node.js/${nodeJsVersion}`,
+    `vs-code-gitlab-workflow/${packageJson.version} VSCode/${vscode.version} Node.js/${nodeJsVersion}`,
   );
 };
 
