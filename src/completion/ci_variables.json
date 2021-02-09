@@ -1,11 +1,11 @@
 [
   {
     "name": "CHAT_CHANNEL",
-    "description": "Source chat channel which triggered the [ChatOps](../chatops/README.md) command."
+    "description": "Source chat channel which triggered the [ChatOps](../chatops/index.md) command."
   },
   {
     "name": "CHAT_INPUT",
-    "description": "Additional arguments passed in the [ChatOps](../chatops/README.md) command."
+    "description": "Additional arguments passed in the [ChatOps](../chatops/index.md) command."
   },
   {
     "name": "CI",
