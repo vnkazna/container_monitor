@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
-import { GqlNote, GqlPosition } from '../gitlab/gitlab_new_service';
-import { GitLabComment } from './gitlab_comment';
+import { GitLabNewService, GqlNote, GqlPosition } from '../gitlab/gitlab_new_service';
+import { CommentCopyOptions, GitLabComment } from './gitlab_comment';
 
 const commentRangeFromPosition = (position: GqlPosition): vscode.Range => {
   const glLine = position.oldLine || position.newLine;
@@ -17,6 +17,7 @@ export class GitLabCommentThread {
     commentController: vscode.CommentController,
     notes: GqlNote[],
     threadUri: vscode.Uri,
+    private readonly gitlabService: GitLabNewService,
   ) {
     const position = notes[0]?.position;
     assert(position, 'thread cannot be created for notes without position');
@@ -26,39 +27,33 @@ export class GitLabCommentThread {
       [],
     );
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-    const comments = notes.map(gqlNote => new GitLabComment(gqlNote, this));
+    const comments = notes.map(gqlNote => GitLabComment.fromGqlNote(gqlNote, this));
     this.vsThread.comments = comments;
   }
 
   startEdit(comment: GitLabComment): void {
-    this.changeCommentMode(comment, vscode.CommentMode.Editing);
+    this.changeComment(comment, { mode: vscode.CommentMode.Editing });
   }
 
   cancelEdit(comment: GitLabComment): void {
-    this.changeCommentMode(comment, vscode.CommentMode.Preview);
+    this.changeComment(comment, { mode: vscode.CommentMode.Preview, body: comment.bodyOnServer });
   }
 
-  submitEdit(comment: GitLabComment): void {
-    // const updatedComments = this.vsThread.comments.map(c => {
-    //   if (c instanceof GitLabComment && c.id === comment.id) {
-    //     console.log(`existingBody: ${c.body}; command arg body: ${comment.body}`);
-    //     const editedComment = new GitLabComment(c.gqlNote, this);
-    //     editedComment.body = comment.body;
-    //     return editedComment;
-    //   }
-    //   return comment;
-    // });
-    // this.vsThread.comments = updatedComments;
+  async submitEdit(comment: GitLabComment): Promise<void> {
+    await this.gitlabService.updateNoteBody(comment.id, comment.body);
+    this.changeComment(comment, {
+      mode: vscode.CommentMode.Preview,
+      body: comment.body,
+      bodyOnServer: comment.body,
+    });
   }
 
-  private changeCommentMode(comment: GitLabComment, mode: vscode.CommentMode) {
+  private changeComment(comment: GitLabComment, options: CommentCopyOptions) {
     const updatedComments = this.vsThread.comments.map(c => {
       if (c instanceof GitLabComment && c.id === comment.id) {
-        const editedComment = new GitLabComment(c.gqlNote, this);
-        editedComment.mode = mode;
-        return editedComment;
+        return c.copy(options);
       }
-      return comment;
+      return c;
     });
     this.vsThread.comments = updatedComments;
   }

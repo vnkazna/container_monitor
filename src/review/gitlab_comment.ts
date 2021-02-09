@@ -2,18 +2,23 @@ import * as vscode from 'vscode';
 import { GqlNote } from '../gitlab/gitlab_new_service';
 import { GitLabCommentThread } from './gitlab_comment_thread';
 
+export interface CommentCopyOptions {
+  body?: string;
+  bodyOnServer?: string;
+  mode?: vscode.CommentMode;
+}
 export class GitLabComment implements vscode.Comment {
-  body: string;
-
-  constructor(readonly gqlNote: GqlNote, readonly thread: GitLabCommentThread) {
-    this.body = gqlNote.body;
-  }
+  protected constructor(
+    readonly gqlNote: GqlNote,
+    public mode: vscode.CommentMode,
+    readonly bodyOnServer: string,
+    public body: string,
+    readonly thread: GitLabCommentThread,
+  ) {}
 
   get id(): string {
     return this.gqlNote.id;
   }
-
-  mode: vscode.CommentMode = vscode.CommentMode.Preview;
 
   get author(): vscode.CommentAuthorInformation {
     const { name, avatarUrl } = this.gqlNote.author;
@@ -30,4 +35,24 @@ export class GitLabComment implements vscode.Comment {
   reactions: undefined;
 
   label: undefined;
+
+  copy({ body, bodyOnServer, mode }: CommentCopyOptions): GitLabComment {
+    return new GitLabComment(
+      this.gqlNote,
+      mode ?? this.mode,
+      bodyOnServer ?? this.bodyOnServer,
+      body ?? this.body,
+      this.thread,
+    );
+  }
+
+  static fromGqlNote(gqlNote: GqlNote, thread: GitLabCommentThread): GitLabComment {
+    return new GitLabComment(
+      gqlNote,
+      vscode.CommentMode.Preview,
+      gqlNote.body,
+      gqlNote.body,
+      thread,
+    );
+  }
 }

@@ -253,6 +253,22 @@ const constructGetDiscussionsQuery = (isMr: boolean, includePosition = false) =>
   }
 `;
 
+const updateNoteBodyMutation = gql`
+  mutation UpdateNoteBody($noteId: NoteID!, $body: String) {
+    updateNote(input: { id: $noteId, body: $body }) {
+      errors
+    }
+  }
+`;
+
+const discussionToggleResolve = gql`
+  mutation DiscussionToggleResolve($replyId: DiscussionID!) {
+    discussionToggleResolve(input: { id: $replyId, resolve: true }) {
+      errors
+    }
+  }
+`;
+
 const createNoteMutation = gql`
   mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
     createNote(input: { noteableId: $issuableId, body: $body, discussionId: $replyId }) {
@@ -385,6 +401,14 @@ export class GitLabNewService {
       throw new FetchError(`Fetching file from ${fileUrl} failed`, fileResult);
     }
     return fileResult.text();
+  }
+
+  async updateNoteBody(noteId: string, body: string): Promise<void> {
+    throw new Error('api call failed');
+    return this.client.request<void>(updateNoteBodyMutation, {
+      noteId,
+      body,
+    });
   }
 
   /*

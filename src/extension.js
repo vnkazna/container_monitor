@@ -77,8 +77,8 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CANCEL_COMMENT_EDIT]: comment => {
       comment.thread.cancelEdit(comment);
     },
-    [USER_COMMANDS.SUBMIT_COMMENT_EDIT]: comment => {
-      comment.thread.submitEdit(comment);
+    [USER_COMMANDS.SUBMIT_COMMENT_EDIT]: async comment => {
+      return comment.thread.submitEdit(comment);
     },
   };
 
