@@ -38,7 +38,7 @@ const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): Re
 const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
 
-const getInstanceUrl = async () => await getInstanceUrlUtil(await getCurrentWorkspaceFolder());
+const getInstanceUrl = async () => getInstanceUrlUtil(await getCurrentWorkspaceFolder());
 
 async function fetch(path: string, method = 'GET', data?: Record<string, unknown>) {
   const instanceUrl = await getInstanceUrl();

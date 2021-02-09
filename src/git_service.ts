@@ -60,15 +60,15 @@ export class GitService {
   }
 
   async fetchGitRemote(): Promise<GitRemote> {
-    return await this.fetchRemoteUrl(this.remoteName);
+    return this.fetchRemoteUrl(this.remoteName);
   }
 
   async fetchLastCommitId(): Promise<string> {
-    return await this.fetch('git log --format=%H -n 1');
+    return this.fetch('git log --format=%H -n 1');
   }
 
   async fetchGitRemotePipeline(): Promise<GitRemote | null> {
-    return await this.fetchRemoteUrl(this.pipelineGitRemoteName);
+    return this.fetchRemoteUrl(this.pipelineGitRemoteName);
   }
 
   /**
