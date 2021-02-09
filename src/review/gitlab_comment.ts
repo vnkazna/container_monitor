@@ -11,6 +11,8 @@ export class GitLabComment implements vscode.Comment {
   protected constructor(
     readonly gqlNote: GqlNote,
     public mode: vscode.CommentMode,
+    // The body on server is necessary because we might want to cancel editing and then we need to
+    // be able to revert to original state. If submitting gives us a new GqlNote, we could avoid keeping this state 🙏
     readonly bodyOnServer: string,
     public body: string,
     readonly thread: GitLabCommentThread,

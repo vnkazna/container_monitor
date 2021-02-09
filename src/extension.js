@@ -80,6 +80,11 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.SUBMIT_COMMENT_EDIT]: async comment => {
       return comment.thread.submitEdit(comment);
     },
+    [USER_COMMANDS.RESOLVE_THREAD]: async vsThread => {
+      // FIXME: either create a utility function that does this or figure out a different way
+      // to convert vscode.CommentThread => GitLabCommentThread
+      return vsThread.comments[0].thread.toggleResolved();
+    },
   };
 
   Object.keys(commands).forEach(cmd => {

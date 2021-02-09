@@ -10,25 +10,42 @@ const commentRangeFromPosition = (position: GqlPosition): vscode.Range => {
   return new vscode.Range(vsPosition, vsPosition);
 };
 
+interface GitLabCommentThreadOptions {
+  notes: GqlNote[];
+  threadUri: vscode.Uri;
+  resolved: boolean;
+  resolvable: boolean;
+  replyId: string;
+}
+
 export class GitLabCommentThread {
   private vsThread: vscode.CommentThread;
 
+  private readonly resolvable: boolean;
+
+  private resolved: boolean;
+
+  private replyId: string;
+
   constructor(
     commentController: vscode.CommentController,
-    notes: GqlNote[],
-    threadUri: vscode.Uri,
     private readonly gitlabService: GitLabNewService,
+    options: GitLabCommentThreadOptions,
   ) {
-    const position = notes[0]?.position;
+    const position = options.notes[0]?.position;
     assert(position, 'thread cannot be created for notes without position');
     this.vsThread = commentController.createCommentThread(
-      threadUri,
+      options.threadUri,
       commentRangeFromPosition(position),
       [],
     );
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-    const comments = notes.map(gqlNote => GitLabComment.fromGqlNote(gqlNote, this));
+    const comments = options.notes.map(gqlNote => GitLabComment.fromGqlNote(gqlNote, this));
     this.vsThread.comments = comments;
+    this.resolvable = options.resolvable;
+    this.resolved = options.resolved;
+    this.replyId = options.replyId;
+    this.vsThread.contextValue = this.createContext();
   }
 
   startEdit(comment: GitLabComment): void {
@@ -48,6 +65,12 @@ export class GitLabCommentThread {
     });
   }
 
+  async toggleResolved(): Promise<void> {
+    await this.gitlabService.setResolved(this.replyId, !this.resolved);
+    this.resolved = !this.resolved;
+    this.vsThread.contextValue = this.createContext();
+  }
+
   private changeComment(comment: GitLabComment, options: CommentCopyOptions) {
     const updatedComments = this.vsThread.comments.map(c => {
       if (c instanceof GitLabComment && c.id === comment.id) {
@@ -56,6 +79,11 @@ export class GitLabCommentThread {
       return c;
     });
     this.vsThread.comments = updatedComments;
+  }
+
+  private createContext(): string | undefined {
+    if (!this.resolvable) return undefined;
+    return `${this.resolved ? 'resolved' : 'unresolved'}`;
   }
 
   dispose(): void {

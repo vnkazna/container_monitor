@@ -27,6 +27,7 @@ export const USER_COMMANDS = {
   EDIT_COMMENT: 'gl.editComment',
   CANCEL_COMMENT_EDIT: 'gl.cancelCommentEdit',
   SUBMIT_COMMENT_EDIT: 'gl.submitCommentEdit',
+  RESOLVE_THREAD: 'gl.resolveThread',
 };
 
 /*

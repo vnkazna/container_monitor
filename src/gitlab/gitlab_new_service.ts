@@ -85,6 +85,8 @@ export interface GqlPosition {
 interface GqlDiscussion {
   replyId: string;
   createdAt: string;
+  resolved: boolean;
+  resolvable: boolean;
   notes: Node<GqlNote>;
 }
 
@@ -210,6 +212,8 @@ ${includePosition ? positionFragment : ''}
     nodes {
       replyId
       createdAt
+      resolved
+      resolvable
       notes {
         pageInfo {
           hasNextPage
@@ -261,9 +265,9 @@ const updateNoteBodyMutation = gql`
   }
 `;
 
-const discussionToggleResolve = gql`
-  mutation DiscussionToggleResolve($replyId: DiscussionID!) {
-    discussionToggleResolve(input: { id: $replyId, resolve: true }) {
+const discussionSetResolved = gql`
+  mutation DiscussionToggleResolve($replyId: DiscussionID!, $resolved: Boolean!) {
+    discussionToggleResolve(input: { id: $replyId, resolve: $resolved }) {
       errors
     }
   }
@@ -404,10 +408,16 @@ export class GitLabNewService {
   }
 
   async updateNoteBody(noteId: string, body: string): Promise<void> {
-    throw new Error('api call failed');
     return this.client.request<void>(updateNoteBodyMutation, {
       noteId,
       body,
+    });
+  }
+
+  async setResolved(replyId: string, resolved: boolean): Promise<void> {
+    return this.client.request<void>(discussionSetResolved, {
+      replyId,
+      resolved,
     });
   }
 

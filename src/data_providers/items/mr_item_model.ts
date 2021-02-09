@@ -66,10 +66,16 @@ export class MrItemModel extends ItemModel {
     const discussionsOnDiff = discussions.filter(d =>
       GitLabCommentThread.isThreadOnDiff(d.notes.nodes),
     );
-    const threads = discussionsOnDiff.map(({ notes }) => {
+    const threads = discussionsOnDiff.map(({ notes, resolved, resolvable, replyId }) => {
       assert(notes.nodes[0]?.position);
       const threadUri = this.uriFromPosition(notes.nodes[0].position);
-      return new GitLabCommentThread(commentController, notes.nodes, threadUri, gitlabService);
+      return new GitLabCommentThread(commentController, gitlabService, {
+        notes: notes.nodes,
+        threadUri,
+        resolvable,
+        resolved,
+        replyId,
+      });
     });
     this.setDisposableChildren([...threads, commentController]);
   }

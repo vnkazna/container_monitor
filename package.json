@@ -164,6 +164,11 @@
         {
           "command": "gl.deleteComment",
           "when": "false"
+        },
+        {
+          "command": "gl.resolveThread",
+          "when": "false"
+
         }
       ],
       "view/title": [
@@ -198,7 +203,8 @@
       "comments/commentThread/title": [
         {
           "command": "gl.resolveThread",
-          "group": "inline@1"
+          "group": "inline@1",
+          "when": "commentThread == unresolved"
         }
       ]
     },
