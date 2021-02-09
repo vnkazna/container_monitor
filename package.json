@@ -151,6 +151,12 @@
         "icon": "$(close)"
       },
       {
+        "command": "gl.openWebComment",
+        "title": "Open comment on the GitLab web",
+        "category": "GitLab",
+        "icon": "$(globe)"
+      },
+      {
         "command": "gl.cancelCommentEdit",
         "title": "Cancel",
         "category": "GitLab"
@@ -199,6 +205,10 @@
           "command": "gl.deleteComment",
           "group": "inline@2",
           "when": "comment =~ /canAdmin/"
+        },
+        {
+          "command": "gl.openWebComment",
+          "group": "inline@3"
         }
       ],
       "comments/comment/context": [

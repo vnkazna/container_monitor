@@ -15,7 +15,7 @@ const CurrentBranchDataProvider = require('./data_providers/current_branch').Dat
 const { initializeLogging, handleError } = require('./log');
 const { GitContentProvider } = require('./review/git_content_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
-const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
+const { USER_COMMANDS, PROGRAMMATIC_COMMANDS, VS_COMMANDS } = require('./command_names');
 const { CiCompletionProvider } = require('./completion/ci_completion_provider');
 const { GitExtensionWrapper } = require('./git/git_extension_wrapper');
 
@@ -89,6 +89,16 @@ const registerCommands = (context, outputChannel) => {
       // FIXME: either create a utility function that does this or figure out a different way
       // to convert vscode.CommentThread => GitLabCommentThread
       return vsThread.comments[0].thread.toggleResolved();
+    },
+    [USER_COMMANDS.OPEN_WEB_COMMENT]: async () => {
+      // FIXME: either create a utility function that does this or figure out a different way
+      // to convert vscode.CommentThread => GitLabCommentThread
+      return vscode.commands.executeCommand(
+        VS_COMMANDS.OPEN,
+        vscode.Uri.parse(
+          'https://gitlab.com/viktomas/test-project/-/merge_requests/3#note_447164415',
+        ),
+      );
     },
   };
 
