@@ -28,6 +28,7 @@ export const USER_COMMANDS = {
   CANCEL_COMMENT_EDIT: 'gl.cancelCommentEdit',
   SUBMIT_COMMENT_EDIT: 'gl.submitCommentEdit',
   RESOLVE_THREAD: 'gl.resolveThread',
+  UNRESOLVE_THREAD: 'gl.unresolveThread',
 };
 
 /*

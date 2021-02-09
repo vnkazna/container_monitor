@@ -85,6 +85,11 @@ const registerCommands = (context, outputChannel) => {
       // to convert vscode.CommentThread => GitLabCommentThread
       return vsThread.comments[0].thread.toggleResolved();
     },
+    [USER_COMMANDS.UNRESOLVE_THREAD]: async vsThread => {
+      // FIXME: either create a utility function that does this or figure out a different way
+      // to convert vscode.CommentThread => GitLabCommentThread
+      return vsThread.comments[0].thread.toggleResolved();
+    },
   };
 
   Object.keys(commands).forEach(cmd => {

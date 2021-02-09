@@ -145,6 +145,12 @@
         "icon": "$(check)"
       },
       {
+        "command": "gl.unresolveThread",
+        "title": "Unresolve thread",
+        "category": "GitLab",
+        "icon": "$(close)"
+      },
+      {
         "command": "gl.cancelCommentEdit",
         "title": "Cancel",
         "category": "GitLab"
@@ -167,6 +173,11 @@
         },
         {
           "command": "gl.resolveThread",
+          "when": "false"
+
+        },
+        {
+          "command": "gl.unresolveThread",
           "when": "false"
 
         }
@@ -205,6 +216,11 @@
           "command": "gl.resolveThread",
           "group": "inline@1",
           "when": "commentThread == unresolved"
+        },
+        {
+          "command": "gl.unresolveThread",
+          "group": "inline@2",
+          "when": "commentThread == resolved"
         }
       ]
     },
