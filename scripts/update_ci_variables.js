@@ -34,7 +34,7 @@ function loadExistingVariablesJson() {
 }
 
 function writeVariablesJson(json) {
-  return fs.writeFileSync(VARIABLE_JSON_PATH, `${json}\n`);
+  return fs.writeFileSync(VARIABLE_JSON_PATH, json);
 }
 
 async function run() {
@@ -44,7 +44,7 @@ async function run() {
 
   if (process.env.CI && onlineVariablesJson !== existingVariablesJson) {
     console.error(
-      '❌ ./src/utils/ci_variables.json has changes, please execute `npm run update-ci-variables` to fix this.',
+      '❌ ./src/utils/ci_variables.json has changed, go to https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/ci-variables.md.',
     );
     process.exit(1);
   }
