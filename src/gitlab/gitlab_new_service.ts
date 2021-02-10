@@ -8,7 +8,7 @@ import * as assert from 'assert';
 import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
-import { getAvatarUrl } from '../utils/get_avatar_url';
+import { ensureAbsoluteAvatarUrl } from '../utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
 import { GitLabProject, GqlProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
@@ -43,15 +43,15 @@ export interface GqlBlob {
   path: string;
 }
 
-interface GqlNoteAuthor {
-  avatarUrl: string;
+interface GqlUser {
+  avatarUrl: string | null;
   name: string;
   username: string;
   webUrl: string;
 }
 interface GqlNote {
   id: string;
-  author: GqlNoteAuthor;
+  author: GqlUser;
   createdAt: string;
   system: boolean;
   body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
@@ -335,7 +335,8 @@ export class GitLabNewService {
       bodyHtml: note.bodyHtml.replace(/href="\//, `href="${this.instanceUrl}/`),
       author: {
         ...note.author,
-        avatarUrl: getAvatarUrl(this.instanceUrl, note.author.avatarUrl),
+        avatarUrl:
+          note.author.avatarUrl && ensureAbsoluteAvatarUrl(this.instanceUrl, note.author.avatarUrl),
       },
     });
     return {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export const getAvatarUrl = (instanceUrl: string, avatarUrl: string): string => {
+export const ensureAbsoluteAvatarUrl = (instanceUrl: string, avatarUrl: string): string => {
   if (!avatarUrl.startsWith('/')) {
     return avatarUrl;
   }

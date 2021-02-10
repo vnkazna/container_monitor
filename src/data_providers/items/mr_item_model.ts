@@ -32,7 +32,9 @@ export class MrItemModel extends ItemModel {
       `!${iid} · ${title}`,
       vscode.TreeItemCollapsibleState.Collapsed,
     );
-    item.iconPath = vscode.Uri.parse(author.avatar_url);
+    if (author.avatar_url) {
+      item.iconPath = vscode.Uri.parse(author.avatar_url);
+    }
     return item;
   }
 
@@ -91,7 +93,7 @@ export class MrItemModel extends ItemModel {
         mode: vscode.CommentMode.Preview,
         author: {
           name: author.name,
-          iconPath: vscode.Uri.parse(author.avatarUrl),
+          iconPath: author.avatarUrl !== null ? vscode.Uri.parse(author.avatarUrl) : undefined,
         },
       }));
       const position = notes.nodes[0]?.position as GqlPosition; // we filtered out all discussions without position
