@@ -1,3 +1,18 @@
+# [3.12.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.11.2...v3.12.0) (2021-02-10)
+
+
+### Bug Fixes
+
+* **side tree:** for current branch not working for multiroot projects ([4c5989a](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/4c5989a20a80513673b90116f6591f040bb25138))
+* **sidebar:** log error when fetching items ([2f95666](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/2f956665301cbb5cc98663245afcb31c79f3559d))
+
+
+### Features
+
+* try to get MR diff conent from local git before fetching from API ([b3c5f54](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b3c5f541e2cfd52277c500b27e915b1507279d96))
+
+
+
 ## [3.11.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.11.1...v3.11.2) (2021-01-29)
 
 
