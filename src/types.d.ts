@@ -13,7 +13,7 @@ interface RestIssuable {
   title: string;
   project_id: number;
   web_url: string;
-  author: { name: string; avatar_url: string };
+  author: { name: string; avatar_url: string | null };
   sha?: string; // only present in MR, legacy logic uses the presence to decide issuable type
   references: {
     full: string; // e.g. "gitlab-org/gitlab#219925"

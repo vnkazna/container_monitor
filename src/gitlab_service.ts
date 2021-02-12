@@ -12,7 +12,7 @@ import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
 import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
-import { getAvatarUrl } from './utils/get_avatar_url';
+import { ensureAbsoluteAvatarUrl } from './utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl as getInstanceUrlUtil } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
@@ -27,13 +27,19 @@ interface GitLabJob {
   created_at: string;
 }
 
-const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => ({
-  ...issuable,
-  author: {
-    ...issuable.author,
-    avatar_url: getAvatarUrl(instanceUrl, issuable.author.avatar_url),
-  },
-});
+const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => {
+  const { author } = issuable;
+  if (!author.avatar_url) {
+    return issuable;
+  }
+  return {
+    ...issuable,
+    author: {
+      ...author,
+      avatar_url: ensureAbsoluteAvatarUrl(instanceUrl, author.avatar_url),
+    },
+  };
+};
 
 const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
