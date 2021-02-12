@@ -1,4 +1,5 @@
 const assert = require('assert');
+const dayjs = require('dayjs');
 const CurrentBranchDataProvider = require('../../src/data_providers/current_branch').DataProvider;
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
@@ -16,10 +17,15 @@ describe('GitLab tree view for current branch', () => {
   let server;
   let dataProvider;
 
+  const fourYearsAgo = dayjs().subtract(4, 'year');
+
   const pipelinesEndpoint = createQueryJsonEndpoint('/projects/278964/pipelines', {
     '?ref=master': pipelinesResponse,
   });
-  const pipelineEndpoint = createJsonEndpoint('/projects/278964/pipelines/47', pipelineResponse);
+  const pipelineEndpoint = createJsonEndpoint('/projects/278964/pipelines/47', {
+    ...pipelineResponse,
+    updated_at: fourYearsAgo.toISOString(),
+  });
   const mrEndpoint = createQueryJsonEndpoint('/projects/278964/merge_requests', {
     '?state=opened&source_branch=master': [openMergeRequestResponse],
   });
