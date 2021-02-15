@@ -1,18 +1,16 @@
-import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { GitService } from './git_service';
 import { GitLabNewService } from './gitlab/gitlab_new_service';
 import { getInstanceUrl } from './utils/get_instance_url';
+import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
 export function createGitService(workspaceFolder: string): GitService {
   assert(workspaceFolder, 'git service requires workspaceFolder to function');
-  const { remoteName, pipelineGitRemoteName } = vscode.workspace.getConfiguration('gitlab');
-  // the getConfiguration() returns null for missing attributes, we need to convert them to
-  // undefined so that we can use optional properties and default function parameters
+  const { remoteName, pipelineGitRemoteName } = getExtensionConfiguration();
   return new GitService({
     workspaceFolder,
-    remoteName: remoteName || undefined,
-    pipelineGitRemoteName: pipelineGitRemoteName || undefined,
+    remoteName,
+    pipelineGitRemoteName,
   });
 }
 

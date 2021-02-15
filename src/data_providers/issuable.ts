@@ -29,6 +29,7 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
       return [new ErrorItem('Fetching Issues and MRs failed')];
     }
     if (projects.length === 0) return [new vscode.TreeItem('No projects found')];
+    // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
     const customQueries =
       vscode.workspace
         .getConfiguration(CONFIG_NAMESPACE)

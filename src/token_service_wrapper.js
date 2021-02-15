@@ -8,6 +8,7 @@ const { USER_COMMANDS } = require('./command_names');
 let context = null;
 let active = false;
 
+// FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
 const currentInstanceUrl = () =>
   vscode.workspace.getConfiguration('gitlab').instanceUrl || GITLAB_COM_URL;
 

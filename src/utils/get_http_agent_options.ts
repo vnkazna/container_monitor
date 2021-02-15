@@ -13,6 +13,7 @@ interface GitLabHttpAgentOptions {
 
 export const getHttpAgentOptions = (): GitLabHttpAgentOptions => {
   const result: GitLabHttpAgentOptions = {};
+  // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
   const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
     'gitlab',
   );
@@ -40,6 +41,7 @@ export const getHttpAgentOptions = (): GitLabHttpAgentOptions => {
     }
   }
 
+  // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
   const { proxy } = vscode.workspace.getConfiguration('http');
   result.proxy = proxy || undefined;
   return result;
