@@ -1,3 +1,12 @@
+## [3.12.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.12.0...v3.12.1) (2021-02-15)
+
+
+### Bug Fixes
+
+* support displaying users without avatars ([8e42065](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/8e42065f135a02d2ced13be27d6a0bc730deafb0))
+
+
+
 # [3.12.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.11.2...v3.12.0) (2021-02-10)
 
 
