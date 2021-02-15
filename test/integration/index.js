@@ -16,7 +16,7 @@ const getAllTestFiles = testsRoot =>
 async function run(testsRoot) {
   // Create the mocha test
   const mocha = new Mocha();
-  mocha.timeout(2000);
+  mocha.timeout(3000);
   mocha.color(true);
   const files = await getAllTestFiles(testsRoot);
 
