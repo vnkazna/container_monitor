@@ -5,6 +5,7 @@ const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const { createGitLabNewService } = require('./service_factory');
 const { logError } = require('./log');
+const { getInstanceUrl } = require('./utils/get_instance_url');
 
 let context = null;
 
@@ -59,6 +60,7 @@ const createPanel = issuable => {
 };
 
 const createMessageHandler = (panel, issuable, workspaceFolder) => async message => {
+  const instanceUrl = await getInstanceUrl(workspaceFolder);
   if (message.command === 'renderMarkdown') {
     const alteredMarkdown = message.markdown.replace(
       /\(\/.*(\/-)?\/merge_requests\//,
@@ -68,7 +70,7 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
     rendered = (rendered || '')
       .replace(/ src=".*" alt/gim, ' alt')
       .replace(/" data-src/gim, '" src')
-      .replace(/ href="\//gim, ` href="${vscode.workspace.getConfiguration('gitlab').instanceUrl}/`)
+      .replace(/ href="\//gim, ` href="${instanceUrl}/`)
       .replace(/\/master\/-\/merge_requests\//gim, '/-/merge_requests/');
 
     panel.webview.postMessage({
