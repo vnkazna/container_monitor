@@ -3,6 +3,7 @@ const Mocha = require('mocha');
 // glob is available in the VS Code runtime
 // eslint-disable-next-line import/no-extraneous-dependencies
 const glob = require('glob');
+const { initializeTestEnvironment } = require('./test_infrastructure/initialize_test_environment');
 
 const getAllTestFiles = testsRoot =>
   new Promise((resolve, reject) => {
@@ -21,6 +22,9 @@ async function run(testsRoot) {
 
   // Add files to the test suite
   files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+
+  // Initialize VS Code environment for integration tests
+  initializeTestEnvironment();
 
   // Run the mocha test
   await new Promise((res, rej) =>
