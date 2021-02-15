@@ -16,6 +16,7 @@ import { ensureAbsoluteAvatarUrl } from './utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl as getInstanceUrlUtil } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
+import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
 interface GitLabPipeline {
   id: number;
@@ -138,7 +139,8 @@ export async function fetchCurrentProjectSwallowError(workspaceFolder: string) {
 
 export async function fetchCurrentPipelineProject(workspaceFolder: string) {
   try {
-    const remote = await createGitService(workspaceFolder).fetchPipelineGitRemote();
+    const { pipelineGitRemoteName } = getExtensionConfiguration();
+    const remote = await createGitService(workspaceFolder).fetchGitRemote(pipelineGitRemoteName);
 
     return await fetchProjectData(remote, workspaceFolder);
   } catch (e) {

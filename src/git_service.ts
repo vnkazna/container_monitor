@@ -7,7 +7,6 @@ import { getInstanceUrl } from './utils/get_instance_url';
 export interface GitServiceOptions {
   workspaceFolder: string;
   preferredRemoteName?: string;
-  pipelineGitRemoteName?: string;
 }
 
 export class GitService {
@@ -15,11 +14,8 @@ export class GitService {
 
   private readonly preferredRemoteName?: string;
 
-  pipelineGitRemoteName?: string;
-
   constructor(options: GitServiceOptions) {
     this.preferredRemoteName = options.preferredRemoteName;
-    this.pipelineGitRemoteName = options.pipelineGitRemoteName;
     this.workspaceFolder = options.workspaceFolder;
   }
 
@@ -61,10 +57,6 @@ export class GitService {
 
   async fetchLastCommitId(): Promise<string> {
     return this.fetch('git log --format=%H -n 1');
-  }
-
-  async fetchPipelineGitRemote(): Promise<GitRemote | null> {
-    return this.fetchGitRemote(this.pipelineGitRemoteName);
   }
 
   /**

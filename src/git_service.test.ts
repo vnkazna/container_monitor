@@ -25,7 +25,6 @@ describe('git_service', () => {
   const getDefaultOptions = (): GitServiceOptions => ({
     workspaceFolder,
     preferredRemoteName: undefined,
-    pipelineGitRemoteName: undefined,
   });
 
   beforeEach(() => {
@@ -92,25 +91,6 @@ describe('git_service', () => {
       });
     });
 
-    describe('fetchPipelineGitRemote', () => {
-      it('returns default remote when the pipelineGitRemoteName setting is missing', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const remoteUrl = await gitService.fetchPipelineGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.gitlab.com');
-      });
-
-      it('returns url for the configured pipelineGitRemoteName remote', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const options = { ...getDefaultOptions(), pipelineGitRemoteName: SECOND_REMOTE };
-        gitService = new GitService(options);
-
-        const remoteUrl = await gitService.fetchPipelineGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.another.com');
-      });
-    });
-
     describe('fetchTrackingBranchName', () => {
       beforeEach(async () => {
         await git.checkout(['-b', 'new-branch']);
@@ -164,10 +144,6 @@ describe('git_service', () => {
 
     it('fetchLastCommitId returns null', async () => {
       expect(gitService.fetchLastCommitId()).rejects.toBeInstanceOf(Error);
-    });
-
-    it('fetchPipelineGitRemote returns null', async () => {
-      expect(gitService.fetchPipelineGitRemote()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchTrackingBranchName returns null', async () => {

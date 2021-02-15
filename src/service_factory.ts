@@ -6,11 +6,10 @@ import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
 export function createGitService(workspaceFolder: string): GitService {
   assert(workspaceFolder, 'git service requires workspaceFolder to function');
-  const { remoteName, pipelineGitRemoteName } = getExtensionConfiguration();
+  const { remoteName } = getExtensionConfiguration();
   return new GitService({
     workspaceFolder,
     preferredRemoteName: remoteName,
-    pipelineGitRemoteName,
   });
 }
 
