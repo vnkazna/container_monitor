@@ -24,7 +24,7 @@ describe('git_service', () => {
 
   const getDefaultOptions = (): GitServiceOptions => ({
     workspaceFolder,
-    remoteName: undefined,
+    preferredRemoteName: undefined,
     pipelineGitRemoteName: undefined,
   });
 
@@ -62,7 +62,7 @@ describe('git_service', () => {
 
       it('gets the remote url for user configured remote name', async () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const options = { ...getDefaultOptions(), remoteName: SECOND_REMOTE };
+        const options = { ...getDefaultOptions(), preferredRemoteName: SECOND_REMOTE };
         gitService = new GitService(options);
 
         const remoteUrl = await gitService.fetchGitRemote();

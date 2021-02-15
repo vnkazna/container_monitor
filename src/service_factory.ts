@@ -9,7 +9,7 @@ export function createGitService(workspaceFolder: string): GitService {
   const { remoteName, pipelineGitRemoteName } = getExtensionConfiguration();
   return new GitService({
     workspaceFolder,
-    remoteName,
+    preferredRemoteName: remoteName,
     pipelineGitRemoteName,
   });
 }
