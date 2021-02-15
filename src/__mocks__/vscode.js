@@ -24,14 +24,17 @@ module.exports = {
   },
   window: {
     showErrorMessage: jest.fn(),
+    createStatusBarItem: jest.fn(),
   },
   commands: {
     executeCommand: jest.fn(),
+    registerCommand: jest.fn(),
   },
   workspace: {
     getConfiguration: jest.fn().mockReturnValue({}),
   },
   CommentMode: { Preview: 1 },
+  StatusBarAlignment: { Left: 0 },
   CommentThreadCollapsibleState: { Expanded: 1 },
   Position: function Position(x, y) {
     return { x, y };

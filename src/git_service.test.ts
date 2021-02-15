@@ -92,10 +92,10 @@ describe('git_service', () => {
       });
     });
 
-    describe('fetchGitRemotePipeline', () => {
+    describe('fetchPipelineGitRemote', () => {
       it('returns default remote when the pipelineGitRemoteName setting is missing', async () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const remoteUrl = await gitService.fetchGitRemotePipeline();
+        const remoteUrl = await gitService.fetchPipelineGitRemote();
 
         expect(remoteUrl?.host).toEqual('test.gitlab.com');
       });
@@ -105,7 +105,7 @@ describe('git_service', () => {
         const options = { ...getDefaultOptions(), pipelineGitRemoteName: SECOND_REMOTE };
         gitService = new GitService(options);
 
-        const remoteUrl = await gitService.fetchGitRemotePipeline();
+        const remoteUrl = await gitService.fetchPipelineGitRemote();
 
         expect(remoteUrl?.host).toEqual('test.another.com');
       });
@@ -166,8 +166,8 @@ describe('git_service', () => {
       expect(gitService.fetchLastCommitId()).rejects.toBeInstanceOf(Error);
     });
 
-    it('fetchGitRemotePipeline returns null', async () => {
-      expect(gitService.fetchGitRemotePipeline()).rejects.toBeInstanceOf(Error);
+    it('fetchPipelineGitRemote returns null', async () => {
+      expect(gitService.fetchPipelineGitRemote()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchTrackingBranchName returns null', async () => {

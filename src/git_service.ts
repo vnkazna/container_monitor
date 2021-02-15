@@ -67,7 +67,7 @@ export class GitService {
     return this.fetch('git log --format=%H -n 1');
   }
 
-  async fetchGitRemotePipeline(): Promise<GitRemote | null> {
+  async fetchPipelineGitRemote(): Promise<GitRemote | null> {
     return this.fetchRemoteUrl(this.pipelineGitRemoteName);
   }
 
