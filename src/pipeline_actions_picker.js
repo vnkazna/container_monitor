@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
-const statusBar = require('./status_bar');
+const { instance: statusBar } = require('./status_bar');
 const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 
 async function showPicker() {

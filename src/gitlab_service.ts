@@ -138,7 +138,7 @@ export async function fetchCurrentProjectSwallowError(workspaceFolder: string) {
 
 export async function fetchCurrentPipelineProject(workspaceFolder: string) {
   try {
-    const remote = await createGitService(workspaceFolder).fetchGitRemotePipeline();
+    const remote = await createGitService(workspaceFolder).fetchPipelineGitRemote();
 
     return await fetchProjectData(remote, workspaceFolder);
   } catch (e) {

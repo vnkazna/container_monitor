@@ -73,3 +73,9 @@ export const createReviewUri = ({
     scheme: 'gl-review',
   } as vscode.Uri;
 };
+
+export const pipeline: RestPipeline = {
+  status: 'success',
+  updated_at: '2021-02-12T12:06:17Z',
+  id: 123456,
+};

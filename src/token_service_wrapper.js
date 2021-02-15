@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const { GITLAB_COM_URL } = require('./constants');
 const openers = require('./openers');
-const statusBar = require('./status_bar');
+const { instance: statusBar } = require('./status_bar');
 const { tokenService } = require('./services/token_service');
 const { USER_COMMANDS } = require('./command_names');
 
@@ -17,7 +17,8 @@ const updateExtensionStatus = () => {
   const tokenExists = !!getToken();
 
   if (!active && tokenExists) {
-    statusBar.init(context);
+    statusBar.init();
+    context.subscriptions.push(statusBar);
     active = true;
   } else if (active && !tokenExists) {
     statusBar.dispose();
