@@ -81,45 +81,46 @@ class StatusBar {
       this.pipelineStatusBarItem.hide();
       return;
     }
-
-    if (pipeline) {
-      const { status } = pipeline;
-      let statusText = getStatusText(status);
-
-      if (status === 'running' || status === 'failed') {
-        try {
-          const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder);
-          if (jobs) {
-            statusText = createStatusTextFromJobs(jobs, status);
-          }
-        } catch (e) {
-          handleError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
-        }
-      }
-
-      const msg = `$(${iconForStatus[status].icon}) GitLab: Pipeline ${statusText}`;
-
-      if (
-        showPipelineUpdateNotifications &&
-        this.pipelineStatusBarItem.text !== msg &&
-        !this.firstRun
-      ) {
-        const message = `Pipeline ${statusText}.`;
-
-        vscode.window
-          .showInformationMessage(message, { modal: false }, 'View in Gitlab')
-          .then(selection => {
-            if (selection === 'View in Gitlab') {
-              openers.openCurrentPipeline(workspaceFolder);
-            }
-          });
-      }
-
-      this.pipelineStatusBarItem.text = msg;
-      this.pipelineStatusBarItem.show();
-    } else {
+    if (!pipeline) {
       this.pipelineStatusBarItem.text = 'GitLab: No pipeline.';
+      this.pipelineStatusBarItem.show();
+      this.firstRun = false;
+      return;
     }
+    const { status } = pipeline;
+    let statusText = getStatusText(status);
+
+    if (status === 'running' || status === 'failed') {
+      try {
+        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder);
+        if (jobs) {
+          statusText = createStatusTextFromJobs(jobs, status);
+        }
+      } catch (e) {
+        handleError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
+      }
+    }
+
+    const msg = `$(${iconForStatus[status].icon}) GitLab: Pipeline ${statusText}`;
+
+    if (
+      showPipelineUpdateNotifications &&
+      this.pipelineStatusBarItem.text !== msg &&
+      !this.firstRun
+    ) {
+      const message = `Pipeline ${statusText}.`;
+
+      vscode.window
+        .showInformationMessage(message, { modal: false }, 'View in Gitlab')
+        .then(selection => {
+          if (selection === 'View in Gitlab') {
+            openers.openCurrentPipeline(workspaceFolder);
+          }
+        });
+    }
+
+    this.pipelineStatusBarItem.text = msg;
+    this.pipelineStatusBarItem.show();
     this.firstRun = false;
   }
 
