@@ -206,21 +206,20 @@ export async function fetchLastPipelineForCurrentBranch(
   workspaceFolder: string,
 ): Promise<RestPipeline | null> {
   const project = await fetchCurrentPipelineProject(workspaceFolder);
-  let pipeline = null;
-
-  if (project) {
-    const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
-    const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
-    const { response } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
-    const pipelines = response;
-
-    if (pipelines.length) {
-      const fetchResult = await fetch(`${pipelinesRootPath}/${pipelines[0].id}`);
-      pipeline = fetchResult.response;
-    }
+  if (!project) {
+    return null;
   }
 
-  return pipeline;
+  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+  const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
+  const { response } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
+  const pipelines = response;
+
+  if (!pipelines.length) {
+    return null;
+  }
+  const fetchResult = await fetch(`${pipelinesRootPath}/${pipelines[0].id}`);
+  return fetchResult.response;
 }
 
 type QueryValue = string | boolean | string[] | number | undefined;

@@ -34,7 +34,6 @@ describe('status_bar', () => {
   });
   describe('pipeline item', () => {
     beforeEach(() => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(project);
       gitLabService.fetchLastJobsForCurrentBranch.mockReset();
     });
 
@@ -82,7 +81,7 @@ describe('status_bar', () => {
     });
 
     it('hides the item when there is no project', async () => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(null);
+      gitLabService.fetchLastPipelineForCurrentBranch.mockRejectedValue(new Error());
       await statusBar.init();
       expect(getPipelineItem().hide).toHaveBeenCalled();
     });

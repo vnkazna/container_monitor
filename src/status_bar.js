@@ -71,23 +71,15 @@ class StatusBar {
 
   async refreshPipeline() {
     let workspaceFolder = null;
-    let project = null;
     let pipeline = null;
 
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
-      project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
-      if (project != null) {
-        pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
-      } else {
-        this.pipelineStatusBarItem.hide();
-      }
+      pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
     } catch (e) {
       logError(e);
-      if (!project) {
-        this.pipelineStatusBarItem.hide();
-        return;
-      }
+      this.pipelineStatusBarItem.hide();
+      return;
     }
 
     if (pipeline) {
