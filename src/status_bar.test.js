@@ -42,7 +42,7 @@ describe('status_bar', () => {
     });
 
     it('initializes the pipeline item with success', async () => {
-      gitLabService.fetchLastPipelineForCurrentBranch.mockReturnValue(pipeline);
+      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({ pipeline });
       await statusBar.init();
       expect(getPipelineItem().show).toHaveBeenCalled();
       expect(getPipelineItem().hide).not.toHaveBeenCalled();
@@ -50,9 +50,11 @@ describe('status_bar', () => {
     });
 
     it('prints jobs for running pipeline', async () => {
-      gitLabService.fetchLastPipelineForCurrentBranch.mockReturnValue({
-        ...pipeline,
-        status: 'running',
+      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({
+        pipeline: {
+          ...pipeline,
+          status: 'running',
+        },
       });
       gitLabService.fetchLastJobsForCurrentBranch.mockReturnValue([
         {
@@ -75,13 +77,13 @@ describe('status_bar', () => {
     });
 
     it('shows no pipeline text when there is no pipeline', async () => {
-      gitLabService.fetchLastPipelineForCurrentBranch.mockReturnValue(null);
+      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({ pipeline: null });
       await statusBar.init();
       expect(getPipelineItem().text).toBe('GitLab: No pipeline.');
     });
 
     it('hides the item when there is no project', async () => {
-      gitLabService.fetchLastPipelineForCurrentBranch.mockRejectedValue(new Error());
+      gitLabService.fetchPipelineAndMrForCurrentBranch.mockRejectedValue(new Error());
       await statusBar.init();
       expect(getPipelineItem().hide).toHaveBeenCalled();
     });
@@ -95,9 +97,11 @@ describe('status_bar', () => {
       ${'canceled'} | ${'$(circle-slash) GitLab: Pipeline canceled'}
       ${'skipped'}  | ${'$(diff-renamed) GitLab: Pipeline skipped'}
     `('shows $itemText for pipeline with status $status', async ({ status, itemText }) => {
-      gitLabService.fetchLastPipelineForCurrentBranch.mockReturnValue({
-        ...pipeline,
-        status,
+      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({
+        pipeline: {
+          ...pipeline,
+          status,
+        },
       });
       await statusBar.init();
       expect(getPipelineItem().text).toBe(itemText);

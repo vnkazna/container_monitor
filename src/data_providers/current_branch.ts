@@ -4,7 +4,7 @@ import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as gitLabService from '../gitlab_service';
 import { ErrorItem } from './items/error_item';
 import { getCurrentWorkspaceFolder } from '../services/workspace_service';
-import { handleError, logError } from '../log';
+import { handleError } from '../log';
 import { ItemModel } from './items/item_model';
 import { MrItemModel } from './items/mr_item_model';
 import { IssueItem } from './items/issue_item';
@@ -23,15 +23,7 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
   private disposableChildren: vscode.Disposable[] = [];
 
   // eslint-disable-next-line class-methods-use-this
-  async fetchPipeline(workspaceFolder: string, project: GitLabProject) {
-    let pipeline;
-    try {
-      pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
-    } catch (e) {
-      logError(e);
-      return new ErrorItem('Fetching pipeline failed');
-    }
-
+  async createPipelineItem(pipeline: RestPipeline | null, project: GitLabProject) {
     if (!pipeline) {
       return new vscode.TreeItem('No pipeline found');
     }
@@ -53,21 +45,14 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     return new ExternalUrlItem(message, url);
   }
 
-  async fetchMR(workspaceFolder: string, project: VsProject) {
-    let mr;
-    try {
-      mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
-    } catch (e) {
-      logError(e);
-      return new ErrorItem('Fetching MR failed');
+  async createMrItem(mr: RestIssuable | null, project: VsProject) {
+    if (!mr) {
+      return new vscode.TreeItem('No merge request found');
     }
-    if (mr) {
-      this.mr = mr;
-      const item = new MrItemModel(mr, project);
-      this.disposableChildren.push(item);
-      return item;
-    }
-    return new vscode.TreeItem('No merge request found');
+    this.mr = mr;
+    const item = new MrItemModel(mr, project);
+    this.disposableChildren.push(item);
+    return item;
   }
 
   async fetchClosingIssue(workspaceFolder: string, project: VsProject) {
@@ -98,8 +83,11 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
         label: gitlabProject.name,
         uri: workspaceFolder,
       };
-      const pipelineItem = await this.fetchPipeline(workspaceFolder, gitlabProject);
-      const mrItem = await this.fetchMR(workspaceFolder, vsProject);
+      const { pipeline, mr } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
+        workspaceFolder,
+      );
+      const pipelineItem = await this.createPipelineItem(pipeline, gitlabProject);
+      const mrItem = await this.createMrItem(mr, vsProject);
       const closingIssuesItems = await this.fetchClosingIssue(workspaceFolder, vsProject);
       return [pipelineItem, mrItem, ...closingIssuesItems] as vscode.TreeItem[]; // TODO the actual type includes ItemMode
     } catch (e) {

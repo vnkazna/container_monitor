@@ -22,6 +22,11 @@ describe('GitLab tree view for current branch', () => {
   const pipelinesEndpoint = createQueryJsonEndpoint('/projects/278964/pipelines', {
     '?ref=master': pipelinesResponse,
   });
+  const pipelinesForMrEndpoint = createJsonEndpoint(
+    '/projects/278964/merge_requests/33824/pipelines',
+    pipelinesResponse,
+  );
+
   const pipelineEndpoint = createJsonEndpoint('/projects/278964/pipelines/47', {
     ...pipelineResponse,
     updated_at: fourYearsAgo.toISOString(),
@@ -49,7 +54,20 @@ describe('GitLab tree view for current branch', () => {
     await tokenService.setToken(GITLAB_URL, undefined);
   });
 
-  it('shows pipeline, mr and closing issue for the current branch', async () => {
+  it('shows detached pipeline and mr for the current branch', async () => {
+    server = getServer([pipelineEndpoint, pipelinesForMrEndpoint, mrEndpoint]);
+    const forCurrentBranch = await dataProvider.getChildren();
+    assert.deepStrictEqual(
+      forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
+      [
+        'Pipeline #47 passed · Finished 4 years ago',
+        '!33824 · Web IDE - remove unused actions (mappings)',
+        'No closing issue found',
+      ],
+    );
+  });
+
+  it('shows standard pipeline, mr and closing issue for the current branch', async () => {
     server = getServer([pipelinesEndpoint, pipelineEndpoint, mrEndpoint, issueEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
@@ -68,7 +86,7 @@ describe('GitLab tree view for current branch', () => {
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
-        'Fetching pipeline failed',
+        'No pipeline found',
         '!33824 · Web IDE - remove unused actions (mappings)',
         '#219925 · Change primary button for editing on files',
       ],
@@ -82,7 +100,7 @@ describe('GitLab tree view for current branch', () => {
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
         'Pipeline #47 passed · Finished 4 years ago',
-        'Fetching MR failed',
+        'No merge request found',
         'No closing issue found',
       ],
     );

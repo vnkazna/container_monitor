@@ -381,8 +381,10 @@ export async function fetchLastJobsForCurrentBranch(
   return null;
 }
 
-export async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder: string) {
-  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
+export async function fetchOpenMergeRequestForCurrentBranch(
+  workspaceFolder: string,
+): Promise<RestIssuable | null> {
+  const project = await fetchCurrentProject(workspaceFolder);
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
   const path = `/projects/${project?.restId}/merge_requests?state=opened&source_branch=${branchName}`;
@@ -394,6 +396,41 @@ export async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder: str
   }
 
   return null;
+}
+
+export async function fetchLastPipelineForMr(mr: RestIssuable): Promise<RestPipeline | null> {
+  const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
+  const { response } = await fetch(path);
+  const pipelines = response;
+
+  if (!pipelines.length) {
+    return null;
+  }
+  const fetchResult = await fetch(`/projects/${mr.project_id}/pipelines/${pipelines[0].id}`);
+  return fetchResult.response;
+}
+
+export async function fetchPipelineAndMrForCurrentBranch(
+  workspaceFolder: string,
+): Promise<{
+  pipeline: RestPipeline | null;
+  mr: RestIssuable | null;
+}> {
+  // TODO: implement more granular approach to errors (deciding between expected and critical)
+  // This can be done when we migrate the code to gitlab_new_service.ts
+  const turnErrorToNull: <T>(p: Promise<T>) => Promise<T | null> = p =>
+    p.catch(e => {
+      logError(e);
+      return null;
+    });
+
+  const mr = await turnErrorToNull(fetchOpenMergeRequestForCurrentBranch(workspaceFolder));
+  if (mr) {
+    const pipeline = await turnErrorToNull(fetchLastPipelineForMr(mr));
+    if (pipeline) return { mr, pipeline };
+  }
+  const pipeline = await turnErrorToNull(fetchLastPipelineForCurrentBranch(workspaceFolder));
+  return { mr, pipeline };
 }
 
 /**

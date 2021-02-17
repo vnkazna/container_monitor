@@ -75,7 +75,10 @@ class StatusBar {
 
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
-      pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
+      const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
+      // TODO: the result contains the MR for this branch as well, we can refactor status_bar
+      // to use this response instead of making a separate request.
+      pipeline = result.pipeline;
     } catch (e) {
       logError(e);
       this.pipelineStatusBarItem.hide();
