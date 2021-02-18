@@ -110,19 +110,10 @@ async function openProjectPage() {
 }
 
 async function openCurrentPipeline(workspaceFolder) {
-  if (!workspaceFolder) {
-    // Temporarily disable eslint to be able to start enforcing stricter rules
-    // eslint-disable-next-line no-param-reassign
-    workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  }
-  const project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
+  const { pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
 
-  if (project) {
-    const pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
-
-    if (pipeline) {
-      openUrl(`${project.webUrl}/pipelines/${pipeline.id}`);
-    }
+  if (pipeline) {
+    openUrl(pipeline.web_url);
   }
 }
 
