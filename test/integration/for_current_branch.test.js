@@ -4,7 +4,6 @@ const CurrentBranchDataProvider = require('../../src/data_providers/current_bran
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const pipelinesResponse = require('./fixtures/rest/pipelines.json');
-const pipelineResponse = require('./fixtures/rest/pipeline.json');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const {
   getServer,
@@ -19,18 +18,19 @@ describe('GitLab tree view for current branch', () => {
 
   const fourYearsAgo = dayjs().subtract(4, 'year');
 
+  const pipelinesResponseWithFixedDate = [
+    { ...pipelinesResponse[0], updated_at: fourYearsAgo.toISOString() },
+    ...pipelinesResponse.slice(1, pipelinesResponse.length),
+  ];
+
   const pipelinesEndpoint = createQueryJsonEndpoint('/projects/278964/pipelines', {
-    '?ref=master': pipelinesResponse,
+    '?ref=master': pipelinesResponseWithFixedDate,
   });
   const pipelinesForMrEndpoint = createJsonEndpoint(
     '/projects/278964/merge_requests/33824/pipelines',
-    pipelinesResponse,
+    pipelinesResponseWithFixedDate,
   );
 
-  const pipelineEndpoint = createJsonEndpoint('/projects/278964/pipelines/47', {
-    ...pipelineResponse,
-    updated_at: fourYearsAgo.toISOString(),
-  });
   const mrEndpoint = createQueryJsonEndpoint('/projects/278964/merge_requests', {
     '?state=opened&source_branch=master': [openMergeRequestResponse],
   });
@@ -55,7 +55,7 @@ describe('GitLab tree view for current branch', () => {
   });
 
   it('shows detached pipeline and mr for the current branch', async () => {
-    server = getServer([pipelineEndpoint, pipelinesForMrEndpoint, mrEndpoint]);
+    server = getServer([pipelinesForMrEndpoint, mrEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -68,7 +68,7 @@ describe('GitLab tree view for current branch', () => {
   });
 
   it('shows standard pipeline, mr and closing issue for the current branch', async () => {
-    server = getServer([pipelinesEndpoint, pipelineEndpoint, mrEndpoint, issueEndpoint]);
+    server = getServer([pipelinesEndpoint, mrEndpoint, issueEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -94,7 +94,7 @@ describe('GitLab tree view for current branch', () => {
   });
 
   it('handles error for MR API request', async () => {
-    server = getServer([pipelinesEndpoint, pipelineEndpoint]);
+    server = getServer([pipelinesEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -107,7 +107,7 @@ describe('GitLab tree view for current branch', () => {
   });
 
   it('handles error for issue API request', async () => {
-    server = getServer([pipelinesEndpoint, pipelineEndpoint, mrEndpoint]);
+    server = getServer([pipelinesEndpoint, mrEndpoint]);
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),

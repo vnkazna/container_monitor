@@ -212,14 +212,8 @@ export async function fetchLastPipelineForCurrentBranch(
 
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
   const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
-  const { response } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
-  const pipelines = response;
-
-  if (!pipelines.length) {
-    return null;
-  }
-  const fetchResult = await fetch(`${pipelinesRootPath}/${pipelines[0].id}`);
-  return fetchResult.response;
+  const { response: pipelines } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
+  return pipelines.length > 0 ? pipelines[0] : null;
 }
 
 type QueryValue = string | boolean | string[] | number | undefined;
@@ -400,14 +394,8 @@ export async function fetchOpenMergeRequestForCurrentBranch(
 
 export async function fetchLastPipelineForMr(mr: RestIssuable): Promise<RestPipeline | null> {
   const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
-  const { response } = await fetch(path);
-  const pipelines = response;
-
-  if (!pipelines.length) {
-    return null;
-  }
-  const fetchResult = await fetch(`/projects/${mr.project_id}/pipelines/${pipelines[0].id}`);
-  return fetchResult.response;
+  const { response: pipelines } = await fetch(path);
+  return pipelines.length > 0 ? pipelines[0] : null;
 }
 
 export async function fetchPipelineAndMrForCurrentBranch(

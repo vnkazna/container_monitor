@@ -4,12 +4,7 @@ const vscode = require('vscode');
 const { StatusBar } = require('../../src/status_bar');
 const { tokenService } = require('../../src/services/token_service');
 const pipelinesResponse = require('./fixtures/rest/pipelines.json');
-const pipelineResponse = require('./fixtures/rest/pipeline.json');
-const {
-  getServer,
-  createJsonEndpoint,
-  createQueryJsonEndpoint,
-} = require('./test_infrastructure/mock_server');
+const { getServer, createQueryJsonEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { USER_COMMANDS } = require('../../src/command_names');
 
@@ -28,7 +23,6 @@ describe('GitLab status bar', () => {
   before(async () => {
     server = getServer([
       createQueryJsonEndpoint('/projects/278964/pipelines', { '?ref=master': pipelinesResponse }),
-      createJsonEndpoint('/projects/278964/pipelines/47', pipelineResponse),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
