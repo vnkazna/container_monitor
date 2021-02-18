@@ -427,7 +427,7 @@ export async function fetchPipelineAndMrForCurrentBranch(
  * @param {string} action create|retry|cancel
  */
 export async function handlePipelineAction(action: string, workspaceFolder: string) {
-  const pipeline = await fetchLastPipelineForCurrentBranch(workspaceFolder);
+  const { pipeline } = await fetchPipelineAndMrForCurrentBranch(workspaceFolder);
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
 
   if (pipeline && project) {
