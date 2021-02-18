@@ -113,7 +113,6 @@ describe('status_bar', () => {
       gitLabService.fetchCurrentPipelineProject.mockReturnValue(project);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
       gitLabService.fetchCurrentProject.mockReturnValue(project);
-      gitLabService.fetchLastPipelineForCurrentBranch.mockReturnValue(null);
     });
 
     afterEach(() => {
@@ -154,7 +153,6 @@ describe('status_bar', () => {
       gitLabService.fetchCurrentPipelineProject.mockReturnValue(project);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
       gitLabService.fetchCurrentProject.mockReturnValue(project);
-      gitLabService.fetchLastPipelineForCurrentBranch.mockReturnValue(null);
     });
 
     afterEach(() => {

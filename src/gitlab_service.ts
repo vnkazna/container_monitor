@@ -202,7 +202,7 @@ export async function getAllGitlabProjects(): Promise<VsProject[]> {
   return Promise.all(projectsWithUri);
 }
 
-export async function fetchLastPipelineForCurrentBranch(
+async function fetchLastPipelineForCurrentBranch(
   workspaceFolder: string,
 ): Promise<RestPipeline | null> {
   const project = await fetchCurrentPipelineProject(workspaceFolder);
