@@ -1,3 +1,17 @@
+# [3.13.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.12.1...v3.13.0) (2021-02-19)
+
+
+### Features
+
+* suport detached pipelines ([4da4cba](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/4da4cba24f9e8602b35def50041dd39eeb88cca2))
+
+
+### Performance Improvements
+
+* **pipeline status:** remove unnecessary API call for single pipeline ([0c55ab4](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0c55ab427740d67e1a4987b26e791f495e01939b))
+
+
+
 ## [3.12.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.12.0...v3.12.1) (2021-02-15)
 
 
