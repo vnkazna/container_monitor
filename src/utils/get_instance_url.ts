@@ -68,6 +68,7 @@ async function heuristicInstanceUrl(workspaceFolder: string) {
 }
 
 export async function getInstanceUrl(workspaceFolder?: string): Promise<string> {
+  // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
   const { instanceUrl } = vscode.workspace.getConfiguration('gitlab');
   // if the workspace setting exists, use it
   if (instanceUrl) {

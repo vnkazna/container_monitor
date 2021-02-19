@@ -78,4 +78,5 @@ export const pipeline: RestPipeline = {
   status: 'success',
   updated_at: '2021-02-12T12:06:17Z',
   id: 123456,
+  web_url: 'https://example.com/foo/bar/pipelines/46',
 };

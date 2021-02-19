@@ -224,10 +224,7 @@ const getIssuableGqlId = (issuable: RestIssuable) =>
 export class GitLabNewService {
   client: GraphQLClient;
 
-  instanceUrl: string;
-
-  constructor(instanceUrl: string) {
-    this.instanceUrl = instanceUrl;
+  constructor(readonly instanceUrl: string, readonly pipelineInstanceUrl?: string) {
     const endpoint = new URL('/api/graphql', this.instanceUrl).href;
     this.client = new GraphQLClient(endpoint, this.fetchOptions);
   }

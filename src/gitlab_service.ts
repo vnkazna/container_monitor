@@ -16,6 +16,7 @@ import { ensureAbsoluteAvatarUrl } from './utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl as getInstanceUrlUtil } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
+import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
 interface GitLabPipeline {
   id: number;
@@ -138,7 +139,8 @@ export async function fetchCurrentProjectSwallowError(workspaceFolder: string) {
 
 export async function fetchCurrentPipelineProject(workspaceFolder: string) {
   try {
-    const remote = await createGitService(workspaceFolder).fetchPipelineGitRemote();
+    const { pipelineGitRemoteName } = getExtensionConfiguration();
+    const remote = await createGitService(workspaceFolder).fetchGitRemote(pipelineGitRemoteName);
 
     return await fetchProjectData(remote, workspaceFolder);
   } catch (e) {
@@ -200,25 +202,18 @@ export async function getAllGitlabProjects(): Promise<VsProject[]> {
   return Promise.all(projectsWithUri);
 }
 
-export async function fetchLastPipelineForCurrentBranch(
+async function fetchLastPipelineForCurrentBranch(
   workspaceFolder: string,
 ): Promise<RestPipeline | null> {
   const project = await fetchCurrentPipelineProject(workspaceFolder);
-  let pipeline = null;
-
-  if (project) {
-    const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
-    const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
-    const { response } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
-    const pipelines = response;
-
-    if (pipelines.length) {
-      const fetchResult = await fetch(`${pipelinesRootPath}/${pipelines[0].id}`);
-      pipeline = fetchResult.response;
-    }
+  if (!project) {
+    return null;
   }
 
-  return pipeline;
+  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+  const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
+  const { response: pipelines } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
+  return pipelines.length > 0 ? pipelines[0] : null;
 }
 
 type QueryValue = string | boolean | string[] | number | undefined;
@@ -380,8 +375,10 @@ export async function fetchLastJobsForCurrentBranch(
   return null;
 }
 
-export async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder: string) {
-  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
+export async function fetchOpenMergeRequestForCurrentBranch(
+  workspaceFolder: string,
+): Promise<RestIssuable | null> {
+  const project = await fetchCurrentProject(workspaceFolder);
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
   const path = `/projects/${project?.restId}/merge_requests?state=opened&source_branch=${branchName}`;
@@ -395,13 +392,42 @@ export async function fetchOpenMergeRequestForCurrentBranch(workspaceFolder: str
   return null;
 }
 
+export async function fetchLastPipelineForMr(mr: RestIssuable): Promise<RestPipeline | null> {
+  const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
+  const { response: pipelines } = await fetch(path);
+  return pipelines.length > 0 ? pipelines[0] : null;
+}
+
+export async function fetchPipelineAndMrForCurrentBranch(
+  workspaceFolder: string,
+): Promise<{
+  pipeline: RestPipeline | null;
+  mr: RestIssuable | null;
+}> {
+  // TODO: implement more granular approach to errors (deciding between expected and critical)
+  // This can be done when we migrate the code to gitlab_new_service.ts
+  const turnErrorToNull: <T>(p: Promise<T>) => Promise<T | null> = p =>
+    p.catch(e => {
+      logError(e);
+      return null;
+    });
+
+  const mr = await turnErrorToNull(fetchOpenMergeRequestForCurrentBranch(workspaceFolder));
+  if (mr) {
+    const pipeline = await turnErrorToNull(fetchLastPipelineForMr(mr));
+    if (pipeline) return { mr, pipeline };
+  }
+  const pipeline = await turnErrorToNull(fetchLastPipelineForCurrentBranch(workspaceFolder));
+  return { mr, pipeline };
+}
+
 /**
  * Cancels or retries last pipeline or creates a new pipeline for current branch.
  *
  * @param {string} action create|retry|cancel
  */
 export async function handlePipelineAction(action: string, workspaceFolder: string) {
-  const pipeline = await fetchLastPipelineForCurrentBranch(workspaceFolder);
+  const { pipeline } = await fetchPipelineAndMrForCurrentBranch(workspaceFolder);
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
 
   if (pipeline && project) {

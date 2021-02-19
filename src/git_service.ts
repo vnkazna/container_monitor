@@ -6,20 +6,16 @@ import { getInstanceUrl } from './utils/get_instance_url';
 
 export interface GitServiceOptions {
   workspaceFolder: string;
-  remoteName?: string;
-  pipelineGitRemoteName?: string;
+  preferredRemoteName?: string;
 }
 
 export class GitService {
   workspaceFolder: string;
 
-  remoteName?: string;
-
-  pipelineGitRemoteName?: string;
+  private readonly preferredRemoteName?: string;
 
   constructor(options: GitServiceOptions) {
-    this.remoteName = options.remoteName;
-    this.pipelineGitRemoteName = options.pipelineGitRemoteName;
+    this.preferredRemoteName = options.preferredRemoteName;
     this.workspaceFolder = options.workspaceFolder;
   }
 
@@ -32,7 +28,7 @@ export class GitService {
     return stdout;
   }
 
-  private async fetchRemoteUrl(remoteName = ''): Promise<GitRemote> {
+  async fetchGitRemote(remoteName = this.preferredRemoteName): Promise<GitRemote> {
     // If remote name isn't provided, the command returns default remote for the current branch
     // if there's no default branch, the command fails but that's part of the normal flow and it can't throw
     const getUrlForRemoteName = async (name: string) =>
@@ -43,7 +39,7 @@ export class GitService {
       return multilineRemotes.split('\n')[0];
     };
 
-    let remoteUrl = await getUrlForRemoteName(remoteName);
+    let remoteUrl = await getUrlForRemoteName(remoteName ?? '');
     if (!remoteUrl) {
       // If there's no remote now, that means that there's no origin and no `remote.pushDefault` config.
       remoteUrl = await getUrlForRemoteName(await getFirstRemoteName());
@@ -59,16 +55,8 @@ export class GitService {
     throw new Error('"git remote" does not return any URL');
   }
 
-  async fetchGitRemote(): Promise<GitRemote> {
-    return this.fetchRemoteUrl(this.remoteName);
-  }
-
   async fetchLastCommitId(): Promise<string> {
     return this.fetch('git log --format=%H -n 1');
-  }
-
-  async fetchPipelineGitRemote(): Promise<GitRemote | null> {
-    return this.fetchRemoteUrl(this.pipelineGitRemoteName);
   }
 
   /**

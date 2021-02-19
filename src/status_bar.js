@@ -8,6 +8,7 @@ const { USER_COMMANDS } = require('./command_names');
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
+// FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
 const {
   showStatusBarLinks,
   showIssueLinkOnStatusBar,
@@ -70,63 +71,59 @@ class StatusBar {
 
   async refreshPipeline() {
     let workspaceFolder = null;
-    let project = null;
     let pipeline = null;
 
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
-      project = await gitLabService.fetchCurrentPipelineProject(workspaceFolder);
-      if (project != null) {
-        pipeline = await gitLabService.fetchLastPipelineForCurrentBranch(workspaceFolder);
-      } else {
-        this.pipelineStatusBarItem.hide();
-      }
+      const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
+      // TODO: the result contains the MR for this branch as well, we can refactor status_bar
+      // to use this response instead of making a separate request.
+      pipeline = result.pipeline;
     } catch (e) {
       logError(e);
-      if (!project) {
-        this.pipelineStatusBarItem.hide();
-        return;
-      }
+      this.pipelineStatusBarItem.hide();
+      return;
     }
-
-    if (pipeline) {
-      const { status } = pipeline;
-      let statusText = getStatusText(status);
-
-      if (status === 'running' || status === 'failed') {
-        try {
-          const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder);
-          if (jobs) {
-            statusText = createStatusTextFromJobs(jobs, status);
-          }
-        } catch (e) {
-          handleError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
-        }
-      }
-
-      const msg = `$(${iconForStatus[status].icon}) GitLab: Pipeline ${statusText}`;
-
-      if (
-        showPipelineUpdateNotifications &&
-        this.pipelineStatusBarItem.text !== msg &&
-        !this.firstRun
-      ) {
-        const message = `Pipeline ${statusText}.`;
-
-        vscode.window
-          .showInformationMessage(message, { modal: false }, 'View in Gitlab')
-          .then(selection => {
-            if (selection === 'View in Gitlab') {
-              openers.openCurrentPipeline(workspaceFolder);
-            }
-          });
-      }
-
-      this.pipelineStatusBarItem.text = msg;
-      this.pipelineStatusBarItem.show();
-    } else {
+    if (!pipeline) {
       this.pipelineStatusBarItem.text = 'GitLab: No pipeline.';
+      this.pipelineStatusBarItem.show();
+      this.firstRun = false;
+      return;
     }
+    const { status } = pipeline;
+    let statusText = getStatusText(status);
+
+    if (status === 'running' || status === 'failed') {
+      try {
+        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder);
+        if (jobs) {
+          statusText = createStatusTextFromJobs(jobs, status);
+        }
+      } catch (e) {
+        handleError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
+      }
+    }
+
+    const msg = `$(${iconForStatus[status].icon}) GitLab: Pipeline ${statusText}`;
+
+    if (
+      showPipelineUpdateNotifications &&
+      this.pipelineStatusBarItem.text !== msg &&
+      !this.firstRun
+    ) {
+      const message = `Pipeline ${statusText}.`;
+
+      vscode.window
+        .showInformationMessage(message, { modal: false }, 'View in Gitlab')
+        .then(selection => {
+          if (selection === 'View in Gitlab') {
+            openers.openCurrentPipeline(workspaceFolder);
+          }
+        });
+    }
+
+    this.pipelineStatusBarItem.text = msg;
+    this.pipelineStatusBarItem.show();
     this.firstRun = false;
   }
 

@@ -24,8 +24,7 @@ describe('git_service', () => {
 
   const getDefaultOptions = (): GitServiceOptions => ({
     workspaceFolder,
-    remoteName: undefined,
-    pipelineGitRemoteName: undefined,
+    preferredRemoteName: undefined,
   });
 
   beforeEach(() => {
@@ -62,7 +61,7 @@ describe('git_service', () => {
 
       it('gets the remote url for user configured remote name', async () => {
         await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const options = { ...getDefaultOptions(), remoteName: SECOND_REMOTE };
+        const options = { ...getDefaultOptions(), preferredRemoteName: SECOND_REMOTE };
         gitService = new GitService(options);
 
         const remoteUrl = await gitService.fetchGitRemote();
@@ -89,25 +88,6 @@ describe('git_service', () => {
         const result = await gitService.fetchLastCommitId();
 
         expect(result).toEqual(lastCommitSha);
-      });
-    });
-
-    describe('fetchPipelineGitRemote', () => {
-      it('returns default remote when the pipelineGitRemoteName setting is missing', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const remoteUrl = await gitService.fetchPipelineGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.gitlab.com');
-      });
-
-      it('returns url for the configured pipelineGitRemoteName remote', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const options = { ...getDefaultOptions(), pipelineGitRemoteName: SECOND_REMOTE };
-        gitService = new GitService(options);
-
-        const remoteUrl = await gitService.fetchPipelineGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.another.com');
       });
     });
 
@@ -164,10 +144,6 @@ describe('git_service', () => {
 
     it('fetchLastCommitId returns null', async () => {
       expect(gitService.fetchLastCommitId()).rejects.toBeInstanceOf(Error);
-    });
-
-    it('fetchPipelineGitRemote returns null', async () => {
-      expect(gitService.fetchPipelineGitRemote()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchTrackingBranchName returns null', async () => {
