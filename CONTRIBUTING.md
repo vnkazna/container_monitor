@@ -37,6 +37,13 @@ Create a [new issue from the "Bug" template](https://gitlab.com/gitlab-org/gitla
 
 Create a [new issue from the "Feature Proposal" template](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/new?issuable_template=Feature%20Proposal) and follow the instructions in the template.
 
+### Your First Code Contribution?
+
+Read about the extension architecture in [architecture.md](docs/architecture.md). This document explains how we structure our code and will help you orientate yourself in the codebase.
+
+For newcomers to the project, you can take a look at issues labelled as `Accepting merge requests`
+as available [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues?label_name[]=Accepting%20merge%20requests).
+
 ### Configuring Development Environment
 
 For general information how to develop and debug VS Code Extensions, please see the [official documentation](https://code.visualstudio.com/api).
@@ -110,11 +117,6 @@ To run linters, open terminal within the project folder and run following;
 npm run autofix # Automatically formats your code using prettier and fixes eslint errors
 npm run lint
 ```
-
-### Your First Contribution?
-
-For newcomers to the project, you can take a look at issues labelled as `Accepting merge requests`
-as available [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues?label_name[]=Accepting%20merge%20requests).
 
 ### Opening Merge Requests
 
