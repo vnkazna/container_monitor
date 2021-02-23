@@ -6,6 +6,9 @@ interface GqlGroup {
 export interface GqlProject {
   id: string;
   name: string;
+  description: string;
+  httpUrlToRepo: string;
+  sshUrlToRepo: string;
   fullPath: string;
   webUrl: string;
   group?: GqlGroup;
@@ -24,6 +27,18 @@ export class GitLabProject {
 
   get name(): string {
     return this.gqlProject.name;
+  }
+
+  get description(): string {
+    return this.gqlProject.description;
+  }
+
+  get httpUrlToRepo(): string {
+    return this.gqlProject.httpUrlToRepo;
+  }
+
+  get sshUrlToRepo(): string {
+    return this.gqlProject.sshUrlToRepo;
   }
 
   get fullPath(): string {

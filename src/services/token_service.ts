@@ -14,9 +14,9 @@ export class TokenService {
     return this.onDidChangeEmitter.event;
   }
 
-  private get glTokenMap() {
+  private get glTokenMap(): Record<string, string | undefined> {
     assert(this.context);
-    return this.context.globalState.get<Record<string, string>>('glTokens', {});
+    return this.context.globalState.get('glTokens', {});
   }
 
   getInstanceUrls() {

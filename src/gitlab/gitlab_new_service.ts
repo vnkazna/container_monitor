@@ -25,6 +25,12 @@ interface GqlProjectResult<T> {
   project?: T;
 }
 
+interface GqlProjectsResult<T> {
+  projects?: {
+    nodes?: T[];
+  };
+}
+
 interface GqlSnippetProject {
   id: string;
   snippets: Node<GqlSnippet>;
@@ -126,15 +132,46 @@ const queryGetSnippets = gql`
   }
 `;
 
+const fragmentProjectDetails = gql`
+  fragment projectDetails on Project {
+    id
+    name
+    description
+    httpUrlToRepo
+    sshUrlToRepo
+    fullPath
+    webUrl
+    group {
+      id
+    }
+  }
+`;
+
 const queryGetProject = gql`
+  ${fragmentProjectDetails}
   query GetProject($projectPath: ID!) {
     project(fullPath: $projectPath) {
-      id
-      name
-      fullPath
-      webUrl
-      group {
-        id
+      ...projectDetails
+    }
+  }
+`;
+
+const queryGetProjects = gql`
+  ${fragmentProjectDetails}
+  query GetProjects(
+    $search: String
+    $membership: Boolean
+    $limit: Int
+    $searchNamespaces: Boolean
+  ) {
+    projects(
+      search: $search
+      membership: $membership
+      first: $limit
+      searchNamespaces: $searchNamespaces
+    ) {
+      nodes {
+        ...projectDetails
       }
     }
   }
@@ -256,6 +293,26 @@ export class GitLabNewService {
       projectPath,
     });
     return result.project && new GitLabProject(result.project);
+  }
+
+  async getProjects({
+    search,
+    membership,
+    limit,
+    searchNamespaces,
+  }: {
+    search?: string;
+    membership: boolean;
+    limit?: number;
+    searchNamespaces?: boolean;
+  }): Promise<GitLabProject[]> {
+    const results = await this.client.request<GqlProjectsResult<GqlProject>>(queryGetProjects, {
+      search,
+      membership,
+      limit,
+      searchNamespaces,
+    });
+    return results.projects?.nodes?.map(project => new GitLabProject(project)) || [];
   }
 
   async getSnippets(projectPath: string): Promise<GqlSnippet[]> {

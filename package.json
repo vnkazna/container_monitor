@@ -500,6 +500,9 @@
       }
     }
   },
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "postinstall": "cd src/webview && npm install",
@@ -518,6 +521,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.14",
+    "@types/mocha": "^8.2.0",
     "@types/node": "^13.7.0",
     "@types/request-promise": "^4.1.46",
     "@types/sinon": "^9.0.4",
