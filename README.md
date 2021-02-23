@@ -9,7 +9,7 @@ This extension integrates GitLab to VS Code by adding a new GitLab sidebar where
 
 ## Features
 
-_You need to set up your access token to use these features, please see [Setup](#setup) section below._
+_You need to set up your access token(s) to use these features, please see [Setup](#setup) section below._
 
 ### Sidebar
 
@@ -41,6 +41,11 @@ Advanced pipeline actions allow you to view pipeline on GitLab, create a new pip
 - `GitLab: Open current project on GitLab`
 - `GitLab: Create new issue on current project`
 - `GitLab: Create new merge request on current project` - Open the merge request page to create a merge request.
+
+Commands this extension extends/integrates with:
+
+- `Git: Clone` - Search for and clone projects for every GitLab instance you set up. [Read more](#git-extension-integration), [Official Documentation](https://code.visualstudio.com/docs/editor/versioncontrol#_cloning-a-repository)
+- `Git: Add Remote...` - Add existing projects as remote from every GitLab instance you set up.
 
 ### Other features
 
@@ -350,6 +355,19 @@ Using this command, you can quickly validate GitLab CI configuration.
 Quickly find the CI variable you are looking for with the CI variable autocompletion.
 
 ![screenshot of the CI variable autocompletion](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_ci_variable_autocomplete.png)
+
+### Git Extension Integration
+
+This extension integrates with the built-in Git Extension and allows you to search for and clone projects from GitLab (command `Git: Clone`).
+
+- You can search for projects on each GitLab instance for wich you [added an access-token](#step-2-add-token-to-gitlab-workflow-extension).
+- Only projects where you are a **member of** are displayed.
+- You can clone with SSH or HTTPS
+- With HTTPS your access-token will be used for cloning the repository and fetching/pushing commits. This is also the case for all GitLab projects that are cloned manually with HTTPS and then opened in vscode.
+
+![Demonstration of cloning a project from gitlab.com](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_git-clone.gif)
+
+> Note: Using the access-token for cloning with HTTPS does not work with VS Code version 1.53.x (See [discussion](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/172#note_513068345))
 
 ---
 

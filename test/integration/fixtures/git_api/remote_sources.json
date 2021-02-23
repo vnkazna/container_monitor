@@ -1,0 +1,10 @@
+[
+  {
+    "description": "The Gitlab Project",
+    "name": "$(repo) gitlab-org/gitlab",
+    "url": [
+      "git@test.gitlab.com:gitlab-org/gitlab.git",
+      "https://test.gitlab.com/gitlab-org/gitlab.git"
+    ]
+  }
+]
