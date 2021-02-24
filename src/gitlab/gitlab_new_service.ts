@@ -55,33 +55,58 @@ interface GqlUser {
   username: string;
   webUrl: string;
 }
-interface GqlNote {
+
+interface GqlBasePosition {
+  diffRefs: {
+    baseSha: string;
+    headSha: string;
+  };
+  filePath: string;
+  newPath: string;
+  oldPath: string;
+}
+
+interface GqlImagePosition extends GqlBasePosition {
+  positionType: 'image';
+  newLine: null;
+  oldLine: null;
+}
+
+interface GqlNewPosition extends GqlBasePosition {
+  positionType: 'text';
+  newLine: number;
+  oldLine: null;
+}
+interface GqlOldPosition extends GqlBasePosition {
+  positionType: 'text';
+  newLine: null;
+  oldLine: number;
+}
+
+export type GqlTextPosition = GqlOldPosition | GqlNewPosition;
+
+interface GqlGenericNote<T extends GqlBasePosition | null> {
   id: string;
   author: GqlUser;
   createdAt: string;
   system: boolean;
   body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
   bodyHtml: string;
-  position?: GqlPosition;
+  position: T;
 }
 
-export interface GqlPosition {
-  diffRefs: {
-    baseSha: string;
-    headSha: string;
-  };
-  filePath: string;
-  positionType: string;
-  newLine: number | null;
-  oldLine: number | null;
-  newPath: string;
-  oldPath: string;
-}
-export interface GqlDiscussion {
+interface GqlGenericDiscussion<T extends GqlBasePosition | null> {
   replyId: string;
   createdAt: string;
-  notes: Node<GqlNote>;
+  notes: Node<GqlGenericNote<T>>;
 }
+
+export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextPosition>;
+
+export type GqlDiscussion =
+  | GqlGenericDiscussion<GqlTextPosition>
+  | GqlGenericDiscussion<GqlImagePosition>
+  | GqlGenericDiscussion<null>;
 
 interface GqlDiscussionsProject {
   mergeRequest?: {
@@ -384,7 +409,9 @@ export class GitLabNewService {
     This works well for the the GitLab webapp, but in VS Code we need to add the full host.
   */
   private addHostToUrl(discussion: GqlDiscussion): GqlDiscussion {
-    const prependHost = (note: GqlNote): GqlNote => ({
+    const prependHost: <T extends GqlBasePosition | null>(
+      note: GqlGenericNote<T>,
+    ) => GqlGenericNote<T> = note => ({
       ...note,
       bodyHtml: note.bodyHtml.replace(/href="\//, `href="${this.instanceUrl}/`),
       author: {
@@ -399,7 +426,7 @@ export class GitLabNewService {
         ...discussion.notes,
         nodes: discussion.notes.nodes.map(prependHost),
       },
-    };
+    } as GqlDiscussion;
   }
 
   async getDiscussions({
