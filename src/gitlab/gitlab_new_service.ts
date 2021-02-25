@@ -100,6 +100,7 @@ interface GqlGenericDiscussion<T extends GqlBasePosition | null> {
   notes: Node<GqlGenericNote<T>>;
 }
 
+export type GqlTextDiffNote = GqlGenericNote<GqlTextPosition>;
 export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextPosition>;
 
 export type GqlDiscussion =

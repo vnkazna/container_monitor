@@ -11,6 +11,7 @@ import {
 } from '../../gitlab/gitlab_new_service';
 import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
+import { GitLabComment } from '../../review/gitlab_comment';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
@@ -90,14 +91,7 @@ export class MrItemModel extends ItemModel {
     });
     const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
     const threads = discussionsOnDiff.map(({ notes }) => {
-      const comments = notes.nodes.map(({ body, author }) => ({
-        body,
-        mode: vscode.CommentMode.Preview,
-        author: {
-          name: author.name,
-          iconPath: author.avatarUrl !== null ? vscode.Uri.parse(author.avatarUrl) : undefined,
-        },
-      }));
+      const comments = notes.nodes.map(GitLabComment.fromGqlNote);
       const { position } = notes.nodes[0];
       const thread = commentController.createCommentThread(
         this.uriFromPosition(position),
