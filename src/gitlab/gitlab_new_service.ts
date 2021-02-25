@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import * as https from 'https';
 import { GraphQLClient, gql } from 'graphql-request';
 import crossFetch from 'cross-fetch';
