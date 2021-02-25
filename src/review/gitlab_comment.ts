@@ -1,8 +1,13 @@
 import * as vscode from 'vscode';
 import { GqlTextDiffNote } from '../gitlab/gitlab_new_service';
+import { GitLabCommentThread } from './gitlab_comment_thread';
 
 export class GitLabComment implements vscode.Comment {
-  protected constructor(readonly gqlNote: GqlTextDiffNote, public mode: vscode.CommentMode) {}
+  protected constructor(
+    readonly gqlNote: GqlTextDiffNote,
+    public mode: vscode.CommentMode,
+    readonly thread: GitLabCommentThread,
+  ) {}
 
   get author(): vscode.CommentAuthorInformation {
     const { name, avatarUrl } = this.gqlNote.author;
@@ -16,7 +21,7 @@ export class GitLabComment implements vscode.Comment {
     return this.gqlNote.body;
   }
 
-  static fromGqlNote(gqlNote: GqlTextDiffNote): GitLabComment {
-    return new GitLabComment(gqlNote, vscode.CommentMode.Preview);
+  static fromGqlNote(gqlNote: GqlTextDiffNote, thread: GitLabCommentThread): GitLabComment {
+    return new GitLabComment(gqlNote, vscode.CommentMode.Preview, thread);
   }
 }

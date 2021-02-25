@@ -1,27 +1,16 @@
 import * as vscode from 'vscode';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
-import { toReviewUri } from '../../review/review_uri';
 import { createGitLabNewService } from '../../service_factory';
 import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';
-import {
-  GqlDiscussion,
-  GqlTextPosition,
-  GqlTextDiffDiscussion,
-} from '../../gitlab/gitlab_new_service';
+import { GqlDiscussion, GqlTextDiffDiscussion } from '../../gitlab/gitlab_new_service';
 import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
-import { GitLabComment } from '../../review/gitlab_comment';
+import { GitLabCommentThread } from '../../review/gitlab_comment_thread';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
   return firstNote?.position?.positionType === 'text';
-};
-
-const commentRangeFromPosition = (position: GqlTextPosition): vscode.Range => {
-  const glLine = position.oldLine ?? position.newLine;
-  const vsPosition = new vscode.Position(glLine - 1, 0);
-  return new vscode.Range(vsPosition, vsPosition);
 };
 
 export class MrItemModel extends ItemModel {
@@ -65,18 +54,6 @@ export class MrItemModel extends ItemModel {
     return [description, ...changedFiles];
   }
 
-  private uriFromPosition(position: GqlTextPosition): vscode.Uri {
-    const onOldVersion = Boolean(position.oldLine);
-    const path = onOldVersion ? position.oldPath : position.newPath;
-    const commit = onOldVersion ? position.diffRefs.baseSha : position.diffRefs.headSha;
-    return toReviewUri({
-      path,
-      commit,
-      workspacePath: this.project.uri,
-      projectId: this.mr.project_id,
-    });
-  }
-
   private async getMrDiscussions(): Promise<void> {
     const commentController = vscode.comments.createCommentController(
       this.mr.references.full,
@@ -91,16 +68,12 @@ export class MrItemModel extends ItemModel {
     });
     const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
     const threads = discussionsOnDiff.map(({ notes }) => {
-      const comments = notes.nodes.map(GitLabComment.fromGqlNote);
-      const { position } = notes.nodes[0];
-      const thread = commentController.createCommentThread(
-        this.uriFromPosition(position),
-        commentRangeFromPosition(position),
-        comments,
+      return GitLabCommentThread.createThread(
+        commentController,
+        this.project.uri,
+        this.mr.project_id,
+        notes.nodes,
       );
-      thread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-      thread.canReply = false;
-      return thread;
     });
     this.setDisposableChildren([...threads, commentController]);
   }
