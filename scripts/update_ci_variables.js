@@ -10,11 +10,17 @@ async function fetchDocumentation() {
   ).then(res => res.text());
 }
 
+const headerLineRegex = /^\|\s+Variable/;
+const dividerLineRegex = /^\|-+/;
+const tableLineRegex = /^\|.+\|.+\|.+\|.+\|$/;
+
 function parseDocumentation(variableMarkdown) {
   const lines = variableMarkdown.split('\n');
-  const tableStartLine = lines.findIndex(l => l.startsWith('| Variable   '));
-  const tableLines = lines.slice(tableStartLine + 2);
-  const variables = tableLines.map(l => {
+  const tableLines = lines.filter(l => l.match(tableLineRegex));
+  const tableLinesWithoutHeaders = tableLines.filter(
+    l => !l.match(headerLineRegex) && !l.match(dividerLineRegex),
+  );
+  const variables = tableLinesWithoutHeaders.map(l => {
     const [, nameSegment, , , descriptionSegment] = l.split('|');
 
     if (!nameSegment) return undefined;
