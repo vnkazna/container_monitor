@@ -132,11 +132,11 @@ const discussionOnDiff = {
       hasNextPage: false,
       endCursor: 'MQ',
     },
-    nodes: [noteOnDiff, note2],
+    nodes: [noteOnDiff],
   },
 };
 
-const projectWithDiscussions = {
+const projectWithIssueDiscussions = {
   project: {
     id: 'gid://gitlab/Project/278964',
     issue: {
@@ -151,8 +151,24 @@ const projectWithDiscussions = {
   },
 };
 
+const projectWithMrDiscussions = {
+  project: {
+    id: 'gid://gitlab/Project/278964',
+    mergeRequest: {
+      discussions: {
+        pageInfo: {
+          hasNextPage: false,
+          endCursor: 'Nw',
+        },
+        nodes: [systemNote, singleNote, discussionOnDiff],
+      },
+    },
+  },
+};
+
 module.exports = {
-  projectWithDiscussions,
+  projectWithIssueDiscussions,
+  projectWithMrDiscussions,
   note1,
   note1TextSnippet,
   note2,

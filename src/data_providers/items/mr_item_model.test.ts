@@ -43,7 +43,7 @@ describe('MrItemModel', () => {
     const [uri, range] = createCommentThreadMock.mock.calls[0];
     expect(uri.path).toBe('src/webview/src/components/LabelNote.vue');
     expect(range.start.x).toBe(47);
-    expect(commentThread.comments.length).toBe(2);
+    expect(commentThread.comments.length).toBe(1);
     const firstComment = commentThread.comments[0];
     expect(firstComment.author.name).toBe('Tomas Vik');
     expect(firstComment.mode).toBe(vscode.CommentMode.Preview);

@@ -1,10 +1,15 @@
 const assert = require('assert');
+const sinon = require('sinon');
+const vscode = require('vscode');
+const { graphql } = require('msw');
+
 const IssuableDataProvider = require('../../src/data_providers/issuable').DataProvider;
 const { MrItemModel } = require('../../src/data_providers/items/mr_item_model');
 const { tokenService } = require('../../src/services/token_service');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const versionsResponse = require('./fixtures/rest/versions.json');
 const versionResponse = require('./fixtures/rest/mr_version.json');
+const { projectWithMrDiscussions, noteOnDiff } = require('./fixtures/graphql/discussions');
 const {
   getServer,
   createJsonEndpoint,
@@ -30,6 +35,11 @@ describe('MR Review', () => {
       createQueryTextEndpoint(`/projects/278964/repository/files/src%2Ftest.js/raw`, {
         '?ref=1f0fa02de1f6b913d674a8be10899fb8540237a9': 'Old Version',
         '?ref=b6d6f6fd17b52b8cf4e961218c572805e9aa7463': 'New Version',
+      }),
+      graphql.query('GetMrDiscussions', (req, res, ctx) => {
+        if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
+          return res(ctx.data(projectWithMrDiscussions));
+        return res(ctx.data({ project: null }));
       }),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
@@ -71,6 +81,41 @@ describe('MR Review', () => {
       mrFiles.map(f => getTreeItem(f).description),
       ['[deleted] /', '[renamed] /', '[added] /', '/src', '[added] /src/assets', '[renamed] /'],
     );
+  });
+
+  describe('discussions', () => {
+    const sandbox = sinon.createSandbox();
+    let thread;
+    let commentController;
+
+    beforeEach(() => {
+      thread = {};
+      /* We fake createCommentController implementation to check
+      that when we initialize an MR review, we create a correct comment controller
+      we save the created thread for later use in assertions */
+      commentController = {
+        createCommentThread: (uri, range, comments) => {
+          thread = { uri, range, comments };
+          return thread;
+        },
+      };
+      sandbox.stub(vscode.comments, 'createCommentController').returns(commentController);
+    });
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('loads MR discussions', async () => {
+      const mrItem = getTreeItem(mrItemModel);
+      assert.strictEqual(mrItem.label, '!33824 · Web IDE - remove unused actions (mappings)');
+
+      await dataProvider.getChildren(mrItemModel);
+
+      const { uri, range, comments } = thread;
+      assert.strictEqual(uri.path, `/${noteOnDiff.position.newPath}`);
+      assert.strictEqual(range.start.line, noteOnDiff.position.oldLine - 1);
+      assert.strictEqual(comments[0].body, noteOnDiff.body);
+    });
   });
 
   describe('clicking on a changed file', () => {
