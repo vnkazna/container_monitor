@@ -1,30 +1,28 @@
-import * as vscode from 'vscode';
-import { createReviewUri } from '../test_utils/entities';
 import { fromReviewUri, toReviewUri } from './review_uri';
 
 describe('review_uri.ts', () => {
-  const params = {
+  const reviewUriParams = {
     commit: 'abcdef',
     path: '/review',
     projectId: 1234,
     workspacePath: 'path/to/workspace',
   };
 
-  const uri = createReviewUri(params);
-
   describe('toReviewUri', () => {
     it('returns the correct Uri', () => {
-      const result = toReviewUri(params);
+      const result = toReviewUri(reviewUriParams);
 
-      expect(result).toEqual(uri);
+      expect(result.toString()).toEqual(
+        'gl-review:///review{"commit":"abcdef","workspacePath":"path/to/workspace","projectId":1234}#',
+      );
     });
   });
 
   describe('fromReviewUri', () => {
     it('returns the correct string', () => {
-      const result = fromReviewUri(uri as vscode.Uri);
+      const result = fromReviewUri(toReviewUri(reviewUriParams));
 
-      expect(result).toEqual(params);
+      expect(result).toEqual(reviewUriParams);
     });
   });
 });

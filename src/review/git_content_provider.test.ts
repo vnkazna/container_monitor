@@ -2,13 +2,20 @@ import { mocked } from 'ts-jest/utils';
 import { GitContentProvider } from './git_content_provider';
 import { GitService } from '../git_service';
 import { ApiContentProvider } from './api_content_provider';
-import { createReviewUri } from '../test_utils/entities';
+import { toReviewUri } from './review_uri';
 
 jest.mock('../git_service');
 jest.mock('./api_content_provider');
 
 describe('GitContentProvider', () => {
   const gitContentProvider = new GitContentProvider();
+
+  const reviewUriParams = {
+    commit: 'abcdef',
+    path: '/review',
+    projectId: 1234,
+    workspacePath: 'path/to/workspace',
+  };
 
   let getFileContent: jest.Mock;
 
@@ -23,7 +30,7 @@ describe('GitContentProvider', () => {
     getFileContent.mockReturnValue('Test text');
 
     const result = await gitContentProvider.provideTextDocumentContent(
-      createReviewUri(),
+      toReviewUri(reviewUriParams),
       null as any,
     );
     expect(result).toBe('Test text');
@@ -37,7 +44,7 @@ describe('GitContentProvider', () => {
     mocked(ApiContentProvider).mockReturnValue(apiContentProvider);
 
     const result = await gitContentProvider.provideTextDocumentContent(
-      createReviewUri(),
+      toReviewUri(reviewUriParams),
       null as any,
     );
     expect(result).toBe('Api content');
