@@ -26,6 +26,9 @@ module.exports = {
   workspace: {
     getConfiguration: jest.fn().mockReturnValue({}),
   },
+  extensions: {
+    getExtension: jest.fn(),
+  },
   CommentMode: { Preview: 1 },
   StatusBarAlignment: { Left: 0 },
   CommentThreadCollapsibleState: { Collapsed: 0, Expanded: 1 },
