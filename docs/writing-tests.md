@@ -4,7 +4,10 @@ This document provides technical details about our automated tests. Please see [
 
 ## Technology choice
 
-We are using [Jest](https://jestjs.io/) for our unit tests[^1]. For integration tests, we use [`mocha`](https://mochajs.org/) as a test runner, [`assert`](https://nodejs.org/docs/latest-v12.x/api/assert.html) for assertions, and [`vscode-test`](https://code.visualstudio.com/api/working-with-extensions/testing-extension#the-test-script) to run integration tests in VS Code instance.
+- **Unit Tests**: TypeScript and [Jest](https://jestjs.io/)[^1]
+- **Integration tests**: JavaScript and [`mocha`](https://mochajs.org/) as a test runner, [`assert`](https://nodejs.org/docs/latest-v12.x/api/assert.html) for assertions, and [`vscode-test`](https://code.visualstudio.com/api/working-with-extensions/testing-extension#the-test-script) to run integration tests in VS Code instance
+
+*We choose JavaScript for integration tests because `@types/jest` and `@types/mocha` are not compatible and often cause conflicts. The integration tests are written against much more stable VS Code Extension API and so some of the TS benefits are not as pronounced.*
 
 ## Unit tests `npm run test-unit`
 
