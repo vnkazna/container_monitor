@@ -124,14 +124,50 @@
           "light": "src/assets/images/light/refresh.svg",
           "dark": "src/assets/images/dark/refresh.svg"
         }
+      },
+      {
+        "command": "gl.resolveThread",
+        "title": "Resolve thread",
+        "category": "GitLab",
+        "icon": "$(check)"
+      },
+      {
+        "command": "gl.unresolveThread",
+        "title": "Unresolve thread",
+        "category": "GitLab",
+        "icon": "$(close)"
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "gl.resolveThread",
+          "when": "false"
+
+        },
+        {
+          "command": "gl.unresolveThread",
+          "when": "false"
+
+        }
+      ],
       "view/title": [
         {
           "command": "gl.refreshSidebar",
           "when": "view =~ /(currentBranchInfo|issuesAndMrs)/",
           "group": "navigation"
+        }
+      ],
+      "comments/commentThread/title": [
+        {
+          "command": "gl.resolveThread",
+          "group": "inline@1",
+          "when": "commentThread == unresolved"
+        },
+        {
+          "command": "gl.unresolveThread",
+          "group": "inline@2",
+          "when": "commentThread == resolved"
         }
       ]
     },

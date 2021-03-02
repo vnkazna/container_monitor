@@ -97,6 +97,8 @@ interface GqlGenericNote<T extends GqlBasePosition | null> {
 interface GqlGenericDiscussion<T extends GqlBasePosition | null> {
   replyId: string;
   createdAt: string;
+  resolved: boolean;
+  resolvable: boolean;
   notes: Node<GqlGenericNote<T>>;
 }
 
@@ -230,6 +232,8 @@ ${includePosition ? positionFragment : ''}
     nodes {
       replyId
       createdAt
+      resolved
+      resolvable
       notes {
         pageInfo {
           hasNextPage

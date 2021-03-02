@@ -67,13 +67,13 @@ export class MrItemModel extends ItemModel {
       includePosition: true,
     });
     const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
-    const threads = discussionsOnDiff.map(({ notes }) => {
-      return GitLabCommentThread.createThread(
+    const threads = discussionsOnDiff.map(discussion => {
+      return GitLabCommentThread.createThread({
         commentController,
-        this.project.uri,
-        this.mr.project_id,
-        notes.nodes,
-      );
+        workspaceFolder: this.project.uri,
+        gitlabProjectId: this.mr.project_id,
+        discussion,
+      });
     });
     this.setDisposableChildren([...threads, commentController]);
   }
