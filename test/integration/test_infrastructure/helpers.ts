@@ -1,8 +1,5 @@
 import * as vscode from 'vscode';
 import { SinonSandbox } from 'sinon';
-import * as fs from 'fs';
-import * as assert from 'assert';
-import { DEFAULT_VS_CODE_SETTINGS } from './constants';
 
 export const createAndOpenFile = async (testFileUri: vscode.Uri) => {
   const createFileEdit = new vscode.WorkspaceEdit();
@@ -24,7 +21,7 @@ export const simulateQuickPickChoice = (sandbox: SinonSandbox, nthItem: number) 
   });
 };
 
-export const getWorkspaceFoder = () => {
+export const getWorkspaceFolder = () => {
   const folders = vscode.workspace.workspaceFolders;
   return folders && folders[0]?.uri.fsPath;
 };

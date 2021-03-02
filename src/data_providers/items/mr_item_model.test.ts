@@ -15,14 +15,16 @@ const createGitLabNewServiceMock = createGitLabNewService as jest.Mock;
 
 describe('MrItemModel', () => {
   let item: MrItemModel;
+  let commentThread: vscode.CommentThread;
 
   const createCommentThreadMock = jest.fn();
 
   beforeEach(() => {
     item = new MrItemModel(mr, project);
+    commentThread = {} as vscode.CommentThread;
 
     createCommentControllerMock.mockReturnValue({
-      createCommentThread: createCommentThreadMock.mockReturnValue({}),
+      createCommentThread: createCommentThreadMock.mockReturnValue(commentThread),
     });
     createGitLabNewServiceMock.mockReturnValue({
       getDiscussions: jest.fn().mockResolvedValue([discussionOnDiff, multipleNotes]),
@@ -38,11 +40,11 @@ describe('MrItemModel', () => {
   it('should add comment thread to VS Code', async () => {
     await item.getChildren();
     expect(createCommentControllerMock).toBeCalledWith('gitlab-org/gitlab!2000', 'Issuable Title');
-    const [uri, range, comments] = createCommentThreadMock.mock.calls[0];
+    const [uri, range] = createCommentThreadMock.mock.calls[0];
     expect(uri.path).toBe('src/webview/src/components/LabelNote.vue');
     expect(range.start.x).toBe(47);
-    expect(comments.length).toBe(2);
-    const firstComment = comments[0];
+    expect(commentThread.comments.length).toBe(1);
+    const firstComment = commentThread.comments[0];
     expect(firstComment.author.name).toBe('Tomas Vik');
     expect(firstComment.mode).toBe(vscode.CommentMode.Preview);
     expect(firstComment.body).toMatch(noteOnDiffTextSnippet);

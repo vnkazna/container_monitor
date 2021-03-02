@@ -12,6 +12,7 @@ const {
   createAndOpenFile,
   closeAndDeleteFile,
   simulateQuickPickChoice,
+  getWorkspaceFolder,
 } = require('./test_infrastructure/helpers');
 
 describe('Insert snippet', async () => {
@@ -40,12 +41,12 @@ describe('Insert snippet', async () => {
 
   beforeEach(async () => {
     server.resetHandlers();
-    testFileUri = vscode.Uri.parse(`${vscode.workspace.workspaceFolders[0].uri.fsPath}/newfile.js`);
+    testFileUri = vscode.Uri.parse(`${getWorkspaceFolder()}/newfile.js`);
     await createAndOpenFile(testFileUri);
   });
 
   afterEach(async () => {
-    const git = simpleGit(vscode.workspace.workspaceFolders[0].uri.fsPath);
+    const git = simpleGit(getWorkspaceFolder());
     await git.removeRemote(REMOTE.NAME);
     await git.addRemote(REMOTE.NAME, REMOTE.URL);
     sandbox.restore();
@@ -72,7 +73,7 @@ describe('Insert snippet', async () => {
   });
 
   it('throws an error when it cannot find GitLab project', async () => {
-    const git = simpleGit(vscode.workspace.workspaceFolders[0].uri.fsPath);
+    const git = simpleGit(getWorkspaceFolder());
     await git.removeRemote(REMOTE.NAME);
     await git.addRemote(REMOTE.NAME, 'git@test.gitlab.com:gitlab-org/nonexistent.git');
     await assert.rejects(insertSnippet(), /Project gitlab-org\/nonexistent was not found./);
