@@ -37,7 +37,7 @@ You can find example of setting the Git repository in a test in [`insert_snippet
 
 ```js
 it('throws an error when it cannot find GitLab project', async () => {
-  const git = simpleGit(vscode.workspace.workspaceFolders[0].uri.fsPath);
+  const git = simpleGit(getWorkspaceFolder());
   await git.removeRemote(REMOTE.NAME);
   await git.addRemote(REMOTE.NAME, 'git@test.gitlab.com:gitlab-org/nonexistent.git');
   await assert.rejects(insertSnippet(), /Project gitlab-org\/nonexistent was not found./);

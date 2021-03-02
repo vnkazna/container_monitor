@@ -6,6 +6,7 @@ const {
   createAndOpenFile,
   closeAndDeleteFile,
   simulateQuickPickChoice,
+  getWorkspaceFolder,
 } = require('../test_infrastructure/helpers');
 
 describe('workspace_service', () => {
@@ -14,12 +15,12 @@ describe('workspace_service', () => {
   describe('one workspace, no open files', () => {
     it('getCurrentWorkspaceFolder returns workspace folder', async () => {
       const result = await workspaceService.getCurrentWorkspaceFolder();
-      assert.strictEqual(result, vscode.workspace.workspaceFolders[0].uri.fsPath);
+      assert.strictEqual(result, getWorkspaceFolder());
     });
 
     it('getCurrentWorkspaceFolderOrSelectOne returns workspace folder', async () => {
       const result = await workspaceService.getCurrentWorkspaceFolderOrSelectOne();
-      assert.strictEqual(result, vscode.workspace.workspaceFolders[0].uri.fsPath);
+      assert.strictEqual(result, getWorkspaceFolder());
     });
   });
 
