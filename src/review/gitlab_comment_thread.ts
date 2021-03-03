@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { GqlTextDiffNote, GqlTextPosition } from '../gitlab/gitlab_new_service';
+import { GqlTextDiffDiscussion, GqlTextPosition } from '../gitlab/gitlab_new_service';
 import { GitLabComment } from './gitlab_comment';
 import { toReviewUri } from './review_uri';
 
@@ -25,23 +25,36 @@ const uriFromPosition = (
   });
 };
 
+interface CreateThreadOptions {
+  commentController: vscode.CommentController;
+  workspaceFolder: string;
+  gitlabProjectId: number;
+  discussion: GqlTextDiffDiscussion;
+}
+
 export class GitLabCommentThread {
-  private constructor(private vsThread: vscode.CommentThread) {
+  private constructor(
+    private vsThread: vscode.CommentThread,
+    gqlDiscussion: GqlTextDiffDiscussion,
+  ) {
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
     this.vsThread.canReply = false;
+    if (gqlDiscussion.resolvable) {
+      this.vsThread.contextValue = gqlDiscussion.resolved ? 'resolved' : 'unresolved';
+    }
   }
 
   dispose(): void {
     this.vsThread.dispose();
   }
 
-  static createThread(
-    commentController: vscode.CommentController,
-    workspaceFolder: string,
-    gitlabProjectId: number,
-    notes: GqlTextDiffNote[],
-  ): GitLabCommentThread {
-    const { position } = notes[0];
+  static createThread({
+    commentController,
+    workspaceFolder,
+    gitlabProjectId,
+    discussion,
+  }: CreateThreadOptions): GitLabCommentThread {
+    const { position } = discussion.notes.nodes[0];
     const vsThread = commentController.createCommentThread(
       uriFromPosition(position, workspaceFolder, gitlabProjectId),
       commentRangeFromPosition(position),
@@ -49,8 +62,10 @@ export class GitLabCommentThread {
       // create empty thread to be able to create comments
       [],
     );
-    const glThread = new GitLabCommentThread(vsThread);
-    vsThread.comments = notes.map(note => GitLabComment.fromGqlNote(note, glThread));
+    const glThread = new GitLabCommentThread(vsThread, discussion);
+    vsThread.comments = discussion.notes.nodes.map(note =>
+      GitLabComment.fromGqlNote(note, glThread),
+    );
     return glThread;
   }
 }

@@ -24,6 +24,8 @@ export const USER_COMMANDS = {
   VALIDATE_CI_CONFIG: 'gl.validateCIConfig',
   SHOW_OUTPUT: 'gl.showOutput',
   REFRESH_SIDEBAR: 'gl.refreshSidebar',
+  RESOLVE_THREAD: 'gl.resolveThread',
+  UNRESOLVE_THREAD: 'gl.unresolveThread',
 };
 
 /*

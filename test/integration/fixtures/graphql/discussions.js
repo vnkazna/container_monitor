@@ -103,6 +103,8 @@ const noteOnDiffTextSnippet =
 const singleNote = {
   replyId: 'gid://gitlab/IndividualNoteDiscussion/afbf8f461a773fc130aa8091c6636f22efb5f4c5',
   createdAt: '2020-12-02T17:00:04Z',
+  resolved: false,
+  resolvable: true,
   notes: {
     pageInfo: {
       hasNextPage: false,
@@ -115,6 +117,8 @@ const singleNote = {
 const multipleNotes = {
   replyId: 'gid://gitlab/IndividualNoteDiscussion/afbf8f461a773fc130aa8091c6636f22efb5f4c5',
   createdAt: '2020-12-02T17:00:04Z',
+  resolved: false,
+  resolvable: true,
   notes: {
     pageInfo: {
       hasNextPage: false,
@@ -127,6 +131,8 @@ const multipleNotes = {
 const discussionOnDiff = {
   replyId: 'gid://gitlab/DiffDiscussion/9a702bfa62ab0a6e7c1bee74444086567e5e99e6',
   createdAt: '2020-12-17T17:20:14Z',
+  resolved: false,
+  resolvable: true,
   notes: {
     pageInfo: {
       hasNextPage: false,

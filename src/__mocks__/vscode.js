@@ -35,9 +35,9 @@ module.exports = {
   },
   CommentMode: { Preview: 1 },
   StatusBarAlignment: { Left: 0 },
-  CommentThreadCollapsibleState: { Expanded: 1 },
-  Position: function Position(x, y) {
-    return { x, y };
+  CommentThreadCollapsibleState: { Collapsed: 0, Expanded: 1 },
+  Position: function Position(line, character) {
+    return { line, character };
   },
   Range: function Range(start, end) {
     return { start, end };
