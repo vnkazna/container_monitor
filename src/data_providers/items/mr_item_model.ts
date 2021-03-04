@@ -73,6 +73,7 @@ export class MrItemModel extends ItemModel {
         workspaceFolder: this.project.uri,
         gitlabProjectId: this.mr.project_id,
         discussion,
+        gitlabService,
       });
     });
     this.setDisposableChildren([...threads, commentController]);

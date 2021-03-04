@@ -129,13 +129,13 @@
         "command": "gl.resolveThread",
         "title": "Resolve thread",
         "category": "GitLab",
-        "icon": "$(check)"
+        "icon": "$(pass)"
       },
       {
         "command": "gl.unresolveThread",
         "title": "Unresolve thread",
         "category": "GitLab",
-        "icon": "$(close)"
+        "icon": "$(pass-filled)"
       }
     ],
     "menus": {

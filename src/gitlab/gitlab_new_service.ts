@@ -11,6 +11,7 @@ import { ensureAbsoluteAvatarUrl } from '../utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
 import { GitLabProject, GqlProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
+import { UserFriendlyError } from '../errors/user_friendly_error';
 
 interface Node<T> {
   pageInfo?: {
@@ -84,6 +85,10 @@ interface GqlOldPosition extends GqlBasePosition {
 
 export type GqlTextPosition = GqlOldPosition | GqlNewPosition;
 
+interface GqlNotePermissions {
+  resolveNote: boolean;
+}
+
 interface GqlGenericNote<T extends GqlBasePosition | null> {
   id: string;
   author: GqlUser;
@@ -91,6 +96,7 @@ interface GqlGenericNote<T extends GqlBasePosition | null> {
   system: boolean;
   body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
   bodyHtml: string;
+  userPermissions: GqlNotePermissions;
   position: T;
 }
 
@@ -251,6 +257,9 @@ ${includePosition ? positionFragment : ''}
           }
           body
           bodyHtml
+          userPermissions {
+            resolveNote
+          }
           ${includePosition ? `...position` : ''}
         }
       }
@@ -270,6 +279,14 @@ const constructGetDiscussionsQuery = (isMr: boolean, includePosition = false) =>
           ...discussions
         }
       }
+    }
+  }
+`;
+
+const discussionSetResolved = gql`
+  mutation DiscussionToggleResolve($replyId: DiscussionID!, $resolved: Boolean!) {
+    discussionToggleResolve(input: { id: $replyId, resolve: $resolved }) {
+      errors
     }
   }
 `;
@@ -459,6 +476,21 @@ export class GitLabNewService {
       return [...discussions.nodes, ...remainingPages];
     }
     return discussions.nodes.map(n => this.addHostToUrl(n));
+  }
+
+  async setResolved(replyId: string, resolved: boolean): Promise<void> {
+    try {
+      return await this.client.request<void>(discussionSetResolved, {
+        replyId,
+        resolved,
+      });
+    } catch (e) {
+      throw new UserFriendlyError(
+        `Couldn't ${resolved ? 'resolve' : 'unresolve'} the discussion when calling the API.
+        For more information, review the extension logs.`,
+        e,
+      );
+    }
   }
 
   private async getLabelEvents(issuable: RestIssuable): Promise<RestLabelEvent[]> {
