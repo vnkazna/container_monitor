@@ -18,6 +18,7 @@ const { REVIEW_URI_SCHEME } = require('./constants');
 const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
 const { CiCompletionProvider } = require('./completion/ci_completion_provider');
 const { GitExtensionWrapper } = require('./git/git_extension_wrapper');
+const { toggleResolved } = require('./commands/mr_discussion_commands');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -69,6 +70,8 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.REFRESH_SIDEBAR]: sidebar.refresh,
     [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.create,
     [USER_COMMANDS.SHOW_OUTPUT]: () => outputChannel.show(),
+    [USER_COMMANDS.RESOLVE_THREAD]: toggleResolved,
+    [USER_COMMANDS.UNRESOLVE_THREAD]: toggleResolved,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };

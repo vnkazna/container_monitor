@@ -1,6 +1,8 @@
 const systemNote = {
   replyId: 'gid://gitlab/IndividualNoteDiscussion/3e120050b42400665aa728f283cfa167d800f03e',
   createdAt: '2020-12-02T09:44:11Z',
+  resolved: false,
+  resolvable: false,
   notes: {
     pageInfo: {
       hasNextPage: false,
@@ -10,6 +12,9 @@ const systemNote = {
       {
         id: 'gid://gitlab/Note/458662425',
         createdAt: '2020-12-02T09:44:11Z',
+        userPermissions: {
+          resolveNote: true,
+        },
         system: true,
         author: {
           avatarUrl:
@@ -32,6 +37,9 @@ const systemNoteTextSnippet = 'added 2 commits';
 const note1 = {
   id: 'gid://gitlab/Note/459020558',
   createdAt: '2020-12-02T17:00:04Z',
+  userPermissions: {
+    resolveNote: true,
+  },
   system: false,
   author: {
     avatarUrl:
@@ -52,6 +60,9 @@ const note1TextSnippet =
 const note2 = {
   id: 'gid://gitlab/DiscussionNote/465896084',
   createdAt: '2020-12-14T08:51:37Z',
+  userPermissions: {
+    resolveNote: true,
+  },
   system: false,
   author: {
     avatarUrl:
@@ -71,6 +82,9 @@ const note2TextSnippet = 'I know that the dependencies are managed separately, b
 const noteOnDiff = {
   id: 'gid://gitlab/DiffNote/469379582',
   createdAt: '2020-12-17T17:20:14Z',
+  userPermissions: {
+    resolveNote: true,
+  },
   system: false,
   author: {
     avatarUrl:
