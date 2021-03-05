@@ -1,3 +1,5 @@
+const { Uri } = require('../test_utils/uri');
+
 module.exports = {
   TreeItem: function TreeItem(label, collapsibleState) {
     return { label, collapsibleState };
@@ -9,16 +11,7 @@ module.exports = {
   TreeItemCollapsibleState: {
     Collapsed: 'collapsed',
   },
-  Uri: {
-    file: path => ({
-      path,
-      with: args => ({
-        path,
-        ...args,
-      }),
-    }),
-    parse: str => str,
-  },
+  Uri,
   comments: {
     createCommentController: jest.fn(),
   },
@@ -33,6 +26,9 @@ module.exports = {
   },
   workspace: {
     getConfiguration: jest.fn().mockReturnValue({}),
+  },
+  extensions: {
+    getExtension: jest.fn(),
   },
   CommentMode: { Preview: 1 },
   StatusBarAlignment: { Left: 0 },

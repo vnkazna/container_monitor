@@ -1,18 +1,18 @@
-import * as assert from 'assert';
-import { graphql } from 'msw';
-import { tokenService } from '../../src/services/token_service';
-import * as projectsResponse from './fixtures/graphql/projects.json';
-import * as remoteSourceResult from './fixtures/git_api/remote_sources.json';
-import { getServer } from './test_infrastructure/mock_server.js';
-import { GITLAB_URL } from './test_infrastructure/constants';
-import { GitLabRemoteSourceProvider } from '../../src/gitlab/clone/gitlab_remote_source_provider';
+const assert = require('assert');
+const { graphql } = require('msw');
+const { tokenService } = require('../../src/services/token_service');
+const projectsResponse = require('./fixtures/graphql/projects.json');
+const remoteSourceResult = require('./fixtures/git_api/remote_sources.json');
+const { getServer } = require('./test_infrastructure/mock_server.js');
+const { GITLAB_URL } = require('./test_infrastructure/constants');
+const {
+  GitLabRemoteSourceProvider,
+} = require('../../src/gitlab/clone/gitlab_remote_source_provider');
 
 const token = 'abcd-secret';
 
 describe('GitLab Remote Source provider', () => {
-  let server: {
-    close(): void;
-  };
+  let server;
 
   before(async () => {
     server = getServer([
