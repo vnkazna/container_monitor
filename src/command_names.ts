@@ -27,6 +27,8 @@ export const USER_COMMANDS = {
   RESOLVE_THREAD: 'gl.resolveThread',
   UNRESOLVE_THREAD: 'gl.unresolveThread',
   DELETE_COMMENT: 'gl.deleteComment',
+  START_EDITING_COMMENT: 'gl.startEditingComment',
+  CANCEL_EDITING_COMMENT: 'gl.cancelEditingComment',
 };
 
 /*

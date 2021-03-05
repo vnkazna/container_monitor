@@ -75,6 +75,23 @@ export class GitLabCommentThread {
     }
   }
 
+  startEdit(comment: GitLabComment): void {
+    this.changeOneComment(comment.id, c => c.withMode(vscode.CommentMode.Editing));
+  }
+
+  cancelEdit(comment: GitLabComment): void {
+    this.changeOneComment(comment.id, c => c.withMode(vscode.CommentMode.Preview).resetBody());
+  }
+
+  private changeOneComment(id: string, changeFn: (c: GitLabComment) => GitLabComment): void {
+    this.vsThread.comments = this.vsThread.comments.map(c => {
+      if (c instanceof GitLabComment && c.id === id) {
+        return changeFn(c);
+      }
+      return c;
+    });
+  }
+
   private updateThreadContext() {
     // when user doesn't have permission to resolve the discussion we don't show the
     // resolve/unresolve buttons at all (`context` stays `undefined`) because otherwise
