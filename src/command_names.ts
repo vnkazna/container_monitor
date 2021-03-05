@@ -26,6 +26,7 @@ export const USER_COMMANDS = {
   REFRESH_SIDEBAR: 'gl.refreshSidebar',
   RESOLVE_THREAD: 'gl.resolveThread',
   UNRESOLVE_THREAD: 'gl.unresolveThread',
+  DELETE_COMMENT: 'gl.deleteComment',
 };
 
 /*

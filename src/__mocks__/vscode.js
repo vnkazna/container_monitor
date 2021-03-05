@@ -23,6 +23,7 @@ module.exports = {
     createCommentController: jest.fn(),
   },
   window: {
+    showWarningMessage: jest.fn(),
     showErrorMessage: jest.fn(),
     createStatusBarItem: jest.fn(),
   },
