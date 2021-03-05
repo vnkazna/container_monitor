@@ -34,3 +34,7 @@ export const editComment = (comment: GitLabComment): void => {
 export const cancelEdit = (comment: GitLabComment): void => {
   comment.thread.cancelEdit(comment);
 };
+
+export const submitEdit = async (comment: GitLabComment): Promise<void> => {
+  return comment.thread.submitEdit(comment);
+};

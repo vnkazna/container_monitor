@@ -309,6 +309,14 @@ const deleteNoteMutation = gql`
   }
 `;
 
+const updateNoteBodyMutation = gql`
+  mutation UpdateNoteBody($noteId: NoteID!, $body: String) {
+    updateNote(input: { id: $noteId, body: $body }) {
+      errors
+    }
+  }
+`;
+
 const getProjectPath = (issuable: RestIssuable) => issuable.references.full.split(/[#!]/)[0];
 const isMr = (issuable: RestIssuable) => Boolean(issuable.sha);
 const getIssuableGqlId = (issuable: RestIssuable) =>
@@ -545,6 +553,22 @@ export class GitLabNewService {
     } catch (e) {
       throw new UserFriendlyError(
         `Couldn't delete the comment when calling the API.
+        For more information, review the extension logs.`,
+        e,
+      );
+    }
+  }
+
+  async updateNoteBody(noteId: string, body: string): Promise<void> {
+    try {
+      await this.client.request<void>(updateNoteBodyMutation, {
+        noteId,
+        body,
+      });
+    } catch (e) {
+      throw new UserFriendlyError(
+        `Couldn't update the comment when calling the API.
+        Your draft hasn't been lost. To see it, edit the comment.
         For more information, review the extension logs.`,
         e,
       );

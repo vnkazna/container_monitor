@@ -83,6 +83,13 @@ export class GitLabCommentThread {
     this.changeOneComment(comment.id, c => c.withMode(vscode.CommentMode.Preview).resetBody());
   }
 
+  async submitEdit(comment: GitLabComment): Promise<void> {
+    await this.gitlabService.updateNoteBody(comment.id, comment.body);
+    this.changeOneComment(comment.id, c =>
+      c.markBodyAsSubmitted().withMode(vscode.CommentMode.Preview),
+    );
+  }
+
   private changeOneComment(id: string, changeFn: (c: GitLabComment) => GitLabComment): void {
     this.vsThread.comments = this.vsThread.comments.map(c => {
       if (c instanceof GitLabComment && c.id === id) {

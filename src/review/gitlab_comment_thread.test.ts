@@ -61,6 +61,7 @@ describe('GitLabCommentThread', () => {
     gitlabService = ({
       setResolved: jest.fn(),
       deleteNote: jest.fn(),
+      updateNoteBody: jest.fn(),
     } as unknown) as GitLabNewService;
     gitlabCommentThread = GitLabCommentThread.createThread({
       commentController: fakeCommentController,
@@ -208,6 +209,38 @@ describe('GitLabCommentThread', () => {
       expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Preview);
       expect(vsCommentThread.comments[0].body).toBe('first body');
       expect(vsCommentThread.comments[1].mode).toBe(vscode.CommentMode.Preview);
+    });
+  });
+
+  describe('updating comments', () => {
+    beforeEach(() => {
+      createGitLabCommentThread(createGqlTextDiffDiscussion(...twoNotes));
+      gitlabCommentThread.startEdit(vsCommentThread.comments[0] as GitLabComment);
+      vsCommentThread.comments[0].body = 'updated body';
+    });
+
+    it('submits updated comment', async () => {
+      (gitlabService.updateNoteBody as jest.Mock).mockResolvedValue(undefined);
+
+      await gitlabCommentThread.submitEdit(vsCommentThread.comments[0] as GitLabComment);
+
+      expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Preview);
+      expect(vsCommentThread.comments[0].body).toBe('updated body');
+      expect((vsCommentThread.comments[0] as GitLabComment).gqlNote.body).toBe('updated body');
+    });
+
+    it("doesn't update the underlying GraphQL note body if API update fails", async () => {
+      const error = new Error();
+
+      (gitlabService.updateNoteBody as jest.Mock).mockRejectedValue(error);
+
+      await expect(
+        gitlabCommentThread.submitEdit(vsCommentThread.comments[0] as GitLabComment),
+      ).rejects.toBe(error);
+
+      expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Editing);
+      expect(vsCommentThread.comments[0].body).toBe('updated body');
+      expect((vsCommentThread.comments[0] as GitLabComment).gqlNote.body).toBe('first body');
     });
   });
 });

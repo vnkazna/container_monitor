@@ -153,6 +153,11 @@
         "command": "gl.cancelEditingComment",
         "title": "Cancel",
         "category": "GitLab"
+      },
+      {
+        "command": "gl.submitCommentEdit",
+        "title": "Save comment",
+        "category": "GitLab"
       }
     ],
     "menus": {
@@ -176,6 +181,10 @@
         {
           "command": "gl.cancelEditingComment",
           "when": "false"
+        },
+        {
+          "command": "gl.submitCommentEdit",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -198,6 +207,10 @@
         }
       ],
       "comments/comment/context": [
+        {
+          "command": "gl.submitCommentEdit",
+          "group": "inline@1"
+        },
         {
           "command": "gl.cancelEditingComment",
           "group": "inline@2"

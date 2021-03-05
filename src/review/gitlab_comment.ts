@@ -5,6 +5,7 @@ import { GitLabCommentThread } from './gitlab_comment_thread';
 interface CommentOptions {
   mode?: vscode.CommentMode;
   body?: string;
+  note?: GqlTextDiffNote;
 }
 
 export class GitLabComment implements vscode.Comment {
@@ -35,12 +36,26 @@ export class GitLabComment implements vscode.Comment {
     return this.with({ body: this.gqlNote.body });
   }
 
+  markBodyAsSubmitted(): GitLabComment {
+    return this.with({
+      note: {
+        ...this.gqlNote,
+        body: this.body, // this synchronizes the API response with the latest body
+      },
+    });
+  }
+
   withMode(mode: vscode.CommentMode): GitLabComment {
     return this.with({ mode });
   }
 
-  private with({ mode, body }: CommentOptions) {
-    return new GitLabComment(this.gqlNote, mode ?? this.mode, this.thread, body ?? this.body);
+  private with({ mode, body, note }: CommentOptions) {
+    return new GitLabComment(
+      note ?? this.gqlNote,
+      mode ?? this.mode,
+      this.thread,
+      body ?? this.body,
+    );
   }
 
   static fromGqlNote(gqlNote: GqlTextDiffNote, thread: GitLabCommentThread): GitLabComment {

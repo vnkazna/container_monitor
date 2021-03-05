@@ -23,6 +23,7 @@ const {
   deleteComment,
   editComment: startEdit,
   cancelEdit,
+  submitEdit,
 } = require('./commands/mr_discussion_commands');
 
 vscode.gitLabWorkflow = {
@@ -80,6 +81,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.DELETE_COMMENT]: deleteComment,
     [USER_COMMANDS.START_EDITING_COMMENT]: startEdit,
     [USER_COMMANDS.CANCEL_EDITING_COMMENT]: cancelEdit,
+    [USER_COMMANDS.SUBMIT_COMMENT_EDIT]: submitEdit,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
