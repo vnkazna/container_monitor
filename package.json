@@ -136,6 +136,12 @@
         "title": "Unresolve thread",
         "category": "GitLab",
         "icon": "$(pass-filled)"
+      },
+      {
+        "command": "gl.deleteComment",
+        "title": "Delete comment",
+        "category": "GitLab",
+        "icon": "$(trash)"
       }
     ],
     "menus": {
@@ -149,6 +155,11 @@
           "command": "gl.unresolveThread",
           "when": "false"
 
+        },
+        {
+          "command": "gl.deleteComment",
+          "when": "false"
+
         }
       ],
       "view/title": [
@@ -156,6 +167,13 @@
           "command": "gl.refreshSidebar",
           "when": "view =~ /(currentBranchInfo|issuesAndMrs)/",
           "group": "navigation"
+        }
+      ],
+      "comments/comment/title": [
+        {
+          "command": "gl.deleteComment",
+          "group": "inline@1",
+          "when": "comment =~ /canAdmin/"
         }
       ],
       "comments/commentThread/title": [

@@ -39,6 +39,7 @@ const note1 = {
   createdAt: '2020-12-02T17:00:04Z',
   userPermissions: {
     resolveNote: true,
+    adminNote: true,
   },
   system: false,
   author: {
@@ -62,6 +63,7 @@ const note2 = {
   createdAt: '2020-12-14T08:51:37Z',
   userPermissions: {
     resolveNote: true,
+    adminNote: true,
   },
   system: false,
   author: {
@@ -84,6 +86,7 @@ const noteOnDiff = {
   createdAt: '2020-12-17T17:20:14Z',
   userPermissions: {
     resolveNote: true,
+    adminNote: true,
   },
   system: false,
   author: {

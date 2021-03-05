@@ -19,7 +19,7 @@ const uriFromPosition = (
   workspaceFolder: string,
   gitlabProjectId: number,
 ) => {
-  const onOldVersion = position.oldLine === null;
+  const onOldVersion = position.oldLine !== null;
   const path = onOldVersion ? position.oldPath : position.newPath;
   const commit = onOldVersion ? position.diffRefs.baseSha : position.diffRefs.headSha;
   return toReviewUri({
@@ -62,6 +62,17 @@ export class GitLabCommentThread {
     const [firstNote] = this.gqlDiscussion.notes.nodes;
     assert(firstNote);
     return firstNote.userPermissions.resolveNote;
+  }
+
+  async deleteComment(comment: GitLabComment): Promise<void> {
+    await this.gitlabService.deleteNote(comment.id);
+    this.vsThread.comments = this.vsThread.comments.filter(c => {
+      if (c instanceof GitLabComment) return c.id !== comment.id;
+      return true;
+    });
+    if (this.vsThread.comments.length === 0) {
+      this.dispose();
+    }
   }
 
   private updateThreadContext() {

@@ -9,6 +9,14 @@ export class GitLabComment implements vscode.Comment {
     readonly thread: GitLabCommentThread,
   ) {}
 
+  get id(): string {
+    return this.gqlNote.id;
+  }
+
+  get contextValue(): string | undefined {
+    return this.gqlNote.userPermissions.adminNote ? 'canAdmin' : undefined;
+  }
+
   get author(): vscode.CommentAuthorInformation {
     const { name, avatarUrl } = this.gqlNote.author;
     return {

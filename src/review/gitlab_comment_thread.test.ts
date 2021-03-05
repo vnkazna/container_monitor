@@ -5,12 +5,28 @@ import {
   noteOnDiff,
 } from '../../test/integration/fixtures/graphql/discussions.js';
 import { GitLabComment } from './gitlab_comment';
-import { GitLabNewService, GqlTextDiffDiscussion } from '../gitlab/gitlab_new_service';
+import {
+  GitLabNewService,
+  GqlTextDiffDiscussion,
+  GqlTextDiffNote,
+} from '../gitlab/gitlab_new_service';
 
 describe('GitLabCommentThread', () => {
   let gitlabCommentThread: GitLabCommentThread;
   let vsCommentThread: vscode.CommentThread;
   let gitlabService: GitLabNewService;
+
+  const createGqlTextDiffDiscussion: (...notes: GqlTextDiffNote[]) => GqlTextDiffDiscussion = (
+    ...notes
+  ) => {
+    return {
+      ...discussionOnDiff,
+      notes: {
+        ...discussionOnDiff.notes,
+        nodes: notes,
+      },
+    };
+  };
 
   const createGitLabCommentThread = (discussion: GqlTextDiffDiscussion) => {
     const fakeCommentController: vscode.CommentController = {
@@ -24,13 +40,14 @@ describe('GitLabCommentThread', () => {
           comments,
           collapsibleState: vscode.CommentThreadCollapsibleState.Collapsed,
           canReply: true,
-          dispose: () => undefined,
+          dispose: jest.fn(),
         };
         return vsCommentThread;
       },
     };
     gitlabService = ({
       setResolved: jest.fn(),
+      deleteNote: jest.fn(),
     } as unknown) as GitLabNewService;
     gitlabCommentThread = GitLabCommentThread.createThread({
       commentController: fakeCommentController,
@@ -57,6 +74,12 @@ describe('GitLabCommentThread', () => {
     expect(vsCommentThread.range.start.line).toBe(noteOnDiff.position.oldLine - 1); // vs code numbers lines from 0
   });
 
+  it('generates uri for the discussion', () => {
+    // TODO: improve the uri tests once we merge https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/192
+    const { baseSha } = noteOnDiff.position.diffRefs; // baseSha points to the commit that the MR started from (old lines)
+    expect(vsCommentThread.uri.query).toMatch(baseSha);
+  });
+
   describe('resolving discussions', () => {
     it('sets context to unresolved', () => {
       expect(vsCommentThread.contextValue).toBe('unresolved');
@@ -80,27 +103,19 @@ describe('GitLabCommentThread', () => {
       const error = new Error();
       (gitlabService.setResolved as jest.Mock).mockRejectedValue(error);
 
-      expect(gitlabCommentThread.toggleResolved()).rejects.toBe(error);
+      await expect(gitlabCommentThread.toggleResolved()).rejects.toBe(error);
 
       expect(vsCommentThread.contextValue).toBe('unresolved');
     });
 
     it("doesn't populate the context if user doesn't have permission to resolve the note", () => {
-      const discussionWithoutPermission = {
-        ...discussionOnDiff,
-        notes: {
-          ...discussionOnDiff.notes,
-          nodes: [
-            {
-              ...noteOnDiff,
-              userPermissions: {
-                ...noteOnDiff.userPermissions,
-                resolveNote: false,
-              },
-            },
-          ],
+      const discussionWithoutPermission = createGqlTextDiffDiscussion({
+        ...(noteOnDiff as GqlTextDiffNote),
+        userPermissions: {
+          ...noteOnDiff.userPermissions,
+          resolveNote: false,
         },
-      } as GqlTextDiffDiscussion;
+      });
 
       createGitLabCommentThread(discussionWithoutPermission);
 
@@ -113,5 +128,50 @@ describe('GitLabCommentThread', () => {
     const [comment] = vsCommentThread.comments;
     expect(comment).toBeInstanceOf(GitLabComment);
     expect((comment as GitLabComment).body).toBe(noteOnDiff.body);
+  });
+
+  describe('deleting comments', () => {
+    it('deletes a comment', async () => {
+      createGitLabCommentThread(
+        createGqlTextDiffDiscussion(
+          {
+            ...(noteOnDiff as GqlTextDiffNote),
+            id: 'gid://gitlab/DiffNote/1',
+          },
+          {
+            ...(noteOnDiff as GqlTextDiffNote),
+            id: 'gid://gitlab/DiffNote/2',
+          },
+        ),
+      );
+      (gitlabService.deleteNote as jest.Mock).mockResolvedValue(undefined);
+
+      await gitlabCommentThread.deleteComment(vsCommentThread.comments[0] as GitLabComment);
+
+      expect(gitlabService.deleteNote).toHaveBeenCalledWith('gid://gitlab/DiffNote/1');
+      expect(vsCommentThread.dispose).not.toHaveBeenCalled();
+      expect(vsCommentThread.comments.length).toBe(1);
+      expect((vsCommentThread.comments[0] as GitLabComment).id).toBe('gid://gitlab/DiffNote/2');
+    });
+
+    it('disposes the thread if we delete the last comment', async () => {
+      (gitlabService.deleteNote as jest.Mock).mockResolvedValue(undefined);
+
+      await gitlabCommentThread.deleteComment(vsCommentThread.comments[0] as GitLabComment);
+
+      expect(vsCommentThread.dispose).toHaveBeenCalled();
+      expect(vsCommentThread.comments.length).toBe(0);
+    });
+
+    it("doesn't delete the comment if the API call failed", async () => {
+      const error = new Error();
+      (gitlabService.deleteNote as jest.Mock).mockRejectedValue(error);
+
+      await expect(
+        gitlabCommentThread.deleteComment(vsCommentThread.comments[0] as GitLabComment),
+      ).rejects.toBe(error);
+
+      expect(vsCommentThread.comments.length).toBe(1);
+    });
   });
 });

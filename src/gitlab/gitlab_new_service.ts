@@ -87,6 +87,7 @@ export type GqlTextPosition = GqlOldPosition | GqlNewPosition;
 
 interface GqlNotePermissions {
   resolveNote: boolean;
+  adminNote: boolean;
 }
 
 interface GqlGenericNote<T extends GqlBasePosition | null> {
@@ -259,6 +260,7 @@ ${includePosition ? positionFragment : ''}
           bodyHtml
           userPermissions {
             resolveNote
+            adminNote
           }
           ${includePosition ? `...position` : ''}
         }
@@ -294,6 +296,14 @@ const discussionSetResolved = gql`
 const createNoteMutation = gql`
   mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
     createNote(input: { noteableId: $issuableId, body: $body, discussionId: $replyId }) {
+      errors
+    }
+  }
+`;
+
+const deleteNoteMutation = gql`
+  mutation DeleteNote($noteId: NoteID!) {
+    destroyNote(input: { id: $noteId }) {
       errors
     }
   }
@@ -525,5 +535,19 @@ export class GitLabNewService {
       body,
       replyId,
     });
+  }
+
+  async deleteNote(noteId: string): Promise<void> {
+    try {
+      await this.client.request<void>(deleteNoteMutation, {
+        noteId,
+      });
+    } catch (e) {
+      throw new UserFriendlyError(
+        `Couldn't delete the comment when calling the API.
+        For more information, review the extension logs.`,
+        e,
+      );
+    }
   }
 }
