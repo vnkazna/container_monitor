@@ -33,7 +33,7 @@ const uriFromPosition = (
 interface CreateThreadOptions {
   commentController: vscode.CommentController;
   workspaceFolder: string;
-  gitlabProjectId: number;
+  mr: RestIssuable;
   discussion: GqlTextDiffDiscussion;
   gitlabService: GitLabNewService;
 }
@@ -45,6 +45,7 @@ export class GitLabCommentThread {
     private vsThread: vscode.CommentThread,
     private gqlDiscussion: GqlTextDiffDiscussion,
     private gitlabService: GitLabNewService,
+    private mr: RestIssuable,
   ) {
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
     this.vsThread.canReply = false;
@@ -84,7 +85,12 @@ export class GitLabCommentThread {
   }
 
   async submitEdit(comment: GitLabComment): Promise<void> {
-    await this.gitlabService.updateNoteBody(comment.id, comment.body);
+    await this.gitlabService.updateNoteBody(
+      comment.id,
+      comment.body,
+      comment.gqlNote.body, // this is what we think is the latest version stored in API
+      this.mr,
+    );
     this.changeOneComment(comment.id, c =>
       c.markBodyAsSubmitted().withMode(vscode.CommentMode.Preview),
     );
@@ -115,19 +121,19 @@ export class GitLabCommentThread {
   static createThread({
     commentController,
     workspaceFolder,
-    gitlabProjectId,
+    mr,
     discussion,
     gitlabService,
   }: CreateThreadOptions): GitLabCommentThread {
     const { position } = discussion.notes.nodes[0];
     const vsThread = commentController.createCommentThread(
-      uriFromPosition(position, workspaceFolder, gitlabProjectId),
+      uriFromPosition(position, workspaceFolder, mr.project_id),
       commentRangeFromPosition(position),
       // the comments need to know about the thread, so we first
       // create empty thread to be able to create comments
       [],
     );
-    const glThread = new GitLabCommentThread(vsThread, discussion, gitlabService);
+    const glThread = new GitLabCommentThread(vsThread, discussion, gitlabService, mr);
     vsThread.comments = discussion.notes.nodes.map(note =>
       GitLabComment.fromGqlNote(note, glThread),
     );

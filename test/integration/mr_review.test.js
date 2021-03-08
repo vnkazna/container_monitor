@@ -6,9 +6,11 @@ const { graphql } = require('msw');
 const IssuableDataProvider = require('../../src/data_providers/issuable').DataProvider;
 const { MrItemModel } = require('../../src/data_providers/items/mr_item_model');
 const { tokenService } = require('../../src/services/token_service');
+const { submitEdit } = require('../../src/commands/mr_discussion_commands');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const versionsResponse = require('./fixtures/rest/versions.json');
 const versionResponse = require('./fixtures/rest/mr_version.json');
+const diffNote = require('./fixtures/rest/diff_note.json');
 const { projectWithMrDiscussions, noteOnDiff } = require('./fixtures/graphql/discussions');
 const {
   getServer,
@@ -28,6 +30,7 @@ describe('MR Review', () => {
   before(async () => {
     server = getServer([
       createJsonEndpoint('/projects/278964/merge_requests/33824/versions', versionsResponse),
+      createJsonEndpoint('/projects/278964/merge_requests/33824/notes/469379582', diffNote),
       createJsonEndpoint(
         '/projects/278964/merge_requests/33824/versions/127919672',
         versionResponse,
@@ -115,6 +118,19 @@ describe('MR Review', () => {
       assert.strictEqual(uri.path, `/${noteOnDiff.position.newPath}`);
       assert.strictEqual(range.start.line, noteOnDiff.position.oldLine - 1);
       assert.strictEqual(comments[0].body, noteOnDiff.body);
+    });
+
+    it('editing comment fails if the comment body has changed on the GitLab instance', async () => {
+      await dataProvider.getChildren(mrItemModel);
+      const [firstComment] = thread.comments;
+      firstComment.gqlNote.body =
+        'this body simulates that our version of the note body is out of sync with the GitLab instance';
+      firstComment.body = 'user wants to change the body to this';
+
+      await assert.rejects(
+        submitEdit(firstComment),
+        /This comment changed after you last viewed it, and can't be edited/,
+      );
     });
   });
 

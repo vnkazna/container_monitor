@@ -10,6 +10,7 @@ import {
   GqlTextDiffDiscussion,
   GqlTextDiffNote,
 } from '../gitlab/gitlab_new_service';
+import { mr } from '../test_utils/entities';
 
 describe('GitLabCommentThread', () => {
   let gitlabCommentThread: GitLabCommentThread;
@@ -66,7 +67,7 @@ describe('GitLabCommentThread', () => {
     gitlabCommentThread = GitLabCommentThread.createThread({
       commentController: fakeCommentController,
       workspaceFolder: '/workspaceFolder',
-      gitlabProjectId: 12345,
+      mr,
       discussion,
       gitlabService,
     });
