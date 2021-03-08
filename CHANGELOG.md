@@ -1,3 +1,15 @@
+# [3.14.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.13.0...v3.14.0) (2021-03-08)
+
+
+### Features
+
+* **git:** implement git clone command ([eeedd25](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/eeedd25bffae50e5f60151753cfbcf5b95a50d84)), closes [#222](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/222)
+* **mr review:** deleting comments on MR diff ([d1d7446](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/d1d744624080dea35d6a5d61b28239aafb67747a))
+* **mr review:** display whether discussion is resolved or not ([89da179](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/89da17934ebeb560bf494b35c297a9cccc65a260))
+* **mr review:** resolving and unresolving discussions ([c7edee6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/c7edee63f30d5d3ac1b637990ba5c0fcb6f61558))
+
+
+
 # [3.13.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.12.1...v3.13.0) (2021-02-19)
 
 
