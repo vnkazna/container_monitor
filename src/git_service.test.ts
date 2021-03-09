@@ -1,6 +1,7 @@
 import * as temp from 'temp';
 import * as vscode from 'vscode';
 import { promises as fs } from 'fs';
+import * as path from 'path';
 import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
 
@@ -26,6 +27,12 @@ describe('git_service', () => {
     workspaceFolder,
     preferredRemoteName: undefined,
   });
+
+  /* The MacOS puts all the temp files in a virtual /private folder
+  it works fine to access them without this prefix, but git returns
+  the path including /private which breaks tests on Mac */
+  const removeMacSpecificPrivatePrefix = (absolutePath: string) =>
+    absolutePath.replace(/^\/private/, '');
 
   beforeEach(() => {
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
@@ -112,6 +119,7 @@ describe('git_service', () => {
         expect(result).toEqual(`${ORIGIN}/test-branch`);
       });
     });
+
     describe('getFileContent', () => {
       it('returns null when the file does not exist', async () => {
         await git.commit('Test commit', [], { '--allow-empty': null });
@@ -127,6 +135,28 @@ describe('git_service', () => {
         const lastCommitSha = await git.revparse(['HEAD']);
         const result = await gitService.getFileContent('/test.txt', lastCommitSha);
         expect(result).toEqual('Test text');
+      });
+    });
+
+    describe('getRepositoryRootFolder', () => {
+      it('returns the workspaceFolder if it is the git root', async () => {
+        gitService = new GitService({ ...getDefaultOptions(), workspaceFolder });
+
+        const result = await gitService.getRepositoryRootFolder();
+
+        const sanitizedResult = removeMacSpecificPrivatePrefix(result);
+        expect(sanitizedResult).toBe(workspaceFolder);
+      });
+
+      it('returns the parent folder if the git service is created for git subfolder', async () => {
+        const subfolder = path.join(workspaceFolder, 'subfolder');
+        await fs.mkdir(subfolder);
+        gitService = new GitService({ ...getDefaultOptions(), workspaceFolder: subfolder });
+
+        const result = await gitService.getRepositoryRootFolder();
+
+        const sanitizedResult = removeMacSpecificPrivatePrefix(result);
+        expect(sanitizedResult).toBe(workspaceFolder);
       });
     });
   });
@@ -148,6 +178,10 @@ describe('git_service', () => {
 
     it('fetchTrackingBranchName returns null', async () => {
       expect(gitService.fetchTrackingBranchName()).rejects.toBeInstanceOf(Error);
+    });
+
+    it('getRepositoryRootFolder throws', async () => {
+      expect(gitService.getRepositoryRootFolder()).rejects.toBeInstanceOf(Error);
     });
   });
 });

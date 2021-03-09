@@ -98,4 +98,8 @@ export class GitService {
       return null;
     }
   }
+
+  async getRepositoryRootFolder(): Promise<string> {
+    return this.fetch('git rev-parse --show-toplevel');
+  }
 }

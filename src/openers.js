@@ -1,6 +1,10 @@
+const path = require('path');
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
-const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
+const {
+  getCurrentWorkspaceFolderOrSelectOne,
+  getCurrentWorkspaceFolder,
+} = require('./services/workspace_service');
 const { createGitService } = require('./service_factory');
 const { handleError } = require('./log');
 const { VS_COMMANDS } = require('./command_names');
@@ -43,12 +47,18 @@ async function showMergeRequests() {
 
 async function getActiveFile() {
   const editor = vscode.window.activeTextEditor;
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath;
-
   if (!editor) {
     vscode.window.showInformationMessage('GitLab Workflow: No open file.');
     return undefined;
   }
+
+  const workspaceFolder = await getCurrentWorkspaceFolder();
+
+  if (!workspaceFolder) {
+    vscode.window.showInformationMessage('GitLab Workflow: Open file isn’t part of workspace.');
+    return undefined;
+  }
+
   let currentProject;
   try {
     currentProject = await gitLabService.fetchCurrentProject(workspaceFolder);
@@ -56,8 +66,13 @@ async function getActiveFile() {
     handleError(e);
     return undefined;
   }
-  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
-  const filePath = editor.document.uri.path.replace(`${workspaceFolder}/`, '');
+
+  const gitService = createGitService(workspaceFolder);
+  const branchName = await gitService.fetchTrackingBranchName();
+  const filePath = path.relative(
+    await gitService.getRepositoryRootFolder(),
+    editor.document.uri.fsPath,
+  );
   const fileUrl = `${currentProject.webUrl}/blob/${branchName}/${filePath}`;
   let anchor = '';
 
@@ -79,7 +94,10 @@ async function openActiveFile() {
 
 async function copyLinkToActiveFile() {
   const fileUrl = await getActiveFile();
-  await vscode.env.clipboard.writeText(fileUrl);
+
+  if (fileUrl) {
+    await vscode.env.clipboard.writeText(fileUrl);
+  }
 }
 
 async function openCurrentMergeRequest() {
