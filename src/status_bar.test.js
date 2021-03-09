@@ -8,7 +8,7 @@ vscode.workspace.getConfiguration.mockReturnValue({
 });
 const { StatusBar } = require('./status_bar');
 const gitLabService = require('./gitlab_service');
-const { project, pipeline, mr, issue } = require('./test_utils/entities');
+const { workspace, pipeline, mr, issue } = require('./test_utils/entities');
 
 const createFakeItem = () => ({
   show: jest.fn(),
@@ -110,9 +110,9 @@ describe('status_bar', () => {
 
   describe('MR closing issue item', () => {
     beforeEach(() => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(project);
+      gitLabService.fetchCurrentPipelineProject.mockReturnValue(workspace);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      gitLabService.fetchCurrentProject.mockReturnValue(project);
+      gitLabService.fetchCurrentProject.mockReturnValue(workspace);
     });
 
     afterEach(() => {
@@ -150,9 +150,9 @@ describe('status_bar', () => {
 
   describe('MR item', () => {
     beforeEach(() => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(project);
+      gitLabService.fetchCurrentPipelineProject.mockReturnValue(workspace);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      gitLabService.fetchCurrentProject.mockReturnValue(project);
+      gitLabService.fetchCurrentProject.mockReturnValue(workspace);
     });
 
     afterEach(() => {

@@ -1,5 +1,5 @@
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
-import { diffFile, issue, mrVersion, project } from '../../test_utils/entities';
+import { diffFile, issue, mrVersion, workspace } from '../../test_utils/entities';
 import { ChangedFileItem } from './changed_file_item';
 
 describe('ChangedFileItem', () => {
@@ -8,7 +8,7 @@ describe('ChangedFileItem', () => {
       'should not show diff for %s',
       extension => {
         const changedImageFile = { ...diffFile, new_path: `file${extension}` };
-        const item = new ChangedFileItem(issue, mrVersion, changedImageFile, project);
+        const item = new ChangedFileItem(issue, mrVersion, changedImageFile, workspace);
         expect(item.command?.command).toBe(PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW);
       },
     );

@@ -21,24 +21,24 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
 
     this.children.forEach(ch => ch.dispose());
     this.children = [];
-    let projects: VsProject[] = [];
+    let workspaces: GitLabWorkspace[] = [];
     try {
-      projects = await gitLabService.getAllGitlabProjects();
+      workspaces = await gitLabService.getAllGitlabWorkspaces();
     } catch (e) {
       logError(e);
       return [new ErrorItem('Fetching Issues and MRs failed')];
     }
-    if (projects.length === 0) return [new vscode.TreeItem('No projects found')];
+    if (workspaces.length === 0) return [new vscode.TreeItem('No projects found')];
     // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
     const customQueries =
       vscode.workspace
         .getConfiguration(CONFIG_NAMESPACE)
         .get<CustomQuery[]>(CONFIG_CUSTOM_QUERIES) || [];
-    if (projects.length === 1) {
-      this.children = customQueries.map(q => new CustomQueryItemModel(q, projects[0]));
+    if (workspaces.length === 1) {
+      this.children = customQueries.map(q => new CustomQueryItemModel(q, workspaces[0]));
       return this.children;
     }
-    this.children = customQueries.map(q => new MultirootCustomQueryItemModel(q, projects));
+    this.children = customQueries.map(q => new MultirootCustomQueryItemModel(q, workspaces));
     return this.children;
   }
 

@@ -40,7 +40,7 @@ export const mrVersion: RestMrVersion = {
   diffs: [diffFile],
 };
 
-export const project: VsProject = {
+export const workspace: GitLabWorkspace = {
   label: 'Project label',
   uri: '/home/johndoe/workspace/project',
 };
