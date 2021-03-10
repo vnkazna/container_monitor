@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { MultirootCustomQueryItemModel } from './multiroot_custom_query_item_model';
 import { CustomQueryItemModel } from './custom_query_item_model';
-import { customQuery, project } from '../../test_utils/entities';
+import { customQuery, workspace } from '../../test_utils/entities';
 
 const projects = [
-  { ...project, label: 'label p1' },
-  { ...project, label: 'label p2' },
+  { ...workspace, label: 'label p1' },
+  { ...workspace, label: 'label p2' },
 ];
 
 describe('MultirootCustomQueryItem', () => {

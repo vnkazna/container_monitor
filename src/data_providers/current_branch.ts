@@ -45,22 +45,22 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     return new ExternalUrlItem(message, url);
   }
 
-  async createMrItem(mr: RestIssuable | null, project: VsProject) {
+  async createMrItem(mr: RestIssuable | null, workspace: GitLabWorkspace) {
     if (!mr) {
       return new vscode.TreeItem('No merge request found');
     }
     this.mr = mr;
-    const item = new MrItemModel(mr, project);
+    const item = new MrItemModel(mr, workspace);
     this.disposableChildren.push(item);
     return item;
   }
 
-  async fetchClosingIssue(workspaceFolder: string, project: VsProject) {
+  async fetchClosingIssue(workspaceFolder: string, workspace: GitLabWorkspace) {
     if (this.mr) {
       const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
 
       if (issues.length) {
-        return issues.map(issue => new IssueItem(issue, project));
+        return issues.map(issue => new IssueItem(issue, workspace));
       }
     }
     return [new vscode.TreeItem('No closing issue found')];

@@ -4,15 +4,15 @@ import { PROGRAMMATIC_COMMANDS } from '../../command_names';
 export class IssueItem extends TreeItem {
   issue: RestIssuable;
 
-  project: VsProject;
+  workspace: GitLabWorkspace;
 
-  constructor(issue: RestIssuable, project: VsProject) {
+  constructor(issue: RestIssuable, workspace: GitLabWorkspace) {
     super(`#${issue.iid} · ${issue.title}`);
     this.issue = issue;
-    this.project = project;
+    this.workspace = workspace;
     this.command = {
       command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
-      arguments: [this.issue, this.project.uri],
+      arguments: [this.issue, this.workspace.uri],
       title: 'Show Issue',
     };
   }

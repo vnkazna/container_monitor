@@ -4,14 +4,14 @@ import { CustomQuery } from '../../gitlab/custom_query';
 import { ItemModel } from './item_model';
 
 export class MultirootCustomQueryItemModel extends ItemModel {
-  private projects: VsProject[];
+  private workspaces: GitLabWorkspace[];
 
   private customQuery: CustomQuery;
 
-  constructor(customQuery: CustomQuery, projects: VsProject[]) {
+  constructor(customQuery: CustomQuery, workspaces: GitLabWorkspace[]) {
     super();
     this.customQuery = customQuery;
-    this.projects = projects;
+    this.workspaces = workspaces;
   }
 
   getTreeItem(): vscode.TreeItem {
@@ -24,7 +24,9 @@ export class MultirootCustomQueryItemModel extends ItemModel {
   }
 
   async getChildren(): Promise<ItemModel[]> {
-    const queryModels = this.projects.map(p => new CustomQueryItemModel(this.customQuery, p, true));
+    const queryModels = this.workspaces.map(
+      p => new CustomQueryItemModel(this.customQuery, p, true),
+    );
     this.setDisposableChildren(queryModels);
     return queryModels;
   }

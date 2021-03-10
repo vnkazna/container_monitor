@@ -14,7 +14,7 @@ const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextD
 };
 
 export class MrItemModel extends ItemModel {
-  constructor(readonly mr: RestIssuable, readonly project: VsProject) {
+  constructor(readonly mr: RestIssuable, readonly workspace: GitLabWorkspace) {
     super();
   }
 
@@ -35,7 +35,7 @@ export class MrItemModel extends ItemModel {
     description.iconPath = new vscode.ThemeIcon('note');
     description.command = {
       command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
-      arguments: [this.mr, this.project.uri],
+      arguments: [this.mr, this.workspace.uri],
       title: 'Show MR',
     };
     try {
@@ -60,7 +60,7 @@ export class MrItemModel extends ItemModel {
       this.mr.title,
     );
 
-    const gitlabService = await createGitLabNewService(this.project.uri);
+    const gitlabService = await createGitLabNewService(this.workspace.uri);
 
     const discussions = await gitlabService.getDiscussions({
       issuable: this.mr,
@@ -70,7 +70,7 @@ export class MrItemModel extends ItemModel {
     const threads = discussionsOnDiff.map(discussion => {
       return GitLabCommentThread.createThread({
         commentController,
-        workspaceFolder: this.project.uri,
+        workspaceFolder: this.workspace.uri,
         gitlabProjectId: this.mr.project_id,
         discussion,
         gitlabService,
@@ -80,8 +80,8 @@ export class MrItemModel extends ItemModel {
   }
 
   private async getChangedFiles(): Promise<vscode.TreeItem[]> {
-    const gitlabService = await createGitLabNewService(this.project.uri);
+    const gitlabService = await createGitLabNewService(this.workspace.uri);
     const mrVersion = await gitlabService.getMrDiff(this.mr);
-    return mrVersion.diffs.map(d => new ChangedFileItem(this.mr, mrVersion, d, this.project));
+    return mrVersion.diffs.map(d => new ChangedFileItem(this.mr, mrVersion, d, this.workspace));
   }
 }

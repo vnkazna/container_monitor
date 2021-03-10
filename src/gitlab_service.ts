@@ -181,7 +181,7 @@ export async function fetchVersion() {
   return versionCache;
 }
 
-export async function getAllGitlabProjects(): Promise<VsProject[]> {
+export async function getAllGitlabWorkspaces(): Promise<GitLabWorkspace[]> {
   if (!vscode.workspace.workspaceFolders) {
     return [];
   }

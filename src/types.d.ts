@@ -34,9 +34,13 @@ interface RestDiffFile {
   renamed_file: boolean;
 }
 
-interface VsProject {
+/** Represents VS Code workspace that contains a GitLab project */
+interface GitLabWorkspace {
+  /** Name of the GitLab project in the workspace */
   label: string;
+  /** Absolute path to the workspace */
   uri: string;
+  /** Has there been an error retrieving the GitLab information? */
   error?: boolean;
 }
 

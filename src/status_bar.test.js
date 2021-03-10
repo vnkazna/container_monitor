@@ -8,13 +8,16 @@ vscode.workspace.getConfiguration.mockReturnValue({
 });
 const { StatusBar } = require('./status_bar');
 const gitLabService = require('./gitlab_service');
-const { project, pipeline, mr, issue } = require('./test_utils/entities');
+const { pipeline, mr, issue } = require('./test_utils/entities');
 
 const createFakeItem = () => ({
   show: jest.fn(),
   hide: jest.fn(),
   dispose: jest.fn(),
 });
+
+// StatusBar is only interested in whether the project exists or not
+const mockedGitLabProject = {};
 
 describe('status_bar', () => {
   let fakeItems;
@@ -110,9 +113,9 @@ describe('status_bar', () => {
 
   describe('MR closing issue item', () => {
     beforeEach(() => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(project);
+      gitLabService.fetchCurrentPipelineProject.mockReturnValue(mockedGitLabProject);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      gitLabService.fetchCurrentProject.mockReturnValue(project);
+      gitLabService.fetchCurrentProject.mockReturnValue(mockedGitLabProject);
     });
 
     afterEach(() => {
@@ -150,9 +153,9 @@ describe('status_bar', () => {
 
   describe('MR item', () => {
     beforeEach(() => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(project);
+      gitLabService.fetchCurrentPipelineProject.mockReturnValue(mockedGitLabProject);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      gitLabService.fetchCurrentProject.mockReturnValue(project);
+      gitLabService.fetchCurrentProject.mockReturnValue(mockedGitLabProject);
     });
 
     afterEach(() => {

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { customQuery, project } from '../../test_utils/entities';
+import { customQuery, workspace } from '../../test_utils/entities';
 
 import { CustomQueryItemModel } from './custom_query_item_model';
 
@@ -8,7 +8,7 @@ describe('CustomQueryItem', () => {
 
   describe('item labeled as a query', () => {
     beforeEach(() => {
-      item = new CustomQueryItemModel(customQuery, project).getTreeItem();
+      item = new CustomQueryItemModel(customQuery, workspace).getTreeItem();
     });
 
     it('should have query name as label', () => {
@@ -22,7 +22,7 @@ describe('CustomQueryItem', () => {
 
   describe('item labeled as a project', () => {
     beforeEach(() => {
-      item = new CustomQueryItemModel(customQuery, project, true).getTreeItem();
+      item = new CustomQueryItemModel(customQuery, workspace, true).getTreeItem();
     });
 
     it('should have project label as label', () => {
@@ -36,11 +36,15 @@ describe('CustomQueryItem', () => {
 
   describe('item with the error field', () => {
     beforeEach(() => {
-      item = new CustomQueryItemModel(customQuery, { ...project, error: true }, true).getTreeItem();
+      item = new CustomQueryItemModel(
+        customQuery,
+        { ...workspace, error: true },
+        true,
+      ).getTreeItem();
     });
 
     it('should return an error item', () => {
-      expect(item.label).toBe(`${project.label}: Project failed to load`);
+      expect(item.label).toBe(`${workspace.label}: Project failed to load`);
     });
   });
 });
