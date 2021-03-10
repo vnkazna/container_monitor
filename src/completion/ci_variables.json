@@ -172,6 +172,10 @@
     "description": "The job details URL."
   },
   {
+    "name": "CI_JOB_STARTED_AT",
+    "description": "The UTC datetime when a job started, in [ISO 8601](https://tools.ietf.org/html/rfc3339#appendix-A) format."
+  },
+  {
     "name": "CI_KUBERNETES_ACTIVE",
     "description": "Only available if the pipeline has a Kubernetes cluster available for deployments. `true` when available."
   },
@@ -216,8 +220,12 @@
     "description": "The URL for the pipeline details."
   },
   {
+    "name": "CI_PIPELINE_CREATED_AT",
+    "description": "The UTC datetime when the pipeline was created, in [ISO 8601](https://tools.ietf.org/html/rfc3339#appendix-A) format."
+  },
+  {
     "name": "CI_PROJECT_CONFIG_PATH",
-    "description": "The CI/CD configuration path for the project."
+    "description": "(Deprecated) The CI configuration path for the project. [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/321334) in GitLab 13.10. [Removal planned](https://gitlab.com/gitlab-org/gitlab/-/issues/322807) for GitLab 14.0."
   },
   {
     "name": "CI_PROJECT_DIR",
@@ -429,7 +437,7 @@
   },
   {
     "name": "CI_MERGE_REQUEST_SOURCE_BRANCH_SHA",
-    "description": "The HEAD SHA of the source branch of the merge request. Only available in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)**"
+    "description": "The HEAD SHA of the source branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)**"
   },
   {
     "name": "CI_MERGE_REQUEST_SOURCE_PROJECT_ID",
@@ -449,7 +457,7 @@
   },
   {
     "name": "CI_MERGE_REQUEST_TARGET_BRANCH_SHA",
-    "description": "The HEAD SHA of the target branch of the merge request. Only available in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)**"
+    "description": "The HEAD SHA of the target branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)**"
   },
   {
     "name": "CI_MERGE_REQUEST_TITLE",
