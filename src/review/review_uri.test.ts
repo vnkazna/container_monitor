@@ -6,6 +6,7 @@ describe('review_uri.ts', () => {
     path: '/review',
     projectId: 1234,
     workspacePath: 'path/to/workspace',
+    mrIid: 1,
   };
 
   describe('toReviewUri', () => {

@@ -15,6 +15,7 @@ describe('GitContentProvider', () => {
     path: '/review',
     projectId: 1234,
     workspacePath: 'path/to/workspace',
+    mrIid: 1,
   };
 
   let getFileContent: jest.Mock;

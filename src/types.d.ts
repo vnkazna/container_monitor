@@ -32,6 +32,7 @@ interface RestDiffFile {
   deleted_file: boolean;
   new_file: boolean;
   renamed_file: boolean;
+  diff: string;
 }
 
 /** Represents VS Code workspace that contains a GitLab project */

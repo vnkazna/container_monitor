@@ -56,7 +56,11 @@ export class ChangedFileItem extends TreeItem {
       return;
     }
 
-    const emptyFileUri = toReviewUri({ workspacePath: workspace.uri, projectId: mr.project_id });
+    const emptyFileUri = toReviewUri({
+      workspacePath: workspace.uri,
+      projectId: mr.project_id,
+      mrIid: this.mr.iid,
+    });
     const baseFileUri = file.new_file
       ? emptyFileUri
       : toReviewUri({
@@ -64,6 +68,7 @@ export class ChangedFileItem extends TreeItem {
           commit: mrVersion.base_commit_sha,
           workspacePath: workspace.uri,
           projectId: mr.project_id,
+          mrIid: this.mr.iid,
         });
     const headFileUri = file.deleted_file
       ? emptyFileUri
@@ -72,6 +77,7 @@ export class ChangedFileItem extends TreeItem {
           commit: mrVersion.head_commit_sha,
           workspacePath: workspace.uri,
           projectId: mr.project_id,
+          mrIid: this.mr.iid,
         });
 
     this.command = {

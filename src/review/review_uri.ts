@@ -6,21 +6,29 @@ interface ReviewParams {
   commit?: string;
   workspacePath: string;
   projectId: number;
+  mrIid: number;
 }
 
-export function toReviewUri({ path = '', commit, workspacePath, projectId }: ReviewParams): Uri {
+export function toReviewUri({
+  path = '',
+  commit,
+  workspacePath,
+  projectId,
+  mrIid,
+}: ReviewParams): Uri {
   return Uri.file(path).with({
     scheme: REVIEW_URI_SCHEME,
-    query: JSON.stringify({ commit, workspacePath, projectId }),
+    query: JSON.stringify({ commit, workspacePath, projectId, mrIid }),
   });
 }
 
 export function fromReviewUri(uri: Uri): ReviewParams {
-  const { commit, workspacePath, projectId } = JSON.parse(uri.query);
+  const { commit, workspacePath, projectId, mrIid } = JSON.parse(uri.query);
   return {
     path: uri.path || undefined,
     commit,
     workspacePath,
     projectId,
+    mrIid,
   };
 }

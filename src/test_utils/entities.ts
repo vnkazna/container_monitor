@@ -32,6 +32,7 @@ export const diffFile: RestDiffFile = {
   new_file: false,
   deleted_file: false,
   renamed_file: true,
+  diff: '@@ -0,0 +1,3 @@\n+export class NewFile{\n+    private property: string;\n+}\n',
 };
 
 export const mrVersion: RestMrVersion = {
