@@ -18,9 +18,17 @@ const getAllTestFiles = testsRoot =>
 
 async function run(testsRoot) {
   // Create the mocha test
-  const mocha = new Mocha();
+  const mocha = new Mocha(
+    process.env.CI && {
+      reporter: 'mocha-junit-reporter',
+      reporterOptions: {
+        mochaFile: './reports/integration.xml',
+      },
+    },
+  );
   mocha.timeout(3000);
   mocha.color(true);
+
   const files = await getAllTestFiles(testsRoot);
 
   // Add files to the test suite

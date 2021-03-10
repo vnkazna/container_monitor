@@ -6,3 +6,4 @@ node_modules
 src/webview/dist/*.hot-update.js*
 out
 /coverage/
+/reports/

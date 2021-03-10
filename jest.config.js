@@ -8,6 +8,18 @@ module.exports = {
   coverageProvider: 'v8',
   coverageReporters: ['lcov', 'text'],
   roots: ['src'],
+  reporters: [
+    'default',
+    [
+      'jest-junit',
+      {
+        outputDirectory: 'reports',
+        outputName: 'unit.xml',
+        titleTemplate: '{title}',
+        classNameTemplate: '{classname}',
+      },
+    ],
+  ],
   testPathIgnorePatterns: ['/node_modules/', '/src/webview/'],
   testEnvironment: 'node',
 };
