@@ -103,15 +103,17 @@ export class MrItemModel extends ItemModel {
       this.mr.references.full,
       this.mr.title,
     );
-    commentController.commentingRangeProvider = commentRangeProvider;
 
     const gitlabService = await createGitLabNewService(this.workspace.uri);
 
-    const discussions = await gitlabService.getDiscussions({
+    const discussionResult = await gitlabService.getDiscussions({
       issuable: this.mr,
       includePosition: true,
     });
-    const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
+    if (discussionResult.userCanCreateNote) {
+      commentController.commentingRangeProvider = commentRangeProvider;
+    }
+    const discussionsOnDiff = discussionResult.discussions.filter(isTextDiffDiscussion);
     const threads = discussionsOnDiff.map(discussion => {
       return GitLabCommentThread.createThread({
         commentController,

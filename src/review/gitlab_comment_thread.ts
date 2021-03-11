@@ -50,7 +50,6 @@ export class GitLabCommentThread {
     private mr: RestIssuable,
   ) {
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-    this.vsThread.canReply = false;
     this.resolved = gqlDiscussion.resolved;
     this.updateThreadContext();
   }

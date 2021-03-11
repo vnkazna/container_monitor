@@ -119,11 +119,22 @@ export type GqlDiscussion =
 
 interface GqlDiscussionsProject {
   mergeRequest?: {
+    userPermissions: {
+      createNote: boolean;
+    };
     discussions: Node<GqlDiscussion>;
   };
   issue?: {
+    userPermissions: {
+      createNote: boolean;
+    };
     discussions: Node<GqlDiscussion>;
   };
+}
+
+interface DiscussionsResult {
+  discussions: GqlDiscussion[];
+  userCanCreateNote: boolean;
 }
 
 interface RestLabelEvent {
@@ -281,6 +292,9 @@ const constructGetDiscussionsQuery = (isMr: boolean, includePosition = false) =>
     project(fullPath: $projectPath) {
       id
       ${isMr ? 'mergeRequest' : 'issue'}(iid: $iid) {
+        userPermissions {
+          createNote
+        }
         discussions(after: $afterCursor) {
           ...discussions
         }
@@ -476,7 +490,7 @@ export class GitLabNewService {
     issuable,
     includePosition = false,
     endCursor,
-  }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
+  }: GetDiscussionsOptions): Promise<DiscussionsResult> {
     const projectPath = getProjectPath(issuable);
     const query = constructGetDiscussionsQuery(isMr(issuable), includePosition);
     const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
@@ -487,7 +501,12 @@ export class GitLabNewService {
     assert(result.project, `Project ${projectPath} was not found.`);
     const discussions =
       result.project.issue?.discussions || result.project.mergeRequest?.discussions;
+    const userCanCreateNote =
+      result.project.issue?.userPermissions.createNote ||
+      result.project.mergeRequest?.userPermissions.createNote ||
+      false;
     assert(discussions, `Discussions for issuable ${issuable.references.full} were not found.`);
+    const sanitizedDiscussions = discussions.nodes.map(n => this.addHostToUrl(n));
     if (discussions.pageInfo?.hasNextPage) {
       assert(discussions.pageInfo.endCursor);
       const remainingPages = await this.getDiscussions({
@@ -495,9 +514,15 @@ export class GitLabNewService {
         includePosition,
         endCursor: discussions.pageInfo.endCursor,
       });
-      return [...discussions.nodes, ...remainingPages];
+      return {
+        userCanCreateNote,
+        discussions: [...sanitizedDiscussions, ...remainingPages.discussions],
+      };
     }
-    return discussions.nodes.map(n => this.addHostToUrl(n));
+    return {
+      userCanCreateNote,
+      discussions: sanitizedDiscussions,
+    };
   }
 
   async setResolved(replyId: string, resolved: boolean): Promise<void> {
@@ -526,12 +551,12 @@ export class GitLabNewService {
   }
 
   async getDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<Note[]> {
-    const [discussions, labelEvents] = await Promise.all([
+    const [discussionResult, labelEvents] = await Promise.all([
       this.getDiscussions({ issuable }),
       this.getLabelEvents(issuable),
     ]);
 
-    const combinedEvents: Note[] = [...discussions, ...labelEvents];
+    const combinedEvents: Note[] = [...discussionResult.discussions, ...labelEvents];
     combinedEvents.sort((a: Note, b: Note) => {
       const aCreatedAt = isLabelEvent(a) ? a.created_at : a.createdAt;
       const bCreatedAt = isLabelEvent(b) ? b.created_at : b.createdAt;
