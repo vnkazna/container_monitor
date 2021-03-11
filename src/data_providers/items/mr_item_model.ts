@@ -54,11 +54,7 @@ export class MrItemModel extends ItemModel {
           return [];
         }
         const params = fromReviewUri(uri);
-        if (
-          params.mrIid !== this.mr.iid ||
-          params.projectId !== this.mr.project_id ||
-          !params.path
-        ) {
+        if (params.mrId !== this.mr.id || params.projectId !== this.mr.project_id || !params.path) {
           return [];
         }
         const oldFile = params.commit === mrVersion.base_commit_sha;
@@ -99,17 +95,16 @@ export class MrItemModel extends ItemModel {
   private async getMrDiscussions(
     commentRangeProvider: vscode.CommentingRangeProvider,
   ): Promise<void> {
-    const commentController = vscode.comments.createCommentController(
-      this.mr.references.full,
-      this.mr.title,
-    );
-
     const gitlabService = await createGitLabNewService(this.workspace.uri);
 
     const discussionResult = await gitlabService.getDiscussions({
       issuable: this.mr,
       includePosition: true,
     });
+    const commentController = vscode.comments.createCommentController(
+      this.mr.references.full,
+      this.mr.title,
+    );
     if (discussionResult.userCanCreateNote) {
       commentController.commentingRangeProvider = commentRangeProvider;
     }

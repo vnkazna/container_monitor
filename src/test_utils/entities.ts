@@ -38,6 +38,7 @@ export const diffFile: RestDiffFile = {
 export const mrVersion: RestMrVersion = {
   base_commit_sha: 'aaaaaaaa',
   head_commit_sha: 'bbbbbbbb',
+  start_commit_sha: 'ccccccccc',
   diffs: [diffFile],
 };
 
@@ -66,4 +67,16 @@ export const pipeline: RestPipeline = {
   updated_at: '2021-02-12T12:06:17Z',
   id: 123456,
   web_url: 'https://example.com/foo/bar/pipelines/46',
+};
+
+// NOT GOOD IDEA AT ALL - extracting these params reduces test readability
+export const reviewUriParams = {
+  commit: 'abcdef',
+  path: '/review',
+  projectId: 1234,
+  workspacePath: 'path/to/workspace',
+  mrId: 1,
+  baseSha: 'aaaa',
+  headSha: 'bbbb',
+  startSha: 'cccc',
 };

@@ -60,6 +60,7 @@ interface GqlBasePosition {
   diffRefs: {
     baseSha: string;
     headSha: string;
+    startSha: string; // TODO what is the difference between startSha and baseSha?
   };
   filePath: string;
   newPath: string;
@@ -160,6 +161,18 @@ function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
 
+export interface GqlDiffPositionInput {
+  baseSha: string;
+  headSha: string;
+  startSha: string;
+  paths: {
+    newPath?: string;
+    oldPath?: string;
+  };
+  newLine?: number;
+  oldLine?: number;
+}
+
 const queryGetSnippets = gql`
   query GetSnippets($projectPath: ID!) {
     project(fullPath: $projectPath) {
@@ -232,6 +245,7 @@ const positionFragment = gql`
       diffRefs {
         baseSha
         headSha
+        startSha
       }
       filePath
       positionType
@@ -244,8 +258,29 @@ const positionFragment = gql`
   }
 `;
 
+const baseNoteFragment = gql`
+  fragment baseNote on Note {
+    id
+    createdAt
+    system
+    author {
+      avatarUrl
+      name
+      username
+      webUrl
+    }
+    body
+    bodyHtml
+    userPermissions {
+      resolveNote
+      adminNote
+    }
+  }
+`;
+
 const createDiscussionsFragment = (includePosition: boolean) => gql`
 ${includePosition ? positionFragment : ''}
+${baseNoteFragment}
   fragment discussions on DiscussionConnection {
     pageInfo {
       hasNextPage
@@ -262,21 +297,7 @@ ${includePosition ? positionFragment : ''}
           endCursor
         }
         nodes {
-          id
-          createdAt
-          system
-          author {
-            avatarUrl
-            name
-            username
-            webUrl
-          }
-          body
-          bodyHtml
-          userPermissions {
-            resolveNote
-            adminNote
-          }
+          ...baseNote
           ${includePosition ? `...position` : ''}
         }
       }
@@ -319,6 +340,20 @@ const createNoteMutation = gql`
   }
 `;
 
+const createDiffNoteMutation = gql`
+  ${positionFragment}
+  ${baseNoteFragment}
+  mutation CreateDiffNote($issuableId: NoteableID!, $body: String!, $position: DiffPositionInput!) {
+    createDiffNote(input: { noteableId: $issuableId, body: $body, position: $position }) {
+      errors
+      note {
+        ...baseNote
+        ...position
+      }
+    }
+  }
+`;
+
 const deleteNoteMutation = gql`
   mutation DeleteNote($noteId: NoteID!) {
     destroyNote(input: { id: $noteId }) {
@@ -339,6 +374,7 @@ const getProjectPath = (issuable: RestIssuable) => issuable.references.full.spli
 const isMr = (issuable: RestIssuable) => Boolean(issuable.sha);
 const getIssuableGqlId = (issuable: RestIssuable) =>
   `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
+const getMrGqlId = (id: number) => `gid://gitlab/MergeRequest/${id}`;
 
 export class GitLabNewService {
   client: GraphQLClient;
@@ -634,5 +670,13 @@ export class GitLabNewService {
         e,
       );
     }
+  }
+
+  async createDiffNote(restMrId: number, body: string, position: GqlDiffPositionInput) {
+    return this.client.request<GqlTextDiffNote>(createDiffNoteMutation, {
+      issuableId: getMrGqlId(restMrId),
+      body,
+      position,
+    });
   }
 }

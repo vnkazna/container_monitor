@@ -1,7 +1,10 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { GqlTextDiffDiscussion } from '../gitlab/gitlab_new_service';
 import { GitLabComment } from '../review/gitlab_comment';
 import { GitLabCommentThread } from '../review/gitlab_comment_thread';
+import { fromReviewUri } from '../review/review_uri';
+import { createGitLabNewService } from '../service_factory';
 
 const getGitLabThreadFromVsThread = (thread: vscode.CommentThread): GitLabCommentThread => {
   const firstComment = thread.comments[0];
@@ -37,4 +40,59 @@ export const cancelEdit = (comment: GitLabComment): void => {
 
 export const submitEdit = async (comment: GitLabComment): Promise<void> => {
   return comment.thread.submitEdit(comment);
+};
+
+export const createComment = async ({
+  text,
+  thread,
+}: {
+  text: string;
+  thread: vscode.CommentThread;
+}): Promise<void> => {
+  const {
+    workspacePath,
+    mrId,
+    baseSha,
+    headSha,
+    startSha,
+    commit,
+    path,
+    projectId,
+  } = fromReviewUri(thread.uri);
+  assert(path);
+  assert(commit);
+  const isOld = commit === baseSha;
+  const positionFragment = isOld
+    ? {
+        paths: {
+          oldPath: path,
+        },
+        oldLine: thread.range.start.line + 1,
+      }
+    : {
+        paths: {
+          newPath: path,
+        },
+        newLine: thread.range.start.line + 1,
+      };
+  const gitLabService = await createGitLabNewService(workspacePath);
+  const note = await gitLabService.createDiffNote(mrId, text, {
+    baseSha,
+    headSha,
+    startSha,
+    ...positionFragment,
+  });
+  const discussion: GqlTextDiffDiscussion = {
+    createdAt: note.createdAt,
+    resolvable: true,
+    resolved: false,
+    replyId: note.id,
+    notes: {
+      nodes: [note],
+    },
+  };
+  GitLabCommentThread.createGitLabThreadWithVsThread(thread, discussion, gitLabService, {
+    id: mrId,
+    project_id: projectId,
+  } as RestIssuable); // FIXME, please FIXME
 };

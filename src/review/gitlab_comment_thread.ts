@@ -18,7 +18,7 @@ const uriFromPosition = (
   position: GqlTextPosition,
   workspaceFolder: string,
   gitlabProjectId: number,
-  mrIid: number,
+  mrId: number,
 ) => {
   const onOldVersion = position.oldLine !== null;
   const path = onOldVersion ? position.oldPath : position.newPath;
@@ -28,7 +28,10 @@ const uriFromPosition = (
     commit,
     workspacePath: workspaceFolder,
     projectId: gitlabProjectId,
-    mrIid,
+    headSha: position.diffRefs.headSha,
+    baseSha: position.diffRefs.baseSha,
+    startSha: position.diffRefs.startSha,
+    mrId,
   });
 };
 
@@ -128,13 +131,27 @@ export class GitLabCommentThread {
   }: CreateThreadOptions): GitLabCommentThread {
     const { position } = discussion.notes.nodes[0];
     const vsThread = commentController.createCommentThread(
-      uriFromPosition(position, workspaceFolder, mr.project_id, mr.iid),
+      uriFromPosition(position, workspaceFolder, mr.project_id, mr.id),
       commentRangeFromPosition(position),
       // the comments need to know about the thread, so we first
       // create empty thread to be able to create comments
       [],
     );
     const glThread = new GitLabCommentThread(vsThread, discussion, gitlabService, mr);
+    vsThread.comments = discussion.notes.nodes.map(note =>
+      GitLabComment.fromGqlNote(note, glThread),
+    );
+    return glThread;
+  }
+
+  static createGitLabThreadWithVsThread(
+    vsThread: vscode.CommentThread,
+    discussion: GqlTextDiffDiscussion,
+    gitlabService: GitLabNewService,
+    mr: RestIssuable,
+  ): GitLabCommentThread {
+    const glThread = new GitLabCommentThread(vsThread, discussion, gitlabService, mr);
+    // eslint-disable-next-line no-param-reassign
     vsThread.comments = discussion.notes.nodes.map(note =>
       GitLabComment.fromGqlNote(note, glThread),
     );

@@ -3,20 +3,13 @@ import { GitContentProvider } from './git_content_provider';
 import { GitService } from '../git_service';
 import { ApiContentProvider } from './api_content_provider';
 import { toReviewUri } from './review_uri';
+import { reviewUriParams } from '../test_utils/entities';
 
 jest.mock('../git_service');
 jest.mock('./api_content_provider');
 
 describe('GitContentProvider', () => {
   const gitContentProvider = new GitContentProvider();
-
-  const reviewUriParams = {
-    commit: 'abcdef',
-    path: '/review',
-    projectId: 1234,
-    workspacePath: 'path/to/workspace',
-    mrIid: 1,
-  };
 
   let getFileContent: jest.Mock;
 

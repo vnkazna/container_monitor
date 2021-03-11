@@ -1,14 +1,7 @@
+import { reviewUriParams } from '../test_utils/entities';
 import { fromReviewUri, toReviewUri } from './review_uri';
 
 describe('review_uri.ts', () => {
-  const reviewUriParams = {
-    commit: 'abcdef',
-    path: '/review',
-    projectId: 1234,
-    workspacePath: 'path/to/workspace',
-    mrIid: 1,
-  };
-
   describe('toReviewUri', () => {
     it('returns the correct Uri', () => {
       const result = toReviewUri(reviewUriParams);
