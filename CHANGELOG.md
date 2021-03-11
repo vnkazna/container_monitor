@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * workspace in project subfolder breaks Open active file on GitLab ([78372e8](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/78372e8b0e78bff8ee3450496452aeeb9592644a))
+  * Implemented by [@GrantASL19](https://gitlab.com/GrantASL19) with [MR !185](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/185) 👍
 
 
 
