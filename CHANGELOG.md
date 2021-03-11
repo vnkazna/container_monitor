@@ -1,3 +1,12 @@
+## [3.14.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.14.0...v3.14.1) (2021-03-11)
+
+
+### Bug Fixes
+
+* workspace in project subfolder breaks Open active file on GitLab ([78372e8](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/78372e8b0e78bff8ee3450496452aeeb9592644a))
+
+
+
 # [3.14.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.13.0...v3.14.0) (2021-03-08)
 
 
