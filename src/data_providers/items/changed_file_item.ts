@@ -60,9 +60,13 @@ export class ChangedFileItem extends TreeItem {
       workspacePath: workspace.uri,
       projectId: mr.project_id,
       mrId: this.mr.id,
-      baseSha: mrVersion.base_commit_sha,
-      headSha: mrVersion.head_commit_sha,
-      startSha: mrVersion.start_commit_sha,
+      mrCommentPayload: {
+        baseSha: mrVersion.base_commit_sha,
+        headSha: mrVersion.head_commit_sha,
+        startSha: mrVersion.start_commit_sha,
+        oldPath: file.old_path,
+        newPath: file.new_path,
+      },
     };
     const baseFileUri = file.new_file
       ? toReviewUri(mandatoryOptions)

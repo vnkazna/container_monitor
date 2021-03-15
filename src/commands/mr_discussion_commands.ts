@@ -49,37 +49,29 @@ export const createComment = async ({
   text: string;
   thread: vscode.CommentThread;
 }): Promise<void> => {
-  const {
-    workspacePath,
-    mrId,
-    baseSha,
-    headSha,
-    startSha,
-    commit,
-    path,
-    projectId,
-  } = fromReviewUri(thread.uri);
+  const { workspacePath, mrId, mrCommentPayload, commit, path, projectId } = fromReviewUri(
+    thread.uri,
+  );
   assert(path);
   assert(commit);
-  const isOld = commit === baseSha;
+  const isOld = commit === mrCommentPayload.baseSha;
   const positionFragment = isOld
     ? {
-        paths: {
-          oldPath: path,
-        },
         oldLine: thread.range.start.line + 1,
       }
     : {
-        paths: {
-          newPath: path,
-        },
         newLine: thread.range.start.line + 1,
       };
   const gitLabService = await createGitLabNewService(workspacePath);
+  const { baseSha, headSha, startSha, oldPath, newPath } = mrCommentPayload;
   const note = await gitLabService.createDiffNote(mrId, text, {
     baseSha,
     headSha,
     startSha,
+    paths: {
+      oldPath,
+      newPath,
+    },
     ...positionFragment,
   });
   const discussion: GqlTextDiffDiscussion = {

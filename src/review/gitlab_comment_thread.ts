@@ -28,10 +28,14 @@ const uriFromPosition = (
     commit,
     workspacePath: workspaceFolder,
     projectId: gitlabProjectId,
-    headSha: position.diffRefs.headSha,
-    baseSha: position.diffRefs.baseSha,
-    startSha: position.diffRefs.startSha,
     mrId,
+    mrCommentPayload: {
+      headSha: position.diffRefs.headSha,
+      baseSha: position.diffRefs.baseSha,
+      startSha: position.diffRefs.startSha,
+      newPath: position.newPath,
+      oldPath: position.oldPath,
+    },
   });
 };
 

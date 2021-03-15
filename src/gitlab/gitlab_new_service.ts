@@ -12,6 +12,7 @@ import { getHttpAgentOptions } from '../utils/get_http_agent_options';
 import { GitLabProject, GqlProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
+import { ApiError } from '../errors/api_error';
 
 interface Node<T> {
   pageInfo?: {
@@ -28,6 +29,14 @@ interface GqlProjectResult<T> {
 interface GqlProjectsResult<T> {
   projects?: {
     nodes?: T[];
+  };
+}
+
+interface GqlCreateDiffNoteResult {
+  // TODO is this a bug or should mutations return object with their name?
+  createDiffNote: {
+    errors: unknown[];
+    note: GqlTextDiffNote | null;
   };
 }
 
@@ -166,8 +175,8 @@ export interface GqlDiffPositionInput {
   headSha: string;
   startSha: string;
   paths: {
-    newPath?: string;
-    oldPath?: string;
+    newPath: string;
+    oldPath: string;
   };
   newLine?: number;
   oldLine?: number;
@@ -672,11 +681,22 @@ export class GitLabNewService {
     }
   }
 
-  async createDiffNote(restMrId: number, body: string, position: GqlDiffPositionInput) {
-    return this.client.request<GqlTextDiffNote>(createDiffNoteMutation, {
+  async createDiffNote(
+    restMrId: number,
+    body: string,
+    position: GqlDiffPositionInput,
+  ): Promise<GqlTextDiffNote> {
+    const result = await this.client.request<GqlCreateDiffNoteResult>(createDiffNoteMutation, {
       issuableId: getMrGqlId(restMrId),
       body,
       position,
     });
+    const { errors, note } = result.createDiffNote;
+    // because the errors are nested, we must check them manually
+    if (errors.length !== 0) {
+      throw new ApiError(new Error(errors.join(',')), 'create note');
+    }
+    assert(note);
+    return note;
   }
 }
