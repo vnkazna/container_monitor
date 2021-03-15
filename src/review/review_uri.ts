@@ -15,6 +15,7 @@ export interface ReviewParams {
   workspacePath: string;
   projectId: number;
   mrId: number;
+  mrIid: number;
   mrCommentPayload: MrCommentPayload;
 }
 
@@ -24,6 +25,7 @@ export function toReviewUri({
   workspacePath,
   projectId,
   mrId,
+  mrIid,
   mrCommentPayload,
 }: ReviewParams): Uri {
   const { baseSha, headSha, startSha, oldPath, newPath } = mrCommentPayload;
@@ -33,6 +35,7 @@ export function toReviewUri({
     workspacePath,
     projectId,
     mrId,
+    mrIid,
     baseSha,
     headSha,
     startSha,
@@ -51,6 +54,7 @@ export function fromReviewUri(uri: Uri): ReviewParams {
     workspacePath,
     projectId,
     mrId,
+    mrIid,
     baseSha,
     headSha,
     startSha,
@@ -63,6 +67,7 @@ export function fromReviewUri(uri: Uri): ReviewParams {
     workspacePath,
     projectId,
     mrId,
+    mrIid,
     mrCommentPayload: {
       baseSha,
       headSha,

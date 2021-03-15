@@ -49,7 +49,7 @@ export const createComment = async ({
   text: string;
   thread: vscode.CommentThread;
 }): Promise<void> => {
-  const { workspacePath, mrId, mrCommentPayload, commit, path, projectId } = fromReviewUri(
+  const { workspacePath, mrId, mrIid, mrCommentPayload, commit, path, projectId } = fromReviewUri(
     thread.uri,
   );
   assert(path);
@@ -85,6 +85,7 @@ export const createComment = async ({
   };
   GitLabCommentThread.createGitLabThreadWithVsThread(thread, discussion, gitLabService, {
     id: mrId,
+    iid: mrIid,
     project_id: projectId,
   } as RestIssuable); // FIXME, please FIXME
 };

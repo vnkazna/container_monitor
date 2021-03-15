@@ -60,6 +60,7 @@ export class ChangedFileItem extends TreeItem {
       workspacePath: workspace.uri,
       projectId: mr.project_id,
       mrId: this.mr.id,
+      mrIid: this.mr.iid,
       mrCommentPayload: {
         baseSha: mrVersion.base_commit_sha,
         headSha: mrVersion.head_commit_sha,

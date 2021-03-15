@@ -75,7 +75,8 @@ export const reviewUriParams = {
   path: '/review',
   projectId: 1234,
   workspacePath: 'path/to/workspace',
-  mrId: 1,
+  mrId: 1000,
+  mrIid: 1,
   mrCommentPayload: {
     baseSha: 'aaaa',
     headSha: 'bbbb',

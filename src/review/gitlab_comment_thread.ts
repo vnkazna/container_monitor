@@ -19,6 +19,7 @@ const uriFromPosition = (
   workspaceFolder: string,
   gitlabProjectId: number,
   mrId: number,
+  mrIid: number,
 ) => {
   const onOldVersion = position.oldLine !== null;
   const path = onOldVersion ? position.oldPath : position.newPath;
@@ -29,6 +30,7 @@ const uriFromPosition = (
     workspacePath: workspaceFolder,
     projectId: gitlabProjectId,
     mrId,
+    mrIid,
     mrCommentPayload: {
       headSha: position.diffRefs.headSha,
       baseSha: position.diffRefs.baseSha,
@@ -135,7 +137,7 @@ export class GitLabCommentThread {
   }: CreateThreadOptions): GitLabCommentThread {
     const { position } = discussion.notes.nodes[0];
     const vsThread = commentController.createCommentThread(
-      uriFromPosition(position, workspaceFolder, mr.project_id, mr.id),
+      uriFromPosition(position, workspaceFolder, mr.project_id, mr.id, mr.iid),
       commentRangeFromPosition(position),
       // the comments need to know about the thread, so we first
       // create empty thread to be able to create comments
