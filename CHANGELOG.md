@@ -1,3 +1,7 @@
+## [3.14.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.14.1...v3.14.2) (2021-03-15)
+
+
+
 ## [3.14.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.14.0...v3.14.1) (2021-03-11)
 
 
