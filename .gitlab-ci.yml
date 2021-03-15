@@ -73,7 +73,7 @@ test-webview:
     - npm ci
     - npm run test
 
-package:
+.package:
   stage: package
   script:
     - npm ci
@@ -82,9 +82,20 @@ package:
   artifacts:
     paths:
       - '*.vsix'
-    expire_in: 1 year
+
+package_release:
+  extends: .package
+  artifacts:
+      expire_in: 1 year
   only:
     - tags
+
+# We test that packaging works to prevent failed releases
+# Without this task we would only find out packaging errors after tagging a release
+package_test:
+  extends: .package
+  artifacts:
+      expire_in: 10 days
 
 publish_marketplace:
   stage: publish
