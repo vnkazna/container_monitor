@@ -40,6 +40,14 @@ interface GqlCreateDiffNoteResult {
   };
 }
 
+interface GqlCreateNoteResult {
+  // TODO is this a bug or should mutations return object with their name?
+  createNote: {
+    errors: unknown[];
+    note: GqlGenericNote<null> | null;
+  };
+}
+
 interface GqlSnippetProject {
   id: string;
   snippets: Node<GqlSnippet>;
@@ -100,7 +108,7 @@ interface GqlNotePermissions {
   adminNote: boolean;
 }
 
-interface GqlGenericNote<T extends GqlBasePosition | null> {
+export interface GqlGenericNote<T extends GqlBasePosition | null> {
   id: string;
   author: GqlUser;
   createdAt: string;
@@ -342,9 +350,15 @@ const discussionSetResolved = gql`
 `;
 
 const createNoteMutation = gql`
+  ${positionFragment}
+  ${baseNoteFragment}
   mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
     createNote(input: { noteableId: $issuableId, body: $body, discussionId: $replyId }) {
       errors
+      note {
+        ...baseNote
+        ...position
+      }
     }
   }
 `;
@@ -611,12 +625,23 @@ export class GitLabNewService {
     return combinedEvents;
   }
 
-  async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<void> {
-    await this.client.request<void>(createNoteMutation, {
+  async createNote(
+    issuable: RestIssuable,
+    body: string,
+    replyId?: string,
+  ): Promise<GqlGenericNote<null>> {
+    const result = await this.client.request<GqlCreateNoteResult>(createNoteMutation, {
       issuableId: getIssuableGqlId(issuable),
       body,
       replyId,
     });
+    const { errors, note } = result.createNote;
+    // because the errors are nested, we must check them manually
+    if (errors.length !== 0) {
+      throw new ApiError(new Error(errors.join(',')), 'create note');
+    }
+    assert(note);
+    return note;
   }
 
   async deleteNote(noteId: string): Promise<void> {

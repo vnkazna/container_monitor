@@ -42,18 +42,10 @@ export const submitEdit = async (comment: GitLabComment): Promise<void> => {
   return comment.thread.submitEdit(comment);
 };
 
-export const createComment = async ({
-  text,
-  thread,
-}: {
-  text: string;
-  thread: vscode.CommentThread;
-}): Promise<void> => {
-  const { workspacePath, mrId, mrIid, mrCommentPayload, commit, path, projectId } = fromReviewUri(
+const createFirstCommentInThread = async (text: string, thread: vscode.CommentThread) => {
+  const { workspacePath, mrId, mrIid, mrCommentPayload, commit, projectId } = fromReviewUri(
     thread.uri,
   );
-  assert(path);
-  assert(commit);
   const isOld = commit === mrCommentPayload.baseSha;
   const positionFragment = isOld
     ? {
@@ -62,9 +54,9 @@ export const createComment = async ({
     : {
         newLine: thread.range.start.line + 1,
       };
-  const gitLabService = await createGitLabNewService(workspacePath);
   const { baseSha, headSha, startSha, oldPath, newPath } = mrCommentPayload;
-  const note = await gitLabService.createDiffNote(mrId, text, {
+  const gitlabService = await createGitLabNewService(workspacePath);
+  const note = await gitlabService.createDiffNote(mrId, text, {
     baseSha,
     headSha,
     startSha,
@@ -83,9 +75,28 @@ export const createComment = async ({
       nodes: [note],
     },
   };
-  GitLabCommentThread.createGitLabThreadWithVsThread(thread, discussion, gitLabService, {
+  GitLabCommentThread.createGitLabThreadWithVsThread(thread, discussion, gitlabService, {
     id: mrId,
     iid: mrIid,
     project_id: projectId,
   } as RestIssuable); // FIXME, please FIXME
+};
+
+const createReplyComment = async (text: string, thread: vscode.CommentThread) => {
+  const gitlabThread = getGitLabThreadFromVsThread(thread);
+  return gitlabThread.reply(text);
+};
+
+export const createComment = async ({
+  text,
+  thread,
+}: {
+  text: string;
+  thread: vscode.CommentThread;
+}): Promise<void> => {
+  if (thread.comments.length === 0) {
+    await createFirstCommentInThread(text, thread);
+  } else {
+    await createReplyComment(text, thread);
+  }
 };

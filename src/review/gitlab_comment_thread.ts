@@ -3,6 +3,7 @@ import * as assert from 'assert';
 import {
   GitLabNewService,
   GqlTextDiffDiscussion,
+  GqlTextDiffNote,
   GqlTextPosition,
 } from '../gitlab/gitlab_new_service';
 import { GitLabComment } from './gitlab_comment';
@@ -12,6 +13,10 @@ const commentRangeFromPosition = (position: GqlTextPosition): vscode.Range => {
   const glLine = position.oldLine ?? position.newLine;
   const vsPosition = new vscode.Position(glLine - 1, 0); // VS Code numbers lines starting with 0, GitLab starts with 1
   return new vscode.Range(vsPosition, vsPosition);
+};
+
+const isDiffNote = (note: any): note is GqlTextDiffNote => {
+  return note.position && note.position.positionType === 'text';
 };
 
 const uriFromPosition = (
@@ -84,6 +89,12 @@ export class GitLabCommentThread {
     if (this.vsThread.comments.length === 0) {
       this.dispose();
     }
+  }
+
+  async reply(text: string): Promise<void> {
+    const note = await this.gitlabService.createNote(this.mr, text, this.gqlDiscussion.replyId);
+    assert(isDiffNote(note));
+    this.vsThread.comments = [...this.vsThread.comments, GitLabComment.fromGqlNote(note, this)];
   }
 
   startEdit(comment: GitLabComment): void {
