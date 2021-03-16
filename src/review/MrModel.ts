@@ -21,4 +21,12 @@ export class MrModel {
     this.version = await this.gitlabService.getMrDiff(this.mr);
     return this.version;
   }
+
+  async getDiscussions() {
+    const result = await this.gitlabService.getDiscussions({
+      issuable: this.mr,
+      includePosition: true,
+    });
+    return result.discussions;
+  }
 }

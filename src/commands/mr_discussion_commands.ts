@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { GqlTextDiffDiscussion } from '../gitlab/gitlab_new_service';
+import { GqlDiscussion, GqlGenericNote, GqlTextDiffDiscussion } from '../gitlab/gitlab_new_service';
 import { getFileDiff, getRemovedLinesFromDiff } from '../review/get_added_lines_from_diff';
 import { GitLabComment } from '../review/gitlab_comment';
 import { GitLabCommentThread } from '../review/gitlab_comment_thread';
@@ -78,20 +78,18 @@ const createFirstCommentInThread = async (text: string, thread: vscode.CommentTh
     },
     ...positionFragment,
   });
-  const discussion: GqlTextDiffDiscussion = {
-    createdAt: note.createdAt,
-    resolvable: true,
-    resolved: false,
-    replyId: note.id,
-    notes: {
-      nodes: [note],
-    },
-  };
-  GitLabCommentThread.createGitLabThreadWithVsThread(thread, discussion, gitlabService, {
-    id: mrId,
-    iid: mrIid,
-    project_id: projectId,
-  } as RestIssuable); // FIXME, please FIXME
+  // PROBLEM: We only get a note, not the discussion and we have to ask for all discussions because there is no better endpoint
+  const freshDiscussions = await mrModel.getDiscussions();
+  const discussion = freshDiscussions.find(d =>
+    Boolean((d.notes.nodes as GqlGenericNote<null>[]).find(n => n.id === note.id)),
+  ); // This should be done better
+  assert(discussion);
+  GitLabCommentThread.createGitLabThreadWithVsThread(
+    thread,
+    discussion as GqlTextDiffDiscussion,
+    gitlabService,
+    mrModel.mr,
+  );
 };
 
 const createReplyComment = async (text: string, thread: vscode.CommentThread) => {
