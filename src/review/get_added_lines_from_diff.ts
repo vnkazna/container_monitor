@@ -21,6 +21,17 @@ const getAddedLineNumbers = (hunk: string[]): number[] => {
   }, []);
 };
 
+const getRemovedLineNumbers = (hunk: string[]): number[] => {
+  const firstLine = parseInt(hunk[0].match(/@@ -(\d+),\d+ \+\d+,\d+ @@/)![1], 10);
+  const noAddedLines = hunk.slice(1, hunk.length).filter(l => !l.startsWith('+'));
+  return noAddedLines.reduce((acc: number[], l, i) => {
+    if (l.startsWith('-')) {
+      return [...acc, i + firstLine];
+    }
+    return acc;
+  }, []);
+};
+
 /**
  * List of line numbers where code has been added
  *
@@ -40,4 +51,21 @@ export const getAddedLinesFromDiff = (diff: string): number[] => {
 
   // @ts-ignore
   return [].concat.apply([], arraysOfChangedLines);
+};
+
+export const getRemovedLinesFromDiff = (diff: string): number[] => {
+  const hunks = getHunks(diff);
+  const arraysOfChangedLines = hunks.map(h => getRemovedLineNumbers(h));
+
+  // @ts-ignore
+  return [].concat.apply([], arraysOfChangedLines);
+};
+
+const removeLeadingSlash = (path: string): string => path.replace(/^\//, '');
+
+export const getFileDiff = (version: RestMrVersion, isOldFile: boolean, path: string) => {
+  return version.diffs.find(d => {
+    const diffPath = isOldFile ? d.old_path : d.new_path;
+    return diffPath === removeLeadingSlash(path!);
+  });
 };

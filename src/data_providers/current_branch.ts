@@ -10,6 +10,7 @@ import { MrItemModel } from './items/mr_item_model';
 import { IssueItem } from './items/issue_item';
 import { ExternalUrlItem } from './items/external_url_item';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { mrManager } from '../review/MrManager';
 
 dayjs.extend(relativeTime);
 
@@ -49,8 +50,10 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     if (!mr) {
       return new vscode.TreeItem('No merge request found');
     }
+    const repository = await mrManager.getMrRepository(workspace.uri);
+    repository.pupulateMrs([mr]);
     this.mr = mr;
-    const item = new MrItemModel(mr, workspace);
+    const item = new MrItemModel(repository.getStoredMr(mr.id)!, workspace);
     this.disposableChildren.push(item);
     return item;
   }

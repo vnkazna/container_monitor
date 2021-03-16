@@ -1,8 +1,11 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { GqlTextDiffDiscussion } from '../gitlab/gitlab_new_service';
+import { getFileDiff, getRemovedLinesFromDiff } from '../review/get_added_lines_from_diff';
 import { GitLabComment } from '../review/gitlab_comment';
 import { GitLabCommentThread } from '../review/gitlab_comment_thread';
+import { mrManager } from '../review/MrManager';
+import { MrRepository } from '../review/MrRepository';
 import { fromReviewUri } from '../review/review_uri';
 import { createGitLabNewService } from '../service_factory';
 
@@ -43,17 +46,26 @@ export const submitEdit = async (comment: GitLabComment): Promise<void> => {
 };
 
 const createFirstCommentInThread = async (text: string, thread: vscode.CommentThread) => {
-  const { workspacePath, mrId, mrIid, mrCommentPayload, commit, projectId } = fromReviewUri(
+  const { workspacePath, mrId, mrIid, mrCommentPayload, commit, projectId, path } = fromReviewUri(
     thread.uri,
   );
   const isOld = commit === mrCommentPayload.baseSha;
-  const positionFragment = isOld
-    ? {
-        oldLine: thread.range.start.line + 1,
-      }
-    : {
-        newLine: thread.range.start.line + 1,
-      };
+  const mrModel = (await mrManager.getMrRepository(workspacePath)).getStoredMr(mrId);
+  assert(mrModel);
+  assert(path);
+  const mrVersion = await mrModel.getVersion();
+  const fileDiff = getFileDiff(mrVersion, isOld, path);
+  const removedLines = getRemovedLinesFromDiff(fileDiff!.diff);
+  const diffLine = thread.range.start.line + 1;
+  const oldPosition = { oldLine: diffLine };
+  const newPosition = { newLine: diffLine };
+  let positionFragment;
+  // if the line hasn't changed (we are commenting on unchanged part of the diff)
+  if (isOld && !removedLines.includes(diffLine)) {
+    positionFragment = { ...oldPosition, ...newPosition };
+  } else {
+    positionFragment = isOld ? oldPosition : newPosition;
+  }
   const { baseSha, headSha, startSha, oldPath, newPath } = mrCommentPayload;
   const gitlabService = await createGitLabNewService(workspacePath);
   const note = await gitlabService.createDiffNote(mrId, text, {

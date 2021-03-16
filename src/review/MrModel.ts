@@ -2,7 +2,7 @@ import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 
 export class MrModel {
-  private mr: RestIssuable;
+  readonly mr: RestIssuable;
 
   gitlabService: GitLabNewService;
 

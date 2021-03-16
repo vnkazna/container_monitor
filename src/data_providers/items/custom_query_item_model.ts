@@ -9,6 +9,7 @@ import { VulnerabilityItem } from './vulnerability_item';
 import { CustomQuery } from '../../gitlab/custom_query';
 import { CustomQueryType } from '../../gitlab/custom_query_type';
 import { ItemModel } from './item_model';
+import { mrManager } from '../../review/MrManager';
 
 export class CustomQueryItemModel extends ItemModel {
   private workspace: GitLabWorkspace;
@@ -46,7 +47,11 @@ export class CustomQueryItemModel extends ItemModel {
     const { MR, ISSUE, SNIPPET, EPIC, VULNERABILITY } = CustomQueryType;
     switch (this.customQuery.type) {
       case MR: {
-        const mrModels = issues.map((mr: RestIssuable) => new MrItemModel(mr, this.workspace));
+        const repository = await mrManager.getMrRepository(this.workspace.uri);
+        repository.pupulateMrs(issues);
+        const mrModels = issues.map(
+          (mr: RestIssuable) => new MrItemModel(repository.getStoredMr(mr.id)!, this.workspace),
+        );
         this.setDisposableChildren(mrModels);
         return mrModels;
       }
