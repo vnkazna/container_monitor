@@ -1,3 +1,12 @@
+# [3.15.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.14.2...v3.15.0) (2021-03-17)
+
+
+### Features
+
+* **mr review:** editing comments on MR diffs ([fb7275a](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fb7275a22eaf6dc71d2c30726b0f755a204b9586))
+
+
+
 ## [3.14.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.14.1...v3.14.2) (2021-03-15)
 
 * no additional features or fixes, we only fixed the release pipeline ([MR !202](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/202))
