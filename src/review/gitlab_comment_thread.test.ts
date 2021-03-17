@@ -10,11 +10,25 @@ import {
   GqlTextDiffDiscussion,
   GqlTextDiffNote,
 } from '../gitlab/gitlab_new_service';
+import { mr } from '../test_utils/entities';
 
 describe('GitLabCommentThread', () => {
   let gitlabCommentThread: GitLabCommentThread;
   let vsCommentThread: vscode.CommentThread;
   let gitlabService: GitLabNewService;
+
+  const twoNotes = [
+    {
+      ...(noteOnDiff as GqlTextDiffNote),
+      id: 'gid://gitlab/DiffNote/1',
+      body: 'first body',
+    },
+    {
+      ...(noteOnDiff as GqlTextDiffNote),
+      id: 'gid://gitlab/DiffNote/2',
+      body: 'second body',
+    },
+  ];
 
   const createGqlTextDiffDiscussion: (...notes: GqlTextDiffNote[]) => GqlTextDiffDiscussion = (
     ...notes
@@ -48,11 +62,12 @@ describe('GitLabCommentThread', () => {
     gitlabService = ({
       setResolved: jest.fn(),
       deleteNote: jest.fn(),
+      updateNoteBody: jest.fn(),
     } as unknown) as GitLabNewService;
     gitlabCommentThread = GitLabCommentThread.createThread({
       commentController: fakeCommentController,
       workspaceFolder: '/workspaceFolder',
-      gitlabProjectId: 12345,
+      mr,
       discussion,
       gitlabService,
     });
@@ -127,23 +142,12 @@ describe('GitLabCommentThread', () => {
     expect(vsCommentThread.comments.length).toBe(1);
     const [comment] = vsCommentThread.comments;
     expect(comment).toBeInstanceOf(GitLabComment);
-    expect((comment as GitLabComment).body).toBe(noteOnDiff.body);
+    expect(comment.body).toBe(noteOnDiff.body);
   });
 
   describe('deleting comments', () => {
     it('deletes a comment', async () => {
-      createGitLabCommentThread(
-        createGqlTextDiffDiscussion(
-          {
-            ...(noteOnDiff as GqlTextDiffNote),
-            id: 'gid://gitlab/DiffNote/1',
-          },
-          {
-            ...(noteOnDiff as GqlTextDiffNote),
-            id: 'gid://gitlab/DiffNote/2',
-          },
-        ),
-      );
+      createGitLabCommentThread(createGqlTextDiffDiscussion(...twoNotes));
       (gitlabService.deleteNote as jest.Mock).mockResolvedValue(undefined);
 
       await gitlabCommentThread.deleteComment(vsCommentThread.comments[0] as GitLabComment);
@@ -172,6 +176,72 @@ describe('GitLabCommentThread', () => {
       ).rejects.toBe(error);
 
       expect(vsCommentThread.comments.length).toBe(1);
+    });
+  });
+
+  describe('editing comments', () => {
+    beforeEach(() => {
+      createGitLabCommentThread(createGqlTextDiffDiscussion(...twoNotes));
+    });
+
+    it('starts editing comment', () => {
+      gitlabCommentThread.startEdit(vsCommentThread.comments[0] as GitLabComment);
+
+      expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Editing);
+      expect(vsCommentThread.comments[1].mode).toBe(vscode.CommentMode.Preview);
+    });
+
+    it('replaces the original comments array when editing a comment', () => {
+      const originalCommentArray = vsCommentThread.comments;
+
+      gitlabCommentThread.startEdit(vsCommentThread.comments[0] as GitLabComment);
+
+      // this is important because the real vscode.CommentThread implementation listens
+      // on `set comments()` and updates the visual representation when the array reference changes
+      expect(vsCommentThread.comments).not.toBe(originalCommentArray);
+    });
+
+    it('stops editing the comment and resets the comment body', () => {
+      gitlabCommentThread.startEdit(vsCommentThread.comments[0] as GitLabComment);
+      vsCommentThread.comments[0].body = 'new body'; // vs code updates the edited text in place
+
+      gitlabCommentThread.cancelEdit(vsCommentThread.comments[0] as GitLabComment);
+
+      expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Preview);
+      expect(vsCommentThread.comments[0].body).toBe('first body');
+      expect(vsCommentThread.comments[1].mode).toBe(vscode.CommentMode.Preview);
+    });
+  });
+
+  describe('updating comments', () => {
+    beforeEach(() => {
+      createGitLabCommentThread(createGqlTextDiffDiscussion(...twoNotes));
+      gitlabCommentThread.startEdit(vsCommentThread.comments[0] as GitLabComment);
+      vsCommentThread.comments[0].body = 'updated body';
+    });
+
+    it('submits updated comment', async () => {
+      (gitlabService.updateNoteBody as jest.Mock).mockResolvedValue(undefined);
+
+      await gitlabCommentThread.submitEdit(vsCommentThread.comments[0] as GitLabComment);
+
+      expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Preview);
+      expect(vsCommentThread.comments[0].body).toBe('updated body');
+      expect((vsCommentThread.comments[0] as GitLabComment).gqlNote.body).toBe('updated body');
+    });
+
+    it("doesn't update the underlying GraphQL note body if API update fails", async () => {
+      const error = new Error();
+
+      (gitlabService.updateNoteBody as jest.Mock).mockRejectedValue(error);
+
+      await expect(
+        gitlabCommentThread.submitEdit(vsCommentThread.comments[0] as GitLabComment),
+      ).rejects.toBe(error);
+
+      expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Editing);
+      expect(vsCommentThread.comments[0].body).toBe('updated body');
+      expect((vsCommentThread.comments[0] as GitLabComment).gqlNote.body).toBe('first body');
     });
   });
 });

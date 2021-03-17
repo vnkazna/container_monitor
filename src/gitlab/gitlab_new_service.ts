@@ -141,6 +141,10 @@ interface GetDiscussionsOptions {
   endCursor?: string;
 }
 
+interface RestNote {
+  body: string;
+}
+
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
@@ -304,6 +308,14 @@ const createNoteMutation = gql`
 const deleteNoteMutation = gql`
   mutation DeleteNote($noteId: NoteID!) {
     destroyNote(input: { id: $noteId }) {
+      errors
+    }
+  }
+`;
+
+const updateNoteBodyMutation = gql`
+  mutation UpdateNoteBody($noteId: NoteID!, $body: String) {
+    updateNote(input: { id: $noteId, body: $body }) {
       errors
     }
   }
@@ -545,6 +557,54 @@ export class GitLabNewService {
     } catch (e) {
       throw new UserFriendlyError(
         `Couldn't delete the comment when calling the API.
+        For more information, review the extension logs.`,
+        e,
+      );
+    }
+  }
+
+  /**
+   * This method is used only as a replacement of optimistic locking when updating a note.
+   * We request the latest note to validate that it hasn't changed since we last saw it.
+   */
+  private async getMrNote(mr: RestIssuable, noteId: number): Promise<RestNote> {
+    const noteUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/notes/${noteId}`;
+    const result = await crossFetch(noteUrl, this.fetchOptions);
+    if (!result.ok) {
+      throw new FetchError(`Fetching the latest note from ${noteUrl} failed`, result);
+    }
+    return result.json();
+  }
+
+  async updateNoteBody(
+    noteGqlId: string,
+    body: string,
+    originalBody: string,
+    mr: RestIssuable,
+  ): Promise<void> {
+    const latestNote = await this.getMrNote(mr, getRestIdFromGraphQLId(noteGqlId));
+    // This check is the best workaround we can do in the lack of optimistic locking
+    // Issue to make this check in the GitLab instance: https://gitlab.com/gitlab-org/gitlab/-/issues/323808
+    if (latestNote.body !== originalBody) {
+      throw new UserFriendlyError(
+        `This comment changed after you last viewed it, and can't be edited.
+        Your new comment is NOT lost. To retrieve it, edit the comment again and copy your comment text,
+        then update the original comment by opening the sidebar and running the
+        "GitLab: Refresh sidebar" command.`,
+        new Error(
+          `You last saw:\n"${originalBody}"\nbut the latest version is:\n"${latestNote.body}"`,
+        ),
+      );
+    }
+    try {
+      await this.client.request<void>(updateNoteBodyMutation, {
+        noteId: noteGqlId,
+        body,
+      });
+    } catch (e) {
+      throw new UserFriendlyError(
+        `Couldn't update the comment when calling the API.
+        Your draft hasn't been lost. To see it, edit the comment.
         For more information, review the extension logs.`,
         e,
       );

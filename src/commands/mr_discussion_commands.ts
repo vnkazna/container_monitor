@@ -26,3 +26,15 @@ export const deleteComment = async (comment: GitLabComment): Promise<void> => {
   }
   return comment.thread.deleteComment(comment);
 };
+
+export const editComment = (comment: GitLabComment): void => {
+  comment.thread.startEdit(comment);
+};
+
+export const cancelEdit = (comment: GitLabComment): void => {
+  comment.thread.cancelEdit(comment);
+};
+
+export const submitEdit = async (comment: GitLabComment): Promise<void> => {
+  return comment.thread.submitEdit(comment);
+};

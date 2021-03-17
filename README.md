@@ -250,7 +250,7 @@ You can use [GitLab Slash Commands](https://docs.gitlab.com/ee/integration/slash
 
 GitLab Workflow allows you to review changes and comments on merge requests directly inside the editor. You can navigate to merge requests on the left hand sidebar and expand any relevant merge requests to see both the description and files changed.
 
-When navigating changed files you can review comments that have been made on the diff.
+When navigating changed files you can review discussions that have been made on the diff. You can resolve and unresolve these discussions and also delete and edit individual comments.
 
 ![_diff-comments_.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_diff-comments.gif)
 

@@ -142,6 +142,22 @@
         "title": "Delete comment",
         "category": "GitLab",
         "icon": "$(trash)"
+      },
+      {
+        "command": "gl.startEditingComment",
+        "title": "Edit Comment",
+        "category": "GitLab",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "gl.cancelEditingComment",
+        "title": "Cancel",
+        "category": "GitLab"
+      },
+      {
+        "command": "gl.submitCommentEdit",
+        "title": "Save comment",
+        "category": "GitLab"
       }
     ],
     "menus": {
@@ -157,6 +173,18 @@
         {
           "command": "gl.deleteComment",
           "when": "false"
+        },
+        {
+          "command": "gl.startEditingComment",
+          "when": "false"
+        },
+        {
+          "command": "gl.cancelEditingComment",
+          "when": "false"
+        },
+        {
+          "command": "gl.submitCommentEdit",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -168,9 +196,24 @@
       ],
       "comments/comment/title": [
         {
-          "command": "gl.deleteComment",
+          "command": "gl.startEditingComment",
           "group": "inline@1",
           "when": "comment =~ /canAdmin/"
+        },
+        {
+          "command": "gl.deleteComment",
+          "group": "inline@2",
+          "when": "comment =~ /canAdmin/"
+        }
+      ],
+      "comments/comment/context": [
+        {
+          "command": "gl.submitCommentEdit",
+          "group": "inline@1"
+        },
+        {
+          "command": "gl.cancelEditingComment",
+          "group": "inline@2"
         }
       ],
       "comments/commentThread/title": [

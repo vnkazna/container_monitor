@@ -71,7 +71,7 @@ export class MrItemModel extends ItemModel {
       return GitLabCommentThread.createThread({
         commentController,
         workspaceFolder: this.workspace.uri,
-        gitlabProjectId: this.mr.project_id,
+        mr: this.mr,
         discussion,
         gitlabService,
       });

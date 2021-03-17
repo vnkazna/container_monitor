@@ -30,7 +30,7 @@ module.exports = {
   extensions: {
     getExtension: jest.fn(),
   },
-  CommentMode: { Preview: 1 },
+  CommentMode: { Editing: 0, Preview: 1 },
   StatusBarAlignment: { Left: 0 },
   CommentThreadCollapsibleState: { Collapsed: 0, Expanded: 1 },
   Position: function Position(line, character) {
