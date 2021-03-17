@@ -33,11 +33,11 @@ export class GitLabComment implements vscode.Comment {
   }
 
   resetBody(): GitLabComment {
-    return this.with({ body: this.gqlNote.body });
+    return this.copyWith({ body: this.gqlNote.body });
   }
 
   markBodyAsSubmitted(): GitLabComment {
-    return this.with({
+    return this.copyWith({
       note: {
         ...this.gqlNote,
         body: this.body, // this synchronizes the API response with the latest body
@@ -46,10 +46,10 @@ export class GitLabComment implements vscode.Comment {
   }
 
   withMode(mode: vscode.CommentMode): GitLabComment {
-    return this.with({ mode });
+    return this.copyWith({ mode });
   }
 
-  private with({ mode, body, note }: CommentOptions) {
+  private copyWith({ mode, body, note }: CommentOptions) {
     return new GitLabComment(
       note ?? this.gqlNote,
       mode ?? this.mode,
