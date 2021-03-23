@@ -110,6 +110,10 @@
         "title": "GitLab: Insert snippet"
       },
       {
+        "command": "gl.createIssue",
+        "title": "GitLab: Create Issue"
+      },
+      {
         "command": "gl.validateCIConfig",
         "title": "GitLab: Validate GitLab CI config"
       },

@@ -23,6 +23,7 @@ export const USER_COMMANDS = {
   INSERT_SNIPPET: 'gl.insertSnippet',
   VALIDATE_CI_CONFIG: 'gl.validateCIConfig',
   SHOW_OUTPUT: 'gl.showOutput',
+  CREATE_ISSUE: 'gl.createIssue',
   REFRESH_SIDEBAR: 'gl.refreshSidebar',
   RESOLVE_THREAD: 'gl.resolveThread',
   UNRESOLVE_THREAD: 'gl.unresolveThread',

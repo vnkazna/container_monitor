@@ -25,6 +25,7 @@ const {
   cancelEdit,
   submitEdit,
 } = require('./commands/mr_discussion_commands');
+const { createIssue } = require('./commands/create_issue');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -72,6 +73,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.COMPARE_CURRENT_BRANCH]: openers.compareCurrentBranch,
     [USER_COMMANDS.CREATE_SNIPPET]: createSnippet,
     [USER_COMMANDS.INSERT_SNIPPET]: insertSnippet,
+    [USER_COMMANDS.CREATE_ISSUE]: createIssue,
     [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
     [USER_COMMANDS.REFRESH_SIDEBAR]: sidebar.refresh,
     [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.create,

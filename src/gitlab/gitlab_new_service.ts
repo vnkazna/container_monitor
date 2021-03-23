@@ -549,6 +549,21 @@ export class GitLabNewService {
     });
   }
 
+  async createIssue(projectId: number, title: string, description: string): Promise<RestIssuable> {
+    const noteUrl = `${this.instanceUrl}/api/v4/projects/${projectId}/issues`;
+    const body = JSON.stringify({ title, description });
+    const result = await crossFetch(noteUrl, {
+      ...this.fetchOptions,
+      method: 'POST',
+      body,
+      headers: { ...this.fetchOptions.headers, 'Content-Type': 'application/json' },
+    });
+    if (!result.ok) {
+      throw new FetchError(`Creating issue failed`, result);
+    }
+    return result.json();
+  }
+
   async deleteNote(noteId: string): Promise<void> {
     try {
       await this.client.request<void>(deleteNoteMutation, {
