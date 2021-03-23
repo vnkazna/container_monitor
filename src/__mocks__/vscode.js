@@ -1,4 +1,5 @@
 const { Uri } = require('../test_utils/uri');
+const { EventEmitter } = require('../test_utils/event_emitter');
 
 module.exports = {
   TreeItem: function TreeItem(label, collapsibleState) {
@@ -7,7 +8,7 @@ module.exports = {
   ThemeIcon: function ThemeIcon(id) {
     return { id };
   },
-  EventEmitter: jest.fn(),
+  EventEmitter,
   TreeItemCollapsibleState: {
     Collapsed: 'collapsed',
   },

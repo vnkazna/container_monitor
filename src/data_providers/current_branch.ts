@@ -10,6 +10,7 @@ import { MrItemModel } from './items/mr_item_model';
 import { IssueItem } from './items/issue_item';
 import { ExternalUrlItem } from './items/external_url_item';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { extensionState } from '../extension_state';
 
 dayjs.extend(relativeTime);
 
@@ -21,6 +22,10 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
   private mr: RestIssuable | null = null;
 
   private disposableChildren: vscode.Disposable[] = [];
+
+  constructor() {
+    extensionState.onDidChangeValid(this.refresh, this);
+  }
 
   // eslint-disable-next-line class-methods-use-this
   async createPipelineItem(pipeline: RestPipeline | null, project: GitLabProject) {
@@ -71,7 +76,7 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     this.disposableChildren.forEach(s => s.dispose());
     this.disposableChildren = [];
     const workspaceFolder = await getCurrentWorkspaceFolder();
-    if (!workspaceFolder) {
+    if (!extensionState.isValid() || !workspaceFolder) {
       return [];
     }
     try {
