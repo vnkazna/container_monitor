@@ -1,5 +1,6 @@
 import * as execa from 'execa';
 import { UserFriendlyError } from './errors/user_friendly_error';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { parseGitRemote, GitRemote } from './git/git_remote_parser';
 import { log } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
@@ -20,8 +21,8 @@ export class GitService {
   }
 
   private async fetch(cmd: string): Promise<string> {
-    const [git, ...args] = cmd.trim().split(' ');
-    const { stdout } = await execa(git, args, {
+    const [, ...args] = cmd.trim().split(' ');
+    const { stdout } = await execa(gitExtensionWrapper.gitBinaryPath, args, {
       cwd: this.workspaceFolder,
       preferLocal: false,
     });
