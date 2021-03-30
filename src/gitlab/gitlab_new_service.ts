@@ -138,7 +138,6 @@ type Note = GqlDiscussion | RestLabelEvent;
 
 interface GetDiscussionsOptions {
   issuable: RestIssuable;
-  includePosition?: boolean;
   endCursor?: string;
 }
 
@@ -234,8 +233,8 @@ const positionFragment = gql`
   }
 `;
 
-const createDiscussionsFragment = (includePosition: boolean) => gql`
-${includePosition ? positionFragment : ''}
+const discussionsFragment = gql`
+  ${positionFragment}
   fragment discussions on DiscussionConnection {
     pageInfo {
       hasNextPage
@@ -268,15 +267,15 @@ ${includePosition ? positionFragment : ''}
             adminNote
             createNote
           }
-          ${includePosition ? `...position` : ''}
+          ...position
         }
       }
     }
   }
 `;
 
-const constructGetDiscussionsQuery = (isMr: boolean, includePosition = false) => gql`
-  ${createDiscussionsFragment(includePosition)}
+const constructGetDiscussionsQuery = (isMr: boolean) => gql`
+  ${discussionsFragment}
   query Get${
     isMr ? 'Mr' : 'Issue'
   }Discussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
@@ -474,13 +473,9 @@ export class GitLabNewService {
     } as GqlDiscussion;
   }
 
-  async getDiscussions({
-    issuable,
-    includePosition = false,
-    endCursor,
-  }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
+  async getDiscussions({ issuable, endCursor }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
     const projectPath = getProjectPath(issuable);
-    const query = constructGetDiscussionsQuery(isMr(issuable), includePosition);
+    const query = constructGetDiscussionsQuery(isMr(issuable));
     const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
       projectPath,
       iid: String(issuable.iid),
@@ -494,7 +489,6 @@ export class GitLabNewService {
       assert(discussions.pageInfo.endCursor);
       const remainingPages = await this.getDiscussions({
         issuable,
-        includePosition,
         endCursor: discussions.pageInfo.endCursor,
       });
       return [...discussions.nodes, ...remainingPages];
