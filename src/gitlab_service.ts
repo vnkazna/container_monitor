@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as request from 'request-promise';
-import * as fs from 'fs';
 import { basename } from 'path';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
@@ -229,123 +228,144 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   let issuable = null;
 
   const version = await fetchVersion();
-  if (!version) {
-    return [];
-  }
 
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
-  if (project) {
-    if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
-      config.scope = 'all';
-    } else if (
-      (config.type === 'issues' || config.type === 'merge_requests') &&
-      config.scope !== 'assigned_to_me' &&
-      config.scope !== 'created_by_me'
-    ) {
-      config.scope = 'all';
-    }
+  if (!version || !project) return [];
 
-    // Normalize scope parameter for version < 11 instances.
-    const [major] = version.split('.');
-    if (parseInt(major, 10) < 11) {
-      config.scope = config.scope.replace(/_/g, '-');
-    }
-
-    let path = '';
-
-    if (config.type === 'epics') {
-      if (project.groupRestId) {
-        path = `/groups/${project.groupRestId}/${config.type}?include_ancestor_groups=true&state=${config.state}`;
-      } else {
-        return [];
-      }
-    } else {
-      const searchKind =
-        config.type === CustomQueryType.VULNERABILITY ? 'vulnerability_findings' : config.type;
-      path = `/projects/${project.restId}/${searchKind}?scope=${config.scope}&state=${config.state}`;
-    }
-    if (config.type === 'issues') {
-      if (author) {
-        path = `${path}&author_username=${author}`;
-      }
-    } else if (author) {
-      const authorUser = await fetchFirstUserByUsername(author);
-      if (authorUser) {
-        path = `${path}&author_id=${authorUser.id}`;
-      } else {
-        path = `${path}&author_id=-1`;
-      }
-    }
-    if (assignee === 'Any' || assignee === 'None') {
-      path = `${path}&assignee_id=${assignee}`;
-    } else if (assignee && config.type === 'issues') {
-      path = `${path}&assignee_username=${assignee}`;
-    } else if (assignee) {
-      const assigneeUser = await fetchFirstUserByUsername(assignee);
-      if (assigneeUser) {
-        path = `${path}&assignee_id=${assigneeUser.id}`;
-      } else {
-        path = `${path}&assignee_id=-1`;
-      }
-    }
-    if (searchIn) {
-      if (searchIn === 'all') {
-        searchIn = 'title,description';
-      }
-      path = `${path}&in=${searchIn}`;
-    }
-    if (config.type === 'merge_requests' && wip) {
-      path = `${path}&wip=${wip}`;
-    }
-    let issueQueryParams: Record<string, QueryValue> = {};
-    if (config.type === 'issues') {
-      issueQueryParams = {
-        confidential: params.confidential,
-        'not[labels]': params.excludeLabels,
-        'not[milestone]': params.excludeMilestone,
-        'not[author_username]': params.excludeAuthor,
-        'not[assignee_username]': params.excludeAssignee,
-        'not[search]': params.excludeSearch,
-        'not[in]': params.excludeSearchIn,
-      };
-    }
-    // FIXME: this 'branch' or actual numerical ID most likely doesn't make sense from user perspective
-    //        Also, the logic allows for `pipeline_id=branch` query which doesn't make sense
-    //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
-    if (pipelineId) {
-      if (pipelineId === 'branch') {
-        const workspace = await getCurrentWorkspaceFolder();
-        if (workspace) {
-          pipelineId = (await fetchLastPipelineForCurrentBranch(workspace))?.id;
-        }
-      }
-      path = `${path}&pipeline_id=${pipelineId}`;
-    }
-    const queryParams: Record<string, QueryValue> = {
-      labels: params.labels,
-      milestone: params.milestone,
-      search: params.search,
-      created_before: params.createdBefore,
-      created_after: params.createdAfter,
-      updated_before: params.updatedBefore,
-      updated_after: params.updatedAfter,
-      order_by: params.orderBy,
-      sort: params.sort,
-      per_page: params.maxResults,
-      report_type: params.reportTypes,
-      severity: params.severityLevels,
-      confidence: params.confidenceLevels,
-      ...issueQueryParams,
-    };
-    const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
-    const urlQuery = usedQueryParamNames.reduce(
-      (acc, name) => `${acc}&${name}=${queryParams[name]}`,
-      '',
-    );
-    path = `${path}${urlQuery}`;
-    const { response } = await fetch(path);
-    issuable = response;
+  if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
+    config.scope = 'all';
+  } else if (
+    (config.type === 'issues' || config.type === 'merge_requests') &&
+    config.scope !== 'assigned_to_me' &&
+    config.scope !== 'created_by_me'
+  ) {
+    config.scope = 'all';
   }
+
+  // Normalize scope parameter for version < 11 instances.
+  const [major] = version.split('.');
+  if (parseInt(major, 10) < 11) {
+    config.scope = config.scope.replace(/_/g, '-');
+  }
+
+  let path = '';
+  const search = new URLSearchParams();
+  search.append('state', config.state);
+
+  /**
+   * Set path based on config.type
+   */
+  if (config.type === 'epics') {
+    if (project.groupRestId) {
+      path = `/groups/${project.groupRestId}/${config.type}`;
+      search.append('include_ancestor_groups', 'true');
+    } else {
+      return [];
+    }
+  } else {
+    const searchKind =
+      config.type === CustomQueryType.VULNERABILITY ? 'vulnerability_findings' : config.type;
+    path = `/projects/${project.restId}/${searchKind}`;
+    search.append('scope', config.scope);
+  }
+
+  /**
+   * Author parameters
+   */
+  if (config.type === 'issues') {
+    if (author) {
+      search.append('author_username', author);
+    }
+  } else if (author) {
+    const authorUser = await fetchFirstUserByUsername(author);
+    search.append('author_id', (authorUser && authorUser.id) || '-1');
+  }
+
+  /**
+   * Assignee parameters
+   */
+  if (assignee === 'Any' || assignee === 'None') {
+    search.append('assignee_id', assignee);
+  } else if (assignee && config.type === 'issues') {
+    search.append('assignee_username', assignee);
+  } else if (assignee) {
+    const assigneeUser = await fetchFirstUserByUsername(assignee);
+    search.append('assignee_id', (assigneeUser && assigneeUser.id) || '-1');
+  }
+
+  /**
+   * Search in parameters
+   */
+  if (searchIn) {
+    if (searchIn === 'all') {
+      searchIn = 'title,description';
+    }
+    search.append('in', searchIn);
+  }
+
+  /**
+   * Handle WIP/Draft for merge_request config.type
+   */
+  if (config.type === 'merge_requests' && wip) {
+    search.append('wip', wip);
+  }
+
+  /**
+   * Query parameters related to issues
+   */
+  let issueQueryParams: Record<string, QueryValue> = {};
+  if (config.type === 'issues') {
+    issueQueryParams = {
+      confidential: params.confidential,
+      'not[labels]': params.excludeLabels,
+      'not[milestone]': params.excludeMilestone,
+      'not[author_username]': params.excludeAuthor,
+      'not[assignee_username]': params.excludeAssignee,
+      'not[search]': params.excludeSearch,
+      'not[in]': params.excludeSearchIn,
+    };
+  }
+
+  /**
+   * Pipeline parameters
+   */
+  // FIXME: this 'branch' or actual numerical ID most likely doesn't make sense from user perspective
+  //        Also, the logic allows for `pipeline_id=branch` query which doesn't make sense
+  //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
+  if (pipelineId) {
+    if (pipelineId === 'branch') {
+      const workspace = await getCurrentWorkspaceFolder();
+      if (workspace) {
+        pipelineId = (await fetchLastPipelineForCurrentBranch(workspace))?.id;
+      }
+    }
+    search.append('pipeline_id', `${pipelineId}`);
+  }
+
+  /**
+   * Miscellaneous parameters
+   */
+  const queryParams: Record<string, QueryValue> = {
+    labels: params.labels,
+    milestone: params.milestone,
+    search: params.search,
+    created_before: params.createdBefore,
+    created_after: params.createdAfter,
+    updated_before: params.updatedBefore,
+    updated_after: params.updatedAfter,
+    order_by: params.orderBy,
+    sort: params.sort,
+    per_page: params.maxResults,
+    report_type: params.reportTypes,
+    severity: params.severityLevels,
+    confidence: params.confidenceLevels,
+    ...issueQueryParams,
+  };
+  const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
+  usedQueryParamNames.forEach(name => search.append(name, `${queryParams[name]}`));
+
+  const { response } = await fetch(`${path}?${search.toString()}`);
+  issuable = response;
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl()));
 }
 

@@ -9,9 +9,22 @@ const createJsonEndpoint = (path, response) =>
     return res(ctx.status(200), ctx.json(response));
   });
 
+const sortRequestQuery = search =>
+  search
+    .slice(search.indexOf('?') + 1)
+    .split('&')
+    .sort()
+    .join('&');
+
 const createQueryJsonEndpoint = (path, queryResponseMap) =>
   rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
-    const response = queryResponseMap[req.url.search];
+    const sortedQueryResponseMap = Object.keys(queryResponseMap).reduce((acc, key) => {
+      const parsedKey = new URLSearchParams(sortRequestQuery(key)).toString();
+      return { ...acc, [parsedKey]: queryResponseMap[key] };
+    }, {});
+
+    const response = sortedQueryResponseMap[sortRequestQuery(req.url.search)];
+
     if (!response) {
       console.warn(`API call ${req.url.toString()} doesn't have a query handler.`);
       return res(ctx.status(404));
