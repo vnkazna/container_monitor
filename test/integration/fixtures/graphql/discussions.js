@@ -40,6 +40,7 @@ const note1 = {
   userPermissions: {
     resolveNote: true,
     adminNote: true,
+    createNote: true,
   },
   system: false,
   author: {
@@ -64,6 +65,7 @@ const note2 = {
   userPermissions: {
     resolveNote: true,
     adminNote: true,
+    createNote: true,
   },
   system: false,
   author: {
@@ -87,6 +89,7 @@ const noteOnDiff = {
   userPermissions: {
     resolveNote: true,
     adminNote: true,
+    createNote: true,
   },
   system: false,
   author: {

@@ -88,6 +88,7 @@ export type GqlTextPosition = GqlOldPosition | GqlNewPosition;
 interface GqlNotePermissions {
   resolveNote: boolean;
   adminNote: boolean;
+  createNote: boolean;
 }
 
 interface GqlGenericNote<T extends GqlBasePosition | null> {
@@ -265,6 +266,7 @@ ${includePosition ? positionFragment : ''}
           userPermissions {
             resolveNote
             adminNote
+            createNote
           }
           ${includePosition ? `...position` : ''}
         }
