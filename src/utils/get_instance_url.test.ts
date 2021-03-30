@@ -4,6 +4,7 @@ import simpleGit, { SimpleGit } from 'simple-git';
 import { getInstanceUrl } from './get_instance_url';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
 describe('get_instance_url', () => {
   const ORIGIN = 'origin';
@@ -21,6 +22,10 @@ describe('get_instance_url', () => {
         resolve(dirPath);
       });
     });
+
+  beforeEach(() => {
+    jest.spyOn(gitExtensionWrapper, 'gitBinaryPath', 'get').mockReturnValue('git');
+  });
 
   it('returns configured instanceUrl if the config contains one', async () => {
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({

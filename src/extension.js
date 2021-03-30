@@ -17,7 +17,7 @@ const { GitContentProvider } = require('./review/git_content_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
 const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
 const { CiCompletionProvider } = require('./completion/ci_completion_provider');
-const { GitExtensionWrapper } = require('./git/git_extension_wrapper');
+const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
 const {
   toggleResolved,
   deleteComment,
@@ -112,7 +112,7 @@ const activate = context => {
   tokenService.init(context);
   tokenServiceWrapper.init(context);
   registerCiCompletion(context);
-  context.subscriptions.push(GitExtensionWrapper.registerToGitExtension());
+  gitExtensionWrapper.init();
 };
 
 exports.activate = activate;

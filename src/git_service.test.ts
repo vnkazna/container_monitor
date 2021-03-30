@@ -4,6 +4,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 describe('git_service', () => {
   const ORIGIN = 'origin';
@@ -38,6 +39,7 @@ describe('git_service', () => {
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
       instanceUrl: 'https://gitlab.com',
     });
+    jest.spyOn(gitExtensionWrapper, 'gitBinaryPath', 'get').mockReturnValue('git');
   });
 
   afterEach(() => {
