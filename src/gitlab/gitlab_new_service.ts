@@ -102,21 +102,25 @@ interface GqlGenericNote<T extends GqlBasePosition | null> {
   position: T;
 }
 
-interface GqlGenericDiscussion<T extends GqlBasePosition | null> {
+interface GqlGenericDiscussion<T extends GqlNote> {
   replyId: string;
   createdAt: string;
   resolved: boolean;
   resolvable: boolean;
-  notes: Node<GqlGenericNote<T>>;
+  notes: Node<T>;
 }
 
 export type GqlTextDiffNote = GqlGenericNote<GqlTextPosition>;
-export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextPosition>;
+type GqlImageNote = GqlGenericNote<GqlImagePosition>;
+export type GqlOverviewNote = GqlGenericNote<null>;
+export type GqlNote = GqlTextDiffNote | GqlImageNote | GqlOverviewNote;
 
 export type GqlDiscussion =
-  | GqlGenericDiscussion<GqlTextPosition>
-  | GqlGenericDiscussion<GqlImagePosition>
-  | GqlGenericDiscussion<null>;
+  | GqlGenericDiscussion<GqlTextDiffNote>
+  | GqlGenericDiscussion<GqlImageNote>
+  | GqlGenericDiscussion<GqlOverviewNote>;
+
+export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextDiffNote>;
 
 interface GqlDiscussionsProject {
   mergeRequest?: {
