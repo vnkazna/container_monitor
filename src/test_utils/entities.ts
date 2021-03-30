@@ -14,6 +14,8 @@ export const issue: RestIssuable = {
   references: {
     full: 'gitlab-org/gitlab#1000',
   },
+  severity: 'severityLevel1',
+  name: 'Issuable Name',
 };
 
 export const mr: RestIssuable = {
