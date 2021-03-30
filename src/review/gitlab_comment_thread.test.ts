@@ -100,12 +100,13 @@ describe('GitLabCommentThread', () => {
       },
     });
 
-    it('allows replies if the first note has createNote permissions', () => {
+    it('disallows replies if the first note has createNote permissions', () => {
       const note = createNoteAndSetCreatePermissions(true);
 
       createGitLabCommentThread(createGqlTextDiffDiscussion(note));
 
-      expect(vsCommentThread.canReply).toBe(true);
+      // TODO: allow replies when finishing #339
+      expect(vsCommentThread.canReply).toBe(false);
     });
 
     it('disallows replies if the first note does not have createNote permissions', () => {

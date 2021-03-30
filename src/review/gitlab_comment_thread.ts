@@ -55,7 +55,9 @@ export class GitLabCommentThread {
     private mr: RestIssuable,
   ) {
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-    this.vsThread.canReply = firstNoteFrom(gqlDiscussion).userPermissions.createNote;
+    // TODO: when finishing #339, use the permissions to decide if replies should be allowed
+    // this.vsThread.canReply = firstNoteFrom(gqlDiscussion).userPermissions.createNote;
+    this.vsThread.canReply = false;
     this.resolved = gqlDiscussion.resolved;
     this.updateThreadContext();
   }
