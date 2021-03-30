@@ -45,7 +45,7 @@ Security harness installed -- you will only be able to push to gitlab.com/gitlab
 
 ### Request CVE number
 
-For exploitable security issues, request a CVE number by [creating an issue in `gitlab-org/cves` project](https://gitlab.com/gitlab-org/cves/-/issues/new). Use the assigned CVE number in the [changelog entry](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CHANGELOG.md#security).
+For exploitable security issues, request a CVE number by [creating an issue in `gitlab-org/cves` project](https://gitlab.com/gitlab-org/cves/-/issues/new). **You can do the release before the CVE number is available.** When the CVE number is assigned, add it to the [changelog entry](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CHANGELOG.md#security).
 
 Example CVE request: https://gitlab.com/gitlab-org/cves/-/issues/21
 
@@ -67,16 +67,6 @@ git checkout -b security-9999
 git push security security-9999
 ```
 
-#### Backporting fix branch
-
-This branch is going to serve for merging all the security fixes back to `main` branch. If you work on security release v2.2.1, you create the `security-backport-2-2` branch as follows:
-
-```sh
-git checkout main
-git checkout -b security-backport-2-2
-git push security security-backport-2-2
-```
-
 ### Development
 
 Here, the process diverges from the [`gitlab-org/gitlab` security release process].
@@ -88,18 +78,17 @@ Here, the process diverges from the [`gitlab-org/gitlab` security release proces
 
 ### Release the change
 
-Follow the [regular release process](release-process.md) to tag a new patch version on the `security-2-2` branch and release it. Patch release for tag `v2.2.0` would have version and tag `v2.2.1`.
+Follow the [regular release process](release-process.md) to tag a new patch version on the `security-2-2` branch and release it. Patch release for tag `v2.2.0` would have version and tag `v2.2.1`. Push the new version commit (changing `CHANGELOG.md` and version in `package.json`) to the `security-2-2` branch.
 
 Validate that the security issue is fixed in production.
 
 ### Backport the fix to `main`
 
-1. Checkout the backporting branch `git checkout security-backport-2-2`
-1. Cherry-pick all the fixes from the `security-2-2` branch.
-1. Create an MR to merge this the backporting branch to `main`
-1. Merge the MR
+1. Create an MR to merge the security branch `security-2-2` to `main`. Don't squash commits. Delete source branch.
+1. In MR description, add references to all the reviewed MRs that got merged to `security-2-2`.
+1. Review the MR and merge it. No need for additional reviewer since all the changes have been reviewed.
 
-Example: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension/-/merge_requests/4
+Example: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension/-/merge_requests/8
 
 ## Push changes back to the [Extension Repo]
 
