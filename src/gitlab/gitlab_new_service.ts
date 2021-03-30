@@ -36,6 +36,13 @@ interface GqlSnippetProject {
   snippets: Node<GqlSnippet>;
 }
 
+interface CreateNoteResult {
+  createNote: {
+    errors: unknown[];
+    note: GqlNote | null;
+  };
+}
+
 export interface GqlSnippet {
   id: string;
   projectId: string;
@@ -237,8 +244,31 @@ const positionFragment = gql`
   }
 `;
 
-const discussionsFragment = gql`
+const noteDetailsFragment = gql`
   ${positionFragment}
+  fragment noteDetails on Note {
+    id
+    createdAt
+    system
+    author {
+      avatarUrl
+      name
+      username
+      webUrl
+    }
+    body
+    bodyHtml
+    userPermissions {
+      resolveNote
+      adminNote
+      createNote
+    }
+    ...position
+  }
+`;
+
+const discussionsFragment = gql`
+  ${noteDetailsFragment}
   fragment discussions on DiscussionConnection {
     pageInfo {
       hasNextPage
@@ -255,23 +285,7 @@ const discussionsFragment = gql`
           endCursor
         }
         nodes {
-          id
-          createdAt
-          system
-          author {
-            avatarUrl
-            name
-            username
-            webUrl
-          }
-          body
-          bodyHtml
-          userPermissions {
-            resolveNote
-            adminNote
-            createNote
-          }
-          ...position
+          ...noteDetails
         }
       }
     }
@@ -303,9 +317,13 @@ const discussionSetResolved = gql`
 `;
 
 const createNoteMutation = gql`
+  ${noteDetailsFragment}
   mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
     createNote(input: { noteableId: $issuableId, body: $body, discussionId: $replyId }) {
       errors
+      note {
+        ...noteDetails
+      }
     }
   }
 `;
@@ -541,12 +559,21 @@ export class GitLabNewService {
     return combinedEvents;
   }
 
-  async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<void> {
-    await this.client.request<void>(createNoteMutation, {
+  async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<GqlNote> {
+    const result = await this.client.request<CreateNoteResult>(createNoteMutation, {
       issuableId: getIssuableGqlId(issuable),
       body,
       replyId,
     });
+    if (result.createNote.errors.length > 0) {
+      throw new UserFriendlyError(
+        `Couldn't create the comment when calling the API.
+        For more information, review the extension logs.`,
+        new Error(result.createNote.errors.join(',')),
+      );
+    }
+    assert(result.createNote.note);
+    return result.createNote.note;
   }
 
   async deleteNote(noteId: string): Promise<void> {
