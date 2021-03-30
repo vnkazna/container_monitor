@@ -1,4 +1,4 @@
-import { GitExtension } from '../api/git';
+import * as vscode from 'vscode';
 import { GitExtensionWrapper } from './git_extension_wrapper';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
@@ -12,20 +12,17 @@ describe('GitExtensionWrapper', () => {
 
   beforeEach(async () => {
     fakeExtension = new FakeGitExtension();
+    (vscode.extensions.getExtension as jest.Mock).mockReturnValue({ exports: fakeExtension });
   });
 
   it('creates a new GitLabRemoteSourceProviderRepository', async () => {
-    // TODO: maybe introduce something like an initialize method instead of doing the work in constructor
-    // eslint-disable-next-line no-new
-    new GitExtensionWrapper((fakeExtension as unknown) as GitExtension);
+    new GitExtensionWrapper().init();
 
     expect(GitLabRemoteSourceProviderRepository).toHaveBeenCalledWith(fakeExtension.gitApi);
   });
 
   it('adds credentials provider to the Git Extension', async () => {
-    // TODO: maybe introduce something like an initialize method instead of doing the work in constructor
-    // eslint-disable-next-line no-new
-    new GitExtensionWrapper((fakeExtension as unknown) as GitExtension);
+    new GitExtensionWrapper().init();
 
     expect(fakeExtension.gitApi.credentialsProviders).toEqual([gitlabCredentialsProvider]);
   });

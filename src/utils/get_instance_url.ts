@@ -5,10 +5,11 @@ import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
 import { log } from '../log';
 import { parseGitRemote } from '../git/git_remote_parser';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
 async function fetch(cmd: string, workspaceFolder: string): Promise<string | null> {
-  const [git, ...args] = cmd.trim().split(' ');
-  const { stdout } = await execa(git, args, {
+  const [, ...args] = cmd.trim().split(' ');
+  const { stdout } = await execa(gitExtensionWrapper.gitBinaryPath, args, {
     cwd: workspaceFolder,
     preferLocal: false,
   });
