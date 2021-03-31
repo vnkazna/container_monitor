@@ -24,6 +24,12 @@ Integration tests mock the GitLab API using the [`msw`](https://mswjs.io/docs/) 
 
 A temporary workspace for integration tests is created once before running the test suite by `test/create_tmp_workspace.ts`. In this helper script, we use [`simple-git`](https://github.com/steveukx/git-js) module to initialize git repository.
 
+### Debugging integration tests
+
+For debugging the integration tests, we first need to create a test workspace. We can do that by running ```npm run create-test-workspace``` script. This script generates a new workspace and inserts its path into `.vscode/launch.json`.
+
+Then we can debug the by running the "Integration Tests" [Launch configuration].
+
 ### Create a new integration test
 
 When creating a new integration test, you need to know how the tested functionality interacts with the rest of the VS Code, filesystem and GitLab API. Please see the [integration strategy](testing-strategy.md#extension-under-integration-tests) to understand the test boundaries.
@@ -54,12 +60,6 @@ We use [`msw`](https://mswjs.io/docs/) to intercept any requests and return prep
 1. Use a debugger to inspect what request you send out from `gitlab_new_service.ts` or `gitlab_service.ts`.
 1. Run your tests and note down the logged request that the functionality under test makes.
 1. Mock the request in the `before` or `beforeEach` method in your test.
-
-### Debugging integration tests
-
-For debugging the integration tests, we first need to create a test workspace. We can do that by running ```npm run create-test-workspace``` script. This script generates a new workspace and inserts its path into `.vscode/launch.json`.
-
-Then we can debug the by running the "Integration Tests" [Launch configuration].
 
 [Launch configuration]: https://code.visualstudio.com/docs/editor/debugging#_launch-configurations
 

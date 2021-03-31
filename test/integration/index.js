@@ -4,6 +4,9 @@ const Mocha = require('mocha');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const glob = require('glob');
 const { initializeTestEnvironment } = require('./test_infrastructure/initialize_test_environment');
+const { validateTestEnvironment } = require('./test_infrastructure/validate_test_environment');
+
+validateTestEnvironment();
 
 const getAllTestFiles = testsRoot =>
   new Promise((resolve, reject) => {
