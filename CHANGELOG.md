@@ -1,9 +1,9 @@
 ## [3.15.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.15.0...v3.15.1) (2021-03-30)
 
 
-### Bug Fixes
+### Security
 
-* use the same git binary as VS Code ([0fe4c5f](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0fe4c5fbcc947dee938635ca2a92a7d2deb6549b))
+* [CVE-2021-22195](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22195) use the same git binary as VS Code ([0fe4c5f](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0fe4c5fbcc947dee938635ca2a92a7d2deb6549b))
 
 
 
