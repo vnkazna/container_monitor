@@ -4,6 +4,8 @@ const fetch = require('cross-fetch');
 
 const VARIABLE_JSON_PATH = path.join(__dirname, '../src/completion/ci_variables.json');
 
+const docsLinkBasePath = 'https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/';
+
 async function fetchDocumentation() {
   return fetch(
     'https://gitlab.com/gitlab-org/gitlab/-/raw/master/doc/ci/variables/predefined_variables.md',
@@ -13,6 +15,7 @@ async function fetchDocumentation() {
 const headerLineRegex = /^\|\s+Variable/;
 const dividerLineRegex = /^\|-+/;
 const tableLineRegex = /^\|.+\|.+\|.+\|.+\|$/;
+const descriptionLinkRegex = /\]\((?!https?:\/\/)([^)]+)\)/;
 
 function parseDocumentation(variableMarkdown) {
   const lines = variableMarkdown.split('\n');
@@ -25,9 +28,13 @@ function parseDocumentation(variableMarkdown) {
 
     if (!nameSegment) return undefined;
 
+    const description = descriptionSegment
+      .trim()
+      .replace(descriptionLinkRegex, `](${docsLinkBasePath}$1)`);
+
     return {
       name: nameSegment.trim().replace(/`/g, ''),
-      description: descriptionSegment.trim(),
+      description,
     };
   });
 
