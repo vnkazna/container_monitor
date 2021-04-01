@@ -8,6 +8,7 @@ import { ItemModel } from './items/item_model';
 import { CONFIG_CUSTOM_QUERIES, CONFIG_NAMESPACE } from '../constants';
 import { logError } from '../log';
 import { ErrorItem } from './items/error_item';
+import { extensionState } from '../extension_state';
 
 export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
   private eventEmitter = new vscode.EventEmitter<void>();
@@ -16,11 +17,18 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
 
   onDidChangeTreeData = this.eventEmitter.event;
 
+  constructor() {
+    extensionState.onDidChangeValid(this.refresh, this);
+  }
+
   async getChildren(el: ItemModel | undefined): Promise<ItemModel[] | vscode.TreeItem[]> {
     if (el) return el.getChildren();
 
     this.children.forEach(ch => ch.dispose());
     this.children = [];
+    if (!extensionState.isValid()) {
+      return [];
+    }
     let workspaces: GitLabWorkspace[] = [];
     try {
       workspaces = await gitLabService.getAllGitlabWorkspaces();

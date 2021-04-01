@@ -3,6 +3,7 @@ const openers = require('./openers');
 const tokenInput = require('./token_input');
 const { tokenService } = require('./services/token_service');
 const tokenServiceWrapper = require('./token_service_wrapper');
+const { extensionState } = require('./extension_state');
 const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
 const { createSnippet } = require('./commands/create_snippet');
@@ -111,6 +112,7 @@ const activate = context => {
   webviewController.addDeps(context);
   tokenService.init(context);
   tokenServiceWrapper.init(context);
+  extensionState.init(tokenService);
   registerCiCompletion(context);
   gitExtensionWrapper.init();
 };
