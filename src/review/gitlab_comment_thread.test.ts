@@ -81,10 +81,6 @@ describe('GitLabCommentThread', () => {
     expect(vsCommentThread.collapsibleState).toBe(vscode.CommentThreadCollapsibleState.Expanded);
   });
 
-  it('sets canReply on the VS thread', () => {
-    expect(vsCommentThread.canReply).toBe(false);
-  });
-
   it('takes position from the first note', () => {
     expect(vsCommentThread.range.start.line).toBe(noteOnDiff.position.oldLine - 1); // vs code numbers lines from 0
   });
@@ -93,6 +89,33 @@ describe('GitLabCommentThread', () => {
     // TODO: improve the uri tests once we merge https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/192
     const { baseSha } = noteOnDiff.position.diffRefs; // baseSha points to the commit that the MR started from (old lines)
     expect(vsCommentThread.uri.query).toMatch(baseSha);
+  });
+
+  describe('allowing replies to the thread', () => {
+    const createNoteAndSetCreatePermissions = (createNote: boolean): GqlTextDiffNote => ({
+      ...(noteOnDiff as GqlTextDiffNote),
+      userPermissions: {
+        ...noteOnDiff.userPermissions,
+        createNote,
+      },
+    });
+
+    it('disallows replies if the first note has createNote permissions', () => {
+      const note = createNoteAndSetCreatePermissions(true);
+
+      createGitLabCommentThread(createGqlTextDiffDiscussion(note));
+
+      // TODO: allow replies when finishing #339
+      expect(vsCommentThread.canReply).toBe(false);
+    });
+
+    it('disallows replies if the first note does not have createNote permissions', () => {
+      const note = createNoteAndSetCreatePermissions(false);
+
+      createGitLabCommentThread(createGqlTextDiffDiscussion(note));
+
+      expect(vsCommentThread.canReply).toBe(false);
+    });
   });
 
   describe('resolving discussions', () => {

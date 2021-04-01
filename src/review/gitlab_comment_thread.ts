@@ -3,10 +3,17 @@ import * as assert from 'assert';
 import {
   GitLabNewService,
   GqlTextDiffDiscussion,
+  GqlTextDiffNote,
   GqlTextPosition,
 } from '../gitlab/gitlab_new_service';
 import { GitLabComment } from './gitlab_comment';
 import { toReviewUri } from './review_uri';
+
+const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
+  const note = discussion.notes.nodes[0];
+  assert(note, 'discussion should contain at least one note');
+  return note;
+};
 
 const commentRangeFromPosition = (position: GqlTextPosition): vscode.Range => {
   const glLine = position.oldLine ?? position.newLine;
@@ -48,6 +55,8 @@ export class GitLabCommentThread {
     private mr: RestIssuable,
   ) {
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
+    // TODO: when finishing #339, use the permissions to decide if replies should be allowed
+    // this.vsThread.canReply = firstNoteFrom(gqlDiscussion).userPermissions.createNote;
     this.vsThread.canReply = false;
     this.resolved = gqlDiscussion.resolved;
     this.updateThreadContext();
@@ -125,7 +134,7 @@ export class GitLabCommentThread {
     discussion,
     gitlabService,
   }: CreateThreadOptions): GitLabCommentThread {
-    const { position } = discussion.notes.nodes[0];
+    const { position } = firstNoteFrom(discussion);
     const vsThread = commentController.createCommentThread(
       uriFromPosition(position, workspaceFolder, mr.project_id),
       commentRangeFromPosition(position),

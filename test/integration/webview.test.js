@@ -6,7 +6,7 @@ const { graphql } = require('msw');
 const webviewController = require('../../src/webview_controller');
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
-const { projectWithIssueDiscussions } = require('./fixtures/graphql/discussions');
+const { projectWithIssueDiscussions, note2 } = require('./fixtures/graphql/discussions');
 
 const { getServer, createJsonEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
@@ -39,6 +39,7 @@ describe('GitLab webview', () => {
             ctx.data({
               createNote: {
                 errors: [],
+                note: note2,
               },
             }),
           );

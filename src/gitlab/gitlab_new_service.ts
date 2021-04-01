@@ -36,6 +36,13 @@ interface GqlSnippetProject {
   snippets: Node<GqlSnippet>;
 }
 
+interface CreateNoteResult {
+  createNote: {
+    errors: unknown[];
+    note: GqlNote | null;
+  };
+}
+
 export interface GqlSnippet {
   id: string;
   projectId: string;
@@ -88,6 +95,7 @@ export type GqlTextPosition = GqlOldPosition | GqlNewPosition;
 interface GqlNotePermissions {
   resolveNote: boolean;
   adminNote: boolean;
+  createNote: boolean;
 }
 
 interface GqlGenericNote<T extends GqlBasePosition | null> {
@@ -101,21 +109,25 @@ interface GqlGenericNote<T extends GqlBasePosition | null> {
   position: T;
 }
 
-interface GqlGenericDiscussion<T extends GqlBasePosition | null> {
+interface GqlGenericDiscussion<T extends GqlNote> {
   replyId: string;
   createdAt: string;
   resolved: boolean;
   resolvable: boolean;
-  notes: Node<GqlGenericNote<T>>;
+  notes: Node<T>;
 }
 
 export type GqlTextDiffNote = GqlGenericNote<GqlTextPosition>;
-export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextPosition>;
+type GqlImageNote = GqlGenericNote<GqlImagePosition>;
+export type GqlOverviewNote = GqlGenericNote<null>;
+export type GqlNote = GqlTextDiffNote | GqlImageNote | GqlOverviewNote;
 
 export type GqlDiscussion =
-  | GqlGenericDiscussion<GqlTextPosition>
-  | GqlGenericDiscussion<GqlImagePosition>
-  | GqlGenericDiscussion<null>;
+  | GqlGenericDiscussion<GqlTextDiffNote>
+  | GqlGenericDiscussion<GqlImageNote>
+  | GqlGenericDiscussion<GqlOverviewNote>;
+
+export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextDiffNote>;
 
 interface GqlDiscussionsProject {
   mergeRequest?: {
@@ -137,7 +149,6 @@ type Note = GqlDiscussion | RestLabelEvent;
 
 interface GetDiscussionsOptions {
   issuable: RestIssuable;
-  includePosition?: boolean;
   endCursor?: string;
 }
 
@@ -233,8 +244,31 @@ const positionFragment = gql`
   }
 `;
 
-const createDiscussionsFragment = (includePosition: boolean) => gql`
-${includePosition ? positionFragment : ''}
+const noteDetailsFragment = gql`
+  ${positionFragment}
+  fragment noteDetails on Note {
+    id
+    createdAt
+    system
+    author {
+      avatarUrl
+      name
+      username
+      webUrl
+    }
+    body
+    bodyHtml
+    userPermissions {
+      resolveNote
+      adminNote
+      createNote
+    }
+    ...position
+  }
+`;
+
+const discussionsFragment = gql`
+  ${noteDetailsFragment}
   fragment discussions on DiscussionConnection {
     pageInfo {
       hasNextPage
@@ -251,30 +285,15 @@ ${includePosition ? positionFragment : ''}
           endCursor
         }
         nodes {
-          id
-          createdAt
-          system
-          author {
-            avatarUrl
-            name
-            username
-            webUrl
-          }
-          body
-          bodyHtml
-          userPermissions {
-            resolveNote
-            adminNote
-          }
-          ${includePosition ? `...position` : ''}
+          ...noteDetails
         }
       }
     }
   }
 `;
 
-const constructGetDiscussionsQuery = (isMr: boolean, includePosition = false) => gql`
-  ${createDiscussionsFragment(includePosition)}
+const constructGetDiscussionsQuery = (isMr: boolean) => gql`
+  ${discussionsFragment}
   query Get${
     isMr ? 'Mr' : 'Issue'
   }Discussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
@@ -298,9 +317,13 @@ const discussionSetResolved = gql`
 `;
 
 const createNoteMutation = gql`
+  ${noteDetailsFragment}
   mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
     createNote(input: { noteableId: $issuableId, body: $body, discussionId: $replyId }) {
       errors
+      note {
+        ...noteDetails
+      }
     }
   }
 `;
@@ -472,13 +495,9 @@ export class GitLabNewService {
     } as GqlDiscussion;
   }
 
-  async getDiscussions({
-    issuable,
-    includePosition = false,
-    endCursor,
-  }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
+  async getDiscussions({ issuable, endCursor }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
     const projectPath = getProjectPath(issuable);
-    const query = constructGetDiscussionsQuery(isMr(issuable), includePosition);
+    const query = constructGetDiscussionsQuery(isMr(issuable));
     const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
       projectPath,
       iid: String(issuable.iid),
@@ -492,7 +511,6 @@ export class GitLabNewService {
       assert(discussions.pageInfo.endCursor);
       const remainingPages = await this.getDiscussions({
         issuable,
-        includePosition,
         endCursor: discussions.pageInfo.endCursor,
       });
       return [...discussions.nodes, ...remainingPages];
@@ -541,12 +559,21 @@ export class GitLabNewService {
     return combinedEvents;
   }
 
-  async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<void> {
-    await this.client.request<void>(createNoteMutation, {
+  async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<GqlNote> {
+    const result = await this.client.request<CreateNoteResult>(createNoteMutation, {
       issuableId: getIssuableGqlId(issuable),
       body,
       replyId,
     });
+    if (result.createNote.errors.length > 0) {
+      throw new UserFriendlyError(
+        `Couldn't create the comment when calling the API.
+        For more information, review the extension logs.`,
+        new Error(result.createNote.errors.join(',')),
+      );
+    }
+    assert(result.createNote.note);
+    return result.createNote.note;
   }
 
   async deleteNote(noteId: string): Promise<void> {

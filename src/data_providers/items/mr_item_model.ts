@@ -64,7 +64,6 @@ export class MrItemModel extends ItemModel {
 
     const discussions = await gitlabService.getDiscussions({
       issuable: this.mr,
-      includePosition: true,
     });
     const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
     const threads = discussionsOnDiff.map(discussion => {
