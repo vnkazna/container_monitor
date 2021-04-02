@@ -8,7 +8,7 @@ This document describes how we make changes to the extension. For contributing g
 
 ## Who reviews the changes?
 
-**Any member of the Create:Code Review team** (either [FE] or [BE]) can review a change (MR). Each MR should have at least one review. At the moment, we don't want to have any more complexity in the process. The review is mainly for knowledge sharing and sanity checking. It's not a full sign off the same way maintainer would sing off change to GitLab project.
+**Any member of the Create:Code Review team** (either [FE] or [BE]) can review a change (MR). Each MR should have at least one review. At the moment, we don't want to have any more complexity in the process to speed up the development. The review is mainly for knowledge sharing and sanity checking. It's not a full sign off the same way a maintainer would sign off a change to the [`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab/) project.
 
 ## Who releases the changes?
 
