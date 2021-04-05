@@ -31,12 +31,12 @@ export class MrItemModel extends ItemModel {
   }
 
   async getChildren(): Promise<vscode.TreeItem[]> {
-    const description = new vscode.TreeItem('Description');
-    description.iconPath = new vscode.ThemeIcon('note');
-    description.command = {
+    const overview = new vscode.TreeItem('Overview');
+    overview.iconPath = new vscode.ThemeIcon('note');
+    overview.command = {
       command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
       arguments: [this.mr, this.workspace.uri],
-      title: 'Show MR',
+      title: 'Show MR Overview',
     };
     try {
       await this.getMrDiscussions();
@@ -51,7 +51,7 @@ export class MrItemModel extends ItemModel {
       );
     }
     const changedFiles = await this.getChangedFiles();
-    return [description, ...changedFiles];
+    return [overview, ...changedFiles];
   }
 
   private async getMrDiscussions(): Promise<void> {

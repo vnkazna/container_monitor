@@ -66,7 +66,7 @@ describe('MR Review', () => {
     assert.strictEqual(mrItem.label, '!33824 · Web IDE - remove unused actions (mappings)');
 
     const mrContent = await dataProvider.getChildren(mrItemModel);
-    assert.strictEqual(getTreeItem(mrContent[0]).label, 'Description');
+    assert.strictEqual(getTreeItem(mrContent[0]).label, 'Overview');
 
     const mrFiles = mrContent.slice(1);
     assert.deepStrictEqual(
@@ -151,7 +151,7 @@ describe('MR Review', () => {
       );
 
       const mrContent = await dataProvider.getChildren(mrItemModel);
-      assert.strictEqual(mrContent[0].label, 'Description');
+      assert.strictEqual(mrContent[0].label, 'Overview');
 
       mrFiles = mrContent.slice(1);
     });
