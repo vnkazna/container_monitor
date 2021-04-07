@@ -1,3 +1,19 @@
+# [3.16.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.15.1...v3.16.0) (2021-04-07)
+
+
+### Bug Fixes
+
+* **instanceurl:** subpath in self-managed GitLab is not used [#319](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/319) ([7b0cba0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/7b0cba0358a31e61776acc55aef08e75b418c7c5))
+* elliptic and y18n have vulnerabilities ([ba067e1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/ba067e1b73b8a065a5fd82d9aa54303bebe14d9b))
+
+
+### Features
+
+* rename 'Description' to 'Overview' in MR items ([ca1ad6e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/ca1ad6e0fc4b606b90f150a370d1a3b8dee5c42c))
+* **sidebar:** show welcome view if there are no tokens set ([a0fbaee](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/a0fbaee10780002f34dfe40200bd690fd02433a5))
+
+
+
 ## [3.15.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.15.0...v3.15.1) (2021-03-30)
 
 
