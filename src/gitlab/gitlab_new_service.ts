@@ -353,7 +353,10 @@ export class GitLabNewService {
   client: GraphQLClient;
 
   constructor(readonly instanceUrl: string, readonly pipelineInstanceUrl?: string) {
-    const endpoint = new URL('/api/graphql', this.instanceUrl).href;
+    const ensureEndsWithSlash = (url: string) => url.replace(/\/?$/, '/');
+
+    const endpoint = new URL('./api/graphql', ensureEndsWithSlash(this.instanceUrl)).href; // supports GitLab instances that are on a custom path, e.g. "https://example.com/gitlab"
+
     this.client = new GraphQLClient(endpoint, this.fetchOptions);
   }
 
