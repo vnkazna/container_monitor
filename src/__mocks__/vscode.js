@@ -40,4 +40,6 @@ module.exports = {
   Range: function Range(start, end) {
     return { start, end };
   },
+  CancellationTokenSource: jest.fn(),
+  ThemeColor: jest.fn(color => color),
 };
