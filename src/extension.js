@@ -26,6 +26,7 @@ const {
   cancelEdit,
   submitEdit,
 } = require('./commands/mr_discussion_commands');
+const { fileDecorationProvider } = require('./review/file_decoration_provider');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -115,6 +116,7 @@ const activate = context => {
   extensionState.init(tokenService);
   registerCiCompletion(context);
   gitExtensionWrapper.init();
+  vscode.window.registerFileDecorationProvider(fileDecorationProvider);
 };
 
 exports.activate = activate;

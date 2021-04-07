@@ -71,10 +71,10 @@ export class Uri implements vscode.Uri {
 
   static file(filePath: string) {
     return new Uri({
-      scheme: 'file://',
+      scheme: 'file',
       authority: '',
-      path: filePath,
-      query: '',
+      path: filePath.split('?')[0] || '',
+      query: filePath.split('?')[1] || '',
       fragment: '',
     });
   }

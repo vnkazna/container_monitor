@@ -80,9 +80,10 @@ describe('MR Review', () => {
         '/Screenshot.png',
       ],
     );
+
     assert.deepStrictEqual(
       mrFiles.map(f => getTreeItem(f).description),
-      ['[deleted] /', '[renamed] /', '[added] /', '/src', '[added] /src/assets', '[renamed] /'],
+      ['', '', '', 'src', 'src/assets', ''],
     );
   });
 

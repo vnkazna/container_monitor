@@ -2,12 +2,15 @@ import { TreeItem, Uri } from 'vscode';
 import { posix as path } from 'path';
 import { toReviewUri } from '../../review/review_uri';
 import { PROGRAMMATIC_COMMANDS, VS_COMMANDS } from '../../command_names';
+import { ADDED, DELETED, RENAMED, MODIFIED } from '../../constants';
 
-const getChangeTypeIndicator = (diff: RestDiffFile): string => {
-  if (diff.new_file) return '[added] ';
-  if (diff.deleted_file) return '[deleted] ';
-  if (diff.renamed_file) return '[renamed] ';
-  return '';
+export type ChangeType = typeof ADDED | typeof DELETED | typeof RENAMED | typeof MODIFIED;
+
+const getChangeType = (file: RestDiffFile): ChangeType => {
+  if (file.new_file) return ADDED;
+  if (file.deleted_file) return DELETED;
+  if (file.renamed_file) return RENAMED;
+  return MODIFIED;
 };
 
 // Common image types https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
@@ -40,9 +43,14 @@ export class ChangedFileItem extends TreeItem {
     file: RestDiffFile,
     workspace: GitLabWorkspace,
   ) {
-    super(Uri.file(file.new_path));
-    // TODO add FileDecorationProvider once it is available in the 1.52 https://github.com/microsoft/vscode/issues/54938
-    this.description = `${getChangeTypeIndicator(file)}${path.dirname(`/${file.new_path}`)}`;
+    const changeType = getChangeType(file);
+    const query = new URLSearchParams([['changeType', changeType]]).toString();
+    super(Uri.file(file.new_path).with({ query }));
+    this.description = path
+      .dirname(`/${file.new_path}`)
+      .split('/')
+      .slice(1)
+      .join('/');
     this.mr = mr;
     this.mrVersion = mrVersion;
     this.workspace = workspace;
