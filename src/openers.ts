@@ -10,7 +10,7 @@ import { createGitService } from './service_factory';
 import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
 
-export const openUrl = (url: string) =>
+export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
 
 /**
@@ -38,14 +38,14 @@ async function openLink(linkTemplate: string, workspaceFolder: string) {
   await openUrl(await getLink(linkTemplate, workspaceFolder));
 }
 
-export async function showIssues() {
+export async function showIssues(): Promise<void> {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   if (!workspaceFolder) return;
 
   await openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder);
 }
 
-export async function showMergeRequests() {
+export async function showMergeRequests(): Promise<void> {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   if (!workspaceFolder) return;
 
@@ -95,11 +95,11 @@ async function getActiveFile() {
   return `${fileUrl}${anchor}`;
 }
 
-export async function openActiveFile() {
+export async function openActiveFile(): Promise<void> {
   await openUrl((await getActiveFile())!);
 }
 
-export async function copyLinkToActiveFile() {
+export async function copyLinkToActiveFile(): Promise<void> {
   const fileUrl = await getActiveFile();
 
   if (fileUrl) {
@@ -107,7 +107,7 @@ export async function copyLinkToActiveFile() {
   }
 }
 
-export async function openCurrentMergeRequest() {
+export async function openCurrentMergeRequest(): Promise<void> {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   if (!workspaceFolder) return;
 
@@ -118,14 +118,14 @@ export async function openCurrentMergeRequest() {
   }
 }
 
-export async function openCreateNewIssue() {
+export async function openCreateNewIssue(): Promise<void> {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   if (!workspaceFolder) return;
 
   openLink('$projectUrl/issues/new', workspaceFolder);
 }
 
-export async function openCreateNewMr() {
+export async function openCreateNewMr(): Promise<void> {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   if (!workspaceFolder) return;
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
@@ -134,13 +134,13 @@ export async function openCreateNewMr() {
   openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
 }
 
-export async function openProjectPage() {
+export async function openProjectPage(): Promise<void> {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
   if (!workspaceFolder) return;
   openLink('$projectUrl', workspaceFolder);
 }
 
-export async function openCurrentPipeline(workspaceFolder: string) {
+export async function openCurrentPipeline(workspaceFolder: string): Promise<void> {
   const { pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
 
   if (pipeline) {
@@ -148,7 +148,7 @@ export async function openCurrentPipeline(workspaceFolder: string) {
   }
 }
 
-export async function compareCurrentBranch() {
+export async function compareCurrentBranch(): Promise<void> {
   let project = null;
   let lastCommitId = null;
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
