@@ -30,6 +30,7 @@ export const USER_COMMANDS = {
   START_EDITING_COMMENT: 'gl.startEditingComment',
   CANCEL_EDITING_COMMENT: 'gl.cancelEditingComment',
   SUBMIT_COMMENT_EDIT: 'gl.submitCommentEdit',
+  CREATE_COMMENT: 'gl.createComment',
 };
 
 /*

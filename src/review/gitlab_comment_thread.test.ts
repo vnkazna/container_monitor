@@ -63,6 +63,7 @@ describe('GitLabCommentThread', () => {
       setResolved: jest.fn(),
       deleteNote: jest.fn(),
       updateNoteBody: jest.fn(),
+      createNote: jest.fn(),
     } as unknown) as GitLabNewService;
     gitlabCommentThread = GitLabCommentThread.createThread({
       commentController: fakeCommentController,
@@ -100,13 +101,12 @@ describe('GitLabCommentThread', () => {
       },
     });
 
-    it('disallows replies if the first note has createNote permissions', () => {
+    it('allows replies if the first note has createNote permissions', () => {
       const note = createNoteAndSetCreatePermissions(true);
 
       createGitLabCommentThread(createGqlTextDiffDiscussion(note));
 
-      // TODO: allow replies when finishing #339
-      expect(vsCommentThread.canReply).toBe(false);
+      expect(vsCommentThread.canReply).toBe(true);
     });
 
     it('disallows replies if the first note does not have createNote permissions', () => {
@@ -265,6 +265,36 @@ describe('GitLabCommentThread', () => {
       expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Editing);
       expect(vsCommentThread.comments[0].body).toBe('updated body');
       expect((vsCommentThread.comments[0] as GitLabComment).gqlNote.body).toBe('first body');
+    });
+  });
+
+  describe('replying to comments', () => {
+    it('submits the reply', async () => {
+      (gitlabService.createNote as jest.Mock).mockResolvedValue({
+        ...(noteOnDiff as GqlTextDiffNote),
+        id: 'gid://gitlab/DiffNote/3',
+        body: 'reply text',
+      });
+      expect(vsCommentThread.comments.length).toBe(1);
+
+      await gitlabCommentThread.reply('reply text');
+
+      expect(vsCommentThread.comments.length).toBe(2);
+      const { mode, body, gqlNote } = vsCommentThread.comments[1] as GitLabComment;
+      expect(mode).toBe(vscode.CommentMode.Preview);
+      expect(body).toBe('reply text');
+      expect(gqlNote.body).toBe('reply text');
+    });
+
+    it('handles API error', async () => {
+      const error = new Error();
+      (gitlabService.createNote as jest.Mock).mockRejectedValue(error);
+
+      expect(vsCommentThread.comments.length).toBe(1);
+
+      await expect(gitlabCommentThread.reply('reply text')).rejects.toBe(error);
+
+      expect(vsCommentThread.comments.length).toBe(1);
     });
   });
 });
