@@ -1,3 +1,13 @@
+# [3.17.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.16.0...v3.17.0) (2021-04-08)
+
+
+### Features
+
+* respond to an MR diff thread ([3182937](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/31829375987c55e1935d15d7a4b692365f4bc607))
+* **mr review:** show change type for each changed file ([b9f5e12](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b9f5e120b7200b163a8e03a2490a60afe78058f0))
+
+
+
 # [3.16.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.15.1...v3.16.0) (2021-04-07)
 
 

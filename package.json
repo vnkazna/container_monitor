@@ -2,7 +2,7 @@
   "name": "gitlab-workflow",
   "displayName": "GitLab Workflow",
   "description": "GitLab VSCode integration",
-  "version": "3.16.0",
+  "version": "3.17.0",
   "publisher": "GitLab",
   "license": "MIT",
   "repository": {
@@ -238,11 +238,11 @@
         }
       ],
       "comments/commentThread/context": [
-				{
-					"command": "gl.createComment",
-					"group": "inline"
-				}
-			]
+        {
+          "command": "gl.createComment",
+          "group": "inline"
+        }
+      ]
     },
     "viewsContainers": {
       "activitybar": [
