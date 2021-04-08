@@ -158,6 +158,11 @@
         "command": "gl.submitCommentEdit",
         "title": "Save comment",
         "category": "GitLab"
+      },
+      {
+        "command": "gl.createComment",
+        "title": "Add comment now",
+        "category": "GitLab"
       }
     ],
     "menus": {
@@ -184,6 +189,10 @@
         },
         {
           "command": "gl.submitCommentEdit",
+          "when": "false"
+        },
+        {
+          "command": "gl.createComment",
           "when": "false"
         }
       ],
@@ -227,7 +236,13 @@
           "group": "inline@2",
           "when": "commentThread == resolved"
         }
-      ]
+      ],
+      "comments/commentThread/context": [
+				{
+					"command": "gl.createComment",
+					"group": "inline"
+				}
+			]
     },
     "viewsContainers": {
       "activitybar": [

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import {
   GitLabNewService,
+  GqlNote,
   GqlTextDiffDiscussion,
   GqlTextDiffNote,
   GqlTextPosition,
@@ -13,6 +14,10 @@ const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
   const note = discussion.notes.nodes[0];
   assert(note, 'discussion should contain at least one note');
   return note;
+};
+
+const isDiffNote = (note: GqlNote): note is GqlTextDiffNote => {
+  return Boolean(note.position && note.position.positionType === 'text');
 };
 
 const commentRangeFromPosition = (position: GqlTextPosition): vscode.Range => {
@@ -55,9 +60,7 @@ export class GitLabCommentThread {
     private mr: RestIssuable,
   ) {
     this.vsThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-    // TODO: when finishing #339, use the permissions to decide if replies should be allowed
-    // this.vsThread.canReply = firstNoteFrom(gqlDiscussion).userPermissions.createNote;
-    this.vsThread.canReply = false;
+    this.vsThread.canReply = firstNoteFrom(gqlDiscussion).userPermissions.createNote;
     this.resolved = gqlDiscussion.resolved;
     this.updateThreadContext();
   }
@@ -103,6 +106,19 @@ export class GitLabCommentThread {
     this.changeOneComment(comment.id, c =>
       c.markBodyAsSubmitted().withMode(vscode.CommentMode.Preview),
     );
+  }
+
+  async reply(text: string): Promise<void> {
+    const note = await this.gitlabService.createNote(this.mr, text, this.gqlDiscussion.replyId);
+    assert(isDiffNote(note));
+    this.vsThread.comments = [...this.vsThread.comments, GitLabComment.fromGqlNote(note, this)];
+    // prevent mutating existing API response by making deeper copy
+    this.gqlDiscussion = {
+      ...this.gqlDiscussion,
+      notes: {
+        nodes: [...this.gqlDiscussion.notes.nodes, note],
+      },
+    };
   }
 
   private changeOneComment(id: string, changeFn: (c: GitLabComment) => GitLabComment): void {

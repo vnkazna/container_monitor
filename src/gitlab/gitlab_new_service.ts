@@ -563,20 +563,24 @@ export class GitLabNewService {
   }
 
   async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<GqlNote> {
-    const result = await this.client.request<CreateNoteResult>(createNoteMutation, {
-      issuableId: getIssuableGqlId(issuable),
-      body,
-      replyId,
-    });
-    if (result.createNote.errors.length > 0) {
+    try {
+      const result = await this.client.request<CreateNoteResult>(createNoteMutation, {
+        issuableId: getIssuableGqlId(issuable),
+        body,
+        replyId,
+      });
+      if (result.createNote.errors.length > 0) {
+        throw new Error(result.createNote.errors.join(','));
+      }
+      assert(result.createNote.note);
+      return result.createNote.note;
+    } catch (error) {
       throw new UserFriendlyError(
         `Couldn't create the comment when calling the API.
-        For more information, review the extension logs.`,
-        new Error(result.createNote.errors.join(',')),
+      For more information, review the extension logs.`,
+        error,
       );
     }
-    assert(result.createNote.note);
-    return result.createNote.note;
   }
 
   async deleteNote(noteId: string): Promise<void> {
