@@ -102,6 +102,7 @@ async function fetch(path: string, method = 'GET', data?: Record<string, unknown
 }
 
 async function fetchProjectData(remote: GitRemote | null, workspaceFolder: string) {
+  // TODO require remote so we can guarantee that we return a value or error
   if (remote) {
     if (!(`${remote.namespace}_${remote.project}` in projectCache)) {
       const { namespace, project } = remote;

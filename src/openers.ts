@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as assert from 'assert';
 import * as gitLabService from './gitlab_service';
 import {
   getCurrentWorkspaceFolderOrSelectOne,
@@ -29,7 +30,8 @@ async function getLink(linkTemplate: string, workspaceFolder: string) {
   const user = await gitLabService.fetchCurrentUser();
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
 
-  return linkTemplate.replace('$userId', user.id).replace('$projectUrl', project!.webUrl);
+  assert(project, 'Failed to fetch project');
+  return linkTemplate.replace('$userId', user.id).replace('$projectUrl', project.webUrl);
 }
 
 async function openLink(linkTemplate: string, workspaceFolder: string) {
@@ -38,12 +40,16 @@ async function openLink(linkTemplate: string, workspaceFolder: string) {
 
 export async function showIssues() {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  await openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder!);
+  if (!workspaceFolder) return;
+
+  await openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder);
 }
 
 export async function showMergeRequests() {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  await openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder!);
+  if (!workspaceFolder) return;
+
+  await openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder);
 }
 
 async function getActiveFile() {
@@ -103,7 +109,9 @@ export async function copyLinkToActiveFile() {
 
 export async function openCurrentMergeRequest() {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder!);
+  if (!workspaceFolder) return;
+
+  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
 
   if (mr) {
     await openUrl(mr.web_url);
@@ -112,20 +120,24 @@ export async function openCurrentMergeRequest() {
 
 export async function openCreateNewIssue() {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  openLink('$projectUrl/issues/new', workspaceFolder!);
+  if (!workspaceFolder) return;
+
+  openLink('$projectUrl/issues/new', workspaceFolder);
 }
 
 export async function openCreateNewMr() {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder!);
-  const branchName = await createGitService(workspaceFolder!).fetchTrackingBranchName();
+  if (!workspaceFolder) return;
+  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
   openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
 }
 
 export async function openProjectPage() {
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  openLink('$projectUrl', workspaceFolder!);
+  if (!workspaceFolder) return;
+  openLink('$projectUrl', workspaceFolder);
 }
 
 export async function openCurrentPipeline(workspaceFolder: string) {
@@ -140,9 +152,10 @@ export async function compareCurrentBranch() {
   let project = null;
   let lastCommitId = null;
   const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
+  if (!workspaceFolder) return;
 
-  project = await gitLabService.fetchCurrentProject(workspaceFolder!);
-  lastCommitId = await createGitService(workspaceFolder!).fetchLastCommitId();
+  project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  lastCommitId = await createGitService(workspaceFolder).fetchLastCommitId();
 
   if (project && lastCommitId) {
     openUrl(`${project.webUrl}/compare/master...${lastCommitId}`);
