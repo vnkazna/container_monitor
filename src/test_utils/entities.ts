@@ -22,7 +22,7 @@ export const mr: RestIssuable = {
   ...issue,
   id: 2,
   iid: 2000,
-  web_url: 'https://gitlab.example.com/group/project/merge_requests//1',
+  web_url: 'https://gitlab.example.com/group/project/merge_requests/2000',
   references: {
     full: 'gitlab-org/gitlab!2000',
   },

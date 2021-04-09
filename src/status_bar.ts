@@ -42,7 +42,7 @@ const createStatusTextFromJobs = (jobs: gitLabService.RestJob[], status: string)
   return statusText;
 };
 
-const createStatusBarItem = (text: string, command: string) => {
+const createStatusBarItem = (text: string, command?: string | vscode.Command) => {
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   statusBarItem.text = text;
   statusBarItem.show();
@@ -57,6 +57,12 @@ const createStatusBarItem = (text: string, command: string) => {
 const commandRegisterHelper = (cmdName: string, callback: (...args: any[]) => any) => {
   vscode.commands.registerCommand(cmdName, callback);
 };
+
+const openMrCommand = (mr: RestIssuable): vscode.Command => ({
+  title: '', // the title is not used for StatusBarItem commands
+  command: 'vscode.open',
+  arguments: [mr.web_url],
+});
 
 export class StatusBar {
   pipelineStatusBarItem?: vscode.StatusBarItem;
@@ -174,6 +180,9 @@ export class StatusBar {
           (await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder!)) ??
           undefined;
         this.mrStatusBarItem.show();
+        this.mrStatusBarItem.command = this.mr
+          ? openMrCommand(this.mr)
+          : USER_COMMANDS.OPEN_CREATE_NEW_MR;
       } else {
         this.mrStatusBarItem.hide();
       }
@@ -197,16 +206,7 @@ export class StatusBar {
   }
 
   async initMrStatus() {
-    const cmdName = `gl.mrOpener${Date.now()}`;
-    commandRegisterHelper(cmdName, () => {
-      if (this.mr) {
-        openers.openUrl(this.mr.web_url);
-      } else {
-        openers.openCreateNewMr();
-      }
-    });
-
-    this.mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...', cmdName);
+    this.mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...');
     this.mrStatusTimer = setInterval(() => {
       this.fetchBranchMrAndClosingIssue();
     }, 60000);

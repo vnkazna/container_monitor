@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as gitLabService from './gitlab_service';
 import { pipeline, mr, issue } from './test_utils/entities';
+import { USER_COMMANDS } from './command_names';
 
 jest.mock('./gitlab_service');
 
@@ -139,12 +140,16 @@ describe('status_bar', () => {
       expect(getMrItem().show).toHaveBeenCalled();
       expect(getMrItem().hide).not.toHaveBeenCalled();
       expect(getMrItem().text).toBe('$(git-pull-request) GitLab: MR !2000');
+      const command = getMrItem().command as vscode.Command;
+      expect(command.command).toBe('vscode.open');
+      expect(command.arguments?.[0]).toMatch(/merge_requests\/2000$/);
     });
 
     it('shows create MR text when there is no MR', async () => {
       asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(null);
       await statusBar.init();
       expect(getMrItem().text).toBe('$(git-pull-request) GitLab: Create MR.');
+      expect(getMrItem().command).toBe(USER_COMMANDS.OPEN_CREATE_NEW_MR);
     });
 
     it('hides the MR item when there is no project', async () => {
