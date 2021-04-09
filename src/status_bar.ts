@@ -54,14 +54,10 @@ const createStatusBarItem = (text: string, command?: string | vscode.Command) =>
   return statusBarItem;
 };
 
-const commandRegisterHelper = (cmdName: string, callback: (...args: any[]) => any) => {
-  vscode.commands.registerCommand(cmdName, callback);
-};
-
-const openMrCommand = (mr: RestIssuable): vscode.Command => ({
+const openIssuableOnTheWebCommand = (issuable: RestIssuable): vscode.Command => ({
   title: '', // the title is not used for StatusBarItem commands
   command: 'vscode.open',
-  arguments: [mr.web_url],
+  arguments: [issuable.web_url],
 });
 
 export class StatusBar {
@@ -157,13 +153,16 @@ export class StatusBar {
     if (!this.mrIssueStatusBarItem || !this.mr) return;
     const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
     let text = `$(code) GitLab: No issue.`;
+    let command;
 
     if (issues[0]) {
       [this.issue] = issues;
       text = `$(code) GitLab: Issue #${this.issue.iid}`;
+      command = openIssuableOnTheWebCommand(this.issue);
     }
 
     this.mrIssueStatusBarItem.text = text;
+    this.mrIssueStatusBarItem.command = command;
   }
 
   async fetchBranchMrAndClosingIssue() {
@@ -181,7 +180,7 @@ export class StatusBar {
           undefined;
         this.mrStatusBarItem.show();
         this.mrStatusBarItem.command = this.mr
-          ? openMrCommand(this.mr)
+          ? openIssuableOnTheWebCommand(this.mr)
           : USER_COMMANDS.OPEN_CREATE_NEW_MR;
       } else {
         this.mrStatusBarItem.hide();
@@ -197,6 +196,7 @@ export class StatusBar {
       this.mrIssueStatusBarItem.show();
     } else if (project) {
       this.mrIssueStatusBarItem.text = `$(code) GitLab: No issue.`;
+      this.mrIssueStatusBarItem.command = undefined;
       this.mrIssueStatusBarItem.show();
     } else {
       this.mrIssueStatusBarItem.hide();
@@ -212,31 +212,15 @@ export class StatusBar {
     }, 60000);
   }
 
-  initMrIssueStatus() {
-    const cmdName = `gl.mrIssueOpener${Date.now()}`;
-    commandRegisterHelper(cmdName, () => {
-      if (this.issue) {
-        openers.openUrl(this.issue.web_url);
-      } else {
-        vscode.window.showInformationMessage(
-          'GitLab Workflow: No closing issue found for this MR.',
-        );
-      }
-    });
-
-    this.mrIssueStatusBarItem = createStatusBarItem(
-      '$(info) GitLab: Fetching closing issue...',
-      cmdName,
-    );
-  }
-
   async init() {
     if (showStatusBarLinks) {
       await this.initPipelineStatus();
       if (showMrStatusOnStatusBar) {
         await this.initMrStatus();
         if (showIssueLinkOnStatusBar) {
-          this.initMrIssueStatus();
+          this.mrIssueStatusBarItem = createStatusBarItem(
+            '$(info) GitLab: Fetching closing issue...',
+          );
         }
         await this.fetchBranchMrAndClosingIssue();
       }

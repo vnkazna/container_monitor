@@ -177,6 +177,9 @@ describe('status_bar', () => {
       expect(getClosingIssueItem().show).toHaveBeenCalled();
       expect(getClosingIssueItem().hide).not.toHaveBeenCalled();
       expect(getClosingIssueItem().text).toBe('$(code) GitLab: Issue #1000');
+      const command = getClosingIssueItem().command as vscode.Command;
+      expect(command.command).toBe('vscode.open');
+      expect(command.arguments?.[0]).toMatch(/issues\/1000$/);
     });
 
     it('shows no issue when there is not a closing issue', async () => {
@@ -184,12 +187,14 @@ describe('status_bar', () => {
       asMock(gitLabService.fetchMRIssues).mockReturnValue([]);
       await statusBar.init();
       expect(getClosingIssueItem().text).toBe('$(code) GitLab: No issue.');
+      expect(getClosingIssueItem().command).toBe(undefined);
     });
 
     it('shows no issue when there is no MR', async () => {
       asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(null);
       await statusBar.init();
       expect(getClosingIssueItem().text).toBe('$(code) GitLab: No issue.');
+      expect(getClosingIssueItem().command).toBe(undefined);
     });
 
     it('hides the item when there is no project', async () => {
