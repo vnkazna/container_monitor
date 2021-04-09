@@ -35,7 +35,7 @@ async function showPicker() {
     }
 
     const newPipeline = await gitLabService.handlePipelineAction(selected.action, workspaceFolder);
-    if (newPipeline) statusBar.refreshPipeline();
+    if (newPipeline) statusBar.refreshPipelineAndMr();
   }
 }
 

@@ -77,7 +77,7 @@ export class StatusBar {
 
   firstRun = true;
 
-  async refreshPipeline() {
+  async refreshPipelineAndMr() {
     if (!this.pipelineStatusBarItem) return;
     let workspaceFolder: string | undefined;
     let pipeline = null;
@@ -85,8 +85,8 @@ export class StatusBar {
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
       const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder!);
-      // TODO: the result contains the MR for this branch as well, we can refactor status_bar
-      // to use this response instead of making a separate request.
+      this.mr = result.mr ?? undefined;
+      this.updateMrItem();
       pipeline = result.pipeline;
     } catch (e) {
       logError(e);
@@ -143,10 +143,8 @@ export class StatusBar {
     );
 
     this.pipelinesStatusTimer = setInterval(() => {
-      this.refreshPipeline();
+      this.refreshPipelineAndMr();
     }, 30000);
-
-    await this.refreshPipeline();
   }
 
   async fetchMRIssues() {
@@ -170,38 +168,20 @@ export class StatusBar {
     }
   }
 
-  async fetchBranchMR() {
+  updateMrItem() {
     if (!this.mrStatusBarItem) return;
-    let workspaceFolder = null;
-    let project = null;
-
-    try {
-      workspaceFolder = await getCurrentWorkspaceFolder();
-      project = await gitLabService.fetchCurrentProject(workspaceFolder!);
-      if (project != null) {
-        this.mr =
-          (await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder!)) ??
-          undefined;
-        this.mrStatusBarItem.show();
-        this.mrStatusBarItem.command = this.mr
-          ? openIssuableOnTheWebCommand(this.mr)
-          : USER_COMMANDS.OPEN_CREATE_NEW_MR;
-        this.mrStatusBarItem.text = this.mr
-          ? `$(git-pull-request) GitLab: MR !${this.mr.iid}`
-          : '$(git-pull-request) GitLab: Create MR.';
-      } else {
-        this.mrStatusBarItem.hide();
-      }
-    } catch (e) {
-      logError(e);
-      this.mrStatusBarItem.hide();
-    }
+    this.mrStatusBarItem.show();
+    this.mrStatusBarItem.command = this.mr
+      ? openIssuableOnTheWebCommand(this.mr)
+      : USER_COMMANDS.OPEN_CREATE_NEW_MR;
+    this.mrStatusBarItem.text = this.mr
+      ? `$(git-pull-request) GitLab: MR !${this.mr.iid}`
+      : '$(git-pull-request) GitLab: Create MR.';
   }
 
   initMrStatus() {
     this.mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...');
     this.mrStatusTimer = setInterval(async () => {
-      await this.fetchBranchMR();
       await this.fetchMRIssues();
     }, 60000);
   }
@@ -211,14 +191,14 @@ export class StatusBar {
       await this.initPipelineStatus();
       if (showMrStatusOnStatusBar) {
         this.initMrStatus();
-        await this.fetchBranchMR();
         if (showIssueLinkOnStatusBar) {
           this.mrIssueStatusBarItem = createStatusBarItem(
             '$(info) GitLab: Fetching closing issue...',
           );
-          await this.fetchMRIssues();
         }
       }
+      await this.refreshPipelineAndMr();
+      await this.fetchMRIssues();
     }
   }
 
