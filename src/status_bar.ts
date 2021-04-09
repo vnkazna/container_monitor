@@ -160,7 +160,7 @@ export class StatusBar {
     this.mrIssueStatusBarItem.text = text;
   }
 
-  async fetchBranchMR() {
+  async fetchBranchMrAndClosingIssue() {
     if (!this.mrIssueStatusBarItem || !this.mrStatusBarItem) return;
     let text = '$(git-pull-request) GitLab: Create MR.';
     let workspaceFolder = null;
@@ -208,10 +208,8 @@ export class StatusBar {
 
     this.mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...', cmdName);
     this.mrStatusTimer = setInterval(() => {
-      this.fetchBranchMR();
+      this.fetchBranchMrAndClosingIssue();
     }, 60000);
-
-    await this.fetchBranchMR();
   }
 
   initMrIssueStatus() {
@@ -235,15 +233,12 @@ export class StatusBar {
   async init() {
     if (showStatusBarLinks) {
       await this.initPipelineStatus();
-
-      // FIXME: add showMrStatusOnStatusBar to the condition
-      // because the initMrStatus() method does all the fetching and initMrIssueStatus
-      // only introduces a placeholder item
-      if (showIssueLinkOnStatusBar) {
-        this.initMrIssueStatus();
-      }
       if (showMrStatusOnStatusBar) {
         await this.initMrStatus();
+        if (showIssueLinkOnStatusBar) {
+          this.initMrIssueStatus();
+        }
+        await this.fetchBranchMrAndClosingIssue();
       }
     }
   }

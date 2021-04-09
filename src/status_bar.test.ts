@@ -31,8 +31,8 @@ describe('status_bar', () => {
   let fakeItems: vscode.StatusBarItem[];
   let statusBar: StatusBar;
   const getPipelineItem = () => fakeItems[0];
-  const getClosingIssueItem = () => fakeItems[1];
-  const getMrItem = () => fakeItems[2];
+  const getMrItem = () => fakeItems[1];
+  const getClosingIssueItem = () => fakeItems[2];
 
   beforeEach(() => {
     fakeItems = [];
@@ -121,6 +121,39 @@ describe('status_bar', () => {
     });
   });
 
+  describe('MR item', () => {
+    beforeEach(() => {
+      asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
+      // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
+      asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
+    });
+
+    afterEach(() => {
+      statusBar.dispose();
+    });
+
+    it('shows MR item', async () => {
+      asMock(gitLabService.fetchMRIssues).mockReturnValue([]);
+      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(mr);
+      await statusBar.init();
+      expect(getMrItem().show).toHaveBeenCalled();
+      expect(getMrItem().hide).not.toHaveBeenCalled();
+      expect(getMrItem().text).toBe('$(git-pull-request) GitLab: MR !2000');
+    });
+
+    it('shows create MR text when there is no MR', async () => {
+      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(null);
+      await statusBar.init();
+      expect(getMrItem().text).toBe('$(git-pull-request) GitLab: Create MR.');
+    });
+
+    it('hides the MR item when there is no project', async () => {
+      asMock(gitLabService.fetchCurrentProject).mockReturnValue(null);
+      await statusBar.init();
+      expect(getMrItem().hide).toHaveBeenCalled();
+    });
+  });
+
   describe('MR closing issue item', () => {
     beforeEach(() => {
       asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
@@ -158,38 +191,6 @@ describe('status_bar', () => {
       asMock(gitLabService.fetchCurrentProject).mockReturnValue(null);
       await statusBar.init();
       expect(getClosingIssueItem().hide).toHaveBeenCalled();
-    });
-  });
-
-  describe('MR item', () => {
-    beforeEach(() => {
-      asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
-      // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
-    });
-
-    afterEach(() => {
-      statusBar.dispose();
-    });
-
-    it('shows MR item', async () => {
-      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(mr);
-      await statusBar.init();
-      expect(getMrItem().show).toHaveBeenCalled();
-      expect(getMrItem().hide).not.toHaveBeenCalled();
-      expect(getMrItem().text).toBe('$(git-pull-request) GitLab: MR !2000');
-    });
-
-    it('shows create MR text when there is no MR', async () => {
-      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(null);
-      await statusBar.init();
-      expect(getMrItem().text).toBe('$(git-pull-request) GitLab: Create MR.');
-    });
-
-    it('hides the MR item when there is no project', async () => {
-      asMock(gitLabService.fetchCurrentProject).mockReturnValue(null);
-      await statusBar.init();
-      expect(getMrItem().hide).toHaveBeenCalled();
     });
   });
 });
