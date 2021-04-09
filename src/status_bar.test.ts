@@ -190,11 +190,10 @@ describe('status_bar', () => {
       expect(getClosingIssueItem().command).toBe(undefined);
     });
 
-    it('shows no issue when there is no MR', async () => {
+    it('hides the item when there is is no MR', async () => {
       asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(null);
       await statusBar.init();
-      expect(getClosingIssueItem().text).toBe('$(code) GitLab: No issue.');
-      expect(getClosingIssueItem().command).toBe(undefined);
+      expect(getClosingIssueItem().hide).toHaveBeenCalled();
     });
 
     it('hides the item when there is no project', async () => {
