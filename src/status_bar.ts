@@ -4,7 +4,7 @@ import * as openers from './openers';
 import * as gitLabService from './gitlab_service';
 import { getCurrentWorkspaceFolder } from './services/workspace_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
-import { handleError, logError } from './log';
+import { logError } from './log';
 import { USER_COMMANDS } from './command_names';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
@@ -107,7 +107,7 @@ export class StatusBar {
           statusText = createStatusTextFromJobs(jobs, status);
         }
       } catch (e) {
-        handleError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
+        logError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
       }
     }
 
