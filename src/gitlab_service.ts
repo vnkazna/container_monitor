@@ -21,10 +21,11 @@ interface GitLabPipeline {
   id: number;
 }
 
-interface GitLabJob {
+export interface RestJob {
   name: string;
   // eslint-disable-next-line camelcase
   created_at: string;
+  status: string;
 }
 
 const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => {
@@ -102,6 +103,7 @@ async function fetch(path: string, method = 'GET', data?: Record<string, unknown
 }
 
 async function fetchProjectData(remote: GitRemote | null, workspaceFolder: string) {
+  // TODO require remote so we can guarantee that we return a value or error
   if (remote) {
     if (!(`${remote.namespace}_${remote.project}` in projectCache)) {
       const { namespace, project } = remote;
@@ -376,7 +378,7 @@ export async function fetchLastJobsForCurrentBranch(
   const project = await fetchCurrentPipelineProject(workspaceFolder);
   if (project) {
     const { response } = await fetch(`/projects/${project.restId}/pipelines/${pipeline.id}/jobs`);
-    let jobs: GitLabJob[] = response;
+    let jobs: RestJob[] = response;
 
     // Gitlab return multiple jobs if you retry the pipeline we filter to keep only the last
     const alreadyProcessedJob = new Set();

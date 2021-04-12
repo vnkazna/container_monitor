@@ -1,10 +1,11 @@
-const vscode = require('vscode');
-const openers = require('./openers');
-const gitLabService = require('./gitlab_service');
-const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
-const { UserFriendlyError } = require('./errors/user_friendly_error');
-const { handleError, logError } = require('./log');
-const { USER_COMMANDS } = require('./command_names');
+/* eslint-disable no-unused-expressions */
+import * as vscode from 'vscode';
+import * as openers from './openers';
+import * as gitLabService from './gitlab_service';
+import { getCurrentWorkspaceFolder } from './services/workspace_service';
+import { UserFriendlyError } from './errors/user_friendly_error';
+import { handleError, logError } from './log';
+import { USER_COMMANDS } from './command_names';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
@@ -16,7 +17,7 @@ const {
   showPipelineUpdateNotifications,
 } = vscode.workspace.getConfiguration('gitlab');
 
-const iconForStatus = {
+const iconForStatus: Record<string, { icon: string; text?: string } | undefined> = {
   running: { icon: 'pulse' },
   pending: { icon: 'clock' },
   success: { icon: 'check', text: 'passed' },
@@ -25,9 +26,9 @@ const iconForStatus = {
   skipped: { icon: 'diff-renamed' },
 };
 
-const getStatusText = status => iconForStatus[status].text || status;
+const getStatusText = (status: string) => iconForStatus[status]?.text || status;
 
-const createStatusTextFromJobs = (jobs, status) => {
+const createStatusTextFromJobs = (jobs: gitLabService.RestJob[], status: string) => {
   let statusText = getStatusText(status);
   const jobNames = jobs.filter(job => job.status === status).map(job => job.name);
   if (jobNames.length > MAXIMUM_DISPLAYED_JOBS) {
@@ -41,7 +42,7 @@ const createStatusTextFromJobs = (jobs, status) => {
   return statusText;
 };
 
-const createStatusBarItem = (text, command) => {
+const createStatusBarItem = (text: string, command: string) => {
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   statusBarItem.text = text;
   statusBarItem.show();
@@ -53,29 +54,35 @@ const createStatusBarItem = (text, command) => {
   return statusBarItem;
 };
 
-const commandRegisterHelper = (cmdName, callback) => {
+const commandRegisterHelper = (cmdName: string, callback: (...args: any[]) => any) => {
   vscode.commands.registerCommand(cmdName, callback);
 };
 
-class StatusBar {
-  constructor() {
-    this.pipelineStatusBarItem = null;
-    this.pipelinesStatusTimer = null;
-    this.mrStatusBarItem = null;
-    this.mrIssueStatusBarItem = null;
-    this.mrStatusTimer = null;
-    this.issue = null;
-    this.mr = null;
-    this.firstRun = true;
-  }
+export class StatusBar {
+  pipelineStatusBarItem?: vscode.StatusBarItem;
+
+  pipelinesStatusTimer?: NodeJS.Timeout;
+
+  mrStatusBarItem?: vscode.StatusBarItem;
+
+  mrIssueStatusBarItem?: vscode.StatusBarItem;
+
+  mrStatusTimer?: NodeJS.Timeout;
+
+  issue?: RestIssuable;
+
+  mr?: RestIssuable;
+
+  firstRun = true;
 
   async refreshPipeline() {
-    let workspaceFolder = null;
+    if (!this.pipelineStatusBarItem) return;
+    let workspaceFolder: string | undefined;
     let pipeline = null;
 
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
-      const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
+      const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder!);
       // TODO: the result contains the MR for this branch as well, we can refactor status_bar
       // to use this response instead of making a separate request.
       pipeline = result.pipeline;
@@ -95,7 +102,7 @@ class StatusBar {
 
     if (status === 'running' || status === 'failed') {
       try {
-        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder);
+        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(pipeline, workspaceFolder!);
         if (jobs) {
           statusText = createStatusTextFromJobs(jobs, status);
         }
@@ -104,7 +111,7 @@ class StatusBar {
       }
     }
 
-    const msg = `$(${iconForStatus[status].icon}) GitLab: Pipeline ${statusText}`;
+    const msg = `$(${iconForStatus[status]?.icon}) GitLab: Pipeline ${statusText}`;
 
     if (
       showPipelineUpdateNotifications &&
@@ -117,7 +124,7 @@ class StatusBar {
         .showInformationMessage(message, { modal: false }, 'View in Gitlab')
         .then(selection => {
           if (selection === 'View in Gitlab') {
-            openers.openCurrentPipeline(workspaceFolder);
+            openers.openCurrentPipeline(workspaceFolder!);
           }
         });
     }
@@ -140,7 +147,8 @@ class StatusBar {
     await this.refreshPipeline();
   }
 
-  async fetchMRIssues(workspaceFolder) {
+  async fetchMRIssues(workspaceFolder: string) {
+    if (!this.mrIssueStatusBarItem || !this.mr) return;
     const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
     let text = `$(code) GitLab: No issue.`;
 
@@ -153,15 +161,18 @@ class StatusBar {
   }
 
   async fetchBranchMR() {
+    if (!this.mrIssueStatusBarItem || !this.mrStatusBarItem) return;
     let text = '$(git-pull-request) GitLab: Create MR.';
     let workspaceFolder = null;
     let project = null;
 
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
-      project = await gitLabService.fetchCurrentProject(workspaceFolder);
+      project = await gitLabService.fetchCurrentProject(workspaceFolder!);
       if (project != null) {
-        this.mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
+        this.mr =
+          (await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder!)) ??
+          undefined;
         this.mrStatusBarItem.show();
       } else {
         this.mrStatusBarItem.hide();
@@ -173,7 +184,7 @@ class StatusBar {
 
     if (project && this.mr) {
       text = `$(git-pull-request) GitLab: MR !${this.mr.iid}`;
-      await this.fetchMRIssues(workspaceFolder);
+      await this.fetchMRIssues(workspaceFolder!);
       this.mrIssueStatusBarItem.show();
     } else if (project) {
       this.mrIssueStatusBarItem.text = `$(code) GitLab: No issue.`;
@@ -239,29 +250,26 @@ class StatusBar {
 
   dispose() {
     if (showStatusBarLinks) {
-      this.pipelineStatusBarItem.dispose();
+      this.pipelineStatusBarItem?.dispose();
 
       if (showIssueLinkOnStatusBar) {
-        this.mrIssueStatusBarItem.dispose();
+        this.mrIssueStatusBarItem?.dispose();
       }
       if (showMrStatusOnStatusBar) {
-        this.mrStatusBarItem.dispose();
+        this.mrStatusBarItem?.dispose();
       }
     }
 
     if (this.pipelinesStatusTimer) {
       clearInterval(this.pipelinesStatusTimer);
-      this.pipelinesStatusTimer = null;
+      this.pipelinesStatusTimer = undefined;
     }
 
     if (this.mrStatusTimer) {
       clearInterval(this.mrStatusTimer);
-      this.mrStatusTimer = null;
+      this.mrStatusTimer = undefined;
     }
   }
 }
 
-module.exports = {
-  StatusBar,
-  instance: new StatusBar(),
-};
+export const instance = new StatusBar();

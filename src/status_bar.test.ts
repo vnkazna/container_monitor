@@ -1,27 +1,35 @@
-const vscode = require('vscode');
+import * as vscode from 'vscode';
+import * as gitLabService from './gitlab_service';
+import { pipeline, mr, issue } from './test_utils/entities';
 
 jest.mock('./gitlab_service');
-vscode.workspace.getConfiguration.mockReturnValue({
+
+const asMock = (mockFn: unknown) => mockFn as jest.Mock;
+
+asMock(vscode.workspace.getConfiguration).mockReturnValue({
   showStatusBarLinks: true,
   showIssueLinkOnStatusBar: true,
   showMrStatusOnStatusBar: true,
 });
-const { StatusBar } = require('./status_bar');
-const gitLabService = require('./gitlab_service');
-const { pipeline, mr, issue } = require('./test_utils/entities');
 
-const createFakeItem = () => ({
-  show: jest.fn(),
-  hide: jest.fn(),
-  dispose: jest.fn(),
-});
+// StatusBar needs to be imported after we mock the configuration because it uses the configuration
+// during module initialization
+// eslint-disable-next-line import/first
+import { StatusBar } from './status_bar';
+
+const createFakeItem = (): vscode.StatusBarItem =>
+  (({
+    show: jest.fn(),
+    hide: jest.fn(),
+    dispose: jest.fn(),
+  } as unknown) as vscode.StatusBarItem);
 
 // StatusBar is only interested in whether the project exists or not
 const mockedGitLabProject = {};
 
 describe('status_bar', () => {
-  let fakeItems;
-  let statusBar;
+  let fakeItems: vscode.StatusBarItem[];
+  let statusBar: StatusBar;
   const getPipelineItem = () => fakeItems[0];
   const getClosingIssueItem = () => fakeItems[1];
   const getMrItem = () => fakeItems[2];
@@ -29,7 +37,7 @@ describe('status_bar', () => {
   beforeEach(() => {
     fakeItems = [];
     statusBar = new StatusBar();
-    vscode.window.createStatusBarItem.mockImplementation(() => {
+    asMock(vscode.window.createStatusBarItem).mockImplementation(() => {
       const fakeItem = createFakeItem();
       fakeItems.push(fakeItem);
       return fakeItem;
@@ -37,7 +45,7 @@ describe('status_bar', () => {
   });
   describe('pipeline item', () => {
     beforeEach(() => {
-      gitLabService.fetchLastJobsForCurrentBranch.mockReset();
+      asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReset();
     });
 
     afterEach(() => {
@@ -45,7 +53,7 @@ describe('status_bar', () => {
     });
 
     it('initializes the pipeline item with success', async () => {
-      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({ pipeline });
+      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({ pipeline });
       await statusBar.init();
       expect(getPipelineItem().show).toHaveBeenCalled();
       expect(getPipelineItem().hide).not.toHaveBeenCalled();
@@ -53,13 +61,13 @@ describe('status_bar', () => {
     });
 
     it('prints jobs for running pipeline', async () => {
-      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({
+      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({
         pipeline: {
           ...pipeline,
           status: 'running',
         },
       });
-      gitLabService.fetchLastJobsForCurrentBranch.mockReturnValue([
+      asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReturnValue([
         {
           status: 'running',
           name: 'Unit Tests',
@@ -80,13 +88,15 @@ describe('status_bar', () => {
     });
 
     it('shows no pipeline text when there is no pipeline', async () => {
-      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({ pipeline: null });
+      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({
+        pipeline: null,
+      });
       await statusBar.init();
       expect(getPipelineItem().text).toBe('GitLab: No pipeline.');
     });
 
     it('hides the item when there is no project', async () => {
-      gitLabService.fetchPipelineAndMrForCurrentBranch.mockRejectedValue(new Error());
+      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockRejectedValue(new Error());
       await statusBar.init();
       expect(getPipelineItem().hide).toHaveBeenCalled();
     });
@@ -100,7 +110,7 @@ describe('status_bar', () => {
       ${'canceled'} | ${'$(circle-slash) GitLab: Pipeline canceled'}
       ${'skipped'}  | ${'$(diff-renamed) GitLab: Pipeline skipped'}
     `('shows $itemText for pipeline with status $status', async ({ status, itemText }) => {
-      gitLabService.fetchPipelineAndMrForCurrentBranch.mockResolvedValue({
+      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({
         pipeline: {
           ...pipeline,
           status,
@@ -113,9 +123,9 @@ describe('status_bar', () => {
 
   describe('MR closing issue item', () => {
     beforeEach(() => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(mockedGitLabProject);
+      asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      gitLabService.fetchCurrentProject.mockReturnValue(mockedGitLabProject);
+      asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
     });
 
     afterEach(() => {
@@ -123,8 +133,8 @@ describe('status_bar', () => {
     });
 
     it('shows closing issue for an MR', async () => {
-      gitLabService.fetchOpenMergeRequestForCurrentBranch.mockReturnValue(mr);
-      gitLabService.fetchMRIssues.mockReturnValue([issue]);
+      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(mr);
+      asMock(gitLabService.fetchMRIssues).mockReturnValue([issue]);
       await statusBar.init();
       expect(getClosingIssueItem().show).toHaveBeenCalled();
       expect(getClosingIssueItem().hide).not.toHaveBeenCalled();
@@ -132,20 +142,20 @@ describe('status_bar', () => {
     });
 
     it('shows no issue when there is not a closing issue', async () => {
-      gitLabService.fetchOpenMergeRequestForCurrentBranch.mockReturnValue(mr);
-      gitLabService.fetchMRIssues.mockReturnValue([]);
+      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(mr);
+      asMock(gitLabService.fetchMRIssues).mockReturnValue([]);
       await statusBar.init();
       expect(getClosingIssueItem().text).toBe('$(code) GitLab: No issue.');
     });
 
     it('shows no issue when there is no MR', async () => {
-      gitLabService.fetchOpenMergeRequestForCurrentBranch.mockReturnValue(null);
+      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(null);
       await statusBar.init();
       expect(getClosingIssueItem().text).toBe('$(code) GitLab: No issue.');
     });
 
     it('hides the item when there is no project', async () => {
-      gitLabService.fetchCurrentProject.mockReturnValue(null);
+      asMock(gitLabService.fetchCurrentProject).mockReturnValue(null);
       await statusBar.init();
       expect(getClosingIssueItem().hide).toHaveBeenCalled();
     });
@@ -153,9 +163,9 @@ describe('status_bar', () => {
 
   describe('MR item', () => {
     beforeEach(() => {
-      gitLabService.fetchCurrentPipelineProject.mockReturnValue(mockedGitLabProject);
+      asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      gitLabService.fetchCurrentProject.mockReturnValue(mockedGitLabProject);
+      asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
     });
 
     afterEach(() => {
@@ -163,7 +173,7 @@ describe('status_bar', () => {
     });
 
     it('shows MR item', async () => {
-      gitLabService.fetchOpenMergeRequestForCurrentBranch.mockReturnValue(mr);
+      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(mr);
       await statusBar.init();
       expect(getMrItem().show).toHaveBeenCalled();
       expect(getMrItem().hide).not.toHaveBeenCalled();
@@ -171,13 +181,13 @@ describe('status_bar', () => {
     });
 
     it('shows create MR text when there is no MR', async () => {
-      gitLabService.fetchOpenMergeRequestForCurrentBranch.mockReturnValue(null);
+      asMock(gitLabService.fetchOpenMergeRequestForCurrentBranch).mockReturnValue(null);
       await statusBar.init();
       expect(getMrItem().text).toBe('$(git-pull-request) GitLab: Create MR.');
     });
 
     it('hides the MR item when there is no project', async () => {
-      gitLabService.fetchCurrentProject.mockReturnValue(null);
+      asMock(gitLabService.fetchCurrentProject).mockReturnValue(null);
       await statusBar.init();
       expect(getMrItem().hide).toHaveBeenCalled();
     });
