@@ -4,6 +4,10 @@
 
 This extension integrates GitLab to VS Code by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VS Code command palette and status bar to provide more information about your project.
 
+## Minimum supported version
+
+GitLab Workflow requires GitLab 13.4 or later. To find your GitLab version, visit `/help` (like https://gitlab.com/help).
+
 ## Features
 
 _You need to set up your access token(s) to use these features, please see [Setup](#setup) section below._

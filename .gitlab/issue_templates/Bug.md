@@ -1,6 +1,8 @@
 <!---
 Please read this!
 
+The [minimum required GitLab version](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/README.md#minimum-supported-version) is GitLab 13.4. If you're experiencing an issue and running a self-managed version older than 13.4, please test against GitLab.com prior to submitting your bug report.
+
 Before opening a new issue, make sure to search for keywords in the issues
 filtered by the "bug" label:
 
