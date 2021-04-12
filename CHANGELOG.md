@@ -4,7 +4,7 @@
 ### Bug Fixes
 
 * ci variables links are broken ([040a881](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/040a881f0bd017db7147a164070ba4f681c9b1b4))
-
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !215](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/215) 👍
 
 
 # [3.17.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.16.0...v3.17.0) (2021-04-08)
