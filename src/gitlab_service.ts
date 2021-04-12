@@ -17,10 +17,6 @@ import { getInstanceUrl as getInstanceUrlUtil } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
 import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
-interface GitLabPipeline {
-  id: number;
-}
-
 export interface RestJob {
   name: string;
   // eslint-disable-next-line camelcase
@@ -371,30 +367,24 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl()));
 }
 
-export async function fetchLastJobsForCurrentBranch(
-  pipeline: GitLabPipeline,
-  workspaceFolder: string,
-) {
-  const project = await fetchCurrentPipelineProject(workspaceFolder);
-  if (project) {
-    const { response } = await fetch(`/projects/${project.restId}/pipelines/${pipeline.id}/jobs`);
-    let jobs: RestJob[] = response;
+export async function fetchLastJobsForCurrentBranch(pipeline: RestPipeline): Promise<RestJob[]> {
+  const { response } = await fetch(
+    `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
+  );
+  let jobs: RestJob[] = response;
 
-    // Gitlab return multiple jobs if you retry the pipeline we filter to keep only the last
-    const alreadyProcessedJob = new Set();
-    jobs = jobs.sort((one, two) => (one.created_at > two.created_at ? -1 : 1));
-    jobs = jobs.filter(job => {
-      if (alreadyProcessedJob.has(job.name)) {
-        return false;
-      }
-      alreadyProcessedJob.add(job.name);
-      return true;
-    });
+  // Gitlab return multiple jobs if you retry the pipeline we filter to keep only the last
+  const alreadyProcessedJob = new Set();
+  jobs = jobs.sort((one, two) => (one.created_at > two.created_at ? -1 : 1));
+  jobs = jobs.filter(job => {
+    if (alreadyProcessedJob.has(job.name)) {
+      return false;
+    }
+    alreadyProcessedJob.add(job.name);
+    return true;
+  });
 
-    return jobs;
-  }
-
-  return null;
+  return jobs;
 }
 
 export async function fetchOpenMergeRequestForCurrentBranch(
