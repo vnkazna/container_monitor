@@ -69,15 +69,9 @@ export class StatusBar {
 
   mrIssueStatusBarItem?: vscode.StatusBarItem;
 
-  mrStatusTimer?: NodeJS.Timeout;
-
-  issue?: RestIssuable;
-
-  mr?: RestIssuable;
-
   firstRun = true;
 
-  async refreshPipelineAndMr() {
+  async refresh() {
     if (!this.pipelineStatusBarItem) return;
     let workspaceFolder: string | undefined;
     let pipeline = null;
@@ -85,8 +79,9 @@ export class StatusBar {
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
       const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder!);
-      this.mr = result.mr ?? undefined;
-      this.updateMrItem();
+      const mr = result.mr ?? undefined;
+      this.updateMrItem(mr);
+      await this.fetchMrClosingIssue(mr);
       pipeline = result.pipeline;
     } catch (e) {
       logError(e);
@@ -143,22 +138,22 @@ export class StatusBar {
     );
 
     this.pipelinesStatusTimer = setInterval(() => {
-      this.refreshPipelineAndMr();
+      this.refresh();
     }, 30000);
   }
 
-  async fetchMRIssues() {
+  async fetchMrClosingIssue(mr: RestIssuable | undefined) {
     if (!this.mrIssueStatusBarItem) return;
-    if (this.mr) {
+    if (mr) {
       const workspaceFolder = await getCurrentWorkspaceFolder();
-      const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder!);
+      const issues = await gitLabService.fetchMRIssues(mr.iid, workspaceFolder!);
       let text = `$(code) GitLab: No issue.`;
       let command;
 
-      if (issues[0]) {
-        [this.issue] = issues;
-        text = `$(code) GitLab: Issue #${this.issue.iid}`;
-        command = openIssuableOnTheWebCommand(this.issue);
+      const firstIssue = issues[0];
+      if (firstIssue) {
+        text = `$(code) GitLab: Issue #${firstIssue.iid}`;
+        command = openIssuableOnTheWebCommand(firstIssue);
       }
 
       this.mrIssueStatusBarItem.text = text;
@@ -168,22 +163,19 @@ export class StatusBar {
     }
   }
 
-  updateMrItem() {
+  updateMrItem(mr: RestIssuable | undefined): void {
     if (!this.mrStatusBarItem) return;
     this.mrStatusBarItem.show();
-    this.mrStatusBarItem.command = this.mr
-      ? openIssuableOnTheWebCommand(this.mr)
+    this.mrStatusBarItem.command = mr
+      ? openIssuableOnTheWebCommand(mr)
       : USER_COMMANDS.OPEN_CREATE_NEW_MR;
-    this.mrStatusBarItem.text = this.mr
-      ? `$(git-pull-request) GitLab: MR !${this.mr.iid}`
+    this.mrStatusBarItem.text = mr
+      ? `$(git-pull-request) GitLab: MR !${mr.iid}`
       : '$(git-pull-request) GitLab: Create MR.';
   }
 
   initMrStatus() {
     this.mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...');
-    this.mrStatusTimer = setInterval(async () => {
-      await this.fetchMRIssues();
-    }, 60000);
   }
 
   async init() {
@@ -197,8 +189,7 @@ export class StatusBar {
           );
         }
       }
-      await this.refreshPipelineAndMr();
-      await this.fetchMRIssues();
+      await this.refresh();
     }
   }
 
@@ -217,11 +208,6 @@ export class StatusBar {
     if (this.pipelinesStatusTimer) {
       clearInterval(this.pipelinesStatusTimer);
       this.pipelinesStatusTimer = undefined;
-    }
-
-    if (this.mrStatusTimer) {
-      clearInterval(this.mrStatusTimer);
-      this.mrStatusTimer = undefined;
     }
   }
 }
