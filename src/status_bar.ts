@@ -132,13 +132,6 @@ export class StatusBar {
     this.firstRun = false;
   }
 
-  async initPipelineStatus() {
-    this.pipelineStatusBarItem = createStatusBarItem(
-      '$(info) GitLab: Fetching pipeline...',
-      USER_COMMANDS.PIPELINE_ACTIONS,
-    );
-  }
-
   async fetchMrClosingIssue(mr: RestIssuable | undefined, workspaceFolder: string): Promise<void> {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
@@ -170,15 +163,14 @@ export class StatusBar {
       : '$(git-pull-request) GitLab: Create MR.';
   }
 
-  initMrStatus() {
-    this.mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...');
-  }
-
   async init() {
     if (showStatusBarLinks) {
-      await this.initPipelineStatus();
+      this.pipelineStatusBarItem = createStatusBarItem(
+        '$(info) GitLab: Fetching pipeline...',
+        USER_COMMANDS.PIPELINE_ACTIONS,
+      );
       if (showMrStatusOnStatusBar) {
-        this.initMrStatus();
+        this.mrStatusBarItem = createStatusBarItem('$(info) GitLab: Finding MR...');
         if (showIssueLinkOnStatusBar) {
           this.mrIssueStatusBarItem = createStatusBarItem(
             '$(info) GitLab: Fetching closing issue...',
