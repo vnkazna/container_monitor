@@ -78,10 +78,11 @@ export class StatusBar {
 
     try {
       workspaceFolder = await getCurrentWorkspaceFolder();
-      const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder!);
+      if (!workspaceFolder) return;
+      const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
       const mr = result.mr ?? undefined;
       this.updateMrItem(mr);
-      await this.fetchMrClosingIssue(mr);
+      await this.fetchMrClosingIssue(mr, workspaceFolder);
       pipeline = result.pipeline;
     } catch (e) {
       logError(e);
@@ -138,11 +139,10 @@ export class StatusBar {
     );
   }
 
-  async fetchMrClosingIssue(mr: RestIssuable | undefined) {
+  async fetchMrClosingIssue(mr: RestIssuable | undefined, workspaceFolder: string): Promise<void> {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
-      const workspaceFolder = await getCurrentWorkspaceFolder();
-      const issues = await gitLabService.fetchMRIssues(mr.iid, workspaceFolder!);
+      const issues = await gitLabService.fetchMRIssues(mr.iid, workspaceFolder);
       let text = `$(code) GitLab: No issue.`;
       let command;
 
