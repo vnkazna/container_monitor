@@ -63,7 +63,7 @@ const openIssuableOnTheWebCommand = (issuable: RestIssuable): vscode.Command => 
 export class StatusBar {
   pipelineStatusBarItem?: vscode.StatusBarItem;
 
-  pipelinesStatusTimer?: NodeJS.Timeout;
+  refreshTimer?: NodeJS.Timeout;
 
   mrStatusBarItem?: vscode.StatusBarItem;
 
@@ -136,10 +136,6 @@ export class StatusBar {
       '$(info) GitLab: Fetching pipeline...',
       USER_COMMANDS.PIPELINE_ACTIONS,
     );
-
-    this.pipelinesStatusTimer = setInterval(() => {
-      this.refresh();
-    }, 30000);
   }
 
   async fetchMrClosingIssue(mr: RestIssuable | undefined) {
@@ -190,6 +186,10 @@ export class StatusBar {
         }
       }
       await this.refresh();
+      this.refreshTimer = setInterval(() => {
+        if (!vscode.window.state.focused) return;
+        this.refresh();
+      }, 30000);
     }
   }
 
@@ -205,9 +205,9 @@ export class StatusBar {
       }
     }
 
-    if (this.pipelinesStatusTimer) {
-      clearInterval(this.pipelinesStatusTimer);
-      this.pipelinesStatusTimer = undefined;
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = undefined;
     }
   }
 }
