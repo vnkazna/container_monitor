@@ -4,7 +4,7 @@ import * as openers from './openers';
 import * as gitLabService from './gitlab_service';
 import { getCurrentWorkspaceFolder } from './services/workspace_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
-import { logError } from './log';
+import { log, logError } from './log';
 import { USER_COMMANDS } from './command_names';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
@@ -72,23 +72,33 @@ export class StatusBar {
   firstRun = true;
 
   async refresh() {
-    if (!this.pipelineStatusBarItem) return;
-    let workspaceFolder: string | undefined;
-    let pipeline = null;
+    const workspaceFolder = await getCurrentWorkspaceFolder();
+    if (!workspaceFolder) return;
 
-    try {
-      workspaceFolder = await getCurrentWorkspaceFolder();
-      if (!workspaceFolder) return;
-      const result = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
-      const mr = result.mr ?? undefined;
-      this.updateMrItem(mr);
-      await this.fetchMrClosingIssue(mr, workspaceFolder);
-      pipeline = result.pipeline;
-    } catch (e) {
-      logError(e);
-      this.pipelineStatusBarItem.hide();
+    const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+    if (!project) {
+      log(
+        'GitLab project not found, the extension is going to hide the status bar until next refresh in 30s.',
+      );
+      this.hideAllItems();
       return;
     }
+    const { mr, pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
+      workspaceFolder,
+    );
+    await this.updatePipelineItem(pipeline, workspaceFolder);
+    this.updateMrItem(mr);
+    await this.fetchMrClosingIssue(mr, workspaceFolder);
+  }
+
+  hideAllItems(): void {
+    this.pipelineStatusBarItem?.hide();
+    this.mrStatusBarItem?.hide();
+    this.mrIssueStatusBarItem?.hide();
+  }
+
+  async updatePipelineItem(pipeline: RestPipeline | null, workspaceFolder: string): Promise<void> {
+    if (!this.pipelineStatusBarItem) return;
     if (!pipeline) {
       this.pipelineStatusBarItem.text = 'GitLab: No pipeline.';
       this.pipelineStatusBarItem.show();
@@ -122,7 +132,7 @@ export class StatusBar {
         .showInformationMessage(message, { modal: false }, 'View in Gitlab')
         .then(selection => {
           if (selection === 'View in Gitlab') {
-            openers.openCurrentPipeline(workspaceFolder!);
+            openers.openCurrentPipeline(workspaceFolder);
           }
         });
     }
@@ -132,7 +142,7 @@ export class StatusBar {
     this.firstRun = false;
   }
 
-  async fetchMrClosingIssue(mr: RestIssuable | undefined, workspaceFolder: string): Promise<void> {
+  async fetchMrClosingIssue(mr: RestIssuable | null, workspaceFolder: string): Promise<void> {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
       const issues = await gitLabService.fetchMRIssues(mr.iid, workspaceFolder);
@@ -152,7 +162,7 @@ export class StatusBar {
     }
   }
 
-  updateMrItem(mr: RestIssuable | undefined): void {
+  updateMrItem(mr: RestIssuable | null): void {
     if (!this.mrStatusBarItem) return;
     this.mrStatusBarItem.show();
     this.mrStatusBarItem.command = mr

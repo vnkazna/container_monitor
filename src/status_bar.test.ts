@@ -46,14 +46,24 @@ describe('status_bar', () => {
       return fakeItem;
     });
     asMock(getCurrentWorkspaceFolder).mockResolvedValue('/folder');
+    asMock(gitLabService.fetchCurrentProject).mockResolvedValue({});
   });
+
+  afterEach(() => {
+    statusBar.dispose();
+  });
+
+  it('hides all items when the workspace does not contain GitLab project', async () => {
+    asMock(gitLabService.fetchCurrentProject).mockResolvedValue(null);
+    await statusBar.init();
+    expect(getPipelineItem().hide).toHaveBeenCalled();
+    expect(getMrItem().hide).toHaveBeenCalled();
+    expect(getClosingIssueItem().hide).toHaveBeenCalled();
+  });
+
   describe('pipeline item', () => {
     beforeEach(() => {
       asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReset();
-    });
-
-    afterEach(() => {
-      statusBar.dispose();
     });
 
     it('initializes the pipeline item with success', async () => {
@@ -99,12 +109,6 @@ describe('status_bar', () => {
       expect(getPipelineItem().text).toBe('GitLab: No pipeline.');
     });
 
-    it('hides the item when there is no project', async () => {
-      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockRejectedValue(new Error());
-      await statusBar.init();
-      expect(getPipelineItem().hide).toHaveBeenCalled();
-    });
-
     it.each`
       status        | itemText
       ${'running'}  | ${'$(pulse) GitLab: Pipeline running'}
@@ -132,10 +136,6 @@ describe('status_bar', () => {
       asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
     });
 
-    afterEach(() => {
-      statusBar.dispose();
-    });
-
     it('shows MR item', async () => {
       asMock(gitLabService.fetchMRIssues).mockReturnValue([]);
       asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({ mr });
@@ -154,12 +154,6 @@ describe('status_bar', () => {
       expect(getMrItem().text).toBe('$(git-pull-request) GitLab: Create MR.');
       expect(getMrItem().command).toBe(USER_COMMANDS.OPEN_CREATE_NEW_MR);
     });
-
-    xit('hides the MR item when there is no project', async () => {
-      asMock(gitLabService.fetchCurrentProject).mockReturnValue(null);
-      await statusBar.init();
-      expect(getMrItem().hide).toHaveBeenCalled();
-    });
   });
 
   describe('MR closing issue item', () => {
@@ -167,10 +161,6 @@ describe('status_bar', () => {
       asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
       asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
-    });
-
-    afterEach(() => {
-      statusBar.dispose();
     });
 
     it('shows closing issue for an MR', async () => {
@@ -195,12 +185,6 @@ describe('status_bar', () => {
 
     it('hides the item when there is is no MR', async () => {
       asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({});
-      await statusBar.init();
-      expect(getClosingIssueItem().hide).toHaveBeenCalled();
-    });
-
-    it('hides the item when there is no project', async () => {
-      asMock(gitLabService.fetchCurrentProject).mockReturnValue(null);
       await statusBar.init();
       expect(getClosingIssueItem().hide).toHaveBeenCalled();
     });
