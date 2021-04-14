@@ -62,3 +62,11 @@ interface RestPipeline {
   project_id: number;
   web_url: string;
 }
+
+// Incomplete reference of the GitLab user model
+interface RestUser {
+  id: number;
+  username: string;
+  email: string;
+  state: string;
+}

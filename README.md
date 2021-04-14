@@ -228,6 +228,8 @@ Each query is an entry of the json array. Each entry can have the following valu
 
 **`pipelineId`** _(required: false)_ : Returns vulnerabilities belonging to specified pipeline. "branch" returns vulnerabilities belonging to latest pipeline of the current branch. Works only with vulnerabilities.
 
+**`reviewer`** _(required: false)_ : Returns GitLab Merge Requests assigned for review to the given username. When set to `"<current_user>"`, the extension uses the current user's username.
+
 ## Usage
 
 - Open up Command Palette by pressing `Cmd+Shift+P`.
