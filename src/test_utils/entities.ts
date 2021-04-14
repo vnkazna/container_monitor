@@ -5,7 +5,7 @@ export const issue: RestIssuable = {
   iid: 1000,
   title: 'Issuable Title',
   project_id: 9999,
-  web_url: 'https://gitlab.example.com/group/project/issues/1',
+  web_url: 'https://gitlab.example.com/group/project/issues/1000',
   author: {
     avatar_url:
       'https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon',
@@ -22,7 +22,7 @@ export const mr: RestIssuable = {
   ...issue,
   id: 2,
   iid: 2000,
-  web_url: 'https://gitlab.example.com/group/project/merge_requests//1',
+  web_url: 'https://gitlab.example.com/group/project/merge_requests/2000',
   references: {
     full: 'gitlab-org/gitlab!2000',
   },
