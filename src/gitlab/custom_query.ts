@@ -31,4 +31,5 @@ export interface CustomQuery {
   searchIn: string;
   pipelineId?: number | 'branch';
   noItemText: string;
+  reviewer?: string;
 }

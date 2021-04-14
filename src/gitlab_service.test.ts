@@ -191,6 +191,13 @@ describe('fetchIssueables', () => {
     });
   });
 
+  it('sets reviewer parameter', async () => {
+    setupFetchIssuable();
+    await fetchIssuablesHelper({ type: CustomQueryType.MR, reviewer: 'reviewer' });
+    const search = new URLSearchParams(request.mock.calls[1][0]);
+    expect(search.get('reviewer_username')).toEqual('reviewer');
+  });
+
   describe('searchIn parameters', () => {
     it('sets "all" parameter', async () => {
       setupFetchIssuable();

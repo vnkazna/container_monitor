@@ -31,7 +31,7 @@ async function getLink(linkTemplate: string, workspaceFolder: string) {
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
 
   assert(project, 'Failed to fetch project');
-  return linkTemplate.replace('$userId', user.id).replace('$projectUrl', project.webUrl);
+  return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
 async function openLink(linkTemplate: string, workspaceFolder: string) {

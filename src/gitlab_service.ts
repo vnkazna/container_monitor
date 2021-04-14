@@ -146,9 +146,10 @@ export async function fetchCurrentPipelineProject(workspaceFolder: string) {
   }
 }
 
-export async function fetchCurrentUser() {
+export async function fetchCurrentUser(): Promise<RestUser> {
   try {
     const { response: user } = await fetch('/user');
+    if (!user) throw new Error('Could not retrieve current user.');
     return user;
   } catch (e) {
     throw new ApiError(e, 'get current user');
@@ -217,7 +218,7 @@ type QueryValue = string | boolean | string[] | number | undefined;
 
 export async function fetchIssuables(params: CustomQuery, workspaceFolder: string) {
   const { type, scope, state, author, assignee, wip } = params;
-  let { searchIn, pipelineId } = params;
+  let { searchIn, pipelineId, reviewer } = params;
   const config = {
     type: type || 'merge_requests',
     scope: scope || 'all',
@@ -289,6 +290,17 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   } else if (assignee) {
     const assigneeUser = await fetchFirstUserByUsername(assignee);
     search.append('assignee_id', (assigneeUser && assigneeUser.id) || '-1');
+  }
+
+  /**
+   * Reviewer parameters
+   */
+  if (reviewer) {
+    if (reviewer === '<current_user>') {
+      const user = await fetchCurrentUser();
+      reviewer = user.username;
+    }
+    search.append('reviewer_username', reviewer);
   }
 
   /**
