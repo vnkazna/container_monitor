@@ -1,3 +1,20 @@
+# [3.18.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.17.1...v3.18.0) (2021-04-14)
+
+
+### Bug Fixes
+
+* **status bar:** hide all status items when there is no GitLab project ([6a5537e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/6a5537ee9ac61abdd9b39e5d0944c282244c339d)), closes [#71](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/71)
+* use project_id from the pipeline instead of the workspace project ([7b6f1ba](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/7b6f1babd097ad994f08aceda6380b8cd805bddd))
+* when fetching pipeline jobs fails, only log error, no notification ([fb75deb](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fb75debbfce0f4a3e1f598b7dae5d401287bbd10))
+
+
+### Features
+
+* add "Merge requests I'm reviewing" custom query ([740c37d](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/740c37dc2370331811d2f62ee53965cc1ef121e7))
+* only poll for new status bar information in focused window ([105afe9](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/105afe9055377a579f99a162e9a8eb296c49838d))
+
+
+
 ## [3.17.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.17.0...v3.17.1) (2021-04-12)
 
 
