@@ -14,7 +14,7 @@ _You need to set up your access token(s) to use these features, please see [Setu
 
 ### Sidebar
 
-See your issues, MRs (including changed files) and other [custom search results](#custom-queries) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
+See your issues, MRs (including changed files) and other [custom search results](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
 
 ### Status bar
 
@@ -144,89 +144,7 @@ To enable experimental features set this flag to `true`. List of experiemental f
 
 **`gitlab.customQueries`** _(required: false)_
 
-Defines the search queries that retrives the items shown on the Gitlab Panel. See [#custom-queries] for more details.
-
-### Custom Queries
-
-You can define custom queries in your VS Code configuration.
-
-Example:
-
-```json
-{
-  "gitlab.customQueries": [
-    {
-      "name": "Issues assigned to me",
-      "type": "issues",
-      "scope": "assigned_to_me",
-      "noItemText": "There is no issue assigned to you.",
-      "state": "opened"
-    }
-  ]
-}
-```
-
-Each query is an entry of the json array. Each entry can have the following values:
-
-**`name`** _(required: true)_ : The label to show in the GitLab panel
-
-**`type`** _(required: false, default: merge_requests)_ : The type of GitLab items to return. If snippets is selected, none of the other filter will work. Epics will work only on GitLab ultimate/gold. Possible values: issues, merge_requests, epics, snippets, vulnerabilities.
-
-**`noItemText`** _(required: false, default: "No items found.")_ : The text to show if the query returns no items.
-
-**`maxResults`** _(required: false, default: 20)_ : The maximum number of results to show
-
-**`orderBy`** _(required: false, default: created_at)_ : Return issues ordered by the selected value. It is not applicable for vulnerabilities. Possible values: created_at, updated_at, priority, due_date, relative_position, label_priority, milestone_due, popularity, weight.
-
-**`sort`** _(required: false, default: desc)_ : Return issues sorted in ascending or descending order. It is not applicable for vulnerabilities. Possible values: asc, desc.
-
-**`scope`** _(required: false, default: all)_ : Return Gitlab items for the given scope. It is not applicable for epics. Possible values: assigned_to_me, created_by_me, dismissed, all. "assigned_to_me" and "created_by_me" are not applicable for vulnerabilities. "dismissed" is not applicable for issues and merge requests.
-
-**`state`** _(required: false, default: opened)_ : "Return "all" issues or just those that are "opened" or "closed". It is not applicable for vulnerabilities. Possible values: all, opened, closed.
-
-**`labels`** _(required: false, default: [])_ : Array of label names, Gitlab item must have all labels to be returned. "None" lists all GitLab items with no labels. "Any" lists all GitLab issues with at least one label. Predefined names are case-insensitive. It is not applicable for vulnerabilities.
-
-**`excludeLabels`** _(required: false, default: [])_ : Array of label names, Gitlab item must not have to be returned. Predefined names are case-insensitive. Works only with issues
-
-**`milestone`** _(required: false)_ : The milestone title. None lists all GitLab items with no milestone. Any lists all GitLab items that have an assigned milestone. It is not applicable for epics and vulnerabilities.
-
-**`excludeMilestone`** _(required: false)_ : The milestone title to exclude. Works only with issues.
-
-**`author`** _(required: false)_ : Return GitLab items created by the given username. It is not applicable for vulnerabilities.
-
-**`excludeAuthor`** _(required: false)_ : Return GitLab items not created by the given username. Works only with issues.
-
-**`assignee`** _(required: false)_ : Returns GitLab items assigned to the given username. "None" returns unassigned GitLab items. "Any" returns GitLab items with an assignee. It is not applicable for epics and vulnerabilities.
-
-**`excludeAssignee`** _(required: false)_ : ": Returns GitLab items not assigned to the given username. Works only with issues.
-
-**`search`** _(required: false)_ : Search GitLab items against their title and description. It is not applicable for vulnerabilities.
-
-**`excludeSearch`** _(required: false)_ : Search GitLab items that doesn't have the search key in their title or description. Works only with issues.
-
-**`searchIn`** _(required: false, default: all)_ : Modify the scope of the search attribute. It is not applicable for epics and vulnerabilities. Possible values: all, title, description.
-
-**`searchIn`** _(required: false, default: all)_ : Modify the scope of the excludeSearch attribute. Works only with issues. Possible values: all, title, description.
-
-**`createdAfter`** _(required: false)_ : Return GitLab items created after the given date. It is not applicable for vulnerabilities.
-
-**`createdBefore`** _(required: false)_ : Return GitLab items created before the given date. It is not applicable for vulnerabilities.
-
-**`updatedAfter`** _(required: false)_ : Return GitLab items updated after the given date. It is not applicable for vulnerabilities.
-
-**`updatedBefore`** _(required: false)_ : Return GitLab items updated before the given date. It is not applicable for vulnerabilities.
-
-**`wip`** _(required: false, default: no)_ : Filter merge requests against their wip status. "yes" to return only WIP merge requests, "no" to return non WIP merge requests. Works only with merge requests.
-
-**`confidential`** _(required: false, default: false)_ : Filter confidential or public issues. Works only with issues.
-
-**`reportTypes`** _(required: false)_ : Returns vulnerabilities belonging to specified report types. Works only with vulnerabilities. Possible values: sast, dast, dependency_scanning, container_scanning.
-
-**`severityLevels`** _(required: false)_ : Returns vulnerabilities belonging to specified severity levels. Defaults to all. Works only with vulnerabilities. Possible values: undefined, info, unknown, low, medium, high, critical.
-
-**`confidenceLevels`** _(required: false)_ : Returns vulnerabilities belonging to specified confidence levels. Defaults to all. Works only with vulnerabilities. Possible values: undefined, ignore, unknown, experimental, low, medium, high, confirmed.
-
-**`pipelineId`** _(required: false)_ : Returns vulnerabilities belonging to specified pipeline. "branch" returns vulnerabilities belonging to latest pipeline of the current branch. Works only with vulnerabilities.
+Defines the search queries that retrives the items shown on the Gitlab Panel. See [Custom Queries documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md) for more details.
 
 **`reviewer`** _(required: false)_ : Returns GitLab Merge Requests assigned for review to the given username. When set to `"<current_user>"`, the extension uses the current user's username.
 
@@ -259,7 +177,7 @@ When navigating changed files you can review discussions that have been made on 
 
 ### Sidebar - details
 
-Extension will add a GitLab Workflow panel to sidebar of your VS Code. The dedicated panel will allow you to see the list of your issues and MRs. Also you will be able to see pipeline, MR and issue links for your current branch.
+Extension will add a GitLab Workflow panel to sidebar of your VS Code. The dedicated panel will allow you to see the list of your issues and MRs (you can decide the exact queries by using the [custom queries](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md)). Also you will be able to see pipeline, MR and issue links for your current branch.
 
 You can see the issue and MR details by clicking on the issue item or by expanding the MR item and clicking on "Description". When you expand the MR, you can see all the changed files. When you click on a changed file, the extension opens the MR diff.
 
