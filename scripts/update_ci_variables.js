@@ -38,6 +38,9 @@ function parseDocumentation(variableMarkdown) {
     };
   });
 
+  // avoid computing a difference based on order in the docs
+  variables.sort((a, b) => (a.name < b.name ? -1 : 1));
+
   const json = JSON.stringify(variables.filter(Boolean), undefined, 2);
   return `${json}\n`;
 }
