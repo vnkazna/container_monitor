@@ -20,6 +20,10 @@
     "description": "The top-level directory where builds are executed."
   },
   {
+    "name": "CI_COMMIT_AUTHOR",
+    "description": "The author of the commit in `Name <email>` format."
+  },
+  {
     "name": "CI_COMMIT_BEFORE_SHA",
     "description": "The previous latest commit present on a branch. Is always `0000000000000000000000000000000000000000` in pipelines for merge requests."
   },
@@ -66,10 +70,6 @@
   {
     "name": "CI_COMMIT_TITLE",
     "description": "The title of the commit. The full first line of the message."
-  },
-  {
-    "name": "CI_COMMIT_AUTHOR",
-    "description": "The author of the commit in `Name <email>` format."
   },
   {
     "name": "CI_CONCURRENT_ID",
