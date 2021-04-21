@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { REVIEW_URI_SCHEME } from '../constants';
+import { FF_COMMENTING_RANGES, REVIEW_URI_SCHEME } from '../constants';
+import { getExtensionConfiguration } from '../utils/get_extension_configuration';
 import { fromReviewUri } from './review_uri';
 
 export class CommentingRangeProvider implements vscode.CommentingRangeProvider {
@@ -13,6 +14,7 @@ export class CommentingRangeProvider implements vscode.CommentingRangeProvider {
   }
 
   provideCommentingRanges(document: vscode.TextDocument): vscode.Range[] {
+    if (!getExtensionConfiguration().featureFlags?.includes(FF_COMMENTING_RANGES)) return [];
     const { uri } = document;
     if (uri.scheme !== REVIEW_URI_SCHEME) return [];
     const params = fromReviewUri(uri);

@@ -6,3 +6,6 @@ export const ADDED = 'added';
 export const DELETED = 'deleted';
 export const RENAMED = 'renamed';
 export const MODIFIED = 'modified';
+
+// feature flags
+export const FF_COMMENTING_RANGES = 'commenting-ranges';
