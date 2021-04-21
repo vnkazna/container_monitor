@@ -42,7 +42,7 @@ export class MrItemModel extends ItemModel {
     const gitlabService = await createGitLabNewService(this.workspace.uri);
     const mrVersion = await gitlabService.getMrDiff(this.mr);
     try {
-      await this.getMrDiscussions(mrVersion);
+      await this.initializeMrDiscussions(mrVersion);
     } catch (e) {
       handleError(
         new UserFriendlyError(
@@ -60,15 +60,16 @@ export class MrItemModel extends ItemModel {
     return [overview, ...changedFiles];
   }
 
-  private async getMrDiscussions(mrVersion: RestMrVersion): Promise<void> {
+  private async initializeMrDiscussions(mrVersion: RestMrVersion): Promise<void> {
     const commentController = vscode.comments.createCommentController(
       this.mr.references.full,
       this.mr.title,
     );
-
-    commentController.commentingRangeProvider = new CommentingRangeProvider(this.mr, mrVersion);
-
     const gitlabService = await createGitLabNewService(this.workspace.uri);
+
+    if (await gitlabService.canUserCommentOnMr(this.mr)) {
+      commentController.commentingRangeProvider = new CommentingRangeProvider(this.mr, mrVersion);
+    }
 
     const discussions = await gitlabService.getDiscussions({
       issuable: this.mr,

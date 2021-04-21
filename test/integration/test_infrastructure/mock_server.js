@@ -67,7 +67,7 @@ const getServer = (handlers = []) => {
     ...handlers,
     notFoundByDefault,
   );
-  server.listen();
+  server.listen({ onUnhandledRequest: 'warn' });
   return server;
 };
 
