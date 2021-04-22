@@ -4,7 +4,6 @@ import { basename } from 'path';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
-import { getCurrentWorkspaceFolder } from './services/workspace_service';
 import { createGitLabNewService, createGitService } from './service_factory';
 import { GitRemote } from './git/git_remote_parser';
 import { handleError, logError } from './log';
@@ -149,9 +148,9 @@ export async function fetchCurrentPipelineProject(workspaceFolder: string) {
   }
 }
 
-export async function fetchCurrentUser(): Promise<RestUser> {
+export async function fetchCurrentUser(workspaceFolder: string): Promise<RestUser> {
   try {
-    const { response: user } = await fetch(await getCurrentWorkspaceFolder(), '/user');
+    const { response: user } = await fetch(workspaceFolder, '/user');
     if (!user) throw new Error('Could not retrieve current user.');
     return user;
   } catch (e) {
@@ -169,10 +168,10 @@ async function fetchFirstUserByUsername(workspaceFolder: string | undefined, use
   }
 }
 
-export async function fetchVersion() {
+export async function fetchVersion(workspaceFolder: string) {
   try {
     if (!versionCache) {
-      const { response } = await fetch(await getCurrentWorkspaceFolder(), '/version');
+      const { response } = await fetch(workspaceFolder, '/version');
       versionCache = response.version;
     }
   } catch (e) {
@@ -232,7 +231,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   };
   let issuable = null;
 
-  const version = await fetchVersion();
+  const version = await fetchVersion(workspaceFolder);
 
   const project = await fetchCurrentProjectSwallowError(workspaceFolder);
   if (!version || !project) return [];
@@ -303,7 +302,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
    */
   if (reviewer) {
     if (reviewer === '<current_user>') {
-      const user = await fetchCurrentUser();
+      const user = await fetchCurrentUser(workspaceFolder);
       reviewer = user.username;
     }
     search.append('reviewer_username', reviewer);
@@ -350,10 +349,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
   if (pipelineId) {
     if (pipelineId === 'branch') {
-      const workspace = await getCurrentWorkspaceFolder();
-      if (workspace) {
-        pipelineId = (await fetchLastPipelineForCurrentBranch(workspace))?.id;
-      }
+      pipelineId = (await fetchLastPipelineForCurrentBranch(workspaceFolder))?.id;
     }
     search.append('pipeline_id', `${pipelineId}`);
   }
@@ -385,9 +381,12 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl()));
 }
 
-export async function fetchLastJobsForCurrentBranch(pipeline: RestPipeline): Promise<RestJob[]> {
+export async function fetchLastJobsForCurrentBranch(
+  workspaceFolder: string,
+  pipeline: RestPipeline,
+): Promise<RestJob[]> {
   const { response } = await fetch(
-    await getCurrentWorkspaceFolder(),
+    workspaceFolder,
     `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
   );
   let jobs: RestJob[] = response;
@@ -423,9 +422,12 @@ export async function fetchOpenMergeRequestForCurrentBranch(
   return null;
 }
 
-export async function fetchLastPipelineForMr(mr: RestIssuable): Promise<RestPipeline | null> {
+export async function fetchLastPipelineForMr(
+  workspaceFolder: string,
+  mr: RestIssuable,
+): Promise<RestPipeline | null> {
   const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
-  const { response: pipelines } = await fetch(await getCurrentWorkspaceFolder(), path);
+  const { response: pipelines } = await fetch(workspaceFolder, path);
   return pipelines.length > 0 ? pipelines[0] : null;
 }
 
@@ -445,7 +447,7 @@ export async function fetchPipelineAndMrForCurrentBranch(
 
   const mr = await turnErrorToNull(fetchOpenMergeRequestForCurrentBranch(workspaceFolder));
   if (mr) {
-    const pipeline = await turnErrorToNull(fetchLastPipelineForMr(mr));
+    const pipeline = await turnErrorToNull(fetchLastPipelineForMr(workspaceFolder, mr));
     if (pipeline) return { mr, pipeline };
   }
   const pipeline = await turnErrorToNull(fetchLastPipelineForCurrentBranch(workspaceFolder));
@@ -504,7 +506,7 @@ export async function fetchMRIssues(
 }
 
 // TODO specify the correct interface when we convert `create_snippet.js`
-export async function createSnippet(data: { id: string }) {
+export async function createSnippet(workspaceFolder: string, data: { id: string }) {
   let snippet;
   let path = '/snippets';
 
@@ -513,7 +515,7 @@ export async function createSnippet(data: { id: string }) {
   }
 
   try {
-    const { response } = await fetch(await getCurrentWorkspaceFolder(), path, 'POST', data);
+    const { response } = await fetch(workspaceFolder, path, 'POST', data);
     snippet = response;
   } catch (e) {
     handleError(new UserFriendlyError('Failed to create your snippet.', e));
@@ -522,11 +524,11 @@ export async function createSnippet(data: { id: string }) {
   return snippet;
 }
 
-export async function validateCIConfig(content: string) {
+export async function validateCIConfig(workspaceFolder: string, content: string) {
   let validCIConfig = null;
 
   try {
-    const { response } = await fetch(await getCurrentWorkspaceFolder(), '/ci/lint', 'POST', {
+    const { response } = await fetch(workspaceFolder, '/ci/lint', 'POST', {
       content,
     });
     validCIConfig = response;
@@ -545,7 +547,7 @@ interface Discussion {
 
 export async function renderMarkdown(markdown: string, workspaceFolder: string) {
   let rendered = { html: markdown };
-  const version = await fetchVersion();
+  const version = await fetchVersion(workspaceFolder);
   if (!version) {
     return markdown;
   }

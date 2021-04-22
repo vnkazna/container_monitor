@@ -30,7 +30,7 @@ const contextOptions = [
   },
 ];
 
-async function uploadSnippet(project, editor, visibility, context) {
+async function uploadSnippet(project, editor, visibility, context, workspaceFolder) {
   let content = '';
   const fileName = editor.document.fileName.split('/').reverse()[0];
 
@@ -57,7 +57,7 @@ async function uploadSnippet(project, editor, visibility, context) {
     data.id = project.restId;
   }
 
-  const snippet = await gitLabService.createSnippet(data);
+  const snippet = await gitLabService.createSnippet(workspaceFolder, data);
 
   openers.openUrl(snippet.web_url);
 }
@@ -90,7 +90,7 @@ async function createSnippet() {
       const context = await vscode.window.showQuickPick(contextOptions);
 
       if (context) {
-        uploadSnippet(project, editor, visibility.type, context.type);
+        uploadSnippet(project, editor, visibility.type, context.type, workspaceFolder);
       }
     }
   } else {
