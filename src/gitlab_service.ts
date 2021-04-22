@@ -13,7 +13,7 @@ import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
 import { ensureAbsoluteAvatarUrl } from './utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
-import { getInstanceUrl as getInstanceUrlUtil } from './utils/get_instance_url';
+import { getInstanceUrl } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
 import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
@@ -41,10 +41,13 @@ const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): Re
 const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
 
-const getInstanceUrl = async () => getInstanceUrlUtil(await getCurrentWorkspaceFolder());
-
-async function fetch(path: string, method = 'GET', data?: Record<string, unknown>) {
-  const instanceUrl = await getInstanceUrl();
+async function fetch(
+  workspaceFolder: string | undefined,
+  path: string,
+  method = 'GET',
+  data?: Record<string, unknown>,
+) {
+  const instanceUrl = await getInstanceUrl(workspaceFolder);
   const apiRoot = `${instanceUrl}/api/v4`;
   const glToken = tokenService.getToken(instanceUrl);
   const tokens = tokenService.getInstanceUrls().join(', ');
@@ -148,7 +151,7 @@ export async function fetchCurrentPipelineProject(workspaceFolder: string) {
 
 export async function fetchCurrentUser(): Promise<RestUser> {
   try {
-    const { response: user } = await fetch('/user');
+    const { response: user } = await fetch(await getCurrentWorkspaceFolder(), '/user');
     if (!user) throw new Error('Could not retrieve current user.');
     return user;
   } catch (e) {
@@ -156,9 +159,9 @@ export async function fetchCurrentUser(): Promise<RestUser> {
   }
 }
 
-async function fetchFirstUserByUsername(userName: string) {
+async function fetchFirstUserByUsername(workspaceFolder: string | undefined, userName: string) {
   try {
-    const { response: users } = await fetch(`/users?username=${userName}`);
+    const { response: users } = await fetch(workspaceFolder, `/users?username=${userName}`);
     return users[0];
   } catch (e) {
     handleError(new UserFriendlyError('Error when fetching GitLab user.', e));
@@ -169,7 +172,7 @@ async function fetchFirstUserByUsername(userName: string) {
 export async function fetchVersion() {
   try {
     if (!versionCache) {
-      const { response } = await fetch('/version');
+      const { response } = await fetch(await getCurrentWorkspaceFolder(), '/version');
       versionCache = response.version;
     }
   } catch (e) {
@@ -210,7 +213,10 @@ async function fetchLastPipelineForCurrentBranch(
 
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
   const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
-  const { response: pipelines } = await fetch(`${pipelinesRootPath}?ref=${branchName}`);
+  const { response: pipelines } = await fetch(
+    workspaceFolder,
+    `${pipelinesRootPath}?ref=${branchName}`,
+  );
   return pipelines.length > 0 ? pipelines[0] : null;
 }
 
@@ -276,7 +282,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
       search.append('author_username', author);
     }
   } else if (author) {
-    const authorUser = await fetchFirstUserByUsername(author);
+    const authorUser = await fetchFirstUserByUsername(workspaceFolder, author);
     search.append('author_id', (authorUser && authorUser.id) || '-1');
   }
 
@@ -288,7 +294,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   } else if (assignee && config.type === 'issues') {
     search.append('assignee_username', assignee);
   } else if (assignee) {
-    const assigneeUser = await fetchFirstUserByUsername(assignee);
+    const assigneeUser = await fetchFirstUserByUsername(workspaceFolder, assignee);
     search.append('assignee_id', (assigneeUser && assigneeUser.id) || '-1');
   }
 
@@ -374,13 +380,14 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
   usedQueryParamNames.forEach(name => search.append(name, `${queryParams[name]}`));
 
-  const { response } = await fetch(`${path}?${search.toString()}`);
+  const { response } = await fetch(workspaceFolder, `${path}?${search.toString()}`);
   issuable = response;
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl()));
 }
 
 export async function fetchLastJobsForCurrentBranch(pipeline: RestPipeline): Promise<RestJob[]> {
   const { response } = await fetch(
+    await getCurrentWorkspaceFolder(),
     `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
   );
   let jobs: RestJob[] = response;
@@ -406,7 +413,7 @@ export async function fetchOpenMergeRequestForCurrentBranch(
   const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
 
   const path = `/projects/${project?.restId}/merge_requests?state=opened&source_branch=${branchName}`;
-  const { response } = await fetch(path);
+  const { response } = await fetch(workspaceFolder, path);
   const mrs = response;
 
   if (mrs.length > 0) {
@@ -418,7 +425,7 @@ export async function fetchOpenMergeRequestForCurrentBranch(
 
 export async function fetchLastPipelineForMr(mr: RestIssuable): Promise<RestPipeline | null> {
   const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
-  const { response: pipelines } = await fetch(path);
+  const { response: pipelines } = await fetch(await getCurrentWorkspaceFolder(), path);
   return pipelines.length > 0 ? pipelines[0] : null;
 }
 
@@ -484,6 +491,7 @@ export async function fetchMRIssues(
   if (project) {
     try {
       const { response } = await fetch(
+        workspaceFolder,
         `/projects/${project.restId}/merge_requests/${mrId}/closes_issues`,
       );
       issues = response;
@@ -505,7 +513,7 @@ export async function createSnippet(data: { id: string }) {
   }
 
   try {
-    const { response } = await fetch(path, 'POST', data);
+    const { response } = await fetch(await getCurrentWorkspaceFolder(), path, 'POST', data);
     snippet = response;
   } catch (e) {
     handleError(new UserFriendlyError('Failed to create your snippet.', e));
@@ -518,7 +526,9 @@ export async function validateCIConfig(content: string) {
   let validCIConfig = null;
 
   try {
-    const { response } = await fetch('/ci/lint', 'POST', { content });
+    const { response } = await fetch(await getCurrentWorkspaceFolder(), '/ci/lint', 'POST', {
+      content,
+    });
     validCIConfig = response;
   } catch (e) {
     handleError(new UserFriendlyError('Failed to validate CI configuration.', e));
@@ -547,7 +557,7 @@ export async function renderMarkdown(markdown: string, workspaceFolder: string) 
 
   try {
     const project = await fetchCurrentProject(workspaceFolder);
-    const { response } = await fetch('/markdown', 'POST', {
+    const { response } = await fetch(workspaceFolder, '/markdown', 'POST', {
       text: markdown,
       project: project?.fullPath,
       gfm: 'true', // Needs to be a string for the API
