@@ -27,7 +27,7 @@ export const openUrl = async (url: string): Promise<void> =>
  * @param {string} linkTemplate
  */
 async function getLink(linkTemplate: string, workspaceFolder: string) {
-  const user = await gitLabService.fetchCurrentUser();
+  const user = await gitLabService.fetchCurrentUser(workspaceFolder);
   const project = await gitLabService.fetchCurrentProject(workspaceFolder);
 
   assert(project, 'Failed to fetch project');

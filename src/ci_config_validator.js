@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
+const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
 
 const { showInformationMessage, showErrorMessage } = vscode.window;
 
@@ -12,7 +13,7 @@ async function validate() {
   }
 
   const content = editor.document.getText();
-  const response = await gitLabService.validateCIConfig(content);
+  const response = await gitLabService.validateCIConfig(await getCurrentWorkspaceFolder(), content);
 
   if (!response) {
     showInformationMessage('GitLab Workflow: Failed to validate CI configuration.');
