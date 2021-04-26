@@ -65,13 +65,14 @@ export class GitExtensionWrapper implements vscode.Disposable {
   init(): void {
     try {
       this.gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
-      if (this.gitExtension !== undefined) {
-        this.disposables.add(
-          this.gitExtension.onDidChangeEnablement(this.onDidChangeGitExtensionEnablement, this),
-        );
-        this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
+      if (!this.gitExtension) {
+        log('Could not get Git Extension');
+        return;
       }
-      log('Could not get Git Extension');
+      this.disposables.add(
+        this.gitExtension.onDidChangeEnablement(this.onDidChangeGitExtensionEnablement, this),
+      );
+      this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
     } catch (error) {
       handleError(error);
     }
