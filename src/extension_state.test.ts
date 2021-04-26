@@ -1,71 +1,53 @@
 import * as vscode from 'vscode';
 import { ExtensionState } from './extension_state';
 import { tokenService } from './services/token_service';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 describe('extension_state', () => {
   let extensionState: ExtensionState;
-  let tokens: string[];
+  let mockedInstancesWithTokens: string[];
+  let mockedRepositories: any[];
 
   beforeEach(() => {
-    tokenService.getInstanceUrls = () => tokens;
+    mockedInstancesWithTokens = [];
+    mockedRepositories = [];
+    tokenService.getInstanceUrls = () => mockedInstancesWithTokens;
+    jest
+      .spyOn(gitExtensionWrapper, 'repositories', 'get')
+      .mockImplementation(() => mockedRepositories);
     extensionState = new ExtensionState();
   });
 
-  describe('with no tokens', () => {
-    beforeEach(async () => {
-      tokens = [];
+  it.each`
+    scenario                             | instancesWithTokens       | repositories        | validState | noToken  | noRepository
+    ${'is invalid'}                      | ${[]}                     | ${[]}               | ${false}   | ${true}  | ${true}
+    ${'is invalid without tokens'}       | ${[]}                     | ${['repository']}   | ${false}   | ${true}  | ${false}
+    ${'is invalid without repositories'} | ${['https://gitlab.com']} | ${[]}               | ${false}   | ${false} | ${true}
+    ${'is valid'}                        | ${['https://gitlab.com']} | ${[['repository']]} | ${true}    | ${false} | ${false}
+  `(
+    '$scenario',
+    async ({ instancesWithTokens, repositories, validState, noToken, noRepository }) => {
+      mockedInstancesWithTokens = instancesWithTokens;
+      mockedRepositories = repositories;
       await extensionState.init(tokenService);
-    });
 
-    it('state is not valid', () => {
-      expect(extensionState.isValid()).toBe(false);
-    });
+      const { executeCommand } = vscode.commands;
+      expect(executeCommand).toBeCalledWith('setContext', 'gitlab:validState', validState);
+      expect(executeCommand).toBeCalledWith('setContext', 'gitlab:noToken', noToken);
+      expect(executeCommand).toBeCalledWith('setContext', 'gitlab:noRepository', noRepository);
+    },
+  );
 
-    it.each`
-      context                | value
-      ${'gitlab:noToken'}    | ${true}
-      ${'gitlab:validState'} | ${false}
-    `('sets global context $context to $value', ({ context, value }) => {
-      expect(vscode.commands.executeCommand).toBeCalledWith('setContext', context, value);
-    });
+  it('fires event when valid state changes', async () => {
+    await extensionState.init(tokenService);
+    const listener = jest.fn();
+    extensionState.onDidChangeValid(listener);
+    // setting tokens and repositories makes extension state valid
+    mockedInstancesWithTokens = ['http://new-instance-url'];
+    mockedRepositories = ['repository'];
 
-    it('fires event when valid state changes', async () => {
-      const listener = jest.fn();
-      extensionState.onDidChangeValid(listener);
-      tokens = ['http://new-instance-url']; // setting token makes extension state valid
+    await extensionState.updateExtensionStatus();
 
-      await extensionState.updateExtensionStatus();
-
-      expect(listener).toHaveBeenCalled();
-    });
-  });
-
-  describe('with tokens', () => {
-    beforeEach(async () => {
-      tokens = ['http://new-instance-url'];
-      await extensionState.init(tokenService);
-    });
-
-    it('state is valid', () => {
-      expect(extensionState.isValid()).toBe(true);
-    });
-
-    it.each`
-      context                | value
-      ${'gitlab:noToken'}    | ${false}
-      ${'gitlab:validState'} | ${true}
-    `('sets global context $context to $value', ({ context, value }) => {
-      expect(vscode.commands.executeCommand).toBeCalledWith('setContext', context, value);
-    });
-
-    it('fires event when valid state changes', async () => {
-      const listener = jest.fn();
-      extensionState.onDidChangeValid(listener);
-      tokens = []; // unsetting tokens makes extension state invalid
-
-      await extensionState.updateExtensionStatus();
-
-      expect(listener).toHaveBeenCalled();
-    });
+    expect(listener).toHaveBeenCalled();
   });
 });
