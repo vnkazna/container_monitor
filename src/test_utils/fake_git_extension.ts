@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file, @typescript-eslint/no-explicit-any */
+import { EventEmitter } from './event_emitter';
 
 const removeFromArray = (array: any[], element: any): any[] => {
   return array.filter(el => el !== element);
@@ -11,9 +12,19 @@ const removeFromArray = (array: any[], element: any): any[] => {
  * and validating arguments of function calls.
  */
 class FakeGitApi {
-  public credentialsProviders: any[] = [];
+  credentialsProviders: any[] = [];
 
-  public remoteSourceProviders: any[] = [];
+  remoteSourceProviders: any[] = [];
+
+  repositories: any[] = [];
+
+  onDidOpenRepositoryEmitter = new EventEmitter<void>();
+
+  onDidOpenRepository = this.onDidOpenRepositoryEmitter.event;
+
+  onDidCloseRepositoryEmitter = new EventEmitter<void>();
+
+  onDidCloseRepository = this.onDidCloseRepositoryEmitter.event;
 
   registerCredentialsProvider(provider: any) {
     this.credentialsProviders.push(provider);
@@ -40,20 +51,15 @@ class FakeGitApi {
  * We use it to test enabling and disabling the extension.
  */
 export class FakeGitExtension {
-  public enabled = true;
+  enabled = true;
 
-  public enablementListeners: (() => any)[] = [];
+  enablementListeners: (() => any)[] = [];
 
-  public gitApi = new FakeGitApi();
+  gitApi = new FakeGitApi();
 
-  onDidChangeEnablement(listener: () => any) {
-    this.enablementListeners.push(listener);
-    return {
-      dispose: () => {
-        /* */
-      },
-    };
-  }
+  onDidChangeEnablementEmitter = new EventEmitter<boolean>();
+
+  onDidChangeEnablement = this.onDidChangeEnablementEmitter.event;
 
   getAPI() {
     return this.gitApi;
