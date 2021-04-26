@@ -118,6 +118,7 @@ const activate = context => {
   extensionState.init(tokenService);
   registerCiCompletion(context);
   gitExtensionWrapper.init();
+  context.subscriptions.push(gitExtensionWrapper);
   vscode.window.registerFileDecorationProvider(fileDecorationProvider);
 };
 
