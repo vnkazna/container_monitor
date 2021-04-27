@@ -12,6 +12,7 @@ const versionsResponse = require('./fixtures/rest/versions.json');
 const versionResponse = require('./fixtures/rest/mr_version.json');
 const diffNote = require('./fixtures/rest/diff_note.json');
 const { projectWithMrDiscussions, noteOnDiff } = require('./fixtures/graphql/discussions');
+const mrPermissionsResponse = require('./fixtures/graphql/mr_permissions.json');
 const {
   getServer,
   createJsonEndpoint,
@@ -42,6 +43,11 @@ describe('MR Review', () => {
       graphql.query('GetMrDiscussions', (req, res, ctx) => {
         if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
           return res(ctx.data(projectWithMrDiscussions));
+        return res(ctx.data({ project: null }));
+      }),
+      graphql.query('GetMrPermissions', (req, res, ctx) => {
+        if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
+          return res(ctx.data(mrPermissionsResponse));
         return res(ctx.data({ project: null }));
       }),
     ]);

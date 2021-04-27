@@ -1,6 +1,6 @@
 import { TreeItem, Uri } from 'vscode';
 import { posix as path } from 'path';
-import { toReviewUri } from '../../review/review_uri';
+import { toReviewUri, ReviewParams } from '../../review/review_uri';
 import { PROGRAMMATIC_COMMANDS, VS_COMMANDS } from '../../command_names';
 import { ADDED, DELETED, RENAMED, MODIFIED } from '../../constants';
 
@@ -63,23 +63,25 @@ export class ChangedFileItem extends TreeItem {
       };
       return;
     }
-
-    const emptyFileUri = toReviewUri({ workspacePath: workspace.uri, projectId: mr.project_id });
+    const commonParams: ReviewParams = {
+      workspacePath: workspace.uri,
+      projectId: mr.project_id,
+      mrId: mr.id,
+    };
+    const emptyFileUri = toReviewUri(commonParams);
     const baseFileUri = file.new_file
       ? emptyFileUri
       : toReviewUri({
+          ...commonParams,
           path: file.old_path,
           commit: mrVersion.base_commit_sha,
-          workspacePath: workspace.uri,
-          projectId: mr.project_id,
         });
     const headFileUri = file.deleted_file
       ? emptyFileUri
       : toReviewUri({
+          ...commonParams,
           path: file.new_path,
           commit: mrVersion.head_commit_sha,
-          workspacePath: workspace.uri,
-          projectId: mr.project_id,
         });
 
     this.command = {

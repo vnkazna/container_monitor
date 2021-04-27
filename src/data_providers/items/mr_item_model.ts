@@ -7,6 +7,7 @@ import { GqlDiscussion, GqlTextDiffDiscussion } from '../../gitlab/gitlab_new_se
 import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
 import { GitLabCommentThread } from '../../review/gitlab_comment_thread';
+import { CommentingRangeProvider } from '../../review/commenting_range_provider';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
@@ -38,8 +39,10 @@ export class MrItemModel extends ItemModel {
       arguments: [this.mr, this.workspace.uri],
       title: 'Show MR Overview',
     };
+    const gitlabService = await createGitLabNewService(this.workspace.uri);
+    const mrVersion = await gitlabService.getMrDiff(this.mr);
     try {
-      await this.getMrDiscussions();
+      await this.initializeMrDiscussions(mrVersion);
     } catch (e) {
       handleError(
         new UserFriendlyError(
@@ -50,17 +53,23 @@ export class MrItemModel extends ItemModel {
         ),
       );
     }
-    const changedFiles = await this.getChangedFiles();
+
+    const changedFiles = mrVersion.diffs.map(
+      d => new ChangedFileItem(this.mr, mrVersion, d, this.workspace),
+    );
     return [overview, ...changedFiles];
   }
 
-  private async getMrDiscussions(): Promise<void> {
+  private async initializeMrDiscussions(mrVersion: RestMrVersion): Promise<void> {
     const commentController = vscode.comments.createCommentController(
       this.mr.references.full,
       this.mr.title,
     );
-
     const gitlabService = await createGitLabNewService(this.workspace.uri);
+
+    if (await gitlabService.canUserCommentOnMr(this.mr)) {
+      commentController.commentingRangeProvider = new CommentingRangeProvider(this.mr, mrVersion);
+    }
 
     const discussions = await gitlabService.getDiscussions({
       issuable: this.mr,
@@ -76,11 +85,5 @@ export class MrItemModel extends ItemModel {
       });
     });
     this.setDisposableChildren([...threads, commentController]);
-  }
-
-  private async getChangedFiles(): Promise<vscode.TreeItem[]> {
-    const gitlabService = await createGitLabNewService(this.workspace.uri);
-    const mrVersion = await gitlabService.getMrDiff(this.mr);
-    return mrVersion.diffs.map(d => new ChangedFileItem(this.mr, mrVersion, d, this.workspace));
   }
 }
