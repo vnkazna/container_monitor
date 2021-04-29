@@ -69,7 +69,7 @@ and configured, if not, do that first! If already done, proceed ahead.
 
 *  Use your GitLab account to [fork](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/forks/new) this project
     *  Don't know how forking works? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/fork-project.html#doc-nav).
-    *  Don't have GitLab account? [Create one](https://gitlab.com/users/sign_in#register-pane)! It is free and it is awesome!
+    *  Don't have GitLab account? [Create one](https://gitlab.com/users/sign_up)! It is free and it is awesome!
 *  Visit your forked project (usually URL is `https://gitlab.com/<your user name>/gitlab-vscode-extension`) and copy
    SSH or HTTPS URL to clone the project into your system.
     *  Don't know how to clone a project? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/command-line-commands.html#clone-your-project).
