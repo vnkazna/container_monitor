@@ -127,7 +127,9 @@ export async function fetchCurrentProject(workspaceFolder: string): Promise<GitL
   }
 }
 
-export async function fetchCurrentProjectSwallowError(workspaceFolder: string) {
+export async function fetchCurrentProjectSwallowError(
+  workspaceFolder: string,
+): Promise<GitLabProject | null> {
   try {
     return await fetchCurrentProject(workspaceFolder);
   } catch (error) {
@@ -136,7 +138,9 @@ export async function fetchCurrentProjectSwallowError(workspaceFolder: string) {
   }
 }
 
-export async function fetchCurrentPipelineProject(workspaceFolder: string) {
+export async function fetchCurrentPipelineProject(
+  workspaceFolder: string,
+): Promise<GitLabProject | null> {
   try {
     const { pipelineGitRemoteName } = getExtensionConfiguration();
     const remote = await createGitService(workspaceFolder).fetchGitRemote(pipelineGitRemoteName);
@@ -524,7 +528,7 @@ export async function createSnippet(workspaceFolder: string, data: { id: string 
   return snippet;
 }
 
-export async function validateCIConfig(workspaceFolder: string, content: string) {
+export async function validateCIConfig(workspaceFolder: string, content: string): Promise<boolean> {
   let validCIConfig = null;
 
   try {
@@ -536,7 +540,7 @@ export async function validateCIConfig(workspaceFolder: string, content: string)
     handleError(new UserFriendlyError('Failed to validate CI configuration.', e));
   }
 
-  return validCIConfig;
+  return Boolean(validCIConfig);
 }
 interface Discussion {
   notes: {
