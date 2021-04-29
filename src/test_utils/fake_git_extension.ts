@@ -1,5 +1,7 @@
 /* eslint-disable max-classes-per-file, @typescript-eslint/no-explicit-any */
 
+import { API } from '../api/git';
+
 const removeFromArray = (array: any[], element: any): any[] => {
   return array.filter(el => el !== element);
 };
@@ -55,7 +57,7 @@ export class FakeGitExtension {
     };
   }
 
-  getAPI() {
-    return this.gitApi;
+  getAPI(): API {
+    return (this.gitApi as unknown) as API;
   }
 }

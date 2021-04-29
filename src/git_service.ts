@@ -33,7 +33,7 @@ export class GitService {
     // If remote name isn't provided, the command returns default remote for the current branch
     // if there's no default branch, the command fails but that's part of the normal flow and it can't throw
     const getUrlForRemoteName = async (name: string) =>
-      this.fetch(`git ls-remote --get-url ${name}`).catch(e => null);
+      this.fetch(`git ls-remote --get-url ${name}`).catch(() => null);
 
     const getFirstRemoteName = async () => {
       const multilineRemotes = await this.fetch('git remote');

@@ -51,7 +51,7 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getParent() {
+  getParent(): null {
     return null;
   }
 
@@ -61,7 +61,7 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
     return item;
   }
 
-  refresh() {
+  refresh(): void {
     this.eventEmitter.fire();
   }
 }

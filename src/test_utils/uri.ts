@@ -53,11 +53,11 @@ export class Uri implements vscode.Uri {
     return `${this.scheme}://${this.authority}${this.path}${this.query}#${this.fragment}`;
   }
 
-  toJSON() {
+  toJSON(): string {
     return JSON.stringify(this);
   }
 
-  static parse(stringUri: string) {
+  static parse(stringUri: string): Uri {
     const url = new URL(stringUri);
     const [query, fragment] = url.search.split('#');
     return new Uri({
@@ -69,7 +69,7 @@ export class Uri implements vscode.Uri {
     });
   }
 
-  static file(filePath: string) {
+  static file(filePath: string): Uri {
     return new Uri({
       scheme: 'file',
       authority: '',
