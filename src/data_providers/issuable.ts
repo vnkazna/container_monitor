@@ -10,13 +10,11 @@ import { CONFIG_CUSTOM_QUERIES, CONFIG_NAMESPACE } from '../constants';
 import { logError } from '../log';
 import { ErrorItem } from './items/error_item';
 import { extensionState } from '../extension_state';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
-async function getAllGitlabWorkspaces(): Promise<GitLabWorkspace[]> {
-  if (!vscode.workspace.workspaceFolders) {
-    return [];
-  }
-  const projectsWithUri = vscode.workspace.workspaceFolders.map(async workspaceFolder => {
-    const uri = workspaceFolder.uri.fsPath;
+async function getAllGitlabRepositories(): Promise<GitLabRepository[]> {
+  const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
+    const uri = repository.rootUri.fsPath;
     try {
       const currentProject = await gitLabService.fetchCurrentProject(uri);
       return {
@@ -53,7 +51,7 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
     }
     let workspaces: GitLabWorkspace[] = [];
     try {
-      workspaces = await getAllGitlabWorkspaces();
+      workspaces = await getAllGitlabRepositories();
     } catch (e) {
       logError(e);
       return [new ErrorItem('Fetching Issues and MRs failed')];
