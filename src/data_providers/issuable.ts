@@ -14,7 +14,7 @@ import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
 async function getAllGitlabRepositories(): Promise<GitLabRepository[]> {
   const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
-    const uri = repository.rootUri.fsPath;
+    const uri = repository.rootFsPath;
     try {
       const currentProject = await gitLabService.fetchCurrentProject(uri);
       return {
