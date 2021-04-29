@@ -34,6 +34,7 @@ export const diffFile: RestDiffFile = {
   new_file: false,
   deleted_file: false,
   renamed_file: true,
+  diff: '@@ -0,0 +1,7 @@\n+new file 2\n+\n+12\n+34\n+56\n+\n+,,,\n',
 };
 
 export const mrVersion: RestMrVersion = {
