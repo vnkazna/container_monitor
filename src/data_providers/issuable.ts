@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { basename } from 'path';
 import { CustomQueryItemModel } from './items/custom_query_item_model';
 import { MultirootCustomQueryItemModel } from './items/multiroot_custom_query_item_model';
 
@@ -9,6 +10,27 @@ import { CONFIG_CUSTOM_QUERIES, CONFIG_NAMESPACE } from '../constants';
 import { logError } from '../log';
 import { ErrorItem } from './items/error_item';
 import { extensionState } from '../extension_state';
+
+async function getAllGitlabWorkspaces(): Promise<GitLabWorkspace[]> {
+  if (!vscode.workspace.workspaceFolders) {
+    return [];
+  }
+  const projectsWithUri = vscode.workspace.workspaceFolders.map(async workspaceFolder => {
+    const uri = workspaceFolder.uri.fsPath;
+    try {
+      const currentProject = await gitLabService.fetchCurrentProject(uri);
+      return {
+        label: currentProject?.name ?? basename(uri),
+        uri,
+      };
+    } catch (e) {
+      logError(e);
+      return { label: basename(uri), uri, error: true };
+    }
+  });
+
+  return Promise.all(projectsWithUri);
+}
 
 export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
   private eventEmitter = new vscode.EventEmitter<void>();
@@ -31,7 +53,7 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
     }
     let workspaces: GitLabWorkspace[] = [];
     try {
-      workspaces = await gitLabService.getAllGitlabWorkspaces();
+      workspaces = await getAllGitlabWorkspaces();
     } catch (e) {
       logError(e);
       return [new ErrorItem('Fetching Issues and MRs failed')];
