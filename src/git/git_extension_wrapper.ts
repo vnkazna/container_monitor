@@ -11,7 +11,9 @@ import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_rem
 import { handleError, log } from '../log';
 
 export class GitExtensionWrapper implements vscode.Disposable {
-  disposables = new Set<vscode.Disposable>();
+  apiListeners: vscode.Disposable[] = [];
+
+  private enablementListener?: vscode.Disposable;
 
   private repositoryCountChangedEmitter = new vscode.EventEmitter<void>();
 
@@ -26,7 +28,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
     if (enabled) {
       this.register();
     } else {
-      this.dispose();
+      this.disposeApiListeners();
     }
     this.repositoryCountChangedEmitter.fire();
   }
@@ -45,21 +47,26 @@ export class GitExtensionWrapper implements vscode.Disposable {
     assert(this.gitExtension);
     try {
       this.gitApi = this.gitExtension.getAPI(1);
-      [
+      this.apiListeners = [
         new GitLabRemoteSourceProviderRepository(this.gitApi),
         this.gitApi.registerCredentialsProvider(gitlabCredentialsProvider),
         this.gitApi.onDidOpenRepository(() => this.repositoryCountChangedEmitter.fire()),
         this.gitApi.onDidCloseRepository(() => this.repositoryCountChangedEmitter.fire()),
-      ].forEach(d => this.disposables.add(d));
+      ];
     } catch (err) {
       handleError(err);
     }
   }
 
-  dispose(): void {
+  disposeApiListeners(): void {
     this.gitApi = undefined;
-    this.disposables.forEach(d => d?.dispose());
-    this.disposables.clear();
+    this.apiListeners.forEach(d => d?.dispose());
+    this.apiListeners = [];
+  }
+
+  dispose(): void {
+    this.disposeApiListeners();
+    this.enablementListener?.dispose();
   }
 
   init(): void {
@@ -69,8 +76,9 @@ export class GitExtensionWrapper implements vscode.Disposable {
         log('Could not get Git Extension');
         return;
       }
-      this.disposables.add(
-        this.gitExtension.onDidChangeEnablement(this.onDidChangeGitExtensionEnablement, this),
+      this.enablementListener = this.gitExtension.onDidChangeEnablement(
+        this.onDidChangeGitExtensionEnablement,
+        this,
       );
       this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
     } catch (error) {

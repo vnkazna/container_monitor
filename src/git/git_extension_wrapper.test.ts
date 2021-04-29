@@ -36,6 +36,7 @@ describe('GitExtensionWrapper', () => {
     const fakeRepository = 'repository1';
 
     it('returns no repositories when the extension is disabled', () => {
+      fakeExtension.gitApi.repositories = [fakeRepository];
       fakeExtension.enabled = false;
 
       wrapper.init();
@@ -52,30 +53,31 @@ describe('GitExtensionWrapper', () => {
     });
 
     describe('reacts to changes to repository count', () => {
-      let onRepositoryCountChangedListener: jest.Mock;
-
-      beforeEach(() => {
-        onRepositoryCountChangedListener = jest.fn();
+      it.each`
+        scenario                    | fireEvent
+        ${'repository was opened'}  | ${() => fakeExtension.gitApi.onDidOpenRepositoryEmitter.fire()}
+        ${'repository was closed'}  | ${() => fakeExtension.gitApi.onDidCloseRepositoryEmitter.fire()}
+        ${'extension was disabled'} | ${() => fakeExtension.onDidChangeEnablementEmitter.fire(false)}
+        ${'extension was enabled'}  | ${() => fakeExtension.onDidChangeEnablementEmitter.fire(true)}
+      `('calls onRepositoryCountChanged listener when $scenario', ({ fireEvent }) => {
+        const onRepositoryCountChangedListener = jest.fn();
         wrapper.init();
         wrapper.onRepositoryCountChanged(onRepositoryCountChangedListener);
-      });
-      it('calls onRepositoryCountChanged listeners when repository is opened', () => {
-        fakeExtension.gitApi.onDidOpenRepositoryEmitter.fire();
+
+        fireEvent();
 
         expect(onRepositoryCountChangedListener).toHaveBeenCalled();
       });
+    });
 
-      it('calls onRepositoryCountChanged listeners when repository is closed', () => {
-        fakeExtension.gitApi.onDidCloseRepositoryEmitter.fire();
+    it('provides repositories after the git extension gets enabled', () => {
+      fakeExtension.gitApi.repositories = [fakeRepository];
+      fakeExtension.enabled = false;
+      wrapper.init();
 
-        expect(onRepositoryCountChangedListener).toHaveBeenCalled();
-      });
+      fakeExtension.onDidChangeEnablementEmitter.fire(true);
 
-      it('calls onRepositoryCountChanged listeners when extension enablement changes', () => {
-        fakeExtension.onDidChangeEnablementEmitter.fire(false);
-
-        expect(onRepositoryCountChangedListener).toHaveBeenCalled();
-      });
+      expect(wrapper.repositories).toEqual([fakeRepository]);
     });
   });
 });
