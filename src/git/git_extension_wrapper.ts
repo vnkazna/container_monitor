@@ -5,13 +5,18 @@
 
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { API, GitExtension } from '../api/git';
+import { API, GitExtension, Repository } from '../api/git';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
 import { handleError, log } from '../log';
 
 export class GitExtensionWrapper implements vscode.Disposable {
   disposables = new Set<vscode.Disposable>();
+
+  private repositoryCountChangedEmitter = new vscode.EventEmitter<void>();
+
+  /** Gets triggered when user adds or removes repository or when user enables and disables the git extension */
+  onRepositoryCountChanged = this.repositoryCountChangedEmitter.event;
 
   private gitApi?: API;
 
@@ -23,6 +28,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
     } else {
       this.dispose();
     }
+    this.repositoryCountChangedEmitter.fire();
   }
 
   get gitBinaryPath(): string {
@@ -31,13 +37,20 @@ export class GitExtensionWrapper implements vscode.Disposable {
     return path;
   }
 
+  get repositories(): Repository[] {
+    return this.gitApi?.repositories ?? [];
+  }
+
   private register() {
     assert(this.gitExtension);
     try {
       this.gitApi = this.gitExtension.getAPI(1);
-
-      this.disposables.add(new GitLabRemoteSourceProviderRepository(this.gitApi));
-      this.disposables.add(this.gitApi.registerCredentialsProvider(gitlabCredentialsProvider));
+      [
+        new GitLabRemoteSourceProviderRepository(this.gitApi),
+        this.gitApi.registerCredentialsProvider(gitlabCredentialsProvider),
+        this.gitApi.onDidOpenRepository(() => this.repositoryCountChangedEmitter.fire()),
+        this.gitApi.onDidCloseRepository(() => this.repositoryCountChangedEmitter.fire()),
+      ].forEach(d => this.disposables.add(d));
     } catch (err) {
       handleError(err);
     }
@@ -52,13 +65,14 @@ export class GitExtensionWrapper implements vscode.Disposable {
   init(): void {
     try {
       this.gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
-      if (this.gitExtension !== undefined) {
-        this.disposables.add(
-          this.gitExtension.onDidChangeEnablement(this.onDidChangeGitExtensionEnablement, this),
-        );
-        this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
+      if (!this.gitExtension) {
+        log('Could not get Git Extension');
+        return;
       }
-      log('Could not get Git Extension');
+      this.disposables.add(
+        this.gitExtension.onDidChangeEnablement(this.onDidChangeGitExtensionEnablement, this),
+      );
+      this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
     } catch (error) {
       handleError(error);
     }
