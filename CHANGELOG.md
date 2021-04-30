@@ -11,7 +11,15 @@
 * add commenting ranges for new file versions in diff ([6c22d3a](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/6c22d3a74300fbea98ab31a5e73c337acfb38583))
 * show welcome view when there is no git repository ([ce9af7e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/ce9af7e59b0b11cfb9af79b82460c43c2f1dcb60))
 
+### Community contributions 👑 (not user-facing)
 
+* Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull)
+    * [Fix CI variables update script compares order of items](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/230)
+    * [refactor: reduce eslint warnings](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/217)
+    * [docs: update outdated sign up link](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/237)
+    * [chore: update CI variables](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/238)
+    * [docs: add notice to enable fork repo mirroring](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/236)
+* [ci: add junit reports](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/183) implemented by [@haasef](https://gitlab.com/haasef)
 
 # [3.18.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.17.1...v3.18.0) (2021-04-14)
 
