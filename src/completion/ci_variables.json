@@ -129,7 +129,7 @@
   },
   {
     "name": "CI_ENVIRONMENT_SLUG",
-    "description": "The simplified version of the environment name, suitable for inclusion in DNS, URLs, Kubernetes labels, and so on. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentname) is set."
+    "description": "The simplified version of the environment name, suitable for inclusion in DNS, URLs, Kubernetes labels, and so on. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentname) is set. The slug is [truncated to 24 characters](https://gitlab.com/gitlab-org/gitlab/-/issues/20941)."
   },
   {
     "name": "CI_ENVIRONMENT_URL",
