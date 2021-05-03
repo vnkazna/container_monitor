@@ -1,11 +1,14 @@
 /* eslint-disable max-classes-per-file, @typescript-eslint/no-explicit-any */
+import * as vscode from 'vscode';
+import { API, Repository } from '../api/git';
 import { EventEmitter } from './event_emitter';
-
-import { API } from '../api/git';
 
 const removeFromArray = (array: any[], element: any): any[] => {
   return array.filter(el => el !== element);
 };
+
+export const createFakeRepository = (rootUriPath: string): Repository =>
+  (({ rootUri: vscode.Uri.file(rootUriPath) } as unknown) as Repository);
 
 /**
  * This is a simple test double for the native Git extension API
@@ -18,13 +21,13 @@ class FakeGitApi {
 
   remoteSourceProviders: any[] = [];
 
-  repositories: any[] = [];
+  repositories: Repository[] = [];
 
-  onDidOpenRepositoryEmitter = new EventEmitter<void>();
+  onDidOpenRepositoryEmitter = new EventEmitter<Repository>();
 
   onDidOpenRepository = this.onDidOpenRepositoryEmitter.event;
 
-  onDidCloseRepositoryEmitter = new EventEmitter<void>();
+  onDidCloseRepositoryEmitter = new EventEmitter<Repository>();
 
   onDidCloseRepository = this.onDidCloseRepositoryEmitter.event;
 

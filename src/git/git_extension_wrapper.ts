@@ -8,10 +8,15 @@ import * as vscode from 'vscode';
 import { API, GitExtension, Repository } from '../api/git';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
+import { WrappedRepository } from './wrapped_repository';
 import { handleError, log } from '../log';
 
 export class GitExtensionWrapper implements vscode.Disposable {
-  disposables = new Set<vscode.Disposable>();
+  apiListeners: vscode.Disposable[] = [];
+
+  private enablementListener?: vscode.Disposable;
+
+  private wrappedRepositories: WrappedRepository[] = [];
 
   private repositoryCountChangedEmitter = new vscode.EventEmitter<void>();
 
@@ -25,10 +30,11 @@ export class GitExtensionWrapper implements vscode.Disposable {
   private onDidChangeGitExtensionEnablement(enabled: boolean) {
     if (enabled) {
       this.register();
+      this.addRepositories(this.gitApi?.repositories ?? []);
     } else {
-      this.dispose();
+      this.removeRepositories(this.wrappedRepositories.map(wr => wr.rawRepository));
+      this.disposeApiListeners();
     }
-    this.repositoryCountChangedEmitter.fire();
   }
 
   get gitBinaryPath(): string {
@@ -37,8 +43,8 @@ export class GitExtensionWrapper implements vscode.Disposable {
     return path;
   }
 
-  get repositories(): Repository[] {
-    return this.gitApi?.repositories ?? [];
+  get repositories(): WrappedRepository[] {
+    return this.wrappedRepositories;
   }
 
   private register() {
@@ -48,18 +54,38 @@ export class GitExtensionWrapper implements vscode.Disposable {
       [
         new GitLabRemoteSourceProviderRepository(this.gitApi),
         this.gitApi.registerCredentialsProvider(gitlabCredentialsProvider),
-        this.gitApi.onDidOpenRepository(() => this.repositoryCountChangedEmitter.fire()),
-        this.gitApi.onDidCloseRepository(() => this.repositoryCountChangedEmitter.fire()),
-      ].forEach(d => this.disposables.add(d));
+        this.gitApi.onDidOpenRepository(r => this.addRepositories([r])),
+        this.gitApi.onDidCloseRepository(r => this.removeRepositories([r])),
+      ];
     } catch (err) {
       handleError(err);
     }
   }
 
-  dispose(): void {
+  private addRepositories(repositories: Repository[]) {
+    this.wrappedRepositories = [
+      ...this.wrappedRepositories,
+      ...repositories.map(r => new WrappedRepository(r)),
+    ];
+    this.repositoryCountChangedEmitter.fire();
+  }
+
+  private removeRepositories(repositories: Repository[]) {
+    this.wrappedRepositories = this.wrappedRepositories.filter(
+      wr => !repositories.includes(wr.rawRepository),
+    );
+    this.repositoryCountChangedEmitter.fire();
+  }
+
+  disposeApiListeners(): void {
     this.gitApi = undefined;
-    this.disposables.forEach(d => d?.dispose());
-    this.disposables.clear();
+    this.apiListeners.forEach(d => d?.dispose());
+    this.apiListeners = [];
+  }
+
+  dispose(): void {
+    this.disposeApiListeners();
+    this.enablementListener?.dispose();
   }
 
   init(): void {
@@ -69,8 +95,9 @@ export class GitExtensionWrapper implements vscode.Disposable {
         log('Could not get Git Extension');
         return;
       }
-      this.disposables.add(
-        this.gitExtension.onDidChangeEnablement(this.onDidChangeGitExtensionEnablement, this),
+      this.enablementListener = this.gitExtension.onDidChangeEnablement(
+        this.onDidChangeGitExtensionEnablement,
+        this,
       );
       this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
     } catch (error) {

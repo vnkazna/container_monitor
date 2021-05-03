@@ -37,8 +37,8 @@ interface RestDiffFile {
   diff: string;
 }
 
-/** Represents VS Code workspace that contains a GitLab project */
-interface GitLabWorkspace {
+/** Represents VS Code repository that contains a GitLab project */
+interface GitLabRepository {
   /** Name of the GitLab project in the workspace */
   label: string;
   /** Absolute path to the workspace */
@@ -46,6 +46,9 @@ interface GitLabWorkspace {
   /** Has there been an error retrieving the GitLab information? */
   error?: boolean;
 }
+
+// TODO remove this temporary type which aids refactoring from workspace to repositories
+type GitLabWorkspace = GitLabRepository;
 
 interface RestVulnerability {
   location?: {
