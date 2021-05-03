@@ -194,6 +194,82 @@
         {
           "command": "gl.createComment",
           "when": "false"
+        },
+        {
+          "command": "gl.showIssuesAssignedToMe",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.showMergeRequestsAssignedToMe",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.openActiveFile",
+          "when": "gitlab:validState && editorIsOpen"
+        },
+        {
+          "command": "gl.copyLinkToActiveFile",
+          "when": "gitlab:validState && editorIsOpen"
+        },
+        {
+          "command": "gl.openCurrentMergeRequest",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.openCreateNewIssue",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.openCreateNewMR",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.openProjectPage",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.openCurrentPipeline",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.pipelineActions",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.issueSearch",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.mergeRequestSearch",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.projectAdvancedSearch",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.compareCurrentBranch",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.createSnippet",
+          "when": "gitlab:validState && editorIsOpen"
+        },
+        {
+          "command": "gl.insertSnippet",
+          "when": "gitlab:validState && editorIsOpen"
+        },
+        {
+          "command": "gl.validateCIConfig",
+          "when": "gitlab:validState && editorIsOpen"
+        },
+        {
+          "command": "gl.refreshSidebar",
+          "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.showIssuesAssignedToMe",
+          "when": "gitlab:validState"
         }
       ],
       "view/title": [
