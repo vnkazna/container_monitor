@@ -14,7 +14,9 @@
       {
         "ignore": ["vscode"]
       }
-    ]
+    ],
+    "no-shadow": "warn",
+    "no-use-before-define": "warn"
   },
   "reportUnusedDisableDirectives": true,
   "overrides": [
