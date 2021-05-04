@@ -32,7 +32,8 @@ export class GitExtensionWrapper implements vscode.Disposable {
       this.register();
       this.addRepositories(this.gitApi?.repositories ?? []);
     } else {
-      this.removeRepositories(this.wrappedRepositories.map(wr => wr.rawRepository));
+      this.wrappedRepositories = [];
+      this.repositoryCountChangedEmitter.fire();
       this.disposeApiListeners();
     }
   }
@@ -55,7 +56,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
         new GitLabRemoteSourceProviderRepository(this.gitApi),
         this.gitApi.registerCredentialsProvider(gitlabCredentialsProvider),
         this.gitApi.onDidOpenRepository(r => this.addRepositories([r])),
-        this.gitApi.onDidCloseRepository(r => this.removeRepositories([r])),
+        this.gitApi.onDidCloseRepository(r => this.removeRepository(r)),
       ];
     } catch (err) {
       handleError(err);
@@ -70,10 +71,8 @@ export class GitExtensionWrapper implements vscode.Disposable {
     this.repositoryCountChangedEmitter.fire();
   }
 
-  private removeRepositories(repositories: Repository[]) {
-    this.wrappedRepositories = this.wrappedRepositories.filter(
-      wr => !repositories.includes(wr.rawRepository),
-    );
+  private removeRepository(repository: Repository) {
+    this.wrappedRepositories = this.wrappedRepositories.filter(wr => !wr.hasSameRootAs(repository));
     this.repositoryCountChangedEmitter.fire();
   }
 

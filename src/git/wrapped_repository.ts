@@ -2,7 +2,7 @@ import { basename } from 'path';
 import { Repository } from '../api/git';
 
 export class WrappedRepository {
-  rawRepository: Repository;
+  private readonly rawRepository: Repository;
 
   constructor(rawRepository: Repository) {
     this.rawRepository = rawRepository;
