@@ -57,7 +57,7 @@ const createStatusBarItem = (text: string, command?: string | vscode.Command) =>
 const openIssuableOnTheWebCommand = (issuable: RestIssuable): vscode.Command => ({
   title: '', // the title is not used for StatusBarItem commands
   command: 'vscode.open',
-  arguments: [issuable.web_url],
+  arguments: [vscode.Uri.parse(issuable.web_url)],
 });
 
 export class StatusBar {
