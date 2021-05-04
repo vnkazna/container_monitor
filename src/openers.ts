@@ -34,22 +34,18 @@ async function getLink(linkTemplate: string, workspaceFolder: string) {
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
-async function openLink(linkTemplate: string, workspaceFolder: string) {
+async function openTemplatedLink(linkTemplate: string) {
+  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
+  if (!workspaceFolder) return;
   await openUrl(await getLink(linkTemplate, workspaceFolder));
 }
 
 export async function showIssues(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-
-  await openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder);
+  await openTemplatedLink('$projectUrl/issues?assignee_id=$userId');
 }
 
 export async function showMergeRequests(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-
-  await openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder);
+  await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId');
 }
 
 async function getActiveFile() {
@@ -119,10 +115,7 @@ export async function openCurrentMergeRequest(): Promise<void> {
 }
 
 export async function openCreateNewIssue(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-
-  openLink('$projectUrl/issues/new', workspaceFolder);
+  openTemplatedLink('$projectUrl/issues/new');
 }
 
 export async function openCreateNewMr(): Promise<void> {
@@ -135,9 +128,7 @@ export async function openCreateNewMr(): Promise<void> {
 }
 
 export async function openProjectPage(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-  openLink('$projectUrl', workspaceFolder);
+  openTemplatedLink('$projectUrl');
 }
 
 export async function openCurrentPipeline(workspaceFolder: string): Promise<void> {
