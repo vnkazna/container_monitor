@@ -9,6 +9,8 @@ import {
 import { createGitService } from './service_factory';
 import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { WrappedRepository } from './git/wrapped_repository';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
@@ -26,18 +28,18 @@ export const openUrl = async (url: string): Promise<void> =>
  *
  * @param {string} linkTemplate
  */
-async function getLink(linkTemplate: string, workspaceFolder: string) {
-  const user = await gitLabService.fetchCurrentUser(workspaceFolder);
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+async function getLink(linkTemplate: string, repository: WrappedRepository) {
+  const user = await gitLabService.fetchCurrentUser(repository.rootFsPath);
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
 
   assert(project, 'Failed to fetch project');
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
 async function openTemplatedLink(linkTemplate: string) {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-  await openUrl(await getLink(linkTemplate, workspaceFolder));
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
+  await openUrl(await getLink(linkTemplate, repository));
 }
 
 export async function showIssues(): Promise<void> {
