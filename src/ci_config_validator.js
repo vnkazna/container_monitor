@@ -1,6 +1,6 @@
 const vscode = require('vscode');
+const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
 const gitLabService = require('./gitlab_service');
-const { getCurrentWorkspaceFolder } = require('./services/workspace_service');
 
 const { showInformationMessage, showErrorMessage } = vscode.window;
 
@@ -13,7 +13,10 @@ async function validate() {
   }
 
   const content = editor.document.getText();
-  const response = await gitLabService.validateCIConfig(await getCurrentWorkspaceFolder(), content);
+  const response = await gitLabService.validateCIConfig(
+    gitExtensionWrapper.getActiveRepository().rootFsPath,
+    content,
+  );
 
   if (!response) {
     showInformationMessage('GitLab Workflow: Failed to validate CI configuration.');

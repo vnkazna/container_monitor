@@ -1,8 +1,8 @@
 const vscode = require('vscode');
+const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
 const { instance: statusBar } = require('./status_bar');
-const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 
 async function showPicker() {
   const items = [
@@ -24,17 +24,20 @@ async function showPicker() {
     },
   ];
 
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
 
   const selected = await vscode.window.showQuickPick(items);
 
   if (selected) {
     if (selected.action === 'view') {
-      openers.openCurrentPipeline(workspaceFolder);
+      openers.openCurrentPipeline(repository.rootFsPath);
       return;
     }
 
-    const newPipeline = await gitLabService.handlePipelineAction(selected.action, workspaceFolder);
+    const newPipeline = await gitLabService.handlePipelineAction(
+      selected.action,
+      repository.rootFsPath,
+    );
     if (newPipeline) statusBar.refresh();
   }
 }

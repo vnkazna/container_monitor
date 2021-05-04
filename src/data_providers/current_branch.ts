@@ -3,7 +3,6 @@ import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as gitLabService from '../gitlab_service';
 import { ErrorItem } from './items/error_item';
-import { getCurrentWorkspaceFolder } from '../services/workspace_service';
 import { handleError } from '../log';
 import { ItemModel } from './items/item_model';
 import { MrItemModel } from './items/mr_item_model';
@@ -11,6 +10,7 @@ import { IssueItem } from './items/issue_item';
 import { ExternalUrlItem } from './items/external_url_item';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { extensionState } from '../extension_state';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
 dayjs.extend(relativeTime);
 
@@ -75,25 +75,25 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     if (item) return item.getChildren();
     this.disposableChildren.forEach(s => s.dispose());
     this.disposableChildren = [];
-    const workspaceFolder = await getCurrentWorkspaceFolder();
-    if (!extensionState.isValid() || !workspaceFolder) {
+    const repository = gitExtensionWrapper.getActiveRepository();
+    if (!extensionState.isValid() || !repository) {
       return [];
     }
     try {
-      const gitlabProject = await gitLabService.fetchCurrentProject(workspaceFolder);
+      const gitlabProject = await gitLabService.fetchCurrentProject(repository.rootFsPath);
       if (!gitlabProject) {
         return [];
       }
       const vsProject = {
         label: gitlabProject.name,
-        uri: workspaceFolder,
+        uri: repository.rootFsPath,
       };
       const { pipeline, mr } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
-        workspaceFolder,
+        repository.rootFsPath,
       );
       const pipelineItem = await this.createPipelineItem(pipeline, gitlabProject);
       const mrItem = await this.createMrItem(mr, vsProject);
-      const closingIssuesItems = await this.fetchClosingIssue(workspaceFolder, vsProject);
+      const closingIssuesItems = await this.fetchClosingIssue(repository.rootFsPath, vsProject);
       return [pipelineItem, mrItem, ...closingIssuesItems] as vscode.TreeItem[]; // TODO the actual type includes ItemMode
     } catch (e) {
       handleError(e);
