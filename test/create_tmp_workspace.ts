@@ -22,6 +22,8 @@ async function addFile(folderPath: string, relativePath: string, content: string
   fs.writeFileSync(fullPath, content);
 }
 
+const isMac = () => Boolean(process.platform.match(/darwin/));
+
 // `autoCleanUp = true` means that the directory gets deleted on process exit
 export default async function createTmpWorkspace(autoCleanUp = true): Promise<string> {
   if (autoCleanUp) temp.track();
@@ -35,5 +37,9 @@ export default async function createTmpWorkspace(autoCleanUp = true): Promise<st
     '--allow-empty': null,
   });
   await addFile(dirPath, '/.vscode/settings.json', JSON.stringify(DEFAULT_VS_CODE_SETTINGS));
-  return dirPath;
+  // on mac, the temp node module creates folder in /var. /var is a symlink
+  // to /private/var on mac. Every time we use git, it returns the non-symlinked /private prefixed path
+  // https://apple.stackexchange.com/questions/1043/why-is-tmp-a-symlink-to-private-tmp/1096
+  // this prefixing brings the git results in sync with the rest of the tests
+  return isMac() ? `/private${dirPath}` : dirPath;
 }
