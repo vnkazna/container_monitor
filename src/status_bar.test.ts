@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 import * as gitLabService from './gitlab_service';
 import { pipeline, mr, issue } from './test_utils/entities';
 import { USER_COMMANDS } from './command_names';
-import { getCurrentWorkspaceFolder } from './services/workspace_service';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 jest.mock('./gitlab_service');
-jest.mock('./services/workspace_service');
+jest.mock('./git/git_extension_wrapper');
 
 const asMock = (mockFn: unknown) => mockFn as jest.Mock;
 
@@ -45,7 +45,9 @@ describe('status_bar', () => {
       fakeItems.push(fakeItem);
       return fakeItem;
     });
-    asMock(getCurrentWorkspaceFolder).mockResolvedValue('/folder');
+    asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
+      rootFsPath: '/folder',
+    });
     asMock(gitLabService.fetchCurrentProject).mockResolvedValue({});
   });
 

@@ -2,10 +2,10 @@
 import * as vscode from 'vscode';
 import * as openers from './openers';
 import * as gitLabService from './gitlab_service';
-import { getCurrentWorkspaceFolder } from './services/workspace_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { log, logError } from './log';
 import { USER_COMMANDS } from './command_names';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
@@ -72,10 +72,10 @@ export class StatusBar {
   firstRun = true;
 
   async refresh() {
-    const workspaceFolder = await getCurrentWorkspaceFolder();
-    if (!workspaceFolder) return;
+    const repository = gitExtensionWrapper.getActiveRepository();
+    if (!repository) return;
 
-    const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+    const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
     if (!project) {
       log(
         'GitLab project not found, the extension is going to hide the status bar until next refresh in 30s.',
@@ -84,11 +84,11 @@ export class StatusBar {
       return;
     }
     const { mr, pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
-      workspaceFolder,
+      repository.rootFsPath,
     );
-    await this.updatePipelineItem(pipeline, workspaceFolder);
+    await this.updatePipelineItem(pipeline, repository.rootFsPath);
     this.updateMrItem(mr);
-    await this.fetchMrClosingIssue(mr, workspaceFolder);
+    await this.fetchMrClosingIssue(mr, repository.rootFsPath);
   }
 
   hideAllItems(): void {
