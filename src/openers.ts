@@ -2,10 +2,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as gitLabService from './gitlab_service';
-import {
-  getCurrentWorkspaceFolderOrSelectOne,
-  getCurrentWorkspaceFolder,
-} from './services/workspace_service';
 import { createGitService } from './service_factory';
 import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
@@ -57,22 +53,22 @@ async function getActiveFile() {
     return undefined;
   }
 
-  const workspaceFolder = await getCurrentWorkspaceFolder();
+  const repository = gitExtensionWrapper.getActiveRepository();
 
-  if (!workspaceFolder) {
-    vscode.window.showInformationMessage('GitLab Workflow: Open file isn’t part of workspace.');
+  if (!repository) {
+    vscode.window.showInformationMessage('GitLab Workflow: Open file isn’t part of a repository.');
     return undefined;
   }
 
   let currentProject;
   try {
-    currentProject = await gitLabService.fetchCurrentProject(workspaceFolder);
+    currentProject = await gitLabService.fetchCurrentProject(repository.rootFsPath);
   } catch (e) {
     handleError(e);
     return undefined;
   }
 
-  const gitService = createGitService(workspaceFolder);
+  const gitService = createGitService(repository.rootFsPath);
   const branchName = await gitService.fetchTrackingBranchName();
   const filePath = path.relative(
     await gitService.getRepositoryRootFolder(),
@@ -106,10 +102,10 @@ export async function copyLinkToActiveFile(): Promise<void> {
 }
 
 export async function openCurrentMergeRequest(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
 
-  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
+  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(repository.rootFsPath);
 
   if (mr) {
     await openUrl(mr.web_url);
@@ -121,10 +117,10 @@ export async function openCreateNewIssue(): Promise<void> {
 }
 
 export async function openCreateNewMr(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
-  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const branchName = await createGitService(repository.rootFsPath).fetchTrackingBranchName();
 
   openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
 }
@@ -142,13 +138,11 @@ export async function openCurrentPipeline(workspaceFolder: string): Promise<void
 }
 
 export async function compareCurrentBranch(): Promise<void> {
-  let project = null;
-  let lastCommitId = null;
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
 
-  project = await gitLabService.fetchCurrentProject(workspaceFolder);
-  lastCommitId = await createGitService(workspaceFolder).fetchLastCommitId();
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const lastCommitId = await createGitService(repository.rootFsPath).fetchLastCommitId();
 
   if (project && lastCommitId) {
     openUrl(`${project.webUrl}/compare/master...${lastCommitId}`);
