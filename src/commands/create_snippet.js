@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const openers = require('../openers');
 const gitLabService = require('../gitlab_service');
 const gitlabProjectInput = require('../gitlab_project_input');
-const { getCurrentWorkspaceFolder } = require('../services/workspace_service');
+const { gitExtensionWrapper } = require('../git/git_extension_wrapper');
 
 const visibilityOptions = [
   {
@@ -68,7 +68,8 @@ async function createSnippet() {
   let project = null;
 
   if (editor) {
-    workspaceFolder = await getCurrentWorkspaceFolder();
+    const repository = gitExtensionWrapper.getActiveRepository();
+    workspaceFolder = repository.rootFsPath;
     project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
 
     if (project == null) {

@@ -77,9 +77,9 @@ describe('GitExtensionWrapper', () => {
 
       fakeExtension.gitApi.onDidOpenRepositoryEmitter.fire(fakeRepository2);
 
-      expect(wrapper.repositories.map(r => r.rawRepository)).toEqual([
-        fakeRepository,
-        fakeRepository2,
+      expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([
+        fakeRepository.rootUri.fsPath,
+        fakeRepository2.rootUri.fsPath,
       ]);
     });
 
@@ -89,7 +89,7 @@ describe('GitExtensionWrapper', () => {
 
       fakeExtension.gitApi.onDidCloseRepositoryEmitter.fire(fakeRepository);
 
-      expect(wrapper.repositories.map(r => r.rawRepository)).toEqual([fakeRepository2]);
+      expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([fakeRepository2.rootUri.fsPath]);
     });
 
     it('adds all repositories when the git extension gets enabled', () => {
@@ -99,9 +99,9 @@ describe('GitExtensionWrapper', () => {
 
       fakeExtension.onDidChangeEnablementEmitter.fire(true);
 
-      expect(wrapper.repositories.map(r => r.rawRepository)).toEqual([
-        fakeRepository,
-        fakeRepository2,
+      expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([
+        fakeRepository.rootUri.fsPath,
+        fakeRepository2.rootUri.fsPath,
       ]);
     });
   });

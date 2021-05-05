@@ -2,13 +2,11 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as gitLabService from './gitlab_service';
-import {
-  getCurrentWorkspaceFolderOrSelectOne,
-  getCurrentWorkspaceFolder,
-} from './services/workspace_service';
 import { createGitService } from './service_factory';
 import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { WrappedRepository } from './git/wrapped_repository';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
@@ -26,30 +24,26 @@ export const openUrl = async (url: string): Promise<void> =>
  *
  * @param {string} linkTemplate
  */
-async function getLink(linkTemplate: string, workspaceFolder: string) {
-  const user = await gitLabService.fetchCurrentUser(workspaceFolder);
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+async function getLink(linkTemplate: string, repository: WrappedRepository) {
+  const user = await gitLabService.fetchCurrentUser(repository.rootFsPath);
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
 
   assert(project, 'Failed to fetch project');
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
-async function openLink(linkTemplate: string, workspaceFolder: string) {
-  await openUrl(await getLink(linkTemplate, workspaceFolder));
+async function openTemplatedLink(linkTemplate: string) {
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
+  await openUrl(await getLink(linkTemplate, repository));
 }
 
 export async function showIssues(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-
-  await openLink('$projectUrl/issues?assignee_id=$userId', workspaceFolder);
+  await openTemplatedLink('$projectUrl/issues?assignee_id=$userId');
 }
 
 export async function showMergeRequests(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-
-  await openLink('$projectUrl/merge_requests?assignee_id=$userId', workspaceFolder);
+  await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId');
 }
 
 async function getActiveFile() {
@@ -59,22 +53,22 @@ async function getActiveFile() {
     return undefined;
   }
 
-  const workspaceFolder = await getCurrentWorkspaceFolder();
+  const repository = gitExtensionWrapper.getActiveRepository();
 
-  if (!workspaceFolder) {
-    vscode.window.showInformationMessage('GitLab Workflow: Open file isn’t part of workspace.');
+  if (!repository) {
+    vscode.window.showInformationMessage('GitLab Workflow: Open file isn’t part of a repository.');
     return undefined;
   }
 
   let currentProject;
   try {
-    currentProject = await gitLabService.fetchCurrentProject(workspaceFolder);
+    currentProject = await gitLabService.fetchCurrentProject(repository.rootFsPath);
   } catch (e) {
     handleError(e);
     return undefined;
   }
 
-  const gitService = createGitService(workspaceFolder);
+  const gitService = createGitService(repository.rootFsPath);
   const branchName = await gitService.fetchTrackingBranchName();
   const filePath = path.relative(
     await gitService.getRepositoryRootFolder(),
@@ -108,10 +102,10 @@ export async function copyLinkToActiveFile(): Promise<void> {
 }
 
 export async function openCurrentMergeRequest(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
 
-  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(workspaceFolder);
+  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(repository.rootFsPath);
 
   if (mr) {
     await openUrl(mr.web_url);
@@ -119,25 +113,20 @@ export async function openCurrentMergeRequest(): Promise<void> {
 }
 
 export async function openCreateNewIssue(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-
-  openLink('$projectUrl/issues/new', workspaceFolder);
+  openTemplatedLink('$projectUrl/issues/new');
 }
 
 export async function openCreateNewMr(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
-  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const branchName = await createGitService(repository.rootFsPath).fetchTrackingBranchName();
 
   openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
 }
 
 export async function openProjectPage(): Promise<void> {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
-  openLink('$projectUrl', workspaceFolder);
+  openTemplatedLink('$projectUrl');
 }
 
 export async function openCurrentPipeline(workspaceFolder: string): Promise<void> {
@@ -149,13 +138,11 @@ export async function openCurrentPipeline(workspaceFolder: string): Promise<void
 }
 
 export async function compareCurrentBranch(): Promise<void> {
-  let project = null;
-  let lastCommitId = null;
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  if (!workspaceFolder) return;
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
 
-  project = await gitLabService.fetchCurrentProject(workspaceFolder);
-  lastCommitId = await createGitService(workspaceFolder).fetchLastCommitId();
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const lastCommitId = await createGitService(repository.rootFsPath).fetchLastCommitId();
 
   if (project && lastCommitId) {
     openUrl(`${project.webUrl}/compare/master...${lastCommitId}`);

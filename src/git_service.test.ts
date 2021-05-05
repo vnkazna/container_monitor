@@ -6,6 +6,8 @@ import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
+const isMac = () => Boolean(process.platform.match(/darwin/));
+
 describe('git_service', () => {
   const ORIGIN = 'origin';
   const SECOND_REMOTE = 'second'; // name is important, we need this remote to be alphabetically behind origin
@@ -20,7 +22,12 @@ describe('git_service', () => {
     new Promise((resolve, reject) => {
       temp.mkdir('vscodeWorkplace', (err, dirPath) => {
         if (err) reject(err);
-        resolve(dirPath);
+        // on mac, the temp node module creates folder in /var. /var is a symlink
+        // to /private/var on mac. Every time we use git, it returns the non-symlinked /private prefixed path
+        // https://apple.stackexchange.com/questions/1043/why-is-tmp-a-symlink-to-private-tmp/1096
+        // this prefixing brings the git results in sync with the rest of the tests
+        const result = isMac() ? `/private${dirPath}` : dirPath;
+        resolve(result);
       });
     });
 
@@ -28,12 +35,6 @@ describe('git_service', () => {
     workspaceFolder,
     preferredRemoteName: undefined,
   });
-
-  /* The MacOS puts all the temp files in a virtual /private folder
-  it works fine to access them without this prefix, but git returns
-  the path including /private which breaks tests on Mac */
-  const removeMacSpecificPrivatePrefix = (absolutePath: string) =>
-    absolutePath.replace(/^\/private/, '');
 
   beforeEach(() => {
     (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
@@ -146,8 +147,7 @@ describe('git_service', () => {
 
         const result = await gitService.getRepositoryRootFolder();
 
-        const sanitizedResult = removeMacSpecificPrivatePrefix(result);
-        expect(sanitizedResult).toBe(workspaceFolder);
+        expect(result).toBe(workspaceFolder);
       });
 
       it('returns the parent folder if the git service is created for git subfolder', async () => {
@@ -157,8 +157,7 @@ describe('git_service', () => {
 
         const result = await gitService.getRepositoryRootFolder();
 
-        const sanitizedResult = removeMacSpecificPrivatePrefix(result);
-        expect(sanitizedResult).toBe(workspaceFolder);
+        expect(result).toBe(workspaceFolder);
       });
     });
   });

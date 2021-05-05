@@ -1,7 +1,7 @@
 const vscode = require('vscode');
+const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
-const { getCurrentWorkspaceFolderOrSelectOne } = require('./services/workspace_service');
 const { getInstanceUrl } = require('./utils/get_instance_url');
 
 const parseQuery = (query, noteableType) => {
@@ -96,8 +96,8 @@ async function getSearchInput(description) {
 }
 
 async function showSearchInputFor(noteableType) {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
   const query = await getSearchInput(
     'Search in title or description. (Check extension page for search with filters)',
   );
@@ -115,13 +115,13 @@ async function showMergeRequestSearchInput() {
 }
 
 async function showProjectAdvancedSearchInput() {
-  const workspaceFolder = await getCurrentWorkspaceFolderOrSelectOne();
-  const project = await gitLabService.fetchCurrentProject(workspaceFolder);
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
   const query = await getSearchInput(
     'Project Advanced Search. (Check extension page for Advanced Search)',
   );
   const queryString = await encodeURIComponent(query);
-  const instanceUrl = await getInstanceUrl(workspaceFolder);
+  const instanceUrl = await getInstanceUrl(repository.rootFsPath);
 
   // Select issues tab by default for Advanced Search
   await openers.openUrl(

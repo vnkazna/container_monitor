@@ -32,7 +32,8 @@ export class GitExtensionWrapper implements vscode.Disposable {
       this.register();
       this.addRepositories(this.gitApi?.repositories ?? []);
     } else {
-      this.removeRepositories(this.wrappedRepositories.map(wr => wr.rawRepository));
+      this.wrappedRepositories = [];
+      this.repositoryCountChangedEmitter.fire();
       this.disposeApiListeners();
     }
   }
@@ -55,7 +56,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
         new GitLabRemoteSourceProviderRepository(this.gitApi),
         this.gitApi.registerCredentialsProvider(gitlabCredentialsProvider),
         this.gitApi.onDidOpenRepository(r => this.addRepositories([r])),
-        this.gitApi.onDidCloseRepository(r => this.removeRepositories([r])),
+        this.gitApi.onDidCloseRepository(r => this.removeRepository(r)),
       ];
     } catch (err) {
       handleError(err);
@@ -70,10 +71,8 @@ export class GitExtensionWrapper implements vscode.Disposable {
     this.repositoryCountChangedEmitter.fire();
   }
 
-  private removeRepositories(repositories: Repository[]) {
-    this.wrappedRepositories = this.wrappedRepositories.filter(
-      wr => !repositories.includes(wr.rawRepository),
-    );
+  private removeRepository(repository: Repository) {
+    this.wrappedRepositories = this.wrappedRepositories.filter(wr => !wr.hasSameRootAs(repository));
     this.repositoryCountChangedEmitter.fire();
   }
 
@@ -103,6 +102,61 @@ export class GitExtensionWrapper implements vscode.Disposable {
     } catch (error) {
       handleError(error);
     }
+  }
+
+  private getRepositoryForActiveEditor(): WrappedRepository | undefined {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor?.document.uri) {
+      return undefined;
+    }
+
+    const repositoryForActiveFile = this.gitApi?.getRepository(editor.document.uri);
+    if (!repositoryForActiveFile) return undefined;
+    return this.repositories.find(wr => wr.hasSameRootAs(repositoryForActiveFile));
+  }
+
+  /**
+   * This method doesn't require any user input and should be used only for automated functionality.
+   * (e.g. periodical status bar refresh). If there is any uncertainty about which repository to choose,
+   * (i.e. there's multiple repositories and no open editor) we return undefined.
+   */
+  getActiveRepository(): WrappedRepository | undefined {
+    const activeEditorRepository = this.getRepositoryForActiveEditor();
+
+    if (activeEditorRepository) {
+      return activeEditorRepository;
+    }
+
+    if (this.repositories.length === 1) {
+      return this.repositories[0];
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Returns active repository, user-selected repository or undefined if there
+   * are no repositories or user didn't select one.
+   */
+  async getActiveRepositoryOrSelectOne(): Promise<WrappedRepository | undefined> {
+    const activeRepository = this.getActiveRepository();
+
+    if (activeRepository) {
+      return activeRepository;
+    }
+
+    if (this.repositories.length === 0) {
+      return undefined;
+    }
+
+    const repositoryOptions = this.repositories.map(wr => ({
+      label: wr.name,
+      repository: wr,
+    }));
+    const selection = await vscode.window.showQuickPick(repositoryOptions, {
+      placeHolder: 'Select a repository',
+    });
+    return selection?.repository;
   }
 }
 
