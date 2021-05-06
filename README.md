@@ -50,8 +50,6 @@ Commands this extension extends/integrates with:
 
 ### Other features
 
-Supports [multi-root workspaces](https://code.visualstudio.com/docs/editor/multi-root-workspaces). The extension doesn't work well if you just open folder with multiple repositories without configuring [multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
-
 Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
 
 Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
