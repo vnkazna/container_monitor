@@ -64,7 +64,7 @@ export class ChangedFileItem extends TreeItem {
       return;
     }
     const commonParams: ReviewParams = {
-      workspacePath: workspace.uri,
+      repositoryRoot: workspace.uri,
       projectId: mr.project_id,
       mrId: mr.id,
     };

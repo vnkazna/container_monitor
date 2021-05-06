@@ -12,7 +12,7 @@ describe('CommentingRangeProvider', () => {
   const commonUriParams: ReviewParams = {
     mrId: mr.id,
     projectId: mr.project_id,
-    workspacePath: '/',
+    repositoryRoot: '/',
   };
 
   const oldFileUrl = toReviewUri({

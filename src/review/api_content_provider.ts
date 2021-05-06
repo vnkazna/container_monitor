@@ -12,7 +12,7 @@ export class ApiContentProvider implements vscode.TextDocumentContentProvider {
     const params = fromReviewUri(uri);
     if (!params.path || !params.commit) return '';
 
-    const service = await createGitLabNewService(params.workspacePath);
+    const service = await createGitLabNewService(params.repositoryRoot);
     try {
       return await service.getFileContent(params.path, params.commit, params.projectId);
     } catch (e) {

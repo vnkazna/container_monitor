@@ -14,7 +14,7 @@ export class GitContentProvider implements vscode.TextDocumentContentProvider {
   ): Promise<string> {
     const params = fromReviewUri(uri);
     if (!params.path || !params.commit) return '';
-    const service = await createGitService(params.workspacePath);
+    const service = await createGitService(params.repositoryRoot);
     const result = await service.getFileContent(params.path, params.commit);
     return result || provideApiContentAsFallback(uri, token);
   }
