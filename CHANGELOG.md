@@ -13,7 +13,12 @@
 * **side panel:** use git repositories to look for GitLab projects ([3ee0a69](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/3ee0a696d1eb6e9ddcc782bc81945fd7e1956049))
 * **status bar:** use repositories instead of workspaces ([bb9fed9](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bb9fed950bb48a5518164166bb3da2c36e6a6723))
 
+### Community contributions 👑 (not user-facing)
 
+* Implemented by [@tnir](https://gitlab.com/tnir)
+    * [Replace node-sass with sass](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/240)
+    * [ci(eslint): update eslint from 6.8.0 to 7.25.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/241)
+    * [ci(eslint): update @typescript-eslint from 3.10.1 to 4.22.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/242)
 
 # [3.19.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.18.0...v3.19.0) (2021-04-30)
 
