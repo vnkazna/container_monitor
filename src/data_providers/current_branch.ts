@@ -60,9 +60,9 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     return item;
   }
 
-  async fetchClosingIssue(workspaceFolder: string, workspace: GitLabWorkspace) {
+  async fetchClosingIssue(repositoryRoot: string, workspace: GitLabWorkspace) {
     if (this.mr) {
-      const issues = await gitLabService.fetchMRIssues(this.mr.iid, workspaceFolder);
+      const issues = await gitLabService.fetchMRIssues(this.mr.iid, repositoryRoot);
 
       if (issues.length) {
         return issues.map(issue => new IssueItem(issue, workspace));

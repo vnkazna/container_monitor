@@ -7,18 +7,18 @@ import { log } from '../log';
 import { parseGitRemote } from '../git/git_remote_parser';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
-async function fetch(cmd: string, workspaceFolder: string): Promise<string | null> {
+async function fetch(cmd: string, repositoryRoot: string): Promise<string | null> {
   const [, ...args] = cmd.trim().split(' ');
   const { stdout } = await execa(gitExtensionWrapper.gitBinaryPath, args, {
-    cwd: workspaceFolder,
+    cwd: repositoryRoot,
     preferLocal: false,
   });
   return stdout;
 }
 
-async function fetchGitRemoteUrls(workspaceFolder: string): Promise<string[]> {
+async function fetchGitRemoteUrls(repositoryRoot: string): Promise<string[]> {
   const fetchGitRemotesVerbose = async (): Promise<string[]> => {
-    const output = await fetch('git remote -v', workspaceFolder);
+    const output = await fetch('git remote -v', repositoryRoot);
 
     return (output || '').split('\n');
   };
@@ -39,11 +39,11 @@ async function fetchGitRemoteUrls(workspaceFolder: string): Promise<string[]> {
   return [...new Set(remoteUrls)];
 }
 
-async function intersectionOfInstanceAndTokenUrls(workspaceFolder: string) {
+async function intersectionOfInstanceAndTokenUrls(repositoryRoot: string) {
   const uriHostname = (uri: string) => parseGitRemote(uri)?.host;
 
   const instanceUrls = tokenService.getInstanceUrls();
-  const gitRemotes = await fetchGitRemoteUrls(workspaceFolder);
+  const gitRemotes = await fetchGitRemoteUrls(repositoryRoot);
   const gitRemoteHosts = gitRemotes.map(uriHostname);
 
   return instanceUrls.filter(instanceUrl =>
@@ -51,10 +51,10 @@ async function intersectionOfInstanceAndTokenUrls(workspaceFolder: string) {
   );
 }
 
-async function heuristicInstanceUrl(workspaceFolder: string) {
+async function heuristicInstanceUrl(repositoryRoot: string) {
   // if the intersection of git remotes and configured PATs exists and is exactly
   // one hostname, use it
-  const intersection = await intersectionOfInstanceAndTokenUrls(workspaceFolder);
+  const intersection = await intersectionOfInstanceAndTokenUrls(repositoryRoot);
   if (intersection.length === 1) {
     const heuristicUrl = intersection[0];
     log(`Found ${heuristicUrl} in the PAT list and git remotes, using it as the instanceUrl`);
@@ -68,7 +68,7 @@ async function heuristicInstanceUrl(workspaceFolder: string) {
   return null;
 }
 
-export async function getInstanceUrl(workspaceFolder?: string): Promise<string> {
+export async function getInstanceUrl(repositoryRoot?: string): Promise<string> {
   // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
   const { instanceUrl } = vscode.workspace.getConfiguration('gitlab');
   // if the workspace setting exists, use it
@@ -78,9 +78,9 @@ export async function getInstanceUrl(workspaceFolder?: string): Promise<string> 
 
   // legacy logic in GitLabService might not have the workspace folder available
   // in that case we just skip the heuristic
-  if (workspaceFolder) {
+  if (repositoryRoot) {
     // try to determine the instance URL heuristically
-    const heuristicUrl = await heuristicInstanceUrl(workspaceFolder);
+    const heuristicUrl = await heuristicInstanceUrl(repositoryRoot);
     if (heuristicUrl) {
       return heuristicUrl;
     }

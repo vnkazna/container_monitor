@@ -2,25 +2,25 @@ const vscode = require('vscode');
 const gitLabService = require('./gitlab_service');
 
 async function showPicker(additionalEntries = [], placeHolder = 'Select a Gitlab Project') {
-  const workspaceFolderOptions = await gitLabService.getAllGitlabProjects();
+  const repositoryRootOptions = await gitLabService.getAllGitlabProjects();
 
   additionalEntries.forEach(additionalEntry => {
-    workspaceFolderOptions.push(additionalEntry);
+    repositoryRootOptions.push(additionalEntry);
   });
 
-  if (workspaceFolderOptions.length === 0) {
+  if (repositoryRootOptions.length === 0) {
     return null;
   }
-  if (workspaceFolderOptions.length === 1) {
-    return workspaceFolderOptions[0];
+  if (repositoryRootOptions.length === 1) {
+    return repositoryRootOptions[0];
   }
 
-  const workspaceFolder = await vscode.window.showQuickPick(workspaceFolderOptions, {
+  const repositoryRoot = await vscode.window.showQuickPick(repositoryRootOptions, {
     placeHolder,
   });
 
-  if (workspaceFolder) {
-    return workspaceFolder.uri;
+  if (repositoryRoot) {
+    return repositoryRoot.uri;
   }
 
   return null;

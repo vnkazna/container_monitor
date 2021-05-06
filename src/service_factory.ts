@@ -4,15 +4,15 @@ import { GitLabNewService } from './gitlab/gitlab_new_service';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
-export function createGitService(workspaceFolder: string): GitService {
-  assert(workspaceFolder, 'git service requires workspaceFolder to function');
+export function createGitService(repositoryRoot: string): GitService {
+  assert(repositoryRoot, 'git service requires repositoryRoot to function');
   const { remoteName } = getExtensionConfiguration();
   return new GitService({
-    workspaceFolder,
+    repositoryRoot,
     preferredRemoteName: remoteName,
   });
 }
 
-export async function createGitLabNewService(workspaceFolder: string): Promise<GitLabNewService> {
-  return new GitLabNewService(await getInstanceUrl(workspaceFolder));
+export async function createGitLabNewService(repositoryRoot: string): Promise<GitLabNewService> {
+  return new GitLabNewService(await getInstanceUrl(repositoryRoot));
 }

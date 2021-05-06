@@ -19,7 +19,7 @@ const {
   createQueryTextEndpoint,
 } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
-const { getWorkspaceFolder } = require('./test_infrastructure/helpers');
+const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 const { ApiContentProvider } = require('../../src/review/api_content_provider');
 const { PROGRAMMATIC_COMMANDS } = require('../../src/command_names');
 
@@ -57,7 +57,7 @@ describe('MR Review', () => {
   beforeEach(() => {
     server.resetHandlers();
     dataProvider = new IssuableDataProvider();
-    mrItemModel = new MrItemModel(openMergeRequestResponse, getWorkspaceFolder());
+    mrItemModel = new MrItemModel(openMergeRequestResponse, getRepositoryRoot());
   });
 
   after(async () => {

@@ -22,7 +22,7 @@ describe('GitContentProvider', () => {
 
   beforeEach(() => {
     getFileContent = jest.fn();
-    const gitService = new GitService({ workspaceFolder: 'folder' });
+    const gitService = new GitService({ repositoryRoot: 'folder' });
     gitService.getFileContent = getFileContent;
     mocked(GitService).mockReturnValue(gitService);
   });

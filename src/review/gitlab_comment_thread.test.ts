@@ -67,7 +67,7 @@ describe('GitLabCommentThread', () => {
     } as unknown) as GitLabNewService;
     gitlabCommentThread = GitLabCommentThread.createThread({
       commentController: fakeCommentController,
-      workspaceFolder: '/workspaceFolder',
+      repositoryRoot: '/repositoryRoot',
       mr,
       discussion,
       gitlabService,

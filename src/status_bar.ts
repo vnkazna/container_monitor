@@ -97,7 +97,7 @@ export class StatusBar {
     this.mrIssueStatusBarItem?.hide();
   }
 
-  async updatePipelineItem(pipeline: RestPipeline | null, workspaceFolder: string): Promise<void> {
+  async updatePipelineItem(pipeline: RestPipeline | null, repositoryRoot: string): Promise<void> {
     if (!this.pipelineStatusBarItem) return;
     if (!pipeline) {
       this.pipelineStatusBarItem.text = 'GitLab: No pipeline.';
@@ -110,7 +110,7 @@ export class StatusBar {
 
     if (status === 'running' || status === 'failed') {
       try {
-        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(workspaceFolder, pipeline);
+        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(repositoryRoot, pipeline);
         if (jobs) {
           statusText = createStatusTextFromJobs(jobs, status);
         }
@@ -132,7 +132,7 @@ export class StatusBar {
         .showInformationMessage(message, { modal: false }, 'View in Gitlab')
         .then(selection => {
           if (selection === 'View in Gitlab') {
-            openers.openCurrentPipeline(workspaceFolder);
+            openers.openCurrentPipeline(repositoryRoot);
           }
         });
     }
@@ -142,10 +142,10 @@ export class StatusBar {
     this.firstRun = false;
   }
 
-  async fetchMrClosingIssue(mr: RestIssuable | null, workspaceFolder: string): Promise<void> {
+  async fetchMrClosingIssue(mr: RestIssuable | null, repositoryRoot: string): Promise<void> {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
-      const issues = await gitLabService.fetchMRIssues(mr.iid, workspaceFolder);
+      const issues = await gitLabService.fetchMRIssues(mr.iid, repositoryRoot);
       let text = `$(code) GitLab: No issue.`;
       let command;
 
