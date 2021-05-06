@@ -266,10 +266,6 @@
         {
           "command": "gl.refreshSidebar",
           "when": "gitlab:validState"
-        },
-        {
-          "command": "gl.showIssuesAssignedToMe",
-          "when": "gitlab:validState"
         }
       ],
       "view/title": [
