@@ -1,3 +1,20 @@
+# [3.20.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.19.0...v3.20.0) (2021-05-06)
+
+
+### Bug Fixes
+
+* limit command availability ([f6b5607](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/f6b5607d5ee9435fb729b97e20b05404e7e4bba1))
+* **status bar:** status bar items couldn't open MRs and issues ([f41977e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/f41977ece56cb288f4310c09d267e59b36587875))
+* doesn't react to enabling git extension after it was disabled ([a999cc4](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/a999cc4c6edaaeccb803dfb395f0f3f6e5f5f4aa))
+
+
+### Features
+
+* **side panel:** use git repositories to look for GitLab projects ([3ee0a69](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/3ee0a696d1eb6e9ddcc782bc81945fd7e1956049))
+* **status bar:** use repositories instead of workspaces ([bb9fed9](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bb9fed950bb48a5518164166bb3da2c36e6a6723))
+
+
+
 # [3.19.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.18.0...v3.19.0) (2021-04-30)
 
 
