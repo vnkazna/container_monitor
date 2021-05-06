@@ -38,9 +38,7 @@ const uriFromPosition = (
   return toReviewUri({
     path,
     commit,
-    // temporarily disable eslint to simplify MR review
-    // eslint-disable-next-line object-shorthand
-    repositoryRoot: repositoryRoot,
+    repositoryRoot,
     projectId: gitlabProjectId,
     mrId,
   });
