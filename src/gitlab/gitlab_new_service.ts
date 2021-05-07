@@ -12,6 +12,7 @@ import { getHttpAgentOptions } from '../utils/get_http_agent_options';
 import { GitLabProject, GqlProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
+import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
 
 interface Node<T> {
   pageInfo?: {
@@ -308,18 +309,6 @@ const constructGetDiscussionsQuery = (isMr: boolean) => gql`
   }
 `;
 
-const getMrPermissionsQuery = gql`
-  query GetMrPermissions($projectPath: ID!, $iid: String!) {
-    project(fullPath: $projectPath) {
-      mergeRequest(iid: $iid) {
-        userPermissions {
-          createNote
-        }
-      }
-    }
-  }
-`;
-
 const discussionSetResolved = gql`
   mutation DiscussionToggleResolve($replyId: DiscussionID!, $resolved: Boolean!) {
     discussionToggleResolve(input: { id: $replyId, resolve: $resolved }) {
@@ -535,10 +524,11 @@ export class GitLabNewService {
 
   async canUserCommentOnMr(issuable: RestIssuable): Promise<boolean> {
     const projectPath = getProjectPath(issuable);
-    const result = await this.client.request(getMrPermissionsQuery, {
+    const queryOptions: MrPermissionsQueryOptions = {
       projectPath,
       iid: String(issuable.iid),
-    });
+    };
+    const result = await this.client.request(getMrPermissionsQuery, queryOptions);
     assert(result?.project?.mergeRequest, `MR ${issuable.references.full} was not found.`);
     return Boolean(result.project.mergeRequest.userPermissions?.createNote);
   }
