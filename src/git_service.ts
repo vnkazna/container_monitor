@@ -6,24 +6,24 @@ import { log } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
 
 export interface GitServiceOptions {
-  workspaceFolder: string;
+  repositoryRoot: string;
   preferredRemoteName?: string;
 }
 
 export class GitService {
-  workspaceFolder: string;
+  repositoryRoot: string;
 
   private readonly preferredRemoteName?: string;
 
   constructor(options: GitServiceOptions) {
     this.preferredRemoteName = options.preferredRemoteName;
-    this.workspaceFolder = options.workspaceFolder;
+    this.repositoryRoot = options.repositoryRoot;
   }
 
   private async fetch(cmd: string): Promise<string> {
     const [, ...args] = cmd.trim().split(' ');
     const { stdout } = await execa(gitExtensionWrapper.gitBinaryPath, args, {
-      cwd: this.workspaceFolder,
+      cwd: this.repositoryRoot,
       preferLocal: false,
     });
     return stdout;
@@ -47,7 +47,7 @@ export class GitService {
     }
 
     if (remoteUrl) {
-      const parsedRemote = parseGitRemote(remoteUrl, await getInstanceUrl(this.workspaceFolder));
+      const parsedRemote = parseGitRemote(remoteUrl, await getInstanceUrl(this.repositoryRoot));
       if (!parsedRemote) {
         throw new Error(`git remote "${remoteUrl}" could not be parsed`);
       }

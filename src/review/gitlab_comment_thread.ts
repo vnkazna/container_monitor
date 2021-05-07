@@ -28,7 +28,7 @@ const commentRangeFromPosition = (position: GqlTextPosition): vscode.Range => {
 
 const uriFromPosition = (
   position: GqlTextPosition,
-  workspaceFolder: string,
+  repositoryRoot: string,
   gitlabProjectId: number,
   mrId: number,
 ) => {
@@ -38,7 +38,7 @@ const uriFromPosition = (
   return toReviewUri({
     path,
     commit,
-    workspacePath: workspaceFolder,
+    repositoryRoot,
     projectId: gitlabProjectId,
     mrId,
   });
@@ -46,7 +46,7 @@ const uriFromPosition = (
 
 interface CreateThreadOptions {
   commentController: vscode.CommentController;
-  workspaceFolder: string;
+  repositoryRoot: string;
   mr: RestIssuable;
   discussion: GqlTextDiffDiscussion;
   gitlabService: GitLabNewService;
@@ -147,14 +147,14 @@ export class GitLabCommentThread {
 
   static createThread({
     commentController,
-    workspaceFolder,
+    repositoryRoot,
     mr,
     discussion,
     gitlabService,
   }: CreateThreadOptions): GitLabCommentThread {
     const { position } = firstNoteFrom(discussion);
     const vsThread = commentController.createCommentThread(
-      uriFromPosition(position, workspaceFolder, mr.project_id, mr.id),
+      uriFromPosition(position, repositoryRoot, mr.project_id, mr.id),
       commentRangeFromPosition(position),
       // the comments need to know about the thread, so we first
       // create empty thread to be able to create comments

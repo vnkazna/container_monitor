@@ -59,14 +59,14 @@ const createPanel = issuable => {
   });
 };
 
-const createMessageHandler = (panel, issuable, workspaceFolder) => async message => {
-  const instanceUrl = await getInstanceUrl(workspaceFolder);
+const createMessageHandler = (panel, issuable, repositoryRoot) => async message => {
+  const instanceUrl = await getInstanceUrl(repositoryRoot);
   if (message.command === 'renderMarkdown') {
     const alteredMarkdown = message.markdown.replace(
       /\(\/.*(\/-)?\/merge_requests\//,
       '(/-/merge_requests/',
     );
-    let rendered = await gitLabService.renderMarkdown(alteredMarkdown, workspaceFolder);
+    let rendered = await gitLabService.renderMarkdown(alteredMarkdown, repositoryRoot);
     rendered = (rendered || '')
       .replace(/ src=".*" alt/gim, ' alt')
       .replace(/" data-src/gim, '" src')
@@ -82,7 +82,7 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
   }
 
   if (message.command === 'saveNote') {
-    const gitlabNewService = await createGitLabNewService(workspaceFolder);
+    const gitlabNewService = await createGitLabNewService(repositoryRoot);
     try {
       await gitlabNewService.createNote(issuable, message.note, message.replyId);
       const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(issuable);
@@ -99,7 +99,7 @@ const createMessageHandler = (panel, issuable, workspaceFolder) => async message
   }
 };
 
-async function initPanelIfActive(panel, issuable, workspaceFolder) {
+async function initPanelIfActive(panel, issuable, repositoryRoot) {
   if (!panel.active) return;
 
   const appReadyPromise = new Promise(resolve => {
@@ -111,7 +111,7 @@ async function initPanelIfActive(panel, issuable, workspaceFolder) {
     });
   });
 
-  const gitlabNewService = await createGitLabNewService(workspaceFolder);
+  const gitlabNewService = await createGitLabNewService(repositoryRoot);
   const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(issuable);
   await appReadyPromise;
   panel.webview.postMessage({ type: 'issuableFetch', issuable, discussions: discussionsAndLabels });
@@ -130,18 +130,18 @@ const getIconPathForIssuable = issuable => {
     : { light: lightIssueIcon, dark: darkIssueIcon };
 };
 
-async function create(issuable, workspaceFolder) {
+async function create(issuable, repositoryRoot) {
   const panel = createPanel(issuable);
   const html = replaceResources(panel);
   panel.webview.html = html;
   panel.iconPath = getIconPathForIssuable(issuable);
 
-  initPanelIfActive(panel, issuable, workspaceFolder);
+  initPanelIfActive(panel, issuable, repositoryRoot);
   panel.onDidChangeViewState(() => {
-    initPanelIfActive(panel, issuable, workspaceFolder);
+    initPanelIfActive(panel, issuable, repositoryRoot);
   });
 
-  panel.webview.onDidReceiveMessage(createMessageHandler(panel, issuable, workspaceFolder));
+  panel.webview.onDidReceiveMessage(createMessageHandler(panel, issuable, repositoryRoot));
   return panel;
 }
 

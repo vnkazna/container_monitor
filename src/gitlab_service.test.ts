@@ -70,7 +70,7 @@ describe('fetchIssueables', () => {
   };
 
   let request: jest.Mock;
-  let fetchIssuablesRef: (params: CustomQuery, workspaceFolder: string) => Promise<RestIssuable[]>;
+  let fetchIssuablesRef: (params: CustomQuery, repositoryRoot: string) => Promise<RestIssuable[]>;
 
   interface SetupFetchOptions {
     version?: string;

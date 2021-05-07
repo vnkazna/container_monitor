@@ -21,7 +21,7 @@ export const simulateQuickPickChoice = (sandbox: SinonSandbox, nthItem: number):
   });
 };
 
-export const getWorkspaceFolder = (): string | undefined => {
+export const getRepositoryRoot = (): string | undefined => {
   const folders = vscode.workspace.workspaceFolders;
   return folders && folders[0]?.uri.fsPath;
 };

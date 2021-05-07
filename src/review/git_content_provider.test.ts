@@ -15,14 +15,14 @@ describe('GitContentProvider', () => {
     path: '/review',
     projectId: 1234,
     mrId: 2345,
-    workspacePath: 'path/to/workspace',
+    repositoryRoot: 'path/to/workspace',
   };
 
   let getFileContent: jest.Mock;
 
   beforeEach(() => {
     getFileContent = jest.fn();
-    const gitService = new GitService({ workspaceFolder: 'folder' });
+    const gitService = new GitService({ repositoryRoot: 'folder' });
     gitService.getFileContent = getFileContent;
     mocked(GitService).mockReturnValue(gitService);
   });

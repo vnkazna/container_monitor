@@ -13,7 +13,7 @@ describe('git_service', () => {
   const SECOND_REMOTE = 'second'; // name is important, we need this remote to be alphabetically behind origin
 
   let gitService: GitService;
-  let workspaceFolder: string;
+  let repositoryRoot: string;
   let git: SimpleGit;
 
   temp.track(); // clean temporary folders after the tests finish
@@ -32,7 +32,7 @@ describe('git_service', () => {
     });
 
   const getDefaultOptions = (): GitServiceOptions => ({
-    workspaceFolder,
+    repositoryRoot,
     preferredRemoteName: undefined,
   });
 
@@ -49,8 +49,8 @@ describe('git_service', () => {
 
   describe('with initialized git repository', () => {
     beforeEach(async () => {
-      workspaceFolder = await createTempFolder();
-      git = simpleGit(workspaceFolder, { binary: 'git' });
+      repositoryRoot = await createTempFolder();
+      git = simpleGit(repositoryRoot, { binary: 'git' });
       await git.init();
       await git.addConfig('user.email', 'test@example.com');
       await git.addConfig('user.name', 'Test Name');
@@ -132,7 +132,7 @@ describe('git_service', () => {
       });
 
       it('returns file content on the given sha', async () => {
-        await fs.writeFile(`${workspaceFolder}/test.txt`, 'Test text');
+        await fs.writeFile(`${repositoryRoot}/test.txt`, 'Test text');
         await git.add('.');
         await git.commit('Test commit');
         const lastCommitSha = await git.revparse(['HEAD']);
@@ -142,29 +142,29 @@ describe('git_service', () => {
     });
 
     describe('getRepositoryRootFolder', () => {
-      it('returns the workspaceFolder if it is the git root', async () => {
-        gitService = new GitService({ ...getDefaultOptions(), workspaceFolder });
+      it('returns the repositoryRoot if it is the git root', async () => {
+        gitService = new GitService({ ...getDefaultOptions(), repositoryRoot });
 
         const result = await gitService.getRepositoryRootFolder();
 
-        expect(result).toBe(workspaceFolder);
+        expect(result).toBe(repositoryRoot);
       });
 
       it('returns the parent folder if the git service is created for git subfolder', async () => {
-        const subfolder = path.join(workspaceFolder, 'subfolder');
+        const subfolder = path.join(repositoryRoot, 'subfolder');
         await fs.mkdir(subfolder);
-        gitService = new GitService({ ...getDefaultOptions(), workspaceFolder: subfolder });
+        gitService = new GitService({ ...getDefaultOptions(), repositoryRoot: subfolder });
 
         const result = await gitService.getRepositoryRootFolder();
 
-        expect(result).toBe(workspaceFolder);
+        expect(result).toBe(repositoryRoot);
       });
     });
   });
 
   describe('without initialized git repository', () => {
     beforeEach(async () => {
-      workspaceFolder = await createTempFolder();
+      repositoryRoot = await createTempFolder();
       const options = { ...getDefaultOptions(), instanceUrl: undefined };
       gitService = new GitService(options);
     });

@@ -78,7 +78,7 @@ export class MrItemModel extends ItemModel {
     const threads = discussionsOnDiff.map(discussion => {
       return GitLabCommentThread.createThread({
         commentController,
-        workspaceFolder: this.workspace.uri,
+        repositoryRoot: this.workspace.uri,
         mr: this.mr,
         discussion,
         gitlabService,

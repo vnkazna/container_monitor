@@ -6,7 +6,7 @@ const {
   createAndOpenFile,
   closeAndDeleteFile,
   simulateQuickPickChoice,
-  getWorkspaceFolder,
+  getRepositoryRoot,
 } = require('../test_infrastructure/helpers');
 
 describe('git_extension_wrapper', () => {
@@ -16,12 +16,12 @@ describe('git_extension_wrapper', () => {
     describe('one repository, no open files', () => {
       it('getActiveRepository returns the open repository', () => {
         const result = gitExtensionWrapper.getActiveRepository();
-        assert.strictEqual(result.rootFsPath, getWorkspaceFolder());
+        assert.strictEqual(result.rootFsPath, getRepositoryRoot());
       });
 
       it('getActiveRepositoryOrSelectOne returns the open repository', async () => {
         const result = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-        assert.strictEqual(result.rootFsPath, getWorkspaceFolder());
+        assert.strictEqual(result.rootFsPath, getRepositoryRoot());
       });
     });
 
@@ -57,7 +57,7 @@ describe('git_extension_wrapper', () => {
       describe('with open editor', () => {
         let testFileUri;
         beforeEach(async () => {
-          testFileUri = vscode.Uri.parse(`${getWorkspaceFolder()}/newfile.js`);
+          testFileUri = vscode.Uri.parse(`${getRepositoryRoot()}/newfile.js`);
           await createAndOpenFile(testFileUri);
         });
 
@@ -67,12 +67,12 @@ describe('git_extension_wrapper', () => {
 
         it('getActiveRepository returns repository for the open file', () => {
           const result = gitExtensionWrapper.getActiveRepository();
-          assert.strictEqual(result.rootFsPath, getWorkspaceFolder());
+          assert.strictEqual(result.rootFsPath, getRepositoryRoot());
         });
 
         it('getActiveRepositoryOrSelectOne returns repository for the open file', async () => {
           const result = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-          assert.strictEqual(result.rootFsPath, getWorkspaceFolder());
+          assert.strictEqual(result.rootFsPath, getRepositoryRoot());
         });
       });
     });

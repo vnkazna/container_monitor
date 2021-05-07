@@ -8,19 +8,21 @@ The extension is providing a "glue" layer between the [VS Code Extension API](ht
 
 ## The key concept
 
-Every action in the extension needs to know the `workspaceFolder`. `workspaceFolder` is the local filesystem path to a folder that's open in the VS Code and contains `.git` repository with a GitLab project.
+Every action in the extension needs to know the `repositoryRoot`. `repositoryRoot` is the local filesystem path to a git repository open in VS Code editor.
 
 We get the GitLab instance URL, project namespace and branch information from the Git repository. We use this information to make queries to the GitLab API.
 
 ```mermaid
 graph LR;
-A[workspaceFolder] --> B[local git]
+A[repositoryRoot] --> B[git information]
 B --> C[GitLab API]
 ```
 
 ### Git integration
 
-[`git_service.ts`](../src/git_service.ts) currently handles all `git` access. This service takes a `workspaceFolder` and provides us with information about the `git` repository in that folder.
+The extension uses [`git_extension_wrapper.ts`](../src/git/git_extension_wrapper.ts) to connect to the VS Code Git Extension and read information about repositories. Each repository in the open workspaces is [wrapped](../src/git/wrapped_repository.ts) and used throughout the rest of the extension as a base for executing git commands.
+
+[`git_service.ts`](../src/git_service.ts) currently handles all `git` access. This service takes a repository root folder and provides us with information about the `git` repository.
 
 - [ ] The VS Code editor works with git through its built-in [`git` extension](https://github.com/microsoft/vscode/tree/main/extensions/git). We want to use this extension instead of our custom `git_service` ([#203](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/203))[^1].
 
@@ -79,18 +81,11 @@ To further understand how the extension communicates with the webview, read the 
 
 We authenticate to GitLab API using [personal access tokens](https://docs.gitlab.com/ee/api/README.html#personalproject-access-tokens). These tokens are stored in [`ExtensionContext.globalState`](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.globalState). [`TokenService`](../src/services/token_service.ts) orchestrates storing and retrieving tokens.
 
-## Tricky things to keep in mind
-
-### [Multi-root Workspaces]
-
-The VS Code might have more than one `git` folder in the workspace thanks to [Multi-root Workspaces]. Users often open multiple GitLab projects in the same VS Code workspace, and our code needs to be able to decide which GitLab project we should use. Keep in mind **`VS Code Workspace !== single  GitLab project`**.
-
 ---
 
 Introducing this document was motivated by a blog article from Aleksey Kladov: [ARCHITECTURE.md](https://matklad.github.io//2021/02/06/ARCHITECTURE.md.html).
 
 [REST]: https://docs.gitlab.com/ee/api/api_resources.html
 [GraphQL]: https://docs.gitlab.com/ee/api/graphql/
-[Multi-root Workspaces]: https://code.visualstudio.com/docs/editor/multi-root-workspaces
 
 [^1]:  This will help keep the `git` information between VS Code and the GitLab extension in sync. The status bar will benefit the most because it currently [gets out of sync when the user switches to a different branch](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/21).

@@ -10,7 +10,7 @@ describe('get_instance_url', () => {
   const ORIGIN = 'origin';
   const SECOND_REMOTE = 'second'; // name is important, we need this remote to be alphabetically behind origin
 
-  let workspaceFolder: string;
+  let repositoryRoot: string;
   let git: SimpleGit;
 
   temp.track(); // clean temporary folders after the tests finish
@@ -47,8 +47,8 @@ describe('get_instance_url', () => {
       },
     };
     beforeEach(async () => {
-      workspaceFolder = await createTempFolder();
-      git = simpleGit(workspaceFolder, { binary: 'git' });
+      repositoryRoot = await createTempFolder();
+      git = simpleGit(repositoryRoot, { binary: 'git' });
       await git.init();
       await git.addRemote(ORIGIN, 'https://git@gitlab.com/gitlab-org/gitlab-vscode-extension.git');
       tokens = {};
@@ -60,7 +60,7 @@ describe('get_instance_url', () => {
       tokens = {
         'https://test-instance.com': 'abc',
       };
-      expect(await getInstanceUrl(workspaceFolder)).toBe('https://test-instance.com');
+      expect(await getInstanceUrl(repositoryRoot)).toBe('https://test-instance.com');
     });
 
     it('returns default instanceUrl when there is multiple matches between remotes and token URLs', async () => {
@@ -69,7 +69,7 @@ describe('get_instance_url', () => {
         'https://test-instance.com': 'abc',
         'https://gitlab.com': 'def',
       };
-      expect(await getInstanceUrl(workspaceFolder)).toBe(GITLAB_COM_URL);
+      expect(await getInstanceUrl(repositoryRoot)).toBe(GITLAB_COM_URL);
     });
 
     it('it works with URLs in git format', async () => {
@@ -77,7 +77,7 @@ describe('get_instance_url', () => {
       tokens = {
         'https://test-instance.com': 'abc',
       };
-      expect(await getInstanceUrl(workspaceFolder)).toBe('https://test-instance.com');
+      expect(await getInstanceUrl(repositoryRoot)).toBe('https://test-instance.com');
     });
   });
 });

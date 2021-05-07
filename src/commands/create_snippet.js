@@ -30,7 +30,7 @@ const contextOptions = [
   },
 ];
 
-async function uploadSnippet(project, editor, visibility, context, workspaceFolder) {
+async function uploadSnippet(project, editor, visibility, context, repositoryRoot) {
   let content = '';
   const fileName = editor.document.fileName.split('/').reverse()[0];
 
@@ -57,23 +57,23 @@ async function uploadSnippet(project, editor, visibility, context, workspaceFold
     data.id = project.restId;
   }
 
-  const snippet = await gitLabService.createSnippet(workspaceFolder, data);
+  const snippet = await gitLabService.createSnippet(repositoryRoot, data);
 
   openers.openUrl(snippet.web_url);
 }
 
 async function createSnippet() {
   const editor = vscode.window.activeTextEditor;
-  let workspaceFolder = null;
+  let repositoryRoot = null;
   let project = null;
 
   if (editor) {
     const repository = gitExtensionWrapper.getActiveRepository();
-    workspaceFolder = repository.rootFsPath;
-    project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
+    repositoryRoot = repository.rootFsPath;
+    project = await gitLabService.fetchCurrentProjectSwallowError(repositoryRoot);
 
     if (project == null) {
-      workspaceFolder = await gitlabProjectInput.show(
+      repositoryRoot = await gitlabProjectInput.show(
         [
           {
             label: "User's Snippets",
@@ -82,7 +82,7 @@ async function createSnippet() {
         ],
         "Select a Gitlab Project or use the User's Snippets",
       );
-      project = await gitLabService.fetchCurrentProjectSwallowError(workspaceFolder);
+      project = await gitLabService.fetchCurrentProjectSwallowError(repositoryRoot);
     }
 
     const visibility = await vscode.window.showQuickPick(visibilityOptions);
@@ -91,7 +91,7 @@ async function createSnippet() {
       const context = await vscode.window.showQuickPick(contextOptions);
 
       if (context) {
-        uploadSnippet(project, editor, visibility.type, context.type, workspaceFolder);
+        uploadSnippet(project, editor, visibility.type, context.type, repositoryRoot);
       }
     }
   } else {

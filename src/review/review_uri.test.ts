@@ -6,7 +6,7 @@ describe('review_uri.ts', () => {
     path: '/review',
     projectId: 1234,
     mrId: 2345,
-    workspacePath: 'path/to/workspace',
+    repositoryRoot: 'path/to/workspace',
   };
 
   describe('toReviewUri', () => {
@@ -14,7 +14,7 @@ describe('review_uri.ts', () => {
       const result = toReviewUri(reviewUriParams);
 
       expect(result.toString()).toEqual(
-        'gl-review:///review{"commit":"abcdef","mrId":2345,"projectId":1234,"workspacePath":"path/to/workspace"}#',
+        'gl-review:///review{"commit":"abcdef","mrId":2345,"projectId":1234,"repositoryRoot":"path/to/workspace"}#',
       );
     });
   });

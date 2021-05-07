@@ -129,8 +129,8 @@ export async function openProjectPage(): Promise<void> {
   openTemplatedLink('$projectUrl');
 }
 
-export async function openCurrentPipeline(workspaceFolder: string): Promise<void> {
-  const { pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(workspaceFolder);
+export async function openCurrentPipeline(repositoryRoot: string): Promise<void> {
+  const { pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(repositoryRoot);
 
   if (pipeline) {
     openUrl(pipeline.web_url);

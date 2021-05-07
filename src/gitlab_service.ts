@@ -40,12 +40,12 @@ const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
 
 async function fetch(
-  workspaceFolder: string | undefined,
+  repositoryRoot: string | undefined,
   path: string,
   method = 'GET',
   data?: Record<string, unknown>,
 ) {
-  const instanceUrl = await getInstanceUrl(workspaceFolder);
+  const instanceUrl = await getInstanceUrl(repositoryRoot);
   const apiRoot = `${instanceUrl}/api/v4`;
   const glToken = tokenService.getToken(instanceUrl);
   const tokens = tokenService.getInstanceUrls().join(', ');
@@ -99,12 +99,12 @@ async function fetch(
   return await request(`${apiRoot}${path}`, config);
 }
 
-async function fetchProjectData(remote: GitRemote | null, workspaceFolder: string) {
+async function fetchProjectData(remote: GitRemote | null, repositoryRoot: string) {
   // TODO require remote so we can guarantee that we return a value or error
   if (remote) {
     if (!(`${remote.namespace}_${remote.project}` in projectCache)) {
       const { namespace, project } = remote;
-      const gitlabNewService = await createGitLabNewService(workspaceFolder);
+      const gitlabNewService = await createGitLabNewService(repositoryRoot);
       const projectData = await gitlabNewService.getProject(`${namespace}/${project}`);
       if (projectData) {
         projectCache[`${remote.namespace}_${remote.project}`] = projectData;
@@ -116,21 +116,21 @@ async function fetchProjectData(remote: GitRemote | null, workspaceFolder: strin
   return null;
 }
 
-export async function fetchCurrentProject(workspaceFolder: string): Promise<GitLabProject | null> {
+export async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {
   try {
-    const remote = await createGitService(workspaceFolder).fetchGitRemote();
+    const remote = await createGitService(repositoryRoot).fetchGitRemote();
 
-    return await fetchProjectData(remote, workspaceFolder);
+    return await fetchProjectData(remote, repositoryRoot);
   } catch (e) {
     throw new ApiError(e, 'get current project');
   }
 }
 
 export async function fetchCurrentProjectSwallowError(
-  workspaceFolder: string,
+  repositoryRoot: string,
 ): Promise<GitLabProject | null> {
   try {
-    return await fetchCurrentProject(workspaceFolder);
+    return await fetchCurrentProject(repositoryRoot);
   } catch (error) {
     logError(error);
     return null;
@@ -138,22 +138,22 @@ export async function fetchCurrentProjectSwallowError(
 }
 
 export async function fetchCurrentPipelineProject(
-  workspaceFolder: string,
+  repositoryRoot: string,
 ): Promise<GitLabProject | null> {
   try {
     const { pipelineGitRemoteName } = getExtensionConfiguration();
-    const remote = await createGitService(workspaceFolder).fetchGitRemote(pipelineGitRemoteName);
+    const remote = await createGitService(repositoryRoot).fetchGitRemote(pipelineGitRemoteName);
 
-    return await fetchProjectData(remote, workspaceFolder);
+    return await fetchProjectData(remote, repositoryRoot);
   } catch (e) {
     logError(e);
     return null;
   }
 }
 
-export async function fetchCurrentUser(workspaceFolder: string): Promise<RestUser> {
+export async function fetchCurrentUser(repositoryRoot: string): Promise<RestUser> {
   try {
-    const { response: user } = await fetch(workspaceFolder, '/user');
+    const { response: user } = await fetch(repositoryRoot, '/user');
     if (!user) throw new Error('Could not retrieve current user.');
     return user;
   } catch (e) {
@@ -161,9 +161,9 @@ export async function fetchCurrentUser(workspaceFolder: string): Promise<RestUse
   }
 }
 
-async function fetchFirstUserByUsername(workspaceFolder: string | undefined, userName: string) {
+async function fetchFirstUserByUsername(repositoryRoot: string | undefined, userName: string) {
   try {
-    const { response: users } = await fetch(workspaceFolder, `/users?username=${userName}`);
+    const { response: users } = await fetch(repositoryRoot, `/users?username=${userName}`);
     return users[0];
   } catch (e) {
     handleError(new UserFriendlyError('Error when fetching GitLab user.', e));
@@ -171,10 +171,10 @@ async function fetchFirstUserByUsername(workspaceFolder: string | undefined, use
   }
 }
 
-export async function fetchVersion(workspaceFolder: string) {
+export async function fetchVersion(repositoryRoot: string) {
   try {
     if (!versionCache) {
-      const { response } = await fetch(workspaceFolder, '/version');
+      const { response } = await fetch(repositoryRoot, '/version');
       versionCache = response.version;
     }
   } catch (e) {
@@ -185,17 +185,17 @@ export async function fetchVersion(workspaceFolder: string) {
 }
 
 async function fetchLastPipelineForCurrentBranch(
-  workspaceFolder: string,
+  repositoryRoot: string,
 ): Promise<RestPipeline | null> {
-  const project = await fetchCurrentPipelineProject(workspaceFolder);
+  const project = await fetchCurrentPipelineProject(repositoryRoot);
   if (!project) {
     return null;
   }
 
-  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+  const branchName = await createGitService(repositoryRoot).fetchTrackingBranchName();
   const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
   const { response: pipelines } = await fetch(
-    workspaceFolder,
+    repositoryRoot,
     `${pipelinesRootPath}?ref=${branchName}`,
   );
   return pipelines.length > 0 ? pipelines[0] : null;
@@ -203,7 +203,7 @@ async function fetchLastPipelineForCurrentBranch(
 
 type QueryValue = string | boolean | string[] | number | undefined;
 
-export async function fetchIssuables(params: CustomQuery, workspaceFolder: string) {
+export async function fetchIssuables(params: CustomQuery, repositoryRoot: string) {
   const { type, scope, state, author, assignee, wip } = params;
   let { searchIn, pipelineId, reviewer } = params;
   const config = {
@@ -213,9 +213,9 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   };
   let issuable = null;
 
-  const version = await fetchVersion(workspaceFolder);
+  const version = await fetchVersion(repositoryRoot);
 
-  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
+  const project = await fetchCurrentProjectSwallowError(repositoryRoot);
   if (!version || !project) return [];
 
   if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
@@ -263,7 +263,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
       search.append('author_username', author);
     }
   } else if (author) {
-    const authorUser = await fetchFirstUserByUsername(workspaceFolder, author);
+    const authorUser = await fetchFirstUserByUsername(repositoryRoot, author);
     search.append('author_id', (authorUser && authorUser.id) || '-1');
   }
 
@@ -275,7 +275,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   } else if (assignee && config.type === 'issues') {
     search.append('assignee_username', assignee);
   } else if (assignee) {
-    const assigneeUser = await fetchFirstUserByUsername(workspaceFolder, assignee);
+    const assigneeUser = await fetchFirstUserByUsername(repositoryRoot, assignee);
     search.append('assignee_id', (assigneeUser && assigneeUser.id) || '-1');
   }
 
@@ -284,7 +284,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
    */
   if (reviewer) {
     if (reviewer === '<current_user>') {
-      const user = await fetchCurrentUser(workspaceFolder);
+      const user = await fetchCurrentUser(repositoryRoot);
       reviewer = user.username;
     }
     search.append('reviewer_username', reviewer);
@@ -331,7 +331,7 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
   if (pipelineId) {
     if (pipelineId === 'branch') {
-      pipelineId = (await fetchLastPipelineForCurrentBranch(workspaceFolder))?.id;
+      pipelineId = (await fetchLastPipelineForCurrentBranch(repositoryRoot))?.id;
     }
     search.append('pipeline_id', `${pipelineId}`);
   }
@@ -358,17 +358,17 @@ export async function fetchIssuables(params: CustomQuery, workspaceFolder: strin
   const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
   usedQueryParamNames.forEach(name => search.append(name, `${queryParams[name]}`));
 
-  const { response } = await fetch(workspaceFolder, `${path}?${search.toString()}`);
+  const { response } = await fetch(repositoryRoot, `${path}?${search.toString()}`);
   issuable = response;
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl()));
 }
 
 export async function fetchLastJobsForCurrentBranch(
-  workspaceFolder: string,
+  repositoryRoot: string,
   pipeline: RestPipeline,
 ): Promise<RestJob[]> {
   const { response } = await fetch(
-    workspaceFolder,
+    repositoryRoot,
     `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
   );
   let jobs: RestJob[] = response;
@@ -388,13 +388,13 @@ export async function fetchLastJobsForCurrentBranch(
 }
 
 export async function fetchOpenMergeRequestForCurrentBranch(
-  workspaceFolder: string,
+  repositoryRoot: string,
 ): Promise<RestIssuable | null> {
-  const project = await fetchCurrentProject(workspaceFolder);
-  const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+  const project = await fetchCurrentProject(repositoryRoot);
+  const branchName = await createGitService(repositoryRoot).fetchTrackingBranchName();
 
   const path = `/projects/${project?.restId}/merge_requests?state=opened&source_branch=${branchName}`;
-  const { response } = await fetch(workspaceFolder, path);
+  const { response } = await fetch(repositoryRoot, path);
   const mrs = response;
 
   if (mrs.length > 0) {
@@ -405,16 +405,16 @@ export async function fetchOpenMergeRequestForCurrentBranch(
 }
 
 export async function fetchLastPipelineForMr(
-  workspaceFolder: string,
+  repositoryRoot: string,
   mr: RestIssuable,
 ): Promise<RestPipeline | null> {
   const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
-  const { response: pipelines } = await fetch(workspaceFolder, path);
+  const { response: pipelines } = await fetch(repositoryRoot, path);
   return pipelines.length > 0 ? pipelines[0] : null;
 }
 
 export async function fetchPipelineAndMrForCurrentBranch(
-  workspaceFolder: string,
+  repositoryRoot: string,
 ): Promise<{
   pipeline: RestPipeline | null;
   mr: RestIssuable | null;
@@ -427,12 +427,12 @@ export async function fetchPipelineAndMrForCurrentBranch(
       return null;
     });
 
-  const mr = await turnErrorToNull(fetchOpenMergeRequestForCurrentBranch(workspaceFolder));
+  const mr = await turnErrorToNull(fetchOpenMergeRequestForCurrentBranch(repositoryRoot));
   if (mr) {
-    const pipeline = await turnErrorToNull(fetchLastPipelineForMr(workspaceFolder, mr));
+    const pipeline = await turnErrorToNull(fetchLastPipelineForMr(repositoryRoot, mr));
     if (pipeline) return { mr, pipeline };
   }
-  const pipeline = await turnErrorToNull(fetchLastPipelineForCurrentBranch(workspaceFolder));
+  const pipeline = await turnErrorToNull(fetchLastPipelineForCurrentBranch(repositoryRoot));
   return { mr, pipeline };
 }
 
@@ -441,15 +441,15 @@ export async function fetchPipelineAndMrForCurrentBranch(
  *
  * @param {string} action create|retry|cancel
  */
-export async function handlePipelineAction(action: string, workspaceFolder: string) {
-  const { pipeline } = await fetchPipelineAndMrForCurrentBranch(workspaceFolder);
-  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
+export async function handlePipelineAction(action: string, repositoryRoot: string) {
+  const { pipeline } = await fetchPipelineAndMrForCurrentBranch(repositoryRoot);
+  const project = await fetchCurrentProjectSwallowError(repositoryRoot);
 
   if (pipeline && project) {
     let endpoint = `/projects/${project.restId}/pipelines/${pipeline.id}/${action}`;
 
     if (action === 'create') {
-      const branchName = await createGitService(workspaceFolder).fetchTrackingBranchName();
+      const branchName = await createGitService(repositoryRoot).fetchTrackingBranchName();
       endpoint = `/projects/${project.restId}/pipeline?ref=${branchName}`;
     }
 
@@ -465,17 +465,14 @@ export async function handlePipelineAction(action: string, workspaceFolder: stri
   }
 }
 
-export async function fetchMRIssues(
-  mrId: number,
-  workspaceFolder: string,
-): Promise<RestIssuable[]> {
-  const project = await fetchCurrentProjectSwallowError(workspaceFolder);
+export async function fetchMRIssues(mrId: number, repositoryRoot: string): Promise<RestIssuable[]> {
+  const project = await fetchCurrentProjectSwallowError(repositoryRoot);
   let issues = [];
 
   if (project) {
     try {
       const { response } = await fetch(
-        workspaceFolder,
+        repositoryRoot,
         `/projects/${project.restId}/merge_requests/${mrId}/closes_issues`,
       );
       issues = response;
@@ -488,7 +485,7 @@ export async function fetchMRIssues(
 }
 
 // TODO specify the correct interface when we convert `create_snippet.js`
-export async function createSnippet(workspaceFolder: string, data: { id: string }) {
+export async function createSnippet(repositoryRoot: string, data: { id: string }) {
   let snippet;
   let path = '/snippets';
 
@@ -497,7 +494,7 @@ export async function createSnippet(workspaceFolder: string, data: { id: string 
   }
 
   try {
-    const { response } = await fetch(workspaceFolder, path, 'POST', data);
+    const { response } = await fetch(repositoryRoot, path, 'POST', data);
     snippet = response;
   } catch (e) {
     handleError(new UserFriendlyError('Failed to create your snippet.', e));
@@ -506,11 +503,11 @@ export async function createSnippet(workspaceFolder: string, data: { id: string 
   return snippet;
 }
 
-export async function validateCIConfig(workspaceFolder: string, content: string): Promise<boolean> {
+export async function validateCIConfig(repositoryRoot: string, content: string): Promise<boolean> {
   let validCIConfig = null;
 
   try {
-    const { response } = await fetch(workspaceFolder, '/ci/lint', 'POST', {
+    const { response } = await fetch(repositoryRoot, '/ci/lint', 'POST', {
       content,
     });
     validCIConfig = response;
@@ -527,9 +524,9 @@ interface Discussion {
   }[];
 }
 
-export async function renderMarkdown(markdown: string, workspaceFolder: string) {
+export async function renderMarkdown(markdown: string, repositoryRoot: string) {
   let rendered = { html: markdown };
-  const version = await fetchVersion(workspaceFolder);
+  const version = await fetchVersion(repositoryRoot);
   if (!version) {
     return markdown;
   }
@@ -540,8 +537,8 @@ export async function renderMarkdown(markdown: string, workspaceFolder: string) 
   }
 
   try {
-    const project = await fetchCurrentProject(workspaceFolder);
-    const { response } = await fetch(workspaceFolder, '/markdown', 'POST', {
+    const project = await fetchCurrentProject(repositoryRoot);
+    const { response } = await fetch(repositoryRoot, '/markdown', 'POST', {
       text: markdown,
       project: project?.fullPath,
       gfm: 'true', // Needs to be a string for the API

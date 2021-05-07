@@ -3,13 +3,13 @@ const vscode = require('vscode');
 const {
   createAndOpenFile,
   closeAndDeleteFile,
-  getWorkspaceFolder,
+  getRepositoryRoot,
 } = require('./test_infrastructure/helpers');
 const ciVariables = require('../../src/completion/ci_variables.json');
 
 describe('CI variable completion', () => {
   describe('.gitlab-ci.yml', () => {
-    const gitlabCiYml = vscode.Uri.parse(`${getWorkspaceFolder()}/.gitlab-ci.yml`);
+    const gitlabCiYml = vscode.Uri.parse(`${getRepositoryRoot()}/.gitlab-ci.yml`);
 
     const write = async string => {
       const editor = vscode.window.activeTextEditor;
