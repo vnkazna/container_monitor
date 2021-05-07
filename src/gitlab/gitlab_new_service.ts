@@ -9,10 +9,12 @@ import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
 import { ensureAbsoluteAvatarUrl } from '../utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
-import { GitLabProject, GqlProject } from './gitlab_project';
+import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
+import { fragmentProjectDetails, GqlProject } from './graphql/shared';
+import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
 
 interface Node<T> {
   pageInfo?: {
@@ -24,12 +26,6 @@ interface Node<T> {
 
 interface GqlProjectResult<T> {
   project?: T;
-}
-
-interface GqlProjectsResult<T> {
-  projects?: {
-    nodes?: T[];
-  };
 }
 
 interface GqlSnippetProject {
@@ -182,47 +178,11 @@ const queryGetSnippets = gql`
   }
 `;
 
-const fragmentProjectDetails = gql`
-  fragment projectDetails on Project {
-    id
-    name
-    description
-    httpUrlToRepo
-    sshUrlToRepo
-    fullPath
-    webUrl
-    group {
-      id
-    }
-  }
-`;
-
 const queryGetProject = gql`
   ${fragmentProjectDetails}
   query GetProject($projectPath: ID!) {
     project(fullPath: $projectPath) {
       ...projectDetails
-    }
-  }
-`;
-
-const queryGetProjects = gql`
-  ${fragmentProjectDetails}
-  query GetProjects(
-    $search: String
-    $membership: Boolean
-    $limit: Int
-    $searchNamespaces: Boolean
-  ) {
-    projects(
-      search: $search
-      membership: $membership
-      first: $limit
-      searchNamespaces: $searchNamespaces
-    ) {
-      nodes {
-        ...projectDetails
-      }
     }
   }
 `;
@@ -390,23 +350,8 @@ export class GitLabNewService {
     return result.project && new GitLabProject(result.project);
   }
 
-  async getProjects({
-    search,
-    membership,
-    limit,
-    searchNamespaces,
-  }: {
-    search?: string;
-    membership: boolean;
-    limit?: number;
-    searchNamespaces?: boolean;
-  }): Promise<GitLabProject[]> {
-    const results = await this.client.request<GqlProjectsResult<GqlProject>>(queryGetProjects, {
-      search,
-      membership,
-      limit,
-      searchNamespaces,
-    });
+  async getProjects(options: GetProjectsOptions): Promise<GitLabProject[]> {
+    const results = await this.client.request<GqlProjectsResult>(queryGetProjects, options);
     return results.projects?.nodes?.map(project => new GitLabProject(project)) || [];
   }
 
