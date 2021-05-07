@@ -64,6 +64,7 @@ function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
 
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const discussionSetResolved = gql`
   mutation DiscussionToggleResolve($replyId: DiscussionID!, $resolved: Boolean!) {
     discussionToggleResolve(input: { id: $replyId, resolve: $resolved }) {
@@ -72,6 +73,7 @@ const discussionSetResolved = gql`
   }
 `;
 
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const createNoteMutation = gql`
   ${noteDetailsFragment}
   mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
@@ -84,6 +86,7 @@ const createNoteMutation = gql`
   }
 `;
 
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const deleteNoteMutation = gql`
   mutation DeleteNote($noteId: NoteID!) {
     destroyNote(input: { id: $noteId }) {
@@ -92,6 +95,7 @@ const deleteNoteMutation = gql`
   }
 `;
 
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const updateNoteBodyMutation = gql`
   mutation UpdateNoteBody($noteId: NoteID!, $body: String) {
     updateNote(input: { id: $noteId, body: $body }) {
