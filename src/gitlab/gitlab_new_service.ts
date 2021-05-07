@@ -13,15 +13,7 @@ import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
-import {
-  fragmentProjectDetails,
-  GqlBasePosition,
-  GqlGenericNote,
-  GqlNote,
-  GqlProject,
-  GqlProjectResult,
-  noteDetailsFragment,
-} from './graphql/shared';
+import { GqlBasePosition, GqlGenericNote, GqlNote, noteDetailsFragment } from './graphql/shared';
 import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
 import {
   getIssueDiscussionsQuery,
@@ -37,6 +29,11 @@ import {
   GqlSnippet,
   queryGetSnippets,
 } from './graphql/get_snippets';
+import {
+  GetProjectQueryOptions,
+  GetProjectQueryResult,
+  queryGetProject,
+} from './graphql/get_project';
 
 interface CreateNoteResult {
   createNote: {
@@ -66,15 +63,6 @@ interface RestNote {
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
-
-const queryGetProject = gql`
-  ${fragmentProjectDetails}
-  query GetProject($projectPath: ID!) {
-    project(fullPath: $projectPath) {
-      ...projectDetails
-    }
-  }
-`;
 
 const discussionSetResolved = gql`
   mutation DiscussionToggleResolve($replyId: DiscussionID!, $resolved: Boolean!) {
@@ -151,9 +139,8 @@ export class GitLabNewService {
   }
 
   async getProject(projectPath: string): Promise<GitLabProject | undefined> {
-    const result = await this.client.request<GqlProjectResult<GqlProject>>(queryGetProject, {
-      projectPath,
-    });
+    const options: GetProjectQueryOptions = { projectPath };
+    const result = await this.client.request<GetProjectQueryResult>(queryGetProject, options);
     return result.project && new GitLabProject(result.project);
   }
 
