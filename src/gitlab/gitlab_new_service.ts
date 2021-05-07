@@ -13,8 +13,13 @@ import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
-import { fragmentProjectDetails, GqlProject } from './graphql/shared';
+import { fragmentProjectDetails, GqlProject, noteDetailsFragment } from './graphql/shared';
 import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
+import {
+  getIssueDiscussionsQuery,
+  getMrDiscussionsQuery,
+  GetDiscussionsQueryOptions,
+} from './graphql/get_discussions';
 
 interface Node<T> {
   pageInfo?: {
@@ -183,88 +188,6 @@ const queryGetProject = gql`
   query GetProject($projectPath: ID!) {
     project(fullPath: $projectPath) {
       ...projectDetails
-    }
-  }
-`;
-
-const positionFragment = gql`
-  fragment position on Note {
-    position {
-      diffRefs {
-        baseSha
-        headSha
-      }
-      filePath
-      positionType
-      newLine
-      oldLine
-      newPath
-      oldPath
-      positionType
-    }
-  }
-`;
-
-const noteDetailsFragment = gql`
-  ${positionFragment}
-  fragment noteDetails on Note {
-    id
-    createdAt
-    system
-    author {
-      avatarUrl
-      name
-      username
-      webUrl
-    }
-    body
-    bodyHtml
-    userPermissions {
-      resolveNote
-      adminNote
-      createNote
-    }
-    ...position
-  }
-`;
-
-const discussionsFragment = gql`
-  ${noteDetailsFragment}
-  fragment discussions on DiscussionConnection {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-    nodes {
-      replyId
-      createdAt
-      resolved
-      resolvable
-      notes {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        nodes {
-          ...noteDetails
-        }
-      }
-    }
-  }
-`;
-
-const constructGetDiscussionsQuery = (isMr: boolean) => gql`
-  ${discussionsFragment}
-  query Get${
-    isMr ? 'Mr' : 'Issue'
-  }Discussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
-    project(fullPath: $projectPath) {
-      id
-      ${isMr ? 'mergeRequest' : 'issue'}(iid: $iid) {
-        discussions(after: $afterCursor) {
-          ...discussions
-        }
-      }
     }
   }
 `;
@@ -446,12 +369,16 @@ export class GitLabNewService {
 
   async getDiscussions({ issuable, endCursor }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
     const projectPath = getProjectPath(issuable);
-    const query = constructGetDiscussionsQuery(isMr(issuable));
-    const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
+    const query = isMr(issuable) ? getMrDiscussionsQuery : getIssueDiscussionsQuery;
+    const options: GetDiscussionsQueryOptions = {
       projectPath,
       iid: String(issuable.iid),
       endCursor,
-    });
+    };
+    const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(
+      query,
+      options,
+    );
     assert(result.project, `Project ${projectPath} was not found.`);
     const discussions =
       result.project.issue?.discussions || result.project.mergeRequest?.discussions;

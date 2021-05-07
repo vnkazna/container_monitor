@@ -15,6 +15,47 @@ export const fragmentProjectDetails = gql`
   }
 `;
 
+const positionFragment = gql`
+  fragment position on Note {
+    position {
+      diffRefs {
+        baseSha
+        headSha
+      }
+      filePath
+      positionType
+      newLine
+      oldLine
+      newPath
+      oldPath
+      positionType
+    }
+  }
+`;
+
+export const noteDetailsFragment = gql`
+  ${positionFragment}
+  fragment noteDetails on Note {
+    id
+    createdAt
+    system
+    author {
+      avatarUrl
+      name
+      username
+      webUrl
+    }
+    body
+    bodyHtml
+    userPermissions {
+      resolveNote
+      adminNote
+      createNote
+    }
+    ...position
+  }
+`;
+
 interface GqlGroup {
   id: string;
 }
