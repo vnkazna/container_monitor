@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { GqlTextDiffNote } from '../gitlab/gitlab_new_service';
+import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GitLabCommentThread } from './gitlab_comment_thread';
 
 interface CommentOptions {

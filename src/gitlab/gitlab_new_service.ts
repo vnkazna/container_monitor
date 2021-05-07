@@ -9,132 +9,36 @@ import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
 import { ensureAbsoluteAvatarUrl } from '../utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
-import { GitLabProject, GqlProject } from './gitlab_project';
+import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
-
-interface Node<T> {
-  pageInfo?: {
-    hasNextPage: boolean;
-    endCursor: string;
-  };
-  nodes: T[];
-}
-
-interface GqlProjectResult<T> {
-  project?: T;
-}
-
-interface GqlProjectsResult<T> {
-  projects?: {
-    nodes?: T[];
-  };
-}
-
-interface GqlSnippetProject {
-  id: string;
-  snippets: Node<GqlSnippet>;
-}
+import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
+import { GqlBasePosition, GqlGenericNote, GqlNote, noteDetailsFragment } from './graphql/shared';
+import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
+import {
+  getIssueDiscussionsQuery,
+  getMrDiscussionsQuery,
+  GetDiscussionsQueryOptions,
+  GqlDiscussion,
+  GetDiscussionsQueryResult,
+} from './graphql/get_discussions';
+import {
+  GetSnippetsQueryOptions,
+  GetSnippetsQueryResult,
+  GqlBlob,
+  GqlSnippet,
+  queryGetSnippets,
+} from './graphql/get_snippets';
+import {
+  GetProjectQueryOptions,
+  GetProjectQueryResult,
+  queryGetProject,
+} from './graphql/get_project';
 
 interface CreateNoteResult {
   createNote: {
     errors: unknown[];
     note: GqlNote | null;
-  };
-}
-
-export interface GqlSnippet {
-  id: string;
-  projectId: string;
-  title: string;
-  description: string;
-  blobs: Node<GqlBlob>;
-}
-
-export interface GqlBlob {
-  name: string;
-  path: string;
-}
-
-interface GqlUser {
-  avatarUrl: string | null;
-  name: string;
-  username: string;
-  webUrl: string;
-}
-
-interface GqlBasePosition {
-  diffRefs: {
-    baseSha: string;
-    headSha: string;
-  };
-  filePath: string;
-  newPath: string;
-  oldPath: string;
-}
-
-interface GqlImagePosition extends GqlBasePosition {
-  positionType: 'image';
-  newLine: null;
-  oldLine: null;
-}
-
-interface GqlNewPosition extends GqlBasePosition {
-  positionType: 'text';
-  newLine: number;
-  oldLine: null;
-}
-interface GqlOldPosition extends GqlBasePosition {
-  positionType: 'text';
-  newLine: null;
-  oldLine: number;
-}
-
-export type GqlTextPosition = GqlOldPosition | GqlNewPosition;
-
-interface GqlNotePermissions {
-  resolveNote: boolean;
-  adminNote: boolean;
-  createNote: boolean;
-}
-
-interface GqlGenericNote<T extends GqlBasePosition | null> {
-  id: string;
-  author: GqlUser;
-  createdAt: string;
-  system: boolean;
-  body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
-  bodyHtml: string;
-  userPermissions: GqlNotePermissions;
-  position: T;
-}
-
-interface GqlGenericDiscussion<T extends GqlNote> {
-  replyId: string;
-  createdAt: string;
-  resolved: boolean;
-  resolvable: boolean;
-  notes: Node<T>;
-}
-
-export type GqlTextDiffNote = GqlGenericNote<GqlTextPosition>;
-type GqlImageNote = GqlGenericNote<GqlImagePosition>;
-export type GqlOverviewNote = GqlGenericNote<null>;
-export type GqlNote = GqlTextDiffNote | GqlImageNote | GqlOverviewNote;
-
-export type GqlDiscussion =
-  | GqlGenericDiscussion<GqlTextDiffNote>
-  | GqlGenericDiscussion<GqlImageNote>
-  | GqlGenericDiscussion<GqlOverviewNote>;
-
-export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextDiffNote>;
-
-interface GqlDiscussionsProject {
-  mergeRequest?: {
-    discussions: Node<GqlDiscussion>;
-  };
-  issue?: {
-    discussions: Node<GqlDiscussion>;
   };
 }
 
@@ -160,166 +64,7 @@ function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
 
-const queryGetSnippets = gql`
-  query GetSnippets($projectPath: ID!) {
-    project(fullPath: $projectPath) {
-      id
-      snippets {
-        nodes {
-          id
-          title
-          description
-          blobs {
-            nodes {
-              name
-              path
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const fragmentProjectDetails = gql`
-  fragment projectDetails on Project {
-    id
-    name
-    description
-    httpUrlToRepo
-    sshUrlToRepo
-    fullPath
-    webUrl
-    group {
-      id
-    }
-  }
-`;
-
-const queryGetProject = gql`
-  ${fragmentProjectDetails}
-  query GetProject($projectPath: ID!) {
-    project(fullPath: $projectPath) {
-      ...projectDetails
-    }
-  }
-`;
-
-const queryGetProjects = gql`
-  ${fragmentProjectDetails}
-  query GetProjects(
-    $search: String
-    $membership: Boolean
-    $limit: Int
-    $searchNamespaces: Boolean
-  ) {
-    projects(
-      search: $search
-      membership: $membership
-      first: $limit
-      searchNamespaces: $searchNamespaces
-    ) {
-      nodes {
-        ...projectDetails
-      }
-    }
-  }
-`;
-
-const positionFragment = gql`
-  fragment position on Note {
-    position {
-      diffRefs {
-        baseSha
-        headSha
-      }
-      filePath
-      positionType
-      newLine
-      oldLine
-      newPath
-      oldPath
-      positionType
-    }
-  }
-`;
-
-const noteDetailsFragment = gql`
-  ${positionFragment}
-  fragment noteDetails on Note {
-    id
-    createdAt
-    system
-    author {
-      avatarUrl
-      name
-      username
-      webUrl
-    }
-    body
-    bodyHtml
-    userPermissions {
-      resolveNote
-      adminNote
-      createNote
-    }
-    ...position
-  }
-`;
-
-const discussionsFragment = gql`
-  ${noteDetailsFragment}
-  fragment discussions on DiscussionConnection {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-    nodes {
-      replyId
-      createdAt
-      resolved
-      resolvable
-      notes {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        nodes {
-          ...noteDetails
-        }
-      }
-    }
-  }
-`;
-
-const constructGetDiscussionsQuery = (isMr: boolean) => gql`
-  ${discussionsFragment}
-  query Get${
-    isMr ? 'Mr' : 'Issue'
-  }Discussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
-    project(fullPath: $projectPath) {
-      id
-      ${isMr ? 'mergeRequest' : 'issue'}(iid: $iid) {
-        discussions(after: $afterCursor) {
-          ...discussions
-        }
-      }
-    }
-  }
-`;
-
-const getMrPermissionsQuery = gql`
-  query GetMrPermissions($projectPath: ID!, $iid: String!) {
-    project(fullPath: $projectPath) {
-      mergeRequest(iid: $iid) {
-        userPermissions {
-          createNote
-        }
-      }
-    }
-  }
-`;
-
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const discussionSetResolved = gql`
   mutation DiscussionToggleResolve($replyId: DiscussionID!, $resolved: Boolean!) {
     discussionToggleResolve(input: { id: $replyId, resolve: $resolved }) {
@@ -328,6 +73,7 @@ const discussionSetResolved = gql`
   }
 `;
 
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const createNoteMutation = gql`
   ${noteDetailsFragment}
   mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
@@ -340,6 +86,7 @@ const createNoteMutation = gql`
   }
 `;
 
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const deleteNoteMutation = gql`
   mutation DeleteNote($noteId: NoteID!) {
     destroyNote(input: { id: $noteId }) {
@@ -348,6 +95,7 @@ const deleteNoteMutation = gql`
   }
 `;
 
+// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const updateNoteBodyMutation = gql`
   mutation UpdateNoteBody($noteId: NoteID!, $body: String) {
     updateNote(input: { id: $noteId, body: $body }) {
@@ -395,39 +143,21 @@ export class GitLabNewService {
   }
 
   async getProject(projectPath: string): Promise<GitLabProject | undefined> {
-    const result = await this.client.request<GqlProjectResult<GqlProject>>(queryGetProject, {
-      projectPath,
-    });
+    const options: GetProjectQueryOptions = { projectPath };
+    const result = await this.client.request<GetProjectQueryResult>(queryGetProject, options);
     return result.project && new GitLabProject(result.project);
   }
 
-  async getProjects({
-    search,
-    membership,
-    limit,
-    searchNamespaces,
-  }: {
-    search?: string;
-    membership: boolean;
-    limit?: number;
-    searchNamespaces?: boolean;
-  }): Promise<GitLabProject[]> {
-    const results = await this.client.request<GqlProjectsResult<GqlProject>>(queryGetProjects, {
-      search,
-      membership,
-      limit,
-      searchNamespaces,
-    });
+  async getProjects(options: GetProjectsOptions): Promise<GitLabProject[]> {
+    const results = await this.client.request<GqlProjectsResult>(queryGetProjects, options);
     return results.projects?.nodes?.map(project => new GitLabProject(project)) || [];
   }
 
   async getSnippets(projectPath: string): Promise<GqlSnippet[]> {
-    const result = await this.client.request<GqlProjectResult<GqlSnippetProject>>(
-      queryGetSnippets,
-      {
-        projectPath,
-      },
-    );
+    const options: GetSnippetsQueryOptions = {
+      projectPath,
+    };
+    const result = await this.client.request<GetSnippetsQueryResult>(queryGetSnippets, options);
 
     const { project } = result;
     // this can mean three things: project doesn't exist, user doesn't have access, or user credentials are wrong
@@ -512,12 +242,13 @@ export class GitLabNewService {
 
   async getDiscussions({ issuable, endCursor }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
     const projectPath = getProjectPath(issuable);
-    const query = constructGetDiscussionsQuery(isMr(issuable));
-    const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(query, {
+    const query = isMr(issuable) ? getMrDiscussionsQuery : getIssueDiscussionsQuery;
+    const options: GetDiscussionsQueryOptions = {
       projectPath,
       iid: String(issuable.iid),
       endCursor,
-    });
+    };
+    const result = await this.client.request<GetDiscussionsQueryResult>(query, options);
     assert(result.project, `Project ${projectPath} was not found.`);
     const discussions =
       result.project.issue?.discussions || result.project.mergeRequest?.discussions;
@@ -535,10 +266,11 @@ export class GitLabNewService {
 
   async canUserCommentOnMr(issuable: RestIssuable): Promise<boolean> {
     const projectPath = getProjectPath(issuable);
-    const result = await this.client.request(getMrPermissionsQuery, {
+    const queryOptions: MrPermissionsQueryOptions = {
       projectPath,
       iid: String(issuable.iid),
-    });
+    };
+    const result = await this.client.request(getMrPermissionsQuery, queryOptions);
     assert(result?.project?.mergeRequest, `MR ${issuable.references.full} was not found.`);
     return Boolean(result.project.mergeRequest.userPermissions?.createNote);
   }

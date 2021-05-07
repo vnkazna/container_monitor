@@ -1,7 +1,7 @@
 import { GitLabComment } from './gitlab_comment';
 import { GitLabCommentThread } from './gitlab_comment_thread';
 import { noteOnDiff } from '../../test/integration/fixtures/graphql/discussions.js';
-import { GqlTextDiffNote } from '../gitlab/gitlab_new_service';
+import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 
 describe('GitLabComment', () => {
   let comment: GitLabComment;

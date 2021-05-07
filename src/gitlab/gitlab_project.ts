@@ -1,18 +1,5 @@
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
-
-interface GqlGroup {
-  id: string;
-}
-export interface GqlProject {
-  id: string;
-  name: string;
-  description: string;
-  httpUrlToRepo: string;
-  sshUrlToRepo: string;
-  fullPath: string;
-  webUrl: string;
-  group?: GqlGroup;
-}
+import { GqlProject } from './graphql/shared';
 
 export class GitLabProject {
   constructor(private readonly gqlProject: GqlProject) {}
