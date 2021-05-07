@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
-import { GqlSnippet, GqlBlob } from '../gitlab/gitlab_new_service';
+import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
 import { createGitService, createGitLabNewService } from '../service_factory';
 
 const pickSnippet = async (snippets: GqlSnippet[]) => {

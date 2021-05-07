@@ -20,7 +20,6 @@ import {
   GqlNote,
   GqlProject,
   GqlProjectResult,
-  Node,
   noteDetailsFragment,
 } from './graphql/shared';
 import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
@@ -31,30 +30,19 @@ import {
   GqlDiscussion,
   GetDiscussionsQueryResult,
 } from './graphql/get_discussions';
-
-interface GqlSnippetProject {
-  id: string;
-  snippets: Node<GqlSnippet>;
-}
+import {
+  GetSnippetsQueryOptions,
+  GetSnippetsQueryResult,
+  GqlBlob,
+  GqlSnippet,
+  queryGetSnippets,
+} from './graphql/get_snippets';
 
 interface CreateNoteResult {
   createNote: {
     errors: unknown[];
     note: GqlNote | null;
   };
-}
-
-export interface GqlSnippet {
-  id: string;
-  projectId: string;
-  title: string;
-  description: string;
-  blobs: Node<GqlBlob>;
-}
-
-export interface GqlBlob {
-  name: string;
-  path: string;
 }
 
 interface RestLabelEvent {
@@ -78,27 +66,6 @@ interface RestNote {
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
-
-const queryGetSnippets = gql`
-  query GetSnippets($projectPath: ID!) {
-    project(fullPath: $projectPath) {
-      id
-      snippets {
-        nodes {
-          id
-          title
-          description
-          blobs {
-            nodes {
-              name
-              path
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 const queryGetProject = gql`
   ${fragmentProjectDetails}
@@ -196,12 +163,10 @@ export class GitLabNewService {
   }
 
   async getSnippets(projectPath: string): Promise<GqlSnippet[]> {
-    const result = await this.client.request<GqlProjectResult<GqlSnippetProject>>(
-      queryGetSnippets,
-      {
-        projectPath,
-      },
-    );
+    const options: GetSnippetsQueryOptions = {
+      projectPath,
+    };
+    const result = await this.client.request<GetSnippetsQueryResult>(queryGetSnippets, options);
 
     const { project } = result;
     // this can mean three things: project doesn't exist, user doesn't have access, or user credentials are wrong
