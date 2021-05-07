@@ -1,5 +1,13 @@
 import { gql } from 'graphql-request';
-import { noteDetailsFragment } from './shared';
+import {
+  noteDetailsFragment,
+  Node,
+  GqlProjectResult,
+  GqlNote,
+  GqlTextDiffNote,
+  GqlOverviewNote,
+  GqlImageNote,
+} from './shared';
 
 const discussionsFragment = gql`
   ${noteDetailsFragment}
@@ -59,3 +67,29 @@ export interface GetDiscussionsQueryOptions {
   iid: string;
   endCursor?: string;
 }
+
+interface GqlGenericDiscussion<T extends GqlNote> {
+  replyId: string;
+  createdAt: string;
+  resolved: boolean;
+  resolvable: boolean;
+  notes: Node<T>;
+}
+
+export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextDiffNote>;
+
+export type GqlDiscussion =
+  | GqlGenericDiscussion<GqlTextDiffNote>
+  | GqlGenericDiscussion<GqlImageNote>
+  | GqlGenericDiscussion<GqlOverviewNote>;
+
+interface GqlDiscussionsProject {
+  mergeRequest?: {
+    discussions: Node<GqlDiscussion>;
+  };
+  issue?: {
+    discussions: Node<GqlDiscussion>;
+  };
+}
+
+export type GetDiscussionsQueryResult = GqlProjectResult<GqlDiscussionsProject>;

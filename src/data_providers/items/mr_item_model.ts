@@ -3,7 +3,7 @@ import { PROGRAMMATIC_COMMANDS } from '../../command_names';
 import { createGitLabNewService } from '../../service_factory';
 import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';
-import { GqlDiscussion, GqlTextDiffDiscussion } from '../../gitlab/gitlab_new_service';
+import { GqlDiscussion, GqlTextDiffDiscussion } from '../../gitlab/graphql/get_discussions';
 import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
 import { GitLabCommentThread } from '../../review/gitlab_comment_thread';

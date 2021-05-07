@@ -13,25 +13,24 @@ import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
-import { fragmentProjectDetails, GqlProject, noteDetailsFragment } from './graphql/shared';
+import {
+  fragmentProjectDetails,
+  GqlBasePosition,
+  GqlGenericNote,
+  GqlNote,
+  GqlProject,
+  GqlProjectResult,
+  Node,
+  noteDetailsFragment,
+} from './graphql/shared';
 import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
 import {
   getIssueDiscussionsQuery,
   getMrDiscussionsQuery,
   GetDiscussionsQueryOptions,
+  GqlDiscussion,
+  GetDiscussionsQueryResult,
 } from './graphql/get_discussions';
-
-interface Node<T> {
-  pageInfo?: {
-    hasNextPage: boolean;
-    endCursor: string;
-  };
-  nodes: T[];
-}
-
-interface GqlProjectResult<T> {
-  project?: T;
-}
 
 interface GqlSnippetProject {
   id: string;
@@ -56,88 +55,6 @@ export interface GqlSnippet {
 export interface GqlBlob {
   name: string;
   path: string;
-}
-
-interface GqlUser {
-  avatarUrl: string | null;
-  name: string;
-  username: string;
-  webUrl: string;
-}
-
-interface GqlBasePosition {
-  diffRefs: {
-    baseSha: string;
-    headSha: string;
-  };
-  filePath: string;
-  newPath: string;
-  oldPath: string;
-}
-
-interface GqlImagePosition extends GqlBasePosition {
-  positionType: 'image';
-  newLine: null;
-  oldLine: null;
-}
-
-interface GqlNewPosition extends GqlBasePosition {
-  positionType: 'text';
-  newLine: number;
-  oldLine: null;
-}
-interface GqlOldPosition extends GqlBasePosition {
-  positionType: 'text';
-  newLine: null;
-  oldLine: number;
-}
-
-export type GqlTextPosition = GqlOldPosition | GqlNewPosition;
-
-interface GqlNotePermissions {
-  resolveNote: boolean;
-  adminNote: boolean;
-  createNote: boolean;
-}
-
-interface GqlGenericNote<T extends GqlBasePosition | null> {
-  id: string;
-  author: GqlUser;
-  createdAt: string;
-  system: boolean;
-  body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
-  bodyHtml: string;
-  userPermissions: GqlNotePermissions;
-  position: T;
-}
-
-interface GqlGenericDiscussion<T extends GqlNote> {
-  replyId: string;
-  createdAt: string;
-  resolved: boolean;
-  resolvable: boolean;
-  notes: Node<T>;
-}
-
-export type GqlTextDiffNote = GqlGenericNote<GqlTextPosition>;
-type GqlImageNote = GqlGenericNote<GqlImagePosition>;
-export type GqlOverviewNote = GqlGenericNote<null>;
-export type GqlNote = GqlTextDiffNote | GqlImageNote | GqlOverviewNote;
-
-export type GqlDiscussion =
-  | GqlGenericDiscussion<GqlTextDiffNote>
-  | GqlGenericDiscussion<GqlImageNote>
-  | GqlGenericDiscussion<GqlOverviewNote>;
-
-export type GqlTextDiffDiscussion = GqlGenericDiscussion<GqlTextDiffNote>;
-
-interface GqlDiscussionsProject {
-  mergeRequest?: {
-    discussions: Node<GqlDiscussion>;
-  };
-  issue?: {
-    discussions: Node<GqlDiscussion>;
-  };
 }
 
 interface RestLabelEvent {
@@ -375,10 +292,7 @@ export class GitLabNewService {
       iid: String(issuable.iid),
       endCursor,
     };
-    const result = await this.client.request<GqlProjectResult<GqlDiscussionsProject>>(
-      query,
-      options,
-    );
+    const result = await this.client.request<GetDiscussionsQueryResult>(query, options);
     assert(result.project, `Project ${projectPath} was not found.`);
     const discussions =
       result.project.issue?.discussions || result.project.mergeRequest?.discussions;

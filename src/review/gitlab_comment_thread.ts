@@ -1,14 +1,10 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
-import {
-  GitLabNewService,
-  GqlNote,
-  GqlTextDiffDiscussion,
-  GqlTextDiffNote,
-  GqlTextPosition,
-} from '../gitlab/gitlab_new_service';
+import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabComment } from './gitlab_comment';
 import { toReviewUri } from './review_uri';
+import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';
+import { GqlNote, GqlTextDiffNote, GqlTextPosition } from '../gitlab/graphql/shared';
 
 const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
   const note = discussion.notes.nodes[0];
