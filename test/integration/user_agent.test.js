@@ -8,6 +8,7 @@ const gitLabService = require('../../src/gitlab_service');
 const { GitLabNewService } = require('../../src/gitlab/gitlab_new_service');
 const snippetsResponse = require('./fixtures/graphql/snippets.json');
 const packageJson = require('../../package.json');
+const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 
 const validateUserAgent = req => {
   const userAgent = req.headers.get('User-Agent');
@@ -50,7 +51,7 @@ describe('User-Agent header', () => {
   });
 
   it('is sent with requests from GitLabService', async () => {
-    await gitLabService.fetchCurrentUser();
+    await gitLabService.fetchCurrentUser(getRepositoryRoot());
     validateUserAgent(capturedRequest);
   });
 

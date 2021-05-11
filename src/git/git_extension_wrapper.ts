@@ -48,6 +48,12 @@ export class GitExtensionWrapper implements vscode.Disposable {
     return this.wrappedRepositories;
   }
 
+  getRepository(repositoryRoot: string): WrappedRepository | undefined {
+    const rawRepository = this.gitApi?.getRepository(vscode.Uri.file(repositoryRoot));
+    if (!rawRepository) return undefined;
+    return this.repositories.find(r => r.hasSameRootAs(rawRepository));
+  }
+
   private register() {
     assert(this.gitExtension);
     try {
