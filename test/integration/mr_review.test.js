@@ -57,7 +57,7 @@ describe('MR Review', () => {
   beforeEach(() => {
     server.resetHandlers();
     dataProvider = new IssuableDataProvider();
-    mrItemModel = new MrItemModel(openMergeRequestResponse, getRepositoryRoot());
+    mrItemModel = new MrItemModel(openMergeRequestResponse, { uri: getRepositoryRoot() });
   });
 
   after(async () => {

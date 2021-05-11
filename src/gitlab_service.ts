@@ -40,7 +40,7 @@ const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
 
 async function fetch(
-  repositoryRoot: string | undefined,
+  repositoryRoot: string,
   path: string,
   method = 'GET',
   data?: Record<string, unknown>,
@@ -161,7 +161,7 @@ export async function fetchCurrentUser(repositoryRoot: string): Promise<RestUser
   }
 }
 
-async function fetchFirstUserByUsername(repositoryRoot: string | undefined, userName: string) {
+async function fetchFirstUserByUsername(repositoryRoot: string, userName: string) {
   try {
     const { response: users } = await fetch(repositoryRoot, `/users?username=${userName}`);
     return users[0];
@@ -360,7 +360,7 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
 
   const { response } = await fetch(repositoryRoot, `${path}?${search.toString()}`);
   issuable = response;
-  return issuable.map(normalizeAvatarUrl(await getInstanceUrl()));
+  return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
 }
 
 export async function fetchLastJobsForCurrentBranch(

@@ -7,8 +7,21 @@ const removeFromArray = (array: any[], element: any): any[] => {
   return array.filter(el => el !== element);
 };
 
-export const createFakeRepository = (rootUriPath: string): Repository =>
-  (({ rootUri: vscode.Uri.file(rootUriPath) } as unknown) as Repository);
+export const fakeStateOptions = {
+  rootUriPath: '/path/to/repo',
+  remotes: ['git@a.com:gitlab/extension.git', 'git@b.com:gitlab/extension.git'],
+};
+export const createFakeRepository = (
+  options: Partial<typeof fakeStateOptions> = {},
+): Repository => {
+  const { rootUriPath, remotes } = { ...fakeStateOptions, ...options };
+  return ({
+    rootUri: vscode.Uri.file(rootUriPath),
+    state: {
+      remotes: remotes.map(r => ({ fetchUrl: r })),
+    },
+  } as unknown) as Repository;
+};
 
 /**
  * This is a simple test double for the native Git extension API
@@ -38,6 +51,10 @@ class FakeGitApi {
         this.credentialsProviders = removeFromArray(this.credentialsProviders, provider);
       },
     };
+  }
+
+  getRepository(uri: vscode.Uri) {
+    return this.repositories.find(r => r.rootUri.toString() === uri.toString());
   }
 
   registerRemoteSourceProvider(provider: any) {

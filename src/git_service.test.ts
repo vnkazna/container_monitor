@@ -5,6 +5,9 @@ import * as path from 'path';
 import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { getInstanceUrl } from './utils/get_instance_url';
+
+jest.mock('./utils/get_instance_url');
 
 const isMac = () => Boolean(process.platform.match(/darwin/));
 
@@ -37,9 +40,7 @@ describe('git_service', () => {
   });
 
   beforeEach(() => {
-    (vscode.workspace.getConfiguration as jest.Mock).mockReturnValue({
-      instanceUrl: 'https://gitlab.com',
-    });
+    (getInstanceUrl as jest.Mock).mockReturnValue('https://gitlab.com');
     jest.spyOn(gitExtensionWrapper, 'gitBinaryPath', 'get').mockReturnValue('git');
   });
 

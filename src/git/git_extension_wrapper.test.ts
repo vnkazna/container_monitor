@@ -33,8 +33,8 @@ describe('GitExtensionWrapper', () => {
   });
 
   describe('repositories', () => {
-    const fakeRepository = createFakeRepository('/repository/root/path/');
-    const fakeRepository2 = createFakeRepository('/repository/root/path2/');
+    const fakeRepository = createFakeRepository({ rootUriPath: '/repository/root/path/' });
+    const fakeRepository2 = createFakeRepository({ rootUriPath: '/repository/root/path2/' });
 
     it('returns no repositories when the extension is disabled', () => {
       fakeExtension.gitApi.repositories = [fakeRepository];
@@ -103,6 +103,15 @@ describe('GitExtensionWrapper', () => {
         fakeRepository.rootUri.fsPath,
         fakeRepository2.rootUri.fsPath,
       ]);
+    });
+
+    it('returns repository wrapped repository for a repositoryRootPath', () => {
+      fakeExtension.gitApi.repositories = [fakeRepository, fakeRepository2];
+      wrapper.init();
+
+      const repository = wrapper.getRepository('/repository/root/path/');
+
+      expect(repository?.rootFsPath).toBe('/repository/root/path/');
     });
   });
 });

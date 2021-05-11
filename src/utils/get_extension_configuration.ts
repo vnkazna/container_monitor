@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { CONFIG_NAMESPACE } from '../constants';
 
 interface ExtensionConfiguration {
+  instanceUrl?: string;
   remoteName?: string;
   pipelineGitRemoteName?: string;
   featureFlags?: string[];
@@ -13,6 +14,7 @@ const turnNullToUndefined = <T>(val: T | null | undefined): T | undefined => val
 export function getExtensionConfiguration(): ExtensionConfiguration {
   const workspaceConfig = vscode.workspace.getConfiguration(CONFIG_NAMESPACE);
   return {
+    instanceUrl: turnNullToUndefined(workspaceConfig.instanceUrl),
     remoteName: turnNullToUndefined(workspaceConfig.remoteName),
     pipelineGitRemoteName: turnNullToUndefined(workspaceConfig.pipelineGitRemoteName),
     featureFlags: turnNullToUndefined(workspaceConfig.featureFlags),

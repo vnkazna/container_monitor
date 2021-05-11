@@ -2,7 +2,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as gitLabService from './gitlab_service';
-import { createGitService } from './service_factory';
 import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
@@ -68,10 +67,9 @@ async function getActiveFile() {
     return undefined;
   }
 
-  const gitService = createGitService(repository.rootFsPath);
-  const branchName = await gitService.fetchTrackingBranchName();
+  const branchName = await repository.gitService.fetchTrackingBranchName();
   const filePath = path.relative(
-    await gitService.getRepositoryRootFolder(),
+    await repository.gitService.getRepositoryRootFolder(),
     editor.document.uri.fsPath,
   );
   const fileUrl = `${currentProject!.webUrl}/blob/${branchName}/${filePath}`;
@@ -120,7 +118,7 @@ export async function openCreateNewMr(): Promise<void> {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
   if (!repository) return;
   const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
-  const branchName = await createGitService(repository.rootFsPath).fetchTrackingBranchName();
+  const branchName = await repository.gitService.fetchTrackingBranchName();
 
   openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
 }
@@ -142,7 +140,7 @@ export async function compareCurrentBranch(): Promise<void> {
   if (!repository) return;
 
   const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
-  const lastCommitId = await createGitService(repository.rootFsPath).fetchLastCommitId();
+  const lastCommitId = await repository.gitService.fetchLastCommitId();
 
   if (project && lastCommitId) {
     openUrl(`${project.webUrl}/compare/master...${lastCommitId}`);

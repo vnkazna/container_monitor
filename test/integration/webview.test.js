@@ -80,7 +80,7 @@ describe('GitLab webview', () => {
     replacePanelEventSystem();
     webviewPanel = await webviewController.create(
       openIssueResponse,
-      vscode.workspace.workspaceFolders[0],
+      vscode.workspace.workspaceFolders[0].uri.fsPath,
     );
   });
 
