@@ -1,5 +1,5 @@
 import * as url from 'url';
-import { basename } from 'path';
+import { basename, join } from 'path';
 import * as assert from 'assert';
 import { Repository } from '../api/git';
 
@@ -116,6 +116,14 @@ export class WrappedRepository {
 
   get rootFsPath(): string {
     return this.rawRepository.rootUri.fsPath;
+  }
+
+  async getFileContent(path: string, sha: string): Promise<string | null> {
+    // even on Windows, the git show command accepts only POSIX paths
+    const absolutePath = join(this.rootFsPath, path).replace(/\\/g, '/');
+    // null sufficiently signalises that the file has not been found
+    // this scenario is going to happen often (for open and squashed MRs)
+    return this.rawRepository.show(sha, absolutePath).catch(() => null);
   }
 
   /**

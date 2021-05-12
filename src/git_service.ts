@@ -54,19 +54,6 @@ export class GitService {
     }
   }
 
-  async getFileContent(path: string, sha: string): Promise<string | null> {
-    // even on Windows, the git show command accepts only POSIX paths
-    const posixPath = path.replace(/\\/g, '/');
-    const pathWithoutFirstSlash = posixPath.replace(/^\//, '');
-    try {
-      return await this.fetch(`git show ${sha}:${pathWithoutFirstSlash}`);
-    } catch (e) {
-      // null sufficiently signalises that the file has not been found
-      // this scenario is going to happen often (for open and squashed MRs)
-      return null;
-    }
-  }
-
   async getRepositoryRootFolder(): Promise<string> {
     return this.fetch('git rev-parse --show-toplevel');
   }

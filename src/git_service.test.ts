@@ -81,24 +81,6 @@ describe('git_service', () => {
       });
     });
 
-    describe('getFileContent', () => {
-      it('returns null when the file does not exist', async () => {
-        await git.commit('Test commit', [], { '--allow-empty': null });
-        const lastCommitSha = await git.revparse(['HEAD']);
-        const result = await gitService.getFileContent('/non/exising/file', lastCommitSha);
-        expect(result).toEqual(null);
-      });
-
-      it('returns file content on the given sha', async () => {
-        await fs.writeFile(`${repositoryRoot}/test.txt`, 'Test text');
-        await git.add('.');
-        await git.commit('Test commit');
-        const lastCommitSha = await git.revparse(['HEAD']);
-        const result = await gitService.getFileContent('/test.txt', lastCommitSha);
-        expect(result).toEqual('Test text');
-      });
-    });
-
     describe('getRepositoryRootFolder', () => {
       it('returns the repositoryRoot if it is the git root', async () => {
         gitService = new GitService({ ...getDefaultOptions(), repositoryRoot });
