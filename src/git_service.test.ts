@@ -1,7 +1,5 @@
 import * as temp from 'temp';
 import * as vscode from 'vscode';
-import { promises as fs } from 'fs';
-import * as path from 'path';
 import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
@@ -80,26 +78,6 @@ describe('git_service', () => {
         expect(result).toEqual(`${ORIGIN}/test-branch`);
       });
     });
-
-    describe('getRepositoryRootFolder', () => {
-      it('returns the repositoryRoot if it is the git root', async () => {
-        gitService = new GitService({ ...getDefaultOptions(), repositoryRoot });
-
-        const result = await gitService.getRepositoryRootFolder();
-
-        expect(result).toBe(repositoryRoot);
-      });
-
-      it('returns the parent folder if the git service is created for git subfolder', async () => {
-        const subfolder = path.join(repositoryRoot, 'subfolder');
-        await fs.mkdir(subfolder);
-        gitService = new GitService({ ...getDefaultOptions(), repositoryRoot: subfolder });
-
-        const result = await gitService.getRepositoryRootFolder();
-
-        expect(result).toBe(repositoryRoot);
-      });
-    });
   });
 
   describe('without initialized git repository', () => {
@@ -111,10 +89,6 @@ describe('git_service', () => {
 
     it('fetchTrackingBranchName returns null', async () => {
       expect(gitService.fetchTrackingBranchName()).rejects.toBeInstanceOf(Error);
-    });
-
-    it('getRepositoryRootFolder throws', async () => {
-      expect(gitService.getRepositoryRootFolder()).rejects.toBeInstanceOf(Error);
     });
   });
 });

@@ -53,8 +53,4 @@ export class GitService {
       throw new UserFriendlyError('Cannot get current git branch', e);
     }
   }
-
-  async getRepositoryRootFolder(): Promise<string> {
-    return this.fetch('git rev-parse --show-toplevel');
-  }
 }
