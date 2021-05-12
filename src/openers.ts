@@ -140,9 +140,8 @@ export async function compareCurrentBranch(): Promise<void> {
   if (!repository) return;
 
   const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
-  const lastCommitId = await repository.gitService.fetchLastCommitId();
 
-  if (project && lastCommitId) {
-    openUrl(`${project.webUrl}/compare/master...${lastCommitId}`);
+  if (project && repository.lastCommitSha) {
+    openUrl(`${project.webUrl}/compare/master...${repository.lastCommitSha}`);
   }
 }

@@ -27,10 +27,6 @@ export class GitService {
     return stdout;
   }
 
-  async fetchLastCommitId(): Promise<string> {
-    return this.fetch('git log --format=%H -n 1');
-  }
-
   /**
    * Fetches remote tracking branch name of current branch.
    * This should be used in link openers.

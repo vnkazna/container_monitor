@@ -59,17 +59,6 @@ describe('git_service', () => {
       gitService = new GitService(getDefaultOptions());
     });
 
-    describe('fetchLastCommitId', () => {
-      it('returns the last commit sha', async () => {
-        await git.commit('Test commit', [], { '--allow-empty': null });
-        const lastCommitSha = await git.revparse(['HEAD']);
-
-        const result = await gitService.fetchLastCommitId();
-
-        expect(result).toEqual(lastCommitSha);
-      });
-    });
-
     describe('fetchTrackingBranchName', () => {
       beforeEach(async () => {
         await git.checkout(['-b', 'new-branch']);
@@ -136,10 +125,6 @@ describe('git_service', () => {
       repositoryRoot = await createTempFolder();
       const options = { ...getDefaultOptions(), instanceUrl: undefined };
       gitService = new GitService(options);
-    });
-
-    it('fetchLastCommitId returns null', async () => {
-      expect(gitService.fetchLastCommitId()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchTrackingBranchName returns null', async () => {

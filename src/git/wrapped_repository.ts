@@ -87,6 +87,10 @@ export class WrappedRepository {
     return this.getRemoteByName(pipelineGitRemoteName || this.remoteName);
   }
 
+  get lastCommitSha(): string | undefined {
+    return this.rawRepository.state.HEAD?.commit;
+  }
+
   get instanceUrl(): string {
     const remoteUrls = this.rawRepository.state.remotes
       .map(r => r.fetchUrl)
