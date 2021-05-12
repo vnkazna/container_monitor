@@ -35,6 +35,13 @@ describe('GitExtensionWrapper', () => {
   describe('repositories', () => {
     const fakeRepository = createFakeRepository({ rootUriPath: '/repository/root/path/' });
     const fakeRepository2 = createFakeRepository({ rootUriPath: '/repository/root/path2/' });
+    const waitForRepositoryCountChanged = () =>
+      new Promise<void>(resolve => {
+        const sub = wrapper.onRepositoryCountChanged(() => {
+          sub.dispose();
+          resolve(undefined);
+        });
+      });
 
     it('returns no repositories when the extension is disabled', () => {
       fakeExtension.gitApi.repositories = [fakeRepository];
@@ -45,10 +52,11 @@ describe('GitExtensionWrapper', () => {
       expect(wrapper.repositories).toEqual([]);
     });
 
-    it('returns wrapped repositories when the extension is enabled', () => {
+    it('returns wrapped repositories when the extension is enabled', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository];
 
       wrapper.init();
+      await waitForRepositoryCountChanged();
 
       expect(wrapper.repositories).toEqual([new WrappedRepository(fakeRepository)]);
     });
@@ -60,22 +68,24 @@ describe('GitExtensionWrapper', () => {
         ${'repository was closed'}  | ${() => fakeExtension.gitApi.onDidCloseRepositoryEmitter.fire(fakeRepository)}
         ${'extension was disabled'} | ${() => fakeExtension.onDidChangeEnablementEmitter.fire(false)}
         ${'extension was enabled'}  | ${() => fakeExtension.onDidChangeEnablementEmitter.fire(true)}
-      `('calls onRepositoryCountChanged listener when $scenario', ({ fireEvent }) => {
+      `('calls onRepositoryCountChanged listener when $scenario', async ({ fireEvent }) => {
         const onRepositoryCountChangedListener = jest.fn();
         wrapper.init();
         wrapper.onRepositoryCountChanged(onRepositoryCountChangedListener);
 
         fireEvent();
+        await waitForRepositoryCountChanged();
 
         expect(onRepositoryCountChangedListener).toHaveBeenCalled();
       });
     });
 
-    it('adds a new wrapped repository when repository is opened', () => {
+    it('adds a new wrapped repository when repository is opened', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository];
       wrapper.init();
 
       fakeExtension.gitApi.onDidOpenRepositoryEmitter.fire(fakeRepository2);
+      await waitForRepositoryCountChanged();
 
       expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([
         fakeRepository.rootUri.fsPath,
@@ -83,21 +93,23 @@ describe('GitExtensionWrapper', () => {
       ]);
     });
 
-    it('removes wrapped repository when repository is closed', () => {
+    it('removes wrapped repository when repository is closed', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository, fakeRepository2];
       wrapper.init();
+      await waitForRepositoryCountChanged();
 
       fakeExtension.gitApi.onDidCloseRepositoryEmitter.fire(fakeRepository);
 
       expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([fakeRepository2.rootUri.fsPath]);
     });
 
-    it('adds all repositories when the git extension gets enabled', () => {
+    it('adds all repositories when the git extension gets enabled', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository, fakeRepository2];
       fakeExtension.enabled = false;
       wrapper.init();
 
       fakeExtension.onDidChangeEnablementEmitter.fire(true);
+      await waitForRepositoryCountChanged();
 
       expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([
         fakeRepository.rootUri.fsPath,
@@ -105,9 +117,10 @@ describe('GitExtensionWrapper', () => {
       ]);
     });
 
-    it('returns repository wrapped repository for a repositoryRootPath', () => {
+    it('returns repository wrapped repository for a repositoryRootPath', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository, fakeRepository2];
       wrapper.init();
+      await waitForRepositoryCountChanged();
 
       const repository = wrapper.getRepository('/repository/root/path/');
 

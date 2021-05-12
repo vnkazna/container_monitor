@@ -69,7 +69,8 @@ export class GitExtensionWrapper implements vscode.Disposable {
     }
   }
 
-  private addRepositories(repositories: Repository[]) {
+  private async addRepositories(repositories: Repository[]) {
+    await Promise.all(repositories.map(r => r.status())); // make sure the repositories are initialized
     this.wrappedRepositories = [
       ...this.wrappedRepositories,
       ...repositories.map(r => new WrappedRepository(r)),

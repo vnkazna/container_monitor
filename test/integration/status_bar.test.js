@@ -7,6 +7,7 @@ const pipelinesResponse = require('./fixtures/rest/pipelines.json');
 const { getServer, createQueryJsonEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { USER_COMMANDS } = require('../../src/command_names');
+const { updateRepositoryStatus } = require('./test_infrastructure/helpers');
 
 describe('GitLab status bar', () => {
   let server;
@@ -25,6 +26,7 @@ describe('GitLab status bar', () => {
       createQueryJsonEndpoint('/projects/278964/pipelines', { '?ref=master': pipelinesResponse }),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
+    await updateRepositoryStatus();
   });
 
   beforeEach(() => {
