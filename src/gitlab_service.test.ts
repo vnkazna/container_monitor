@@ -21,15 +21,20 @@ jest.mock('./service_factory', () => {
     createGitLabNewService: () => ({
       getProject: () => ({ groupRestId: 'TEST_PROJECT', restId: 'TEST_PROJECT' }),
     }),
-    createGitService: () => ({
-      fetchGitRemote: () => ({
+  };
+});
+
+jest.mock('./git/git_extension_wrapper', () => ({
+  gitExtensionWrapper: {
+    getRepository: () => ({
+      remote: {
         host: 'TEST_HOST',
         namespace: 'TEST_NS',
         project: 'TEST_PROJECT',
-      }),
+      },
     }),
-  };
-});
+  },
+}));
 
 describe('fetchIssueables', () => {
   beforeEach(() => jest.resetModules());

@@ -7,19 +7,28 @@ const removeFromArray = (array: any[], element: any): any[] => {
   return array.filter(el => el !== element);
 };
 
-export const fakeStateOptions = {
+interface FakeRepositoryOptions {
+  rootUriPath: string;
+  remotes: [string, string][];
+  headRemoteName?: string;
+}
+
+export const fakeRepositoryOptions: FakeRepositoryOptions = {
   rootUriPath: '/path/to/repo',
-  remotes: ['git@a.com:gitlab/extension.git', 'git@b.com:gitlab/extension.git'],
+  remotes: [
+    ['origin', 'git@a.com:gitlab/extension.git'],
+    ['second', 'git@b.com:gitlab/extension.git'],
+  ],
 };
-export const createFakeRepository = (
-  options: Partial<typeof fakeStateOptions> = {},
-): Repository => {
-  const { rootUriPath, remotes } = { ...fakeStateOptions, ...options };
+export const createFakeRepository = (options: Partial<FakeRepositoryOptions> = {}): Repository => {
+  const { rootUriPath, remotes, headRemoteName } = { ...fakeRepositoryOptions, ...options };
   return ({
     rootUri: vscode.Uri.file(rootUriPath),
     state: {
-      remotes: remotes.map(r => ({ fetchUrl: r })),
+      remotes: remotes.map(([name, fetchUrl]) => ({ name, fetchUrl })),
+      HEAD: { remote: headRemoteName },
     },
+    status: async () => undefined,
   } as unknown) as Repository;
 };
 

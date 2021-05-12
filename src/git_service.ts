@@ -1,9 +1,7 @@
 import * as execa from 'execa';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
-import { parseGitRemote, GitRemote } from './git/git_remote_parser';
 import { log } from './log';
-import { getInstanceUrl } from './utils/get_instance_url';
 
 export interface GitServiceOptions {
   repositoryRoot: string;
@@ -27,33 +25,6 @@ export class GitService {
       preferLocal: false,
     });
     return stdout;
-  }
-
-  async fetchGitRemote(remoteName = this.preferredRemoteName): Promise<GitRemote> {
-    // If remote name isn't provided, the command returns default remote for the current branch
-    // if there's no default branch, the command fails but that's part of the normal flow and it can't throw
-    const getUrlForRemoteName = async (name: string) =>
-      this.fetch(`git ls-remote --get-url ${name}`).catch(() => null);
-
-    const getFirstRemoteName = async () => {
-      const multilineRemotes = await this.fetch('git remote');
-      return multilineRemotes.split('\n')[0];
-    };
-
-    let remoteUrl = await getUrlForRemoteName(remoteName ?? '');
-    if (!remoteUrl) {
-      // If there's no remote now, that means that there's no origin and no `remote.pushDefault` config.
-      remoteUrl = await getUrlForRemoteName(await getFirstRemoteName());
-    }
-
-    if (remoteUrl) {
-      const parsedRemote = parseGitRemote(remoteUrl, await getInstanceUrl(this.repositoryRoot));
-      if (!parsedRemote) {
-        throw new Error(`git remote "${remoteUrl}" could not be parsed`);
-      }
-      return parsedRemote;
-    }
-    throw new Error('"git remote" does not return any URL');
   }
 
   async fetchLastCommitId(): Promise<string> {
