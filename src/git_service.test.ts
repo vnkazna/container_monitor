@@ -13,7 +13,6 @@ const isMac = () => Boolean(process.platform.match(/darwin/));
 
 describe('git_service', () => {
   const ORIGIN = 'origin';
-  const SECOND_REMOTE = 'second'; // name is important, we need this remote to be alphabetically behind origin
 
   let gitService: GitService;
   let repositoryRoot: string;
@@ -58,37 +57,6 @@ describe('git_service', () => {
       await git.addRemote(ORIGIN, 'git@test.gitlab.com:gitlab-org/gitlab.git');
 
       gitService = new GitService(getDefaultOptions());
-    });
-
-    describe('fetchGitRemote', () => {
-      it('gets the remote url for first origin', async () => {
-        const remoteUrl = await gitService.fetchGitRemote();
-        expect(remoteUrl).toEqual({
-          host: 'test.gitlab.com',
-          namespace: 'gitlab-org',
-          project: 'gitlab',
-        });
-      });
-
-      it('gets the remote url for user configured remote name', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const options = { ...getDefaultOptions(), preferredRemoteName: SECOND_REMOTE };
-        gitService = new GitService(options);
-
-        const remoteUrl = await gitService.fetchGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.another.com');
-      });
-
-      it('gets default remote for a branch', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        await git.checkout(['-b', 'new-branch']);
-        await git.addConfig('branch.new-branch.remote', SECOND_REMOTE); // this is equivalent to setting a remote tracking branch
-
-        const remoteUrl = await gitService.fetchGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.another.com');
-      });
     });
 
     describe('fetchLastCommitId', () => {
@@ -168,10 +136,6 @@ describe('git_service', () => {
       repositoryRoot = await createTempFolder();
       const options = { ...getDefaultOptions(), instanceUrl: undefined };
       gitService = new GitService(options);
-    });
-
-    it('fetchGitRemote returns throws', async () => {
-      expect(gitService.fetchGitRemote()).rejects.toBeInstanceOf(Error);
     });
 
     it('fetchLastCommitId returns null', async () => {
