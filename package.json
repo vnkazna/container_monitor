@@ -756,7 +756,6 @@
   "dependencies": {
     "cross-fetch": "^3.0.6",
     "dayjs": "^1.10.4",
-    "execa": "^4.1.0",
     "graphql": "^15.5.0",
     "graphql-request": "^3.4.0",
     "https-proxy-agent": "^5.0.0",

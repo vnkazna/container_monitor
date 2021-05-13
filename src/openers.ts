@@ -67,7 +67,7 @@ async function getActiveFile() {
     return undefined;
   }
 
-  const branchName = await repository.gitService.fetchTrackingBranchName();
+  const branchName = await repository.getTrackingBranchName();
   const filePath = path.relative(repository.rootFsPath, editor.document.uri.fsPath);
   const fileUrl = `${currentProject!.webUrl}/blob/${branchName}/${filePath}`;
   let anchor = '';
@@ -115,7 +115,7 @@ export async function openCreateNewMr(): Promise<void> {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
   if (!repository) return;
   const project = await repository.getProject();
-  const branchName = await repository.gitService.fetchTrackingBranchName();
+  const branchName = await repository.getTrackingBranchName();
 
   openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
 }
