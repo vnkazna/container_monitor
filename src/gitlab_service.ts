@@ -99,7 +99,7 @@ async function fetch(
   return await request(`${apiRoot}${path}`, config);
 }
 
-export async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {
+async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {
   try {
     const repository = gitExtensionWrapper.getRepository(repositoryRoot);
     assert(repository, `Could not find repository in ${repositoryRoot}`);
@@ -109,7 +109,7 @@ export async function fetchCurrentProject(repositoryRoot: string): Promise<GitLa
   }
 }
 
-export async function fetchCurrentProjectSwallowError(
+async function fetchCurrentProjectSwallowError(
   repositoryRoot: string,
 ): Promise<GitLabProject | null> {
   try {

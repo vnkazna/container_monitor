@@ -3,7 +3,6 @@ import { basename } from 'path';
 import { CustomQueryItemModel } from './items/custom_query_item_model';
 import { MultirootCustomQueryItemModel } from './items/multiroot_custom_query_item_model';
 
-import * as gitLabService from '../gitlab_service';
 import { CustomQuery } from '../gitlab/custom_query';
 import { ItemModel } from './items/item_model';
 import { CONFIG_CUSTOM_QUERIES, CONFIG_NAMESPACE } from '../constants';
@@ -16,7 +15,7 @@ async function getAllGitlabRepositories(): Promise<GitLabRepository[]> {
   const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
     const uri = repository.rootFsPath;
     try {
-      const currentProject = await gitLabService.fetchCurrentProject(uri);
+      const currentProject = await repository.getProject();
       return {
         label: currentProject?.name ?? basename(uri),
         uri,
