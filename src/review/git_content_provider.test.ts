@@ -1,10 +1,12 @@
 import { mocked } from 'ts-jest/utils';
 import { GitContentProvider } from './git_content_provider';
-import { GitService } from '../git_service';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { ApiContentProvider } from './api_content_provider';
 import { toReviewUri } from './review_uri';
+import { Repository } from '../api/git';
+import { WrappedRepository } from '../git/wrapped_repository';
 
-jest.mock('../git_service');
+jest.mock('../git/git_extension_wrapper');
 jest.mock('./api_content_provider');
 
 describe('GitContentProvider', () => {
@@ -22,9 +24,8 @@ describe('GitContentProvider', () => {
 
   beforeEach(() => {
     getFileContent = jest.fn();
-    const gitService = new GitService({ repositoryRoot: 'folder' });
-    gitService.getFileContent = getFileContent;
-    mocked(GitService).mockReturnValue(gitService);
+    gitExtensionWrapper.getRepository = () =>
+      (({ getFileContent } as unknown) as WrappedRepository);
   });
 
   it('provides file content from a git repository', async () => {

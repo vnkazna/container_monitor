@@ -1,11 +1,12 @@
 import * as url from 'url';
-import { basename } from 'path';
+import { basename, join } from 'path';
+import * as assert from 'assert';
 import { Repository } from '../api/git';
 
 import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
 import { log } from '../log';
-import { parseGitRemote } from './git_remote_parser';
+import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { getExtensionConfiguration } from '../utils/get_extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitService } from '../git_service';
@@ -62,6 +63,34 @@ export class WrappedRepository {
     this.rawRepository = rawRepository;
   }
 
+  private get remoteName(): string {
+    const preferredRemote = getExtensionConfiguration().remoteName;
+    const branchRemote = this.rawRepository.state.HEAD?.remote;
+    const firstRemote = this.rawRepository.state.remotes[0]?.name;
+    return preferredRemote || branchRemote || firstRemote || 'origin';
+  }
+
+  private getRemoteByName(remoteName: string): GitRemote {
+    const remoteUrl = this.rawRepository.state.remotes.find(r => r.name === remoteName)?.fetchUrl;
+    assert(remoteUrl, `could not find any URL for git remote with name '${this.remoteName}'`);
+    const parsedRemote = parseGitRemote(remoteUrl, this.instanceUrl);
+    assert(parsedRemote, `git remote "${remoteUrl}" could not be parsed`);
+    return parsedRemote;
+  }
+
+  get remote(): GitRemote {
+    return this.getRemoteByName(this.remoteName);
+  }
+
+  get pipelineRemote(): GitRemote {
+    const { pipelineGitRemoteName } = getExtensionConfiguration();
+    return this.getRemoteByName(pipelineGitRemoteName || this.remoteName);
+  }
+
+  get lastCommitSha(): string | undefined {
+    return this.rawRepository.state.HEAD?.commit;
+  }
+
   get instanceUrl(): string {
     const remoteUrls = this.rawRepository.state.remotes
       .map(r => r.fetchUrl)
@@ -87,6 +116,14 @@ export class WrappedRepository {
 
   get rootFsPath(): string {
     return this.rawRepository.rootUri.fsPath;
+  }
+
+  async getFileContent(path: string, sha: string): Promise<string | null> {
+    // even on Windows, the git show command accepts only POSIX paths
+    const absolutePath = join(this.rootFsPath, path).replace(/\\/g, '/');
+    // null sufficiently signalises that the file has not been found
+    // this scenario is going to happen often (for open and squashed MRs)
+    return this.rawRepository.show(sha, absolutePath).catch(() => null);
   }
 
   /**

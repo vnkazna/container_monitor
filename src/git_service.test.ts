@@ -1,7 +1,5 @@
 import * as temp from 'temp';
 import * as vscode from 'vscode';
-import { promises as fs } from 'fs';
-import * as path from 'path';
 import simpleGit, { SimpleGit } from 'simple-git';
 import { GitService, GitServiceOptions } from './git_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
@@ -13,7 +11,6 @@ const isMac = () => Boolean(process.platform.match(/darwin/));
 
 describe('git_service', () => {
   const ORIGIN = 'origin';
-  const SECOND_REMOTE = 'second'; // name is important, we need this remote to be alphabetically behind origin
 
   let gitService: GitService;
   let repositoryRoot: string;
@@ -60,48 +57,6 @@ describe('git_service', () => {
       gitService = new GitService(getDefaultOptions());
     });
 
-    describe('fetchGitRemote', () => {
-      it('gets the remote url for first origin', async () => {
-        const remoteUrl = await gitService.fetchGitRemote();
-        expect(remoteUrl).toEqual({
-          host: 'test.gitlab.com',
-          namespace: 'gitlab-org',
-          project: 'gitlab',
-        });
-      });
-
-      it('gets the remote url for user configured remote name', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        const options = { ...getDefaultOptions(), preferredRemoteName: SECOND_REMOTE };
-        gitService = new GitService(options);
-
-        const remoteUrl = await gitService.fetchGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.another.com');
-      });
-
-      it('gets default remote for a branch', async () => {
-        await git.addRemote(SECOND_REMOTE, 'git@test.another.com:gitlab-org/gitlab.git');
-        await git.checkout(['-b', 'new-branch']);
-        await git.addConfig('branch.new-branch.remote', SECOND_REMOTE); // this is equivalent to setting a remote tracking branch
-
-        const remoteUrl = await gitService.fetchGitRemote();
-
-        expect(remoteUrl?.host).toEqual('test.another.com');
-      });
-    });
-
-    describe('fetchLastCommitId', () => {
-      it('returns the last commit sha', async () => {
-        await git.commit('Test commit', [], { '--allow-empty': null });
-        const lastCommitSha = await git.revparse(['HEAD']);
-
-        const result = await gitService.fetchLastCommitId();
-
-        expect(result).toEqual(lastCommitSha);
-      });
-    });
-
     describe('fetchTrackingBranchName', () => {
       beforeEach(async () => {
         await git.checkout(['-b', 'new-branch']);
@@ -123,44 +78,6 @@ describe('git_service', () => {
         expect(result).toEqual(`${ORIGIN}/test-branch`);
       });
     });
-
-    describe('getFileContent', () => {
-      it('returns null when the file does not exist', async () => {
-        await git.commit('Test commit', [], { '--allow-empty': null });
-        const lastCommitSha = await git.revparse(['HEAD']);
-        const result = await gitService.getFileContent('/non/exising/file', lastCommitSha);
-        expect(result).toEqual(null);
-      });
-
-      it('returns file content on the given sha', async () => {
-        await fs.writeFile(`${repositoryRoot}/test.txt`, 'Test text');
-        await git.add('.');
-        await git.commit('Test commit');
-        const lastCommitSha = await git.revparse(['HEAD']);
-        const result = await gitService.getFileContent('/test.txt', lastCommitSha);
-        expect(result).toEqual('Test text');
-      });
-    });
-
-    describe('getRepositoryRootFolder', () => {
-      it('returns the repositoryRoot if it is the git root', async () => {
-        gitService = new GitService({ ...getDefaultOptions(), repositoryRoot });
-
-        const result = await gitService.getRepositoryRootFolder();
-
-        expect(result).toBe(repositoryRoot);
-      });
-
-      it('returns the parent folder if the git service is created for git subfolder', async () => {
-        const subfolder = path.join(repositoryRoot, 'subfolder');
-        await fs.mkdir(subfolder);
-        gitService = new GitService({ ...getDefaultOptions(), repositoryRoot: subfolder });
-
-        const result = await gitService.getRepositoryRootFolder();
-
-        expect(result).toBe(repositoryRoot);
-      });
-    });
   });
 
   describe('without initialized git repository', () => {
@@ -170,20 +87,8 @@ describe('git_service', () => {
       gitService = new GitService(options);
     });
 
-    it('fetchGitRemote returns throws', async () => {
-      expect(gitService.fetchGitRemote()).rejects.toBeInstanceOf(Error);
-    });
-
-    it('fetchLastCommitId returns null', async () => {
-      expect(gitService.fetchLastCommitId()).rejects.toBeInstanceOf(Error);
-    });
-
     it('fetchTrackingBranchName returns null', async () => {
       expect(gitService.fetchTrackingBranchName()).rejects.toBeInstanceOf(Error);
-    });
-
-    it('getRepositoryRootFolder throws', async () => {
-      expect(gitService.getRepositoryRootFolder()).rejects.toBeInstanceOf(Error);
     });
   });
 });

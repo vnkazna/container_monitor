@@ -13,6 +13,7 @@ const {
   closeAndDeleteFile,
   simulateQuickPickChoice,
   getRepositoryRoot,
+  updateRepositoryStatus,
 } = require('./test_infrastructure/helpers');
 
 describe('Insert snippet', async () => {
@@ -76,6 +77,7 @@ describe('Insert snippet', async () => {
     const git = simpleGit(getRepositoryRoot());
     await git.removeRemote(REMOTE.NAME);
     await git.addRemote(REMOTE.NAME, 'git@test.gitlab.com:gitlab-org/nonexistent.git');
+    await updateRepositoryStatus();
     await assert.rejects(insertSnippet(), /Project gitlab-org\/nonexistent was not found./);
   });
 });

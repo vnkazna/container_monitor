@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as request from 'request-promise';
+import * as assert from 'assert';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
@@ -13,7 +14,7 @@ import { ensureAbsoluteAvatarUrl } from './utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
-import { getExtensionConfiguration } from './utils/get_extension_configuration';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 export interface RestJob {
   name: string;
@@ -118,9 +119,9 @@ async function fetchProjectData(remote: GitRemote | null, repositoryRoot: string
 
 export async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {
   try {
-    const remote = await createGitService(repositoryRoot).fetchGitRemote();
-
-    return await fetchProjectData(remote, repositoryRoot);
+    const repository = gitExtensionWrapper.getRepository(repositoryRoot);
+    assert(repository, `Could not find repository in ${repositoryRoot}`);
+    return await fetchProjectData(repository.remote, repositoryRoot);
   } catch (e) {
     throw new ApiError(e, 'get current project');
   }
@@ -141,10 +142,10 @@ export async function fetchCurrentPipelineProject(
   repositoryRoot: string,
 ): Promise<GitLabProject | null> {
   try {
-    const { pipelineGitRemoteName } = getExtensionConfiguration();
-    const remote = await createGitService(repositoryRoot).fetchGitRemote(pipelineGitRemoteName);
+    const repository = gitExtensionWrapper.getRepository(repositoryRoot);
+    assert(repository, `Could not find repository in ${repositoryRoot}`);
 
-    return await fetchProjectData(remote, repositoryRoot);
+    return await fetchProjectData(repository.pipelineRemote, repositoryRoot);
   } catch (e) {
     logError(e);
     return null;

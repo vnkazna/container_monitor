@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
+import * as assert from 'assert';
 import { SinonSandbox } from 'sinon';
+import { GitExtension } from '../../../src/api/git';
 
 export const createAndOpenFile = async (testFileUri: vscode.Uri): Promise<void> => {
   const createFileEdit = new vscode.WorkspaceEdit();
@@ -21,7 +23,15 @@ export const simulateQuickPickChoice = (sandbox: SinonSandbox, nthItem: number):
   });
 };
 
-export const getRepositoryRoot = (): string | undefined => {
+export const getRepositoryRoot = (): string => {
   const folders = vscode.workspace.workspaceFolders;
-  return folders && folders[0]?.uri.fsPath;
+  const folder = folders && folders[0]?.uri.fsPath;
+  assert(folder, 'There is no workspace folder in the test VS Code instance');
+  return folder;
+};
+
+export const updateRepositoryStatus = async (): Promise<void> => {
+  const api = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports.getAPI(1);
+  assert(api, 'Failed to retrieve Git Extension');
+  return api.getRepository(vscode.Uri.file(getRepositoryRoot()))?.status();
 };

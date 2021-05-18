@@ -30,7 +30,7 @@ export const insertSnippet = async (): Promise<void> => {
   if (!repository) {
     return;
   }
-  const remote = await repository.gitService.fetchGitRemote();
+  const { remote } = repository;
   const snippets = await repository.gitLabService.getSnippets(
     `${remote.namespace}/${remote.project}`,
   );

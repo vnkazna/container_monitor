@@ -68,10 +68,7 @@ async function getActiveFile() {
   }
 
   const branchName = await repository.gitService.fetchTrackingBranchName();
-  const filePath = path.relative(
-    await repository.gitService.getRepositoryRootFolder(),
-    editor.document.uri.fsPath,
-  );
+  const filePath = path.relative(repository.rootFsPath, editor.document.uri.fsPath);
   const fileUrl = `${currentProject!.webUrl}/blob/${branchName}/${filePath}`;
   let anchor = '';
 
@@ -140,9 +137,8 @@ export async function compareCurrentBranch(): Promise<void> {
   if (!repository) return;
 
   const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
-  const lastCommitId = await repository.gitService.fetchLastCommitId();
 
-  if (project && lastCommitId) {
-    openUrl(`${project.webUrl}/compare/master...${lastCommitId}`);
+  if (project && repository.lastCommitSha) {
+    openUrl(`${project.webUrl}/compare/master...${repository.lastCommitSha}`);
   }
 }
