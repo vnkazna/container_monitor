@@ -3,6 +3,12 @@
 import { CustomQueryType } from './gitlab/custom_query_type';
 import { CustomQuery } from './gitlab/custom_query';
 
+let extensionConfiguration = {};
+
+jest.mock('./utils/get_extension_configuration', () => ({
+  getExtensionConfiguration: () => extensionConfiguration,
+}));
+
 jest.mock('./utils/get_instance_url', () => {
   return {
     getInstanceUrl: () => 'INSTANCE_URL',
@@ -16,28 +22,28 @@ jest.mock('./services/token_service', () => {
     },
   };
 });
-jest.mock('./service_factory', () => {
-  return {
-    createGitLabNewService: () => ({
-      getProject: () => ({ groupRestId: 'TEST_PROJECT', restId: 'TEST_PROJECT' }),
-    }),
-  };
-});
+
+const TEST_REPOSITORY = {
+  remote: {
+    host: 'TEST_HOST',
+    namespace: 'TEST_NS',
+    project: 'TEST_PROJECT',
+  },
+  getProject: () => ({ groupRestId: 'TEST_PROJECT', restId: 'TEST_PROJECT' }),
+};
+
+let repository: any;
 
 jest.mock('./git/git_extension_wrapper', () => ({
   gitExtensionWrapper: {
-    getRepository: () => ({
-      remote: {
-        host: 'TEST_HOST',
-        namespace: 'TEST_NS',
-        project: 'TEST_PROJECT',
-      },
-    }),
+    getRepository: () => repository,
   },
 }));
 
 describe('fetchIssueables', () => {
   beforeEach(() => jest.resetModules());
+
+  repository = TEST_REPOSITORY;
   // These are required, but not used in the function
   const baseParams = {
     name: '',
@@ -285,6 +291,45 @@ describe('fetchIssueables', () => {
       await fetchIssuablesHelper({ pipelineId: 1 });
       const search = new URLSearchParams(request.mock.calls[1][0]);
       expect(search.get('pipeline_id')).toEqual('1');
+    });
+  });
+
+  describe('fetchCurrentPipelineProject', () => {
+    const TEST_PROJECT = { id: 'test' };
+
+    let fetchCurrentPipelineProject: () => Promise<any>;
+
+    beforeEach(() => {
+      repository = { getProject: jest.fn().mockResolvedValue(TEST_PROJECT) };
+      fetchCurrentPipelineProject = require('./gitlab_service').fetchCurrentPipelineProject;
+    });
+
+    it('simply calls repository.getProject() when pipelineGitRemoteName setting is not present', async () => {
+      extensionConfiguration = {};
+
+      const project = await fetchCurrentPipelineProject();
+
+      expect(project).toEqual(TEST_PROJECT);
+      expect(repository.getProject).toHaveBeenCalledWith();
+    });
+
+    it('obtains project for the pipeline remote when pipelineGitRemoteName is set', async () => {
+      extensionConfiguration = {
+        pipelineGitRemoteName: 'pipeline-remote',
+      };
+      repository = {
+        getProject: jest.fn(),
+        getRemoteByName: jest.fn().mockReturnValue({ namespace: 'namespace', project: 'project' }),
+        gitLabService: {
+          getProject: jest.fn().mockResolvedValue(TEST_PROJECT),
+        },
+      };
+
+      const project = await fetchCurrentPipelineProject();
+
+      expect(project).toEqual(TEST_PROJECT);
+      expect(repository.getRemoteByName).toHaveBeenCalledWith('pipeline-remote');
+      expect(repository.gitLabService.getProject).toHaveBeenCalledWith('namespace/project');
     });
   });
 });

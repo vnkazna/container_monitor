@@ -142,42 +142,4 @@ describe('WrappedRepository', () => {
       expect(() => wrappedRepository.remote).toThrowError();
     });
   });
-
-  describe('pipelineRemote', () => {
-    const defaultRemotes: [string, string][] = [
-      ['first', 'git@test.gitlab.com:gitlab-org/gitlab.git'],
-      ['second', 'https://git@test-instance.com/g/extension.git'],
-    ];
-
-    it('gets the remote url for first origin (works the same as .remote)', () => {
-      repository = createFakeRepository({
-        remotes: defaultRemotes,
-      });
-
-      wrappedRepository = new WrappedRepository(repository);
-
-      expect(wrappedRepository.pipelineRemote).toEqual({
-        host: 'test.gitlab.com',
-        namespace: 'gitlab-org',
-        project: 'gitlab',
-      });
-    });
-
-    it('gets the remote url for user configured pipeline remote name', () => {
-      (getExtensionConfiguration as jest.Mock).mockReturnValue({
-        pipelineGitRemoteName: 'second',
-      });
-      repository = createFakeRepository({
-        remotes: defaultRemotes,
-      });
-
-      wrappedRepository = new WrappedRepository(repository);
-
-      expect(wrappedRepository.pipelineRemote).toEqual({
-        host: 'test-instance.com',
-        namespace: 'g',
-        project: 'extension',
-      });
-    });
-  });
 });

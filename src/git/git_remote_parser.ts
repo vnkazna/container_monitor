@@ -16,20 +16,20 @@ const escapeForRegExp = (str: string) => {
   return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
 };
 
-export function parseGitRemote(remote: string, instanceUrl?: string): GitRemote | null {
+export function parseGitRemote(remote: string, instanceUrl?: string): GitRemote | undefined {
   // Regex to match gitlab potential starting names for ssh remotes.
   const normalizedRemote = remote.match(`^[a-zA-Z0-9_-]+@`) ? `ssh://${remote}` : remote;
 
   const { host, pathname } = url.parse(normalizedRemote);
 
   if (!host || !pathname) {
-    return null;
+    return undefined;
   }
 
   const pathRegExp = instanceUrl ? escapeForRegExp(getInstancePath(instanceUrl)) : '';
   const match = pathname.match(`${pathRegExp}/:?(.+)/([^/]+?)(?:.git)?/?$`);
   if (!match) {
-    return null;
+    return undefined;
   }
 
   const [namespace, project] = match.slice(1, 3);

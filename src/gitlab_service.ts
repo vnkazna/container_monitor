@@ -4,8 +4,7 @@ import * as assert from 'assert';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
-import { createGitLabNewService, createGitService } from './service_factory';
-import { GitRemote } from './git/git_remote_parser';
+import { createGitService } from './service_factory';
 import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
 import { CustomQueryType } from './gitlab/custom_query_type';
@@ -15,6 +14,7 @@ import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
 export interface RestJob {
   name: string;
@@ -37,7 +37,6 @@ const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): Re
   };
 };
 
-const projectCache: Record<string, GitLabProject> = {};
 let versionCache: string | null = null;
 
 async function fetch(
@@ -100,28 +99,11 @@ async function fetch(
   return await request(`${apiRoot}${path}`, config);
 }
 
-async function fetchProjectData(remote: GitRemote | null, repositoryRoot: string) {
-  // TODO require remote so we can guarantee that we return a value or error
-  if (remote) {
-    if (!(`${remote.namespace}_${remote.project}` in projectCache)) {
-      const { namespace, project } = remote;
-      const gitlabNewService = await createGitLabNewService(repositoryRoot);
-      const projectData = await gitlabNewService.getProject(`${namespace}/${project}`);
-      if (projectData) {
-        projectCache[`${remote.namespace}_${remote.project}`] = projectData;
-      }
-    }
-    return projectCache[`${remote.namespace}_${remote.project}`] || null;
-  }
-
-  return null;
-}
-
 export async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {
   try {
     const repository = gitExtensionWrapper.getRepository(repositoryRoot);
     assert(repository, `Could not find repository in ${repositoryRoot}`);
-    return await fetchProjectData(repository.remote, repositoryRoot);
+    return (await repository.getProject()) ?? null;
   } catch (e) {
     throw new ApiError(e, 'get current project');
   }
@@ -144,8 +126,12 @@ export async function fetchCurrentPipelineProject(
   try {
     const repository = gitExtensionWrapper.getRepository(repositoryRoot);
     assert(repository, `Could not find repository in ${repositoryRoot}`);
-
-    return await fetchProjectData(repository.pipelineRemote, repositoryRoot);
+    const { pipelineGitRemoteName } = getExtensionConfiguration();
+    if (pipelineGitRemoteName) {
+      const { namespace, project } = repository.getRemoteByName(pipelineGitRemoteName);
+      return (await repository.gitLabService.getProject(`${namespace}/${project}`)) ?? null;
+    }
+    return (await repository.getProject()) ?? null;
   } catch (e) {
     logError(e);
     return null;
