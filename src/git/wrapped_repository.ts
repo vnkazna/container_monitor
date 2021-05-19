@@ -9,7 +9,6 @@ import { log } from '../log';
 import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { getExtensionConfiguration } from '../utils/get_extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
-import { GitService } from '../git_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
@@ -108,14 +107,6 @@ export class WrappedRepository {
     return new GitLabNewService(this.instanceUrl);
   }
 
-  get gitService(): GitService {
-    const { remoteName } = getExtensionConfiguration();
-    return new GitService({
-      repositoryRoot: this.rootFsPath,
-      preferredRemoteName: remoteName,
-    });
-  }
-
   get name(): string {
     return basename(this.rawRepository.rootUri.fsPath);
   }
@@ -130,6 +121,19 @@ export class WrappedRepository {
     // null sufficiently signalises that the file has not been found
     // this scenario is going to happen often (for open and squashed MRs)
     return this.rawRepository.show(sha, absolutePath).catch(() => null);
+  }
+
+  async getTrackingBranchName(): Promise<string> {
+    const branchName = this.rawRepository.state.HEAD?.name;
+    assert(
+      branchName,
+      'The repository seems to be in a detached HEAD state. Please checkout a branch.',
+    );
+    const trackingBranch = await this.rawRepository
+      .getConfig(`branch.${branchName}.merge`)
+      .catch(() => ''); // the tracking branch is going to be empty most of the time, we'll swallow the error instead of logging it every time
+
+    return trackingBranch.replace('refs/heads/', '') || branchName;
   }
 
   /**

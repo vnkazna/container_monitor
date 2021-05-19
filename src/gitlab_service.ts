@@ -4,7 +4,6 @@ import * as assert from 'assert';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
-import { createGitService } from './service_factory';
 import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
 import { CustomQueryType } from './gitlab/custom_query_type';
@@ -179,7 +178,9 @@ async function fetchLastPipelineForCurrentBranch(
     return null;
   }
 
-  const branchName = await createGitService(repositoryRoot).fetchTrackingBranchName();
+  const branchName = await gitExtensionWrapper
+    .getRepository(repositoryRoot)
+    ?.getTrackingBranchName();
   const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
   const { response: pipelines } = await fetch(
     repositoryRoot,
@@ -378,7 +379,9 @@ export async function fetchOpenMergeRequestForCurrentBranch(
   repositoryRoot: string,
 ): Promise<RestIssuable | null> {
   const project = await fetchCurrentProject(repositoryRoot);
-  const branchName = await createGitService(repositoryRoot).fetchTrackingBranchName();
+  const branchName = await gitExtensionWrapper
+    .getRepository(repositoryRoot)
+    ?.getTrackingBranchName();
 
   const path = `/projects/${project?.restId}/merge_requests?state=opened&source_branch=${branchName}`;
   const { response } = await fetch(repositoryRoot, path);
@@ -436,7 +439,9 @@ export async function handlePipelineAction(action: string, repositoryRoot: strin
     let endpoint = `/projects/${project.restId}/pipelines/${pipeline.id}/${action}`;
 
     if (action === 'create') {
-      const branchName = await createGitService(repositoryRoot).fetchTrackingBranchName();
+      const branchName = await gitExtensionWrapper
+        .getRepository(repositoryRoot)
+        ?.getTrackingBranchName();
       endpoint = `/projects/${project.restId}/pipeline?ref=${branchName}`;
     }
 

@@ -38,15 +38,21 @@ async function run(testsRoot) {
   initializeTestEnvironment();
 
   // Run the mocha test
-  await new Promise((res, rej) =>
-    mocha.run(failures => {
-      if (failures) {
-        rej(failures);
-      } else {
-        res();
-      }
-    }),
-  );
+  try {
+    await new Promise((res, rej) =>
+      mocha.run(failures => {
+        if (failures) {
+          rej(failures);
+        } else {
+          res();
+        }
+      }),
+    );
+  } catch (e) {
+    // temporary fix for https://github.com/microsoft/vscode/issues/123882
+    console.error(e);
+    throw e;
+  }
 }
 
 module.exports = { run };
