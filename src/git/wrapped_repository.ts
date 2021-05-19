@@ -36,7 +36,7 @@ function heuristicInstanceUrl(gitRemoteHosts: string[]) {
   return null;
 }
 
-export function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
+function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
   const { instanceUrl } = getExtensionConfiguration();
   // if the workspace setting exists, use it
   if (instanceUrl) {
