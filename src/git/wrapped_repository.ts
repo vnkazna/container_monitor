@@ -88,6 +88,10 @@ export class WrappedRepository {
     return this.cachedProject;
   }
 
+  get containsGitLabProject(): boolean {
+    return Boolean(this.cachedProject);
+  }
+
   get remote(): GitRemote {
     return this.getRemoteByName(this.remoteName);
   }
@@ -108,7 +112,7 @@ export class WrappedRepository {
   }
 
   get name(): string {
-    return basename(this.rawRepository.rootUri.fsPath);
+    return this.cachedProject?.name ?? basename(this.rawRepository.rootUri.fsPath);
   }
 
   get rootFsPath(): string {

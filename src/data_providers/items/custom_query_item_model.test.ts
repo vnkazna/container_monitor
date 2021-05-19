@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { customQuery, workspace } from '../../test_utils/entities';
+import { customQuery, repository } from '../../test_utils/entities';
 
 import { CustomQueryItemModel } from './custom_query_item_model';
 
@@ -8,7 +8,7 @@ describe('CustomQueryItem', () => {
 
   describe('item labeled as a query', () => {
     beforeEach(() => {
-      item = new CustomQueryItemModel(customQuery, workspace).getTreeItem();
+      item = new CustomQueryItemModel(customQuery, repository).getTreeItem();
     });
 
     it('should have query name as label', () => {
@@ -22,11 +22,11 @@ describe('CustomQueryItem', () => {
 
   describe('item labeled as a project', () => {
     beforeEach(() => {
-      item = new CustomQueryItemModel(customQuery, workspace, true).getTreeItem();
+      item = new CustomQueryItemModel(customQuery, repository, true).getTreeItem();
     });
 
-    it('should have project label as label', () => {
-      expect(item.label).toBe('Project label');
+    it('should have project name as a label', () => {
+      expect(item.label).toBe(repository.name);
     });
 
     it('should have project icon', () => {
@@ -34,17 +34,17 @@ describe('CustomQueryItem', () => {
     });
   });
 
-  describe('item with the error field', () => {
+  describe('item not containing a GitLab project', () => {
     beforeEach(() => {
       item = new CustomQueryItemModel(
         customQuery,
-        { ...workspace, error: true },
+        { ...repository, containsGitLabProject: false } as any,
         true,
       ).getTreeItem();
     });
 
     it('should return an error item', () => {
-      expect(item.label).toBe(`${workspace.label}: Project failed to load`);
+      expect(item.label).toBe(`${repository.name}: Project failed to load`);
     });
   });
 });

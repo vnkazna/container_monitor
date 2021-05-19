@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { MrItemModel } from './mr_item_model';
-import { mr, workspace } from '../../test_utils/entities';
+import { mr, repository } from '../../test_utils/entities';
 import {
   discussionOnDiff,
   noteOnDiffTextSnippet,
@@ -23,7 +23,7 @@ describe('MrItemModel', () => {
   const createCommentThreadMock = jest.fn();
 
   beforeEach(() => {
-    item = new MrItemModel(mr, workspace);
+    item = new MrItemModel(mr, repository);
     commentThread = {} as vscode.CommentThread;
 
     commentController = {

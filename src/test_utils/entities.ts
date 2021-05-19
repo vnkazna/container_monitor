@@ -1,3 +1,4 @@
+import { WrappedRepository } from '../git/wrapped_repository';
 import { CustomQueryType } from '../gitlab/custom_query_type';
 
 export const issue: RestIssuable = {
@@ -43,11 +44,6 @@ export const mrVersion: RestMrVersion = {
   diffs: [diffFile],
 };
 
-export const workspace: GitLabWorkspace = {
-  label: 'Project label',
-  uri: '/home/johndoe/workspace/project',
-};
-
 export const customQuery = {
   name: 'Query name',
   type: CustomQueryType.ISSUE,
@@ -70,3 +66,9 @@ export const pipeline: RestPipeline = {
   project_id: 567890,
   web_url: 'https://example.com/foo/bar/pipelines/46',
 };
+
+export const repository = ({
+  name: 'GitLab Project',
+  rootFsPath: '/path/to/repo',
+  containsGitLabProject: true,
+} as unknown) as WrappedRepository;
