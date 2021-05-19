@@ -68,7 +68,9 @@ async function getActiveFile() {
   }
 
   const branchName = await repository.getTrackingBranchName();
-  const filePath = path.relative(repository.rootFsPath, editor.document.uri.fsPath);
+  const filePath = path
+    .relative(repository.rootFsPath, editor.document.uri.fsPath)
+    .replace('\\', '/');
   const fileUrl = `${currentProject!.webUrl}/blob/${branchName}/${filePath}`;
   let anchor = '';
 
