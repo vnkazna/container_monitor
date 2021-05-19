@@ -1,3 +1,12 @@
+## [3.20.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.20.0...v3.20.1) (2021-05-19)
+
+
+### Bug Fixes
+
+* generating file link on windows uses backslash ([78f44f2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/78f44f238dc103e2565bb496011bb8da73afd2f2))
+
+
+
 # [3.20.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.19.0...v3.20.0) (2021-05-06)
 
 
