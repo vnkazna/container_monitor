@@ -6,7 +6,7 @@ This extension integrates GitLab to VS Code by adding a new GitLab sidebar where
 
 ## Minimum supported version
 
-GitLab Workflow requires GitLab 13.4 or later. To find your GitLab version, visit `/help` (like https://gitlab.com/help).
+GitLab Workflow requires GitLab 13.4 or later. To find your GitLab version, visit `/help` (like `https://gitlab.com/help`).
 
 ## Features
 
@@ -60,106 +60,106 @@ You can use [autocompletion of GitLab CI variables](#ci-variable-autocompletion)
 
 To use this extension, you need to create a GitLab Personal Access Token and give it to the extension.
 
-##### Step 1: Create your Personal Access Token
+### Step 1: Create your Personal Access Token
 
 - If you are using
   - GitLab.com [click to open Personal Access Tokens page](https://gitlab.com/profile/personal_access_tokens).
-  - Self-hosted GitLab instance go to "Settings" and click "Access Tokens" on the left navigation menu
-- On "Add a personal access token" form
+  - Self-managed GitLab instance go to **Settings** and select **Access Tokens** on the left navigation menu
+- On **Add a personal access token** form:
   - Give a name to your token.
   - Select an expiry date.
-  - Select "api" and "read_user" permissions.
-  - Hit "Create personal access token" button.
+  - Select `api` and `read_user` permissions.
+  - Select **Create personal access token**.
 - Copy the token. _Remember you won't be able to see the value of this token ever again for security reasons._
 
-##### Step 2: Add token to GitLab Workflow Extension
+### Step 2: Add token to GitLab Workflow Extension
 
 - Open up Command Palette by pressing `Cmd+Shift+P`.
 - Search for "GitLab: Set GitLab Personal Access Token" and hit Enter.
-- Enter the URL to the Gitlab instance the PAT should apply to and hit Enter.
+- Enter the URL to the GitLab instance the PAT should apply to and hit Enter.
 - Extension will ask for your PAT. Paste your PAT and hit Enter. _It won't be visible and accessible to others._
 - If you want to connect to GitLab hosted on a custom domain, additionally set
   `gitlab.instanceUrl` in your user or workspace settings, otherwise the extension
-  will try to connect to gitlab.com. See [Configuration Options](#configuration-options) for more information.
+  will try to connect to gitlab.com. See [Extension settings](#extension-settings) for more information.
 
 That's it. 🏁
 
 You can start using this extension right away. If your project has a pipeline for last commit and a MR from your current branch, you should see them on VS Code status bar. 🎉
 
-#### Multiple Gitlab instances
+### Multiple GitLab instances
 
-If you want to use multiple GitLab instances you may want to configure each workspace separately. See `gitlab.instanceUrl` config option in [Configuration Options](#configuration-options) section.
+If you want to use multiple GitLab instances you may want to configure each workspace separately. See the `gitlab.instanceUrl` configuration option in [Extension settings](#extension-settings) section.
 
-## Configuration options
+## Extension settings
+
+To learn how to change the VS Code Settings, read the official [Settings documentation](https://code.visualstudio.com/docs/getstarted/settings).
 
 **`gitlab.instanceUrl`** _(required: false, default: "https://gitlab.com")_
 
 If you are using GitLab on a custom domain, you must add this to your user settings file. Example: `"gitlab.instanceUrl": "https://my-gitlab-domain.com"`
 
-To enable Gitlab Workflow extension to work with different Gitlab instances, each token is assigned to a Gitlab instance URL. For the extension to selected the correct token for a specific workspace, the option [`gitlab.instanceUrl`](#configuration-options) can be used. This option can be set in the current workspace's `.vscode/settings.json` file.
+To enable GitLab Workflow extension to work with different GitLab instances, each token is assigned to a GitLab instance URL. For the extension to select the correct token for a specific workspace, the option [`gitlab.instanceUrl`](#extension-settings) can be used. This option can be set in the current workspace's `.vscode/settings.json` file.
 
 **`gitlab.showStatusBarLinks`** _(required: false, default: true)_
 
-If you don't want to see GitLab related links on the status bar, you can set this option to `false`. If you are using version 1.0.0 or above you can also find the same links in sidebar. You should restart your VS Code after updating this option.
+If you don't want to see GitLab-related links on the status bar, you can set this option to `false`. If you are using version 1.0.0 or later, you can also find the same links in sidebar. You should restart VS Code after updating this option.
 
 **`gitlab.showIssueLinkOnStatusBar`** _(required: false, default: true)_
 
-If you are not using GitLab's issue tracker, you can set this option to `false` to remove related issue link on the status bar. You should restart your VS Code after updating this option.
+If you are not using the GitLab issue tracker, you can set this option to `false` to remove related issue links on the status bar. You should restart VS Code after updating this option.
 
 **`gitlab.showMrStatusOnStatusBar`** _(required: false, default: true)_
 
-You can toggle visibility of MR link in your sidebar. You can always find MR link in GitLab Workflow sidebar. You should restart your VS Code after updating this option.
-
-**`gitlab.ca`** _(required: false, default: null)_
-
-If your self-hosted GitLab instance has a self-signed SSL certificate you would probably need to set this option in to point your certificate file. More discussion can be found [in this issue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26).
-
-**`gitlab.cert`** _(required: false, default: null)_
-
-If your self-hosted GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate file. Please also see `gitlab.certKey` option. More information [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/merge_requests/29#note_132284448).
-
-**`gitlab.certKey`** _(required: false, default: null)_
-
-If your self-hosted GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate key file. Please also see `gitlab.cert` option. More information [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/merge_requests/29#note_132284448).
-
-**`gitlab.ignoreCertificateErrors`** _(required: false, default: false)_
-
-If you are using a self-hosted GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors. More information can be found [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26#note_61312786).
-
-> You can open User Settings file by pressing `Cmd+,` on Mac OS or following `Code > Preferences > User Settings`. You can simply add extension configuration values to your User Settings file. This won't break or change anything on your VS Code.
+You can toggle visibility of the merge request link in your sidebar. You can always find a merge request link in GitLab Workflow sidebar. You should restart VS Code after updating this option.
 
 **`gitlab.remoteName`** _(required: false, default: null)_
 
-The name of the git remote link corresponding to the GitLab repositiory with your MR and issues. If no setting is provided, the extension will detect it. For example: origin.
+The name of the Git remote link corresponding to the GitLab repository with your merge request and issues. If no setting is provided, the extension will detect it. For example: `origin`.
 
 **`gitlab.pipelineGitRemoteName`** _(required: false, default: null)_
 
-The name of the git remote link corresponding to the GitLab repositiory with your pipelines. If no setting is provided, the extension will detect it. For example: origin.
-
-**`gitlab.enableExperimentalFeatures`** _(required: false, default: false)_
-
-To enable experimental features set this flag to `true`. List of experiemental features and details can be found [here](#experiemental-features)
+The name of the Git remote link corresponding to the GitLab repository with your pipelines. If no setting is provided, the extension will detect it. For example: `origin`.
 
 **`gitlab.customQueries`** _(required: false)_
 
-Defines the search queries that retrives the items shown on the Gitlab Panel. See [Custom Queries documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md) for more details.
+Defines the search queries that retrieves the items shown on the GitLab Panel. See [Custom Queries documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md) for more details.
 
-**`reviewer`** _(required: false)_ : Returns GitLab Merge Requests assigned for review to the given username. When set to `"<current_user>"`, the extension uses the current user's username.
+### Self-signed certificates
+
+To use self-signed certificates to connect to your GitLab instance, configure them using the following settings. These are community contributed because the GitLab team uses a public CA.
+
+These settings don't work with [`http.proxy` setting for VS Code](https://code.visualstudio.com/docs/setup/network#_legacy-proxy-server-support) (see [open issue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/314)).
+
+**`gitlab.ca`** _(required: false, default: null)_
+
+If your self-managed GitLab instance has a self-signed SSL certificate you would probably need to set this option in to point your certificate file. Implemented in [this issue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26).
+
+**`gitlab.cert`** _(required: false, default: null)_
+
+If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate file. Please also see `gitlab.certKey` option. For more information, [read this comment](https://gitlab.com/gitlab-org/gitlab-vscode-extension/merge_requests/29#note_132284448).
+
+**`gitlab.certKey`** _(required: false, default: null)_
+
+If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate key file. Please also see `gitlab.cert` option. For more information, [read this comment](https://gitlab.com/gitlab-org/gitlab-vscode-extension/merge_requests/29#note_132284448).
+
+**`gitlab.ignoreCertificateErrors`** _(required: false, default: false)_
+
+If you are using a self-managed GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors. For more information, [read this comment](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26#note_61312786).
 
 ## Usage
 
 - Open up Command Palette by pressing `Cmd+Shift+P`.
 - Search for `GitLab:` and you will see all the commands provided by the extension.
 
-![https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/gitlab-vscode.png](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/gitlab-vscode.png)
+![Screenshot of available commands](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/gitlab-vscode.png)
 
-![https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png)
+![Pipeline actions screenshot](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png)
 
 ## Features in-depth
 
 ### Issue and Merge Request details and comments in VS Code
 
-![_issues-in-vscode](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_issues-in-vscode.png)
+![Issues in Visual Studio Code](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_issues-in-vscode.png)
 
 GitLab Workflow allows you to view issue details and comments right in the VS Code. Click an issue link from the sidebar and VS Code will open a new tab to show the issue details. You can also comment on the issue from VS Code.
 
@@ -175,7 +175,7 @@ When navigating changed files you can review discussions that have been made on 
 
 ### Sidebar - details
 
-Extension will add a GitLab Workflow panel to sidebar of your VS Code. The dedicated panel will allow you to see the list of your issues and MRs (you can decide the exact queries by using the [custom queries](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md)). Also you will be able to see pipeline, MR and issue links for your current branch.
+Extension will add a GitLab Workflow panel to sidebar of VS Code. The dedicated panel will allow you to see the list of your issues and MRs (you can decide the exact queries by using the [custom queries](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md)). Also you will be able to see pipeline, MR and issue links for your current branch.
 
 You can see the issue and MR details by clicking on the issue item or by expanding the MR item and clicking on "Description". When you expand the MR, you can see all the changed files. When you click on a changed file, the extension opens the MR diff.
 
@@ -231,7 +231,7 @@ It can become more powerful by allowing you to filter issues/MRs by author, assi
 - You don't need to add quotes around multiple words for `title` token. `title:"new merge request widget"` may return parsing error. `title: new merge request widget` should be used.
 - You can have `labels` and `label` tokens at the same time. `labels: fronted discussion label: performance` is a valid query and all labels will be included in your search query. It's equal with `labels: fronted discussion performance`. You can also have multiple `label` tokens. `label: frontend label: discussion label: performance` is valid and equals to `labels: fronted discussion performance`.
 
-![_advanced-search.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_advanced-search.gif)
+![Advanced search](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_advanced-search.gif)
 
 #### Search with Advanced Search
 
@@ -255,7 +255,7 @@ You can see changes in your branch by comparing with `master` and see them on Gi
 
 ![_compare-with-master.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_compare-with-master.gif)
 
-> Soon extension will support comparing your current branch with other branches.
+> Soon, the extension will support comparing your current branch with other branches.
 
 ### Open active file
 
@@ -267,7 +267,7 @@ This command allows you to see active file on GitLab. Extension sends active lin
 
 Using this command, you can quickly validate GitLab CI configuration.
 
-![_validate-ci-config.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_validate-ci-config.gif)
+![Validate CI configuration](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_validate-ci-config.gif)
 
 ### CI variable autocompletion
 
@@ -279,10 +279,10 @@ Quickly find the CI variable you are looking for with the CI variable autocomple
 
 This extension integrates with the built-in Git Extension and allows you to search for and clone projects from GitLab (command `Git: Clone`).
 
-- You can search for projects on each GitLab instance for wich you [added an access-token](#step-2-add-token-to-gitlab-workflow-extension).
+- You can search for projects on each GitLab instance for which you [added an access-token](#step-2-add-token-to-gitlab-workflow-extension).
 - Only projects where you are a **member of** are displayed.
 - You can clone with SSH or HTTPS
-- With HTTPS your access-token will be used for cloning the repository and fetching/pushing commits. This is also the case for all GitLab projects that are cloned manually with HTTPS and then opened in vscode.
+- With HTTPS your access-token will be used for cloning the repository and fetching/pushing commits. This is also the case for all GitLab projects that are cloned manually with HTTPS and then opened in VS Code.
 
 ![Demonstration of cloning a project from gitlab.com](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_git-clone.gif)
 
@@ -294,4 +294,4 @@ This extension integrates with the built-in Git Extension and allows you to sear
 
 This extension is open source and [hosted on GitLab](https://gitlab.com/gitlab-org/gitlab-vscode-extension). Contributions are more than welcome. Feel free to fork and add new features or submit bug reports.
 
-[Here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CONTRIBUTORS.md) is the list of great people who contributed this project and make it even more awesome. Thank you all 🎉
+[A list of the great people](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CONTRIBUTORS.md) who contributed this project, and made it even more awesome, is available. Thank you all! 🎉
