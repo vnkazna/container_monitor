@@ -3,6 +3,7 @@ const openers = require('../openers');
 const gitLabService = require('../gitlab_service');
 const gitlabProjectInput = require('../gitlab_project_input');
 const { gitExtensionWrapper } = require('../git/git_extension_wrapper');
+const { logError } = require('../log');
 
 const visibilityOptions = [
   {
@@ -69,10 +70,15 @@ async function createSnippet() {
 
   if (editor) {
     const repository = gitExtensionWrapper.getActiveRepository();
-    repositoryRoot = repository.rootFsPath;
-    project = await gitLabService.fetchCurrentProjectSwallowError(repositoryRoot);
+    repositoryRoot = repository && repository.rootFsPath;
+    try {
+      project = repository && (await repository.getProject());
+    } catch (e) {
+      logError(e);
+    }
 
-    if (project == null) {
+    // FIXME: the empty `uri` representing user's snippets is not correctly handled
+    if (!project) {
       repositoryRoot = await gitlabProjectInput.show(
         [
           {
@@ -82,7 +88,12 @@ async function createSnippet() {
         ],
         "Select a Gitlab Project or use the User's Snippets",
       );
-      project = await gitLabService.fetchCurrentProjectSwallowError(repositoryRoot);
+      try {
+        const selectedRepository = gitExtensionWrapper.getRepository(repositoryRoot);
+        project = selectedRepository && (await selectedRepository.getProject());
+      } catch (e) {
+        logError(e);
+      }
     }
 
     const visibility = await vscode.window.showQuickPick(visibilityOptions);

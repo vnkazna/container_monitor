@@ -1,6 +1,5 @@
 const vscode = require('vscode');
 const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
-const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
 const { getInstanceUrl } = require('./utils/get_instance_url');
 
@@ -97,7 +96,7 @@ async function getSearchInput(description) {
 
 async function showSearchInputFor(noteableType) {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const project = await repository.getProject();
   const query = await getSearchInput(
     'Search in title or description. (Check extension page for search with filters)',
   );
@@ -116,7 +115,7 @@ async function showMergeRequestSearchInput() {
 
 async function showProjectAdvancedSearchInput() {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const project = await repository.getProject();
   const query = await getSearchInput(
     'Project Advanced Search. (Check extension page for Advanced Search)',
   );

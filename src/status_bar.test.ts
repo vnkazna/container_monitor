@@ -47,8 +47,8 @@ describe('status_bar', () => {
     });
     asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
       rootFsPath: '/folder',
+      getProject: async () => ({}),
     });
-    asMock(gitLabService.fetchCurrentProject).mockResolvedValue({});
   });
 
   afterEach(() => {
@@ -56,7 +56,10 @@ describe('status_bar', () => {
   });
 
   it('hides all items when the workspace does not contain GitLab project', async () => {
-    asMock(gitLabService.fetchCurrentProject).mockResolvedValue(null);
+    asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
+      rootFsPath: '/folder',
+      getProject: async () => undefined,
+    });
     await statusBar.init();
     expect(getPipelineItem().hide).toHaveBeenCalled();
     expect(getMrItem().hide).toHaveBeenCalled();
@@ -135,7 +138,10 @@ describe('status_bar', () => {
     beforeEach(() => {
       asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
+      asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
+        rootFsPath: '/folder',
+        getProject: async () => mockedGitLabProject,
+      });
     });
 
     it('shows MR item', async () => {
@@ -162,7 +168,10 @@ describe('status_bar', () => {
     beforeEach(() => {
       asMock(gitLabService.fetchCurrentPipelineProject).mockReturnValue(mockedGitLabProject);
       // FIXME: why is closing issue fetched from normal remote and pipeline result from pipeline remote?
-      asMock(gitLabService.fetchCurrentProject).mockReturnValue(mockedGitLabProject);
+      asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
+        rootFsPath: '/folder',
+        getProject: async () => mockedGitLabProject,
+      });
     });
 
     it('shows closing issue for an MR', async () => {

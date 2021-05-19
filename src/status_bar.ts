@@ -75,7 +75,7 @@ export class StatusBar {
     const repository = gitExtensionWrapper.getActiveRepository();
     if (!repository) return;
 
-    const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+    const project = await repository.getProject();
     if (!project) {
       log(
         'GitLab project not found, the extension is going to hide the status bar until next refresh in 30s.',

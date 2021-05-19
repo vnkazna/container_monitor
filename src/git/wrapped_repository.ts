@@ -10,6 +10,7 @@ import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { getExtensionConfiguration } from '../utils/get_extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitService } from '../git_service';
+import { GitLabProject } from '../gitlab/gitlab_project';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   const instanceUrls = tokenService.getInstanceUrls();
@@ -59,6 +60,8 @@ export function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
 export class WrappedRepository {
   private readonly rawRepository: Repository;
 
+  private cachedProject?: GitLabProject;
+
   constructor(rawRepository: Repository) {
     this.rawRepository = rawRepository;
   }
@@ -70,7 +73,7 @@ export class WrappedRepository {
     return preferredRemote || branchRemote || firstRemote || 'origin';
   }
 
-  private getRemoteByName(remoteName: string): GitRemote {
+  getRemoteByName(remoteName: string): GitRemote {
     const remoteUrl = this.rawRepository.state.remotes.find(r => r.name === remoteName)?.fetchUrl;
     assert(remoteUrl, `could not find any URL for git remote with name '${this.remoteName}'`);
     const parsedRemote = parseGitRemote(remoteUrl, this.instanceUrl);
@@ -78,13 +81,16 @@ export class WrappedRepository {
     return parsedRemote;
   }
 
-  get remote(): GitRemote {
-    return this.getRemoteByName(this.remoteName);
+  async getProject(): Promise<GitLabProject | undefined> {
+    if (!this.cachedProject) {
+      const { namespace, project } = this.remote;
+      this.cachedProject = await this.gitLabService.getProject(`${namespace}/${project}`);
+    }
+    return this.cachedProject;
   }
 
-  get pipelineRemote(): GitRemote {
-    const { pipelineGitRemoteName } = getExtensionConfiguration();
-    return this.getRemoteByName(pipelineGitRemoteName || this.remoteName);
+  get remote(): GitRemote {
+    return this.getRemoteByName(this.remoteName);
   }
 
   get lastCommitSha(): string | undefined {

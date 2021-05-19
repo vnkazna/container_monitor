@@ -80,7 +80,7 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
       return [];
     }
     try {
-      const gitlabProject = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+      const gitlabProject = await repository.getProject();
       if (!gitlabProject) {
         return [];
       }

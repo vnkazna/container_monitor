@@ -25,7 +25,7 @@ export const openUrl = async (url: string): Promise<void> =>
  */
 async function getLink(linkTemplate: string, repository: WrappedRepository) {
   const user = await gitLabService.fetchCurrentUser(repository.rootFsPath);
-  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const project = await repository.getProject();
 
   assert(project, 'Failed to fetch project');
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
@@ -61,7 +61,7 @@ async function getActiveFile() {
 
   let currentProject;
   try {
-    currentProject = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+    currentProject = await repository.getProject();
   } catch (e) {
     handleError(e);
     return undefined;
@@ -114,7 +114,7 @@ export async function openCreateNewIssue(): Promise<void> {
 export async function openCreateNewMr(): Promise<void> {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
   if (!repository) return;
-  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const project = await repository.getProject();
   const branchName = await repository.gitService.fetchTrackingBranchName();
 
   openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
@@ -136,7 +136,7 @@ export async function compareCurrentBranch(): Promise<void> {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
   if (!repository) return;
 
-  const project = await gitLabService.fetchCurrentProject(repository.rootFsPath);
+  const project = await repository.getProject();
 
   if (project && repository.lastCommitSha) {
     openUrl(`${project.webUrl}/compare/master...${repository.lastCommitSha}`);
