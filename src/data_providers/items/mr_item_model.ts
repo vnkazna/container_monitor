@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
-import { createGitLabNewService } from '../../service_factory';
 import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';
 import { GqlDiscussion, GqlTextDiffDiscussion } from '../../gitlab/graphql/get_discussions';
@@ -40,8 +39,7 @@ export class MrItemModel extends ItemModel {
       arguments: [this.mr, this.repository.rootFsPath],
       title: 'Show MR Overview',
     };
-    const gitlabService = await createGitLabNewService(this.repository.rootFsPath);
-    const mrVersion = await gitlabService.getMrDiff(this.mr);
+    const { mrVersion } = await this.repository.reloadMr(this.mr);
     try {
       await this.initializeMrDiscussions(mrVersion);
     } catch (e) {
@@ -66,7 +64,7 @@ export class MrItemModel extends ItemModel {
       this.mr.references.full,
       this.mr.title,
     );
-    const gitlabService = await createGitLabNewService(this.repository.rootFsPath);
+    const gitlabService = this.repository.getGitLabService();
 
     if (await gitlabService.canUserCommentOnMr(this.mr)) {
       commentController.commentingRangeProvider = new CommentingRangeProvider(this.mr, mrVersion);

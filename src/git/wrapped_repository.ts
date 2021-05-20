@@ -56,10 +56,17 @@ function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
   return GITLAB_COM_URL;
 }
 
+export interface CachedMr {
+  mr: RestIssuable;
+  mrVersion: RestMrVersion;
+}
+
 export class WrappedRepository {
   private readonly rawRepository: Repository;
 
   private cachedProject?: GitLabProject;
+
+  private mrCache: Record<number, CachedMr> = {};
 
   constructor(rawRepository: Repository) {
     this.rawRepository = rawRepository;
@@ -90,6 +97,20 @@ export class WrappedRepository {
 
   get containsGitLabProject(): boolean {
     return Boolean(this.cachedProject);
+  }
+
+  async reloadMr(mr: RestIssuable): Promise<CachedMr> {
+    const mrVersion = await this.getGitLabService().getMrDiff(mr);
+    const cachedMr = {
+      mr,
+      mrVersion,
+    };
+    this.mrCache[mr.id] = cachedMr;
+    return cachedMr;
+  }
+
+  getMr(id: number): CachedMr | undefined {
+    return this.mrCache[id];
   }
 
   get remote(): GitRemote {
