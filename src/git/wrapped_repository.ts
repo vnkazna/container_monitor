@@ -83,7 +83,7 @@ export class WrappedRepository {
   async getProject(): Promise<GitLabProject | undefined> {
     if (!this.cachedProject) {
       const { namespace, project } = this.remote;
-      this.cachedProject = await this.gitLabService.getProject(`${namespace}/${project}`);
+      this.cachedProject = await this.getGitLabService().getProject(`${namespace}/${project}`);
     }
     return this.cachedProject;
   }
@@ -107,7 +107,7 @@ export class WrappedRepository {
     return getInstanceUrlFromRemotes(remoteUrls);
   }
 
-  get gitLabService(): GitLabNewService {
+  getGitLabService(): GitLabNewService {
     return new GitLabNewService(this.instanceUrl);
   }
 

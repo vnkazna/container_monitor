@@ -7,7 +7,7 @@ const removeFromArray = (array: any[], element: any): any[] => {
   return array.filter(el => el !== element);
 };
 
-interface FakeRepositoryOptions {
+export interface FakeRepositoryOptions {
   rootUriPath: string;
   remotes: [string, string][];
   headRemoteName?: string;

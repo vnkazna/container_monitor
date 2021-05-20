@@ -1,5 +1,7 @@
 import { WrappedRepository } from '../git/wrapped_repository';
 import { CustomQueryType } from '../gitlab/custom_query_type';
+import { GitLabProject } from '../gitlab/gitlab_project';
+import { GqlProject } from '../gitlab/graphql/shared';
 
 export const issue: RestIssuable = {
   id: 1,
@@ -72,3 +74,18 @@ export const repository = ({
   rootFsPath: '/path/to/repo',
   containsGitLabProject: true,
 } as unknown) as WrappedRepository;
+
+export const gqlProject: GqlProject = {
+  id: 'gid://gitlab/Project/5261717',
+  name: 'gitlab-vscode-extension',
+  description: '',
+  httpUrlToRepo: 'https://gitlab.com/gitlab-org/gitlab-vscode-extension.git',
+  sshUrlToRepo: 'git@gitlab.com:gitlab-org/gitlab-vscode-extension.git',
+  fullPath: 'gitlab-org/gitlab-vscode-extension',
+  webUrl: 'https://gitlab.com/gitlab-org/gitlab-vscode-extension',
+  group: {
+    id: 'gid://gitlab/Group/9970',
+  },
+};
+
+export const project = new GitLabProject(gqlProject);
