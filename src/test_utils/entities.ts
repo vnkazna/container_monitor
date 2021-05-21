@@ -2,6 +2,7 @@ import { WrappedRepository } from '../git/wrapped_repository';
 import { CustomQueryType } from '../gitlab/custom_query_type';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
+import { ReviewParams as ReviewUriParams } from '../review/review_uri';
 
 export const issue: RestIssuable = {
   id: 1,
@@ -104,6 +105,14 @@ export const gqlProject: GqlProject = {
     id: 'gid://gitlab/Group/9970',
   },
   wikiEnabled: false,
+};
+
+export const reviewUriParams: ReviewUriParams = {
+  mrId: mr.id,
+  projectId: mr.project_id,
+  repositoryRoot: '/',
+  path: 'new_path.js',
+  commit: mr.sha,
 };
 
 export const project = new GitLabProject(gqlProject);

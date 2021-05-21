@@ -35,6 +35,7 @@ const { checkoutMrBranch } = require('./commands/checkout_mr_branch');
 const { cloneWiki } = require('./commands/clone_wiki');
 const { createSnippetPatch } = require('./commands/create_snippet_patch');
 const { applySnippetPatch } = require('./commands/apply_snippet_patch');
+const { openMrFile } = require('./commands/open_mr_file');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -89,6 +90,7 @@ const registerCommands = (context, outputChannel) => {
       issuableDataProvider.refresh();
       currentBranchDataProvider.refresh();
     },
+    [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
