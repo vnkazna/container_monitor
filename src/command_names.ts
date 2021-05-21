@@ -31,6 +31,7 @@ export const USER_COMMANDS = {
   CANCEL_EDITING_COMMENT: 'gl.cancelEditingComment',
   SUBMIT_COMMENT_EDIT: 'gl.submitCommentEdit',
   CREATE_COMMENT: 'gl.createComment',
+  OPEN_MR_FILE: 'gl.openMrFile',
 };
 
 /*

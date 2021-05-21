@@ -126,6 +126,12 @@
         }
       },
       {
+				"command": "gl.openMrFile",
+				"title": "Open changed file in local project",
+				"category": "GitLab",
+				"icon": "$(file)"
+			},
+      {
         "command": "gl.resolveThread",
         "title": "Resolve thread",
         "category": "GitLab",
@@ -314,6 +320,13 @@
           "command": "gl.createComment",
           "group": "inline"
         }
+      ],
+      "editor/title": [
+				{
+					"command": "gl.openMrFile",
+					"when": "resourceScheme =~ /^gl-review.*$/ && isInDiffEditor",
+					"group": "navigation@-99"
+				}
       ]
     },
     "viewsContainers": {

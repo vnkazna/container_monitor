@@ -1,4 +1,5 @@
 const vscode = require('vscode');
+const path = require('path');
 const openers = require('./openers');
 const tokenInput = require('./token_input');
 const { tokenService } = require('./services/token_service');
@@ -13,10 +14,10 @@ const ciConfigValidator = require('./ci_config_validator');
 const webviewController = require('./webview_controller');
 const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
-const { initializeLogging, handleError } = require('./log');
+const { initializeLogging, handleError, log } = require('./log');
 const { GitContentProvider } = require('./review/git_content_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
-const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
+const { USER_COMMANDS, PROGRAMMATIC_COMMANDS, VS_COMMANDS } = require('./command_names');
 const { CiCompletionProvider } = require('./completion/ci_completion_provider');
 const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
 const {
@@ -28,6 +29,7 @@ const {
   createComment,
 } = require('./commands/mr_discussion_commands');
 const { fileDecorationProvider } = require('./review/file_decoration_provider');
+const { fromReviewUri } = require('./review/review_uri');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -86,6 +88,13 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CANCEL_EDITING_COMMENT]: cancelEdit,
     [USER_COMMANDS.SUBMIT_COMMENT_EDIT]: submitEdit,
     [USER_COMMANDS.CREATE_COMMENT]: createComment,
+    [USER_COMMANDS.OPEN_MR_FILE]: async uri => {
+      const params = fromReviewUri(uri);
+      await vscode.commands.executeCommand(
+        VS_COMMANDS.OPEN,
+        vscode.Uri.file(path.join(params.repositoryRoot, params.path)),
+      );
+    },
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
