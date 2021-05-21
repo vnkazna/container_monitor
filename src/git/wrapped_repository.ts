@@ -36,7 +36,7 @@ function heuristicInstanceUrl(gitRemoteHosts: string[]) {
   return null;
 }
 
-export function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
+function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
   const { instanceUrl } = getExtensionConfiguration();
   // if the workspace setting exists, use it
   if (instanceUrl) {
@@ -56,10 +56,17 @@ export function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
   return GITLAB_COM_URL;
 }
 
+export interface CachedMr {
+  mr: RestIssuable;
+  mrVersion: RestMrVersion;
+}
+
 export class WrappedRepository {
   private readonly rawRepository: Repository;
 
   private cachedProject?: GitLabProject;
+
+  private mrCache: Record<number, CachedMr> = {};
 
   constructor(rawRepository: Repository) {
     this.rawRepository = rawRepository;
@@ -83,9 +90,27 @@ export class WrappedRepository {
   async getProject(): Promise<GitLabProject | undefined> {
     if (!this.cachedProject) {
       const { namespace, project } = this.remote;
-      this.cachedProject = await this.gitLabService.getProject(`${namespace}/${project}`);
+      this.cachedProject = await this.getGitLabService().getProject(`${namespace}/${project}`);
     }
     return this.cachedProject;
+  }
+
+  get containsGitLabProject(): boolean {
+    return Boolean(this.cachedProject);
+  }
+
+  async reloadMr(mr: RestIssuable): Promise<CachedMr> {
+    const mrVersion = await this.getGitLabService().getMrDiff(mr);
+    const cachedMr = {
+      mr,
+      mrVersion,
+    };
+    this.mrCache[mr.id] = cachedMr;
+    return cachedMr;
+  }
+
+  getMr(id: number): CachedMr | undefined {
+    return this.mrCache[id];
   }
 
   get remote(): GitRemote {
@@ -103,12 +128,12 @@ export class WrappedRepository {
     return getInstanceUrlFromRemotes(remoteUrls);
   }
 
-  get gitLabService(): GitLabNewService {
+  getGitLabService(): GitLabNewService {
     return new GitLabNewService(this.instanceUrl);
   }
 
   get name(): string {
-    return basename(this.rawRepository.rootUri.fsPath);
+    return this.cachedProject?.name ?? basename(this.rawRepository.rootUri.fsPath);
   }
 
   get rootFsPath(): string {

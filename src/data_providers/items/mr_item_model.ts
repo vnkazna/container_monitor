@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
-import { createGitLabNewService } from '../../service_factory';
 import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';
 import { GqlDiscussion, GqlTextDiffDiscussion } from '../../gitlab/graphql/get_discussions';
@@ -8,6 +7,7 @@ import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
 import { GitLabCommentThread } from '../../review/gitlab_comment_thread';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
+import { WrappedRepository } from '../../git/wrapped_repository';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
@@ -15,7 +15,7 @@ const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextD
 };
 
 export class MrItemModel extends ItemModel {
-  constructor(readonly mr: RestIssuable, readonly workspace: GitLabWorkspace) {
+  constructor(readonly mr: RestIssuable, readonly repository: WrappedRepository) {
     super();
   }
 
@@ -36,11 +36,10 @@ export class MrItemModel extends ItemModel {
     overview.iconPath = new vscode.ThemeIcon('note');
     overview.command = {
       command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
-      arguments: [this.mr, this.workspace.uri],
+      arguments: [this.mr, this.repository.rootFsPath],
       title: 'Show MR Overview',
     };
-    const gitlabService = await createGitLabNewService(this.workspace.uri);
-    const mrVersion = await gitlabService.getMrDiff(this.mr);
+    const { mrVersion } = await this.repository.reloadMr(this.mr);
     try {
       await this.initializeMrDiscussions(mrVersion);
     } catch (e) {
@@ -55,7 +54,7 @@ export class MrItemModel extends ItemModel {
     }
 
     const changedFiles = mrVersion.diffs.map(
-      d => new ChangedFileItem(this.mr, mrVersion, d, this.workspace),
+      d => new ChangedFileItem(this.mr, mrVersion, d, this.repository.rootFsPath),
     );
     return [overview, ...changedFiles];
   }
@@ -65,7 +64,7 @@ export class MrItemModel extends ItemModel {
       this.mr.references.full,
       this.mr.title,
     );
-    const gitlabService = await createGitLabNewService(this.workspace.uri);
+    const gitlabService = this.repository.getGitLabService();
 
     if (await gitlabService.canUserCommentOnMr(this.mr)) {
       commentController.commentingRangeProvider = new CommentingRangeProvider(this.mr, mrVersion);
@@ -78,7 +77,7 @@ export class MrItemModel extends ItemModel {
     const threads = discussionsOnDiff.map(discussion => {
       return GitLabCommentThread.createThread({
         commentController,
-        repositoryRoot: this.workspace.uri,
+        repositoryRoot: this.repository.rootFsPath,
         mr: this.mr,
         discussion,
         gitlabService,

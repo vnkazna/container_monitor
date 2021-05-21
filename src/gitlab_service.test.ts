@@ -317,19 +317,17 @@ describe('fetchIssueables', () => {
       extensionConfiguration = {
         pipelineGitRemoteName: 'pipeline-remote',
       };
+      const gitLabService = { getProject: jest.fn().mockResolvedValue(TEST_PROJECT) };
       repository = {
-        getProject: jest.fn(),
         getRemoteByName: jest.fn().mockReturnValue({ namespace: 'namespace', project: 'project' }),
-        gitLabService: {
-          getProject: jest.fn().mockResolvedValue(TEST_PROJECT),
-        },
+        getGitLabService: () => gitLabService,
       };
 
       const project = await fetchCurrentPipelineProject();
 
       expect(project).toEqual(TEST_PROJECT);
       expect(repository.getRemoteByName).toHaveBeenCalledWith('pipeline-remote');
-      expect(repository.gitLabService.getProject).toHaveBeenCalledWith('namespace/project');
+      expect(gitLabService.getProject).toHaveBeenCalledWith('namespace/project');
     });
   });
 });

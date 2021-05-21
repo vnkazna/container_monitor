@@ -31,9 +31,9 @@ export const insertSnippet = async (): Promise<void> => {
     return;
   }
   const { remote } = repository;
-  const snippets = await repository.gitLabService.getSnippets(
-    `${remote.namespace}/${remote.project}`,
-  );
+  const snippets = await repository
+    .getGitLabService()
+    .getSnippets(`${remote.namespace}/${remote.project}`);
   if (snippets.length === 0) {
     vscode.window.showInformationMessage('There are no project snippets.');
     return;
@@ -48,7 +48,7 @@ export const insertSnippet = async (): Promise<void> => {
   if (!blob) {
     return;
   }
-  const snippet = await repository.gitLabService.getSnippetContent(result.original, blob);
+  const snippet = await repository.getGitLabService().getSnippetContent(result.original, blob);
   const editor = vscode.window.activeTextEditor;
   await editor.edit(editBuilder => {
     editBuilder.insert(editor.selection.start, snippet);

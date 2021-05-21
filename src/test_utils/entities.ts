@@ -1,4 +1,7 @@
+import { WrappedRepository } from '../git/wrapped_repository';
 import { CustomQueryType } from '../gitlab/custom_query_type';
+import { GitLabProject } from '../gitlab/gitlab_project';
+import { GqlProject } from '../gitlab/graphql/shared';
 
 export const issue: RestIssuable = {
   id: 1,
@@ -43,11 +46,6 @@ export const mrVersion: RestMrVersion = {
   diffs: [diffFile],
 };
 
-export const workspace: GitLabWorkspace = {
-  label: 'Project label',
-  uri: '/home/johndoe/workspace/project',
-};
-
 export const customQuery = {
   name: 'Query name',
   type: CustomQueryType.ISSUE,
@@ -70,3 +68,24 @@ export const pipeline: RestPipeline = {
   project_id: 567890,
   web_url: 'https://example.com/foo/bar/pipelines/46',
 };
+
+export const repository = ({
+  name: 'GitLab Project',
+  rootFsPath: '/path/to/repo',
+  containsGitLabProject: true,
+} as unknown) as WrappedRepository;
+
+export const gqlProject: GqlProject = {
+  id: 'gid://gitlab/Project/5261717',
+  name: 'gitlab-vscode-extension',
+  description: '',
+  httpUrlToRepo: 'https://gitlab.com/gitlab-org/gitlab-vscode-extension.git',
+  sshUrlToRepo: 'git@gitlab.com:gitlab-org/gitlab-vscode-extension.git',
+  fullPath: 'gitlab-org/gitlab-vscode-extension',
+  webUrl: 'https://gitlab.com/gitlab-org/gitlab-vscode-extension',
+  group: {
+    id: 'gid://gitlab/Group/9970',
+  },
+};
+
+export const project = new GitLabProject(gqlProject);

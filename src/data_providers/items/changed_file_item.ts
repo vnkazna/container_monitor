@@ -33,7 +33,7 @@ export class ChangedFileItem extends TreeItem {
 
   mrVersion: RestMrVersion;
 
-  workspace: GitLabWorkspace;
+  repositoryPath: string;
 
   file: RestDiffFile;
 
@@ -41,7 +41,7 @@ export class ChangedFileItem extends TreeItem {
     mr: RestIssuable,
     mrVersion: RestMrVersion,
     file: RestDiffFile,
-    workspace: GitLabWorkspace,
+    repositoryPath: string,
   ) {
     const changeType = getChangeType(file);
     const query = new URLSearchParams([['changeType', changeType]]).toString();
@@ -53,7 +53,7 @@ export class ChangedFileItem extends TreeItem {
       .join('/');
     this.mr = mr;
     this.mrVersion = mrVersion;
-    this.workspace = workspace;
+    this.repositoryPath = repositoryPath;
     this.file = file;
 
     if (looksLikeImage(file.old_path) || looksLikeImage(file.new_path)) {
@@ -64,7 +64,7 @@ export class ChangedFileItem extends TreeItem {
       return;
     }
     const commonParams: ReviewParams = {
-      repositoryRoot: workspace.uri,
+      repositoryRoot: repositoryPath,
       projectId: mr.project_id,
       mrId: mr.id,
     };

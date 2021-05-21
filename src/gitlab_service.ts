@@ -128,7 +128,7 @@ export async function fetchCurrentPipelineProject(
     const { pipelineGitRemoteName } = getExtensionConfiguration();
     if (pipelineGitRemoteName) {
       const { namespace, project } = repository.getRemoteByName(pipelineGitRemoteName);
-      return (await repository.gitLabService.getProject(`${namespace}/${project}`)) ?? null;
+      return (await repository.getGitLabService().getProject(`${namespace}/${project}`)) ?? null;
     }
     return (await repository.getProject()) ?? null;
   } catch (e) {

@@ -1,18 +1,15 @@
 import * as vscode from 'vscode';
 import { MrItemModel } from './mr_item_model';
-import { mr, workspace } from '../../test_utils/entities';
+import { mr } from '../../test_utils/entities';
 import {
   discussionOnDiff,
   noteOnDiffTextSnippet,
   multipleNotes,
 } from '../../../test/integration/fixtures/graphql/discussions.js';
-import { createGitLabNewService } from '../../service_factory';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
-
-jest.mock('../../service_factory');
+import { createWrappedRepository } from '../../test_utils/create_wrapped_repository';
 
 const createCommentControllerMock = vscode.comments.createCommentController as jest.Mock;
-const createGitLabNewServiceMock = createGitLabNewService as jest.Mock;
 
 describe('MrItemModel', () => {
   let item: MrItemModel;
@@ -23,18 +20,20 @@ describe('MrItemModel', () => {
   const createCommentThreadMock = jest.fn();
 
   beforeEach(() => {
-    item = new MrItemModel(mr, workspace);
+    const repository = createWrappedRepository({
+      gitLabService: {
+        getDiscussions: jest.fn().mockResolvedValue([discussionOnDiff, multipleNotes]),
+        getMrDiff: jest.fn().mockResolvedValue({ diffs: [] }),
+        canUserCommentOnMr: jest.fn(async () => canUserCommentOnMr),
+      },
+    });
+    item = new MrItemModel(mr, repository);
     commentThread = {} as vscode.CommentThread;
 
     commentController = {
       createCommentThread: createCommentThreadMock.mockReturnValue(commentThread),
     };
     createCommentControllerMock.mockReturnValue(commentController);
-    createGitLabNewServiceMock.mockReturnValue({
-      getDiscussions: jest.fn().mockResolvedValue([discussionOnDiff, multipleNotes]),
-      getMrDiff: jest.fn().mockResolvedValue({ diffs: [] }),
-      canUserCommentOnMr: jest.fn(() => canUserCommentOnMr),
-    });
   });
 
   afterEach(() => {

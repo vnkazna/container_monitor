@@ -11,6 +11,7 @@ import { ExternalUrlItem } from './items/external_url_item';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { extensionState } from '../extension_state';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { WrappedRepository } from '../git/wrapped_repository';
 
 dayjs.extend(relativeTime);
 
@@ -50,22 +51,22 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     return new ExternalUrlItem(message, url);
   }
 
-  async createMrItem(mr: RestIssuable | null, workspace: GitLabWorkspace) {
+  async createMrItem(mr: RestIssuable | null, repository: WrappedRepository) {
     if (!mr) {
       return new vscode.TreeItem('No merge request found');
     }
     this.mr = mr;
-    const item = new MrItemModel(mr, workspace);
+    const item = new MrItemModel(mr, repository);
     this.disposableChildren.push(item);
     return item;
   }
 
-  async fetchClosingIssue(repositoryRoot: string, workspace: GitLabWorkspace) {
+  async fetchClosingIssue(repository: WrappedRepository) {
     if (this.mr) {
-      const issues = await gitLabService.fetchMRIssues(this.mr.iid, repositoryRoot);
+      const issues = await gitLabService.fetchMRIssues(this.mr.iid, repository.rootFsPath);
 
       if (issues.length) {
-        return issues.map(issue => new IssueItem(issue, workspace));
+        return issues.map(issue => new IssueItem(issue, repository.rootFsPath));
       }
     }
     return [new vscode.TreeItem('No closing issue found')];
@@ -84,16 +85,12 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
       if (!gitlabProject) {
         return [];
       }
-      const vsProject = {
-        label: gitlabProject.name,
-        uri: repository.rootFsPath,
-      };
       const { pipeline, mr } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
         repository.rootFsPath,
       );
       const pipelineItem = await this.createPipelineItem(pipeline, gitlabProject);
-      const mrItem = await this.createMrItem(mr, vsProject);
-      const closingIssuesItems = await this.fetchClosingIssue(repository.rootFsPath, vsProject);
+      const mrItem = await this.createMrItem(mr, repository);
+      const closingIssuesItems = await this.fetchClosingIssue(repository);
       return [pipelineItem, mrItem, ...closingIssuesItems] as vscode.TreeItem[]; // TODO the actual type includes ItemMode
     } catch (e) {
       handleError(e);

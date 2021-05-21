@@ -19,9 +19,9 @@ const {
   createQueryTextEndpoint,
 } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
-const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 const { ApiContentProvider } = require('../../src/review/api_content_provider');
 const { PROGRAMMATIC_COMMANDS } = require('../../src/command_names');
+const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
 
 describe('MR Review', () => {
   let server;
@@ -57,7 +57,10 @@ describe('MR Review', () => {
   beforeEach(() => {
     server.resetHandlers();
     dataProvider = new IssuableDataProvider();
-    mrItemModel = new MrItemModel(openMergeRequestResponse, { uri: getRepositoryRoot() });
+    mrItemModel = new MrItemModel(
+      openMergeRequestResponse,
+      gitExtensionWrapper.getActiveRepository(),
+    );
   });
 
   after(async () => {
