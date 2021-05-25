@@ -25,6 +25,7 @@ interface RestIssuable {
 interface RestMrVersion {
   head_commit_sha: string;
   base_commit_sha: string;
+  start_commit_sha: string;
   diffs: RestDiffFile[];
 }
 

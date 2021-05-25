@@ -21,6 +21,7 @@ const positionFragment = gql`
       diffRefs {
         baseSha
         headSha
+        startSha
       }
       filePath
       positionType
@@ -93,6 +94,7 @@ export interface GqlBasePosition {
   diffRefs: {
     baseSha: string;
     headSha: string;
+    startSha: string;
   };
   filePath: string;
   newPath: string;
