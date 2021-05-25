@@ -1,41 +1,128 @@
-const removeLeadingSlash = (path: string): string => path.replace(/^\//, '');
+import * as assert from 'assert';
+
+// these helper functions are simplified version of the same lodash functions
+const range = (start: number, end: number) => [...Array(end - start).keys()].map(n => n + start);
+const flatten = <T>(a: T[][]): T[] => a.reduce((acc, nested) => [...acc, ...nested], []);
+const last = <T>(a: T[]): T => a[a.length - 1];
+const first = <T>(a: T[]): T => a[0];
 
 /**
  * This method returns line number where in the text document given hunk starts.
  * Each hunk header contains information about where the hunk starts for old and new version.
  * `@@ -38,9 +36,8 @@` reads: hunk starts at line 38 of the old version and 36 of the new version.
  */
-const getHunkStartingLine = (headerString = ''): number | null => {
-  const headerMatch = headerString.match(/@@ -\d+,\d+ \+(\d+),\d+ @@/);
-  return headerMatch && parseInt(headerMatch[1], 10);
+const getHunkStartingLine = (headerString = ''): { oldStart: number; newStart: number } | null => {
+  const headerMatch = headerString.match(/@@ -(\d+),\d+ \+(\d+),\d+ @@/);
+  return (
+    headerMatch && {
+      oldStart: parseInt(headerMatch[1], 10),
+      newStart: parseInt(headerMatch[2], 10),
+    }
+  );
 };
 
-const getHunks = (diff: string): string[] => {
+const getRawHunks = (diff: string): string[] => {
   return diff
     .replace(/^@@/, '') // remove first @@ because we'll remove all the other @@ by splitting
     .split('\n@@')
     .map(h => `@@${h}`); // prepend the removed @@ to all hunks
 };
 
-const getAddedLineNumbers = (hunk: string): number[] => {
-  const hunkLines = hunk.split('\n');
-  const hunkStartingLine = getHunkStartingLine(hunkLines[0]);
-  if (!hunkStartingLine) return [];
-  const noRemovedLines = hunkLines.slice(1, hunkLines.length).filter(l => !l.startsWith('-'));
-  return noRemovedLines.reduce((addedLines: number[], l, i) => {
-    if (l.startsWith('+')) {
-      return [...addedLines, i + hunkStartingLine];
-    }
-    return addedLines;
-  }, []);
+const REMOVED = 'REMOVED';
+const ADDED = 'ADDED';
+const UNCHANGED = 'UNCHANGED';
+
+type RemovedLine = { type: typeof REMOVED; oldLine: number };
+type AddedLine = { type: typeof ADDED; newLine: number };
+type UnchangedLine = { type: typeof UNCHANGED; oldLine: number; newLine: number };
+type HunkLine = RemovedLine | AddedLine | UnchangedLine;
+
+type FilePath = { oldPath?: string; newPath?: string };
+
+/** Converts lines in the text hunk into data structures that represent type of the change and affected lines */
+const parseHunk = (hunk: string): HunkLine[] => {
+  const [headerLine, ...remainingLines] = hunk.split('\n');
+  const header = getHunkStartingLine(headerLine);
+  assert(header);
+  const result = remainingLines
+    .filter(l => l) // no empty lines
+    .reduce(
+      ({ oldIndex, newIndex, lines }, line) => {
+        const prefix = line[0];
+        switch (prefix) {
+          case '-':
+            return {
+              oldIndex: oldIndex + 1,
+              newIndex,
+              lines: [...lines, { type: REMOVED, oldLine: oldIndex } as const],
+            };
+          case '+':
+            return {
+              oldIndex,
+              newIndex: newIndex + 1,
+              lines: [...lines, { type: ADDED, newLine: newIndex } as const],
+            };
+          case ' ':
+            return {
+              oldIndex: oldIndex + 1,
+              newIndex: newIndex + 1,
+              lines: [...lines, { type: UNCHANGED, oldLine: oldIndex, newLine: newIndex } as const],
+            };
+          default:
+            throw new Error(`Unexpected line prefix in a hunk. Hunk: ${hunk}, prefix ${prefix}`);
+        }
+      },
+      {
+        oldIndex: header.oldStart,
+        newIndex: header.newStart,
+        lines: [] as HunkLine[],
+      },
+    );
+  return result.lines;
+};
+
+const getHunksForFile = (mrVersion: RestMrVersion, path: FilePath): HunkLine[][] => {
+  // VS Code Uri returns absolute path (leading slash) but GitLab uses relative paths (no leading slash)
+  const removeLeadingSlash = (filePath = ''): string => filePath.replace(/^\//, '');
+  const diff = mrVersion.diffs.find(
+    d =>
+      d.new_path === removeLeadingSlash(path.newPath) ||
+      d.old_path === removeLeadingSlash(path.oldPath),
+  );
+  if (!diff) return [];
+  return getRawHunks(diff.diff).map(parseHunk);
 };
 
 export const getAddedLinesForFile = (mrVersion: RestMrVersion, newPath: string): number[] => {
-  // VS Code Uri returns absolute path (leading slash) but GitLab uses relative paths (no leading slash)
-  const diff = mrVersion.diffs.find(d => d.new_path === removeLeadingSlash(newPath));
-  if (!diff) return [];
-  const hunks = getHunks(diff.diff);
-  const changedLinesForHunks = hunks.map(h => getAddedLineNumbers(h));
-
-  return changedLinesForHunks.reduce((acc, changedLines) => [...acc, ...changedLines], []);
+  const hunkLines = flatten(getHunksForFile(mrVersion, { newPath }));
+  return hunkLines.filter((hl): hl is AddedLine => hl.type === ADDED).map(hl => hl.newLine);
 };
+
+const newLineOffset = (line: UnchangedLine) => line.newLine - line.oldLine;
+
+const createUnchangedLinesBetweenHunks = (
+  previousHunkLast: HunkLine,
+  nextHunkFirst: HunkLine,
+): HunkLine[] => {
+  assert(previousHunkLast.type === UNCHANGED && nextHunkFirst.type === UNCHANGED);
+  assert(newLineOffset(previousHunkLast) === newLineOffset(nextHunkFirst));
+  return range(previousHunkLast.oldLine + 1, nextHunkFirst.oldLine).map(oldLine => ({
+    type: UNCHANGED,
+    oldLine,
+    newLine: oldLine + newLineOffset(previousHunkLast),
+  }));
+};
+
+const connectHunks = (parsedHunks: HunkLine[][]): HunkLine[] =>
+  parsedHunks.length === 0
+    ? []
+    : parsedHunks.reduce((acc, hunk) => [
+        ...acc,
+        ...createUnchangedLinesBetweenHunks(last(acc), first(hunk)),
+        ...hunk,
+      ]);
+
+export const getUnchangedLines = (mrVersion: RestMrVersion, oldPath: string): UnchangedLine[] =>
+  connectHunks(getHunksForFile(mrVersion, { oldPath })).filter(
+    (l): l is UnchangedLine => l.type === UNCHANGED,
+  );
