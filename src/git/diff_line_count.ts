@@ -4,8 +4,11 @@ import { DiffFilePath, findFileInDiffs } from '../utils/find_file_in_diffs';
 // these helper functions are simplified version of the same lodash functions
 const range = (start: number, end: number) => [...Array(end - start).keys()].map(n => n + start);
 const flatten = <T>(a: T[][]): T[] => a.reduce((acc, nested) => [...acc, ...nested], []);
-const last = <T>(a: T[]): T => a[a.length - 1];
-const first = <T>(a: T[]): T => a[0];
+const last = <T>(a: T[]): T | undefined => a[a.length - 1];
+const first = <T>(a: T[]): T | undefined => a[0];
+// copied from https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_isempty
+const isEmpty = (obj: any): boolean =>
+  [Object, Array].includes((obj || {}).constructor) && !Object.entries(obj || {}).length;
 
 /**
  * This method returns line number where in the text document given hunk starts.
@@ -35,7 +38,7 @@ const UNCHANGED = 'UNCHANGED';
 
 type RemovedLine = { type: typeof REMOVED; oldLine: number };
 type AddedLine = { type: typeof ADDED; newLine: number };
-type UnchangedLine = { type: typeof UNCHANGED; oldLine: number; newLine: number };
+export type UnchangedLine = { type: typeof UNCHANGED; oldLine: number; newLine: number };
 type HunkLine = RemovedLine | AddedLine | UnchangedLine;
 
 /** Converts lines in the text hunk into data structures that represent type of the change and affected lines */
@@ -111,7 +114,7 @@ const connectHunks = (parsedHunks: HunkLine[][]): HunkLine[] =>
     ? []
     : parsedHunks.reduce((acc, hunk) => [
         ...acc,
-        ...createUnchangedLinesBetweenHunks(last(acc), first(hunk)),
+        ...createUnchangedLinesBetweenHunks(last(acc)!, first(hunk)!),
         ...hunk,
       ]);
 
@@ -119,3 +122,17 @@ export const getUnchangedLines = (mrVersion: RestMrVersion, oldPath: string): Un
   connectHunks(getHunksForFile(mrVersion, { oldPath })).filter(
     (l): l is UnchangedLine => l.type === UNCHANGED,
   );
+
+export const getNewLineForOldUnchangedLine = (
+  mrVersion: RestMrVersion,
+  oldPath: string,
+  oldLine: number,
+): number | undefined => {
+  const unchangedLines = getUnchangedLines(mrVersion, oldPath);
+  if (isEmpty(unchangedLines)) return undefined;
+  if (oldLine < first(unchangedLines)!.oldLine)
+    return oldLine + newLineOffset(first(unchangedLines)!);
+  if (oldLine > last(unchangedLines)!.oldLine)
+    return oldLine + newLineOffset(last(unchangedLines)!);
+  return unchangedLines.find(ul => ul.oldLine === oldLine)?.newLine;
+};

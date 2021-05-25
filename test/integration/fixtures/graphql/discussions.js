@@ -109,12 +109,12 @@ const noteOnDiff = {
       headSha: 'b9c6f9ad70d55a75785fb2702ab8012a69e767d3',
       startSha: 'b9c6f9ad70d55a75785fb2702ab8012a69e767d3',
     },
-    filePath: 'src/webview/src/components/LabelNote.vue',
+    filePath: 'src/webview/src/components/LabelNoteOld.vue',
     positionType: 'text',
     newLine: null,
     oldLine: 48,
-    newPath: 'src/webview/src/components/LabelNote.vue',
-    oldPath: 'src/webview/src/components/LabelNote.vue',
+    newPath: 'src/webview/src/components/LabelNoteNew.vue',
+    oldPath: 'src/webview/src/components/LabelNoteOld.vue',
   },
 };
 

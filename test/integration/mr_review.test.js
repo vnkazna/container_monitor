@@ -31,7 +31,7 @@ describe('MR Review', () => {
   before(async () => {
     server = getServer([
       createJsonEndpoint('/projects/278964/merge_requests/33824/versions', versionsResponse),
-      createJsonEndpoint('/projects/278964/merge_requests/33824/notes/469379582', diffNote),
+      createJsonEndpoint('/projects/278964/merge_requests/33824/notes/469379582', diffNote), // TODO remove
       createJsonEndpoint(
         '/projects/278964/merge_requests/33824/versions/127919672',
         versionResponse,
@@ -125,7 +125,7 @@ describe('MR Review', () => {
       await dataProvider.getChildren(mrItemModel);
 
       const { uri, range, comments } = thread;
-      assert.strictEqual(uri.path, `/${noteOnDiff.position.newPath}`);
+      assert.strictEqual(uri.path, `/${noteOnDiff.position.oldPath}`);
       assert.strictEqual(range.start.line, noteOnDiff.position.oldLine - 1);
       assert.strictEqual(comments[0].body, noteOnDiff.body);
     });

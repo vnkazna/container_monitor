@@ -57,6 +57,25 @@ export const noteDetailsFragment = gql`
   }
 `;
 
+export const discussionDetailsFragment = gql`
+  ${noteDetailsFragment}
+  fragment discussionDetails on Discussion {
+    replyId
+    createdAt
+    resolved
+    resolvable
+    notes {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        ...noteDetails
+      }
+    }
+  }
+`;
+
 interface GqlGroup {
   id: string;
 }

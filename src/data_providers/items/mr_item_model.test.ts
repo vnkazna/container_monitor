@@ -45,7 +45,7 @@ describe('MrItemModel', () => {
     await item.getChildren();
     expect(createCommentControllerMock).toBeCalledWith('gitlab-org/gitlab!2000', 'Issuable Title');
     const [uri, range] = createCommentThreadMock.mock.calls[0];
-    expect(uri.path).toBe('src/webview/src/components/LabelNote.vue');
+    expect(uri.path).toBe('src/webview/src/components/LabelNoteOld.vue');
     expect(range.start.line).toBe(47);
     expect(commentThread.comments.length).toBe(1);
     const firstComment = commentThread.comments[0];
