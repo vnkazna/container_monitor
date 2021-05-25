@@ -124,7 +124,7 @@ describe('GitExtensionWrapper', () => {
 
       const repository = wrapper.getRepository('/repository/root/path/');
 
-      expect(repository?.rootFsPath).toBe('/repository/root/path/');
+      expect(repository.rootFsPath).toBe('/repository/root/path/');
     });
   });
 });

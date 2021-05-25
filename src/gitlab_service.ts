@@ -101,7 +101,6 @@ async function fetch(
 async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {
   try {
     const repository = gitExtensionWrapper.getRepository(repositoryRoot);
-    assert(repository, `Could not find repository in ${repositoryRoot}`);
     return (await repository.getProject()) ?? null;
   } catch (e) {
     throw new ApiError(e, 'get current project');
@@ -124,7 +123,6 @@ export async function fetchCurrentPipelineProject(
 ): Promise<GitLabProject | null> {
   try {
     const repository = gitExtensionWrapper.getRepository(repositoryRoot);
-    assert(repository, `Could not find repository in ${repositoryRoot}`);
     const { pipelineGitRemoteName } = getExtensionConfiguration();
     if (pipelineGitRemoteName) {
       const { namespace, project } = repository.getRemoteByName(pipelineGitRemoteName);
@@ -180,7 +178,7 @@ async function fetchLastPipelineForCurrentBranch(
 
   const branchName = await gitExtensionWrapper
     .getRepository(repositoryRoot)
-    ?.getTrackingBranchName();
+    .getTrackingBranchName();
   const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
   const { response: pipelines } = await fetch(
     repositoryRoot,
@@ -381,7 +379,7 @@ export async function fetchOpenMergeRequestForCurrentBranch(
   const project = await fetchCurrentProject(repositoryRoot);
   const branchName = await gitExtensionWrapper
     .getRepository(repositoryRoot)
-    ?.getTrackingBranchName();
+    .getTrackingBranchName();
 
   const path = `/projects/${project?.restId}/merge_requests?state=opened&source_branch=${branchName}`;
   const { response } = await fetch(repositoryRoot, path);
@@ -441,7 +439,7 @@ export async function handlePipelineAction(action: string, repositoryRoot: strin
     if (action === 'create') {
       const branchName = await gitExtensionWrapper
         .getRepository(repositoryRoot)
-        ?.getTrackingBranchName();
+        .getTrackingBranchName();
       endpoint = `/projects/${project.restId}/pipeline?ref=${branchName}`;
     }
 

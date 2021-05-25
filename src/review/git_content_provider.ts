@@ -15,7 +15,7 @@ export class GitContentProvider implements vscode.TextDocumentContentProvider {
     const params = fromReviewUri(uri);
     if (!params.path || !params.commit) return '';
     const repository = gitExtensionWrapper.getRepository(params.repositoryRoot);
-    const result = await repository?.getFileContent(params.path, params.commit);
+    const result = await repository.getFileContent(params.path, params.commit);
     return result || provideApiContentAsFallback(uri, token);
   }
 }
