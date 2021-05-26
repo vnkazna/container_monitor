@@ -478,21 +478,12 @@ export async function fetchMRIssues(mrId: number, repositoryRoot: string): Promi
 
 // TODO specify the correct interface when we convert `create_snippet.js`
 export async function createSnippet(repositoryRoot: string, data: { id: string }) {
-  let snippet;
-  let path = '/snippets';
-
-  if (data.id) {
-    path = `/projects/${data.id}/snippets`;
-  }
-
   try {
-    const { response } = await fetch(repositoryRoot, path, 'POST', data);
-    snippet = response;
+    const { response } = await fetch(repositoryRoot, `/projects/${data.id}/snippets`, 'POST', data);
+    return response;
   } catch (e) {
-    handleError(new UserFriendlyError('Failed to create your snippet.', e));
+    throw new UserFriendlyError('Failed to create your snippet.', e);
   }
-
-  return snippet;
 }
 
 export async function validateCIConfig(repositoryRoot: string, content: string): Promise<boolean> {

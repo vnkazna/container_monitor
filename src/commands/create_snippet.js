@@ -30,12 +30,8 @@ const contextOptions = [
   },
 ];
 
-async function showPicker(additionalEntries = [], placeHolder = 'Select a Gitlab Project') {
+async function showPicker() {
   const repositoryRootOptions = await gitLabService.getAllGitlabProjects();
-
-  additionalEntries.forEach(additionalEntry => {
-    repositoryRootOptions.push(additionalEntry);
-  });
 
   if (repositoryRootOptions.length === 0) {
     return null;
@@ -45,7 +41,7 @@ async function showPicker(additionalEntries = [], placeHolder = 'Select a Gitlab
   }
 
   const repositoryRoot = await vscode.window.showQuickPick(repositoryRootOptions, {
-    placeHolder,
+    placeHolder: "Select a Gitlab Project or use the User's Snippets",
   });
 
   if (repositoryRoot) {
@@ -101,17 +97,8 @@ async function createSnippet() {
       logError(e);
     }
 
-    // FIXME: the empty `uri` representing user's snippets is not correctly handled
     if (!project) {
-      repositoryRoot = await showPicker(
-        [
-          {
-            label: "User's Snippets",
-            uri: '',
-          },
-        ],
-        "Select a Gitlab Project or use the User's Snippets",
-      );
+      repositoryRoot = await showPicker();
       try {
         const selectedRepository = gitExtensionWrapper.getRepository(repositoryRoot);
         project = selectedRepository && (await selectedRepository.getProject());
