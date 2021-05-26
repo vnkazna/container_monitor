@@ -2,7 +2,6 @@ const vscode = require('vscode');
 const openers = require('../openers');
 const gitLabService = require('../gitlab_service');
 const { gitExtensionWrapper } = require('../git/git_extension_wrapper');
-const { logError } = require('../log');
 
 const visibilityOptions = [
   {
@@ -29,27 +28,6 @@ const contextOptions = [
     type: 'selection',
   },
 ];
-
-async function showPicker() {
-  const repositoryRootOptions = await gitLabService.getAllGitlabProjects();
-
-  if (repositoryRootOptions.length === 0) {
-    return null;
-  }
-  if (repositoryRootOptions.length === 1) {
-    return repositoryRootOptions[0];
-  }
-
-  const repositoryRoot = await vscode.window.showQuickPick(repositoryRootOptions, {
-    placeHolder: "Select a Gitlab Project or use the User's Snippets",
-  });
-
-  if (repositoryRoot) {
-    return repositoryRoot.uri;
-  }
-
-  return null;
-}
 
 async function uploadSnippet(project, editor, visibility, context, repositoryRoot) {
   let content = '';
@@ -85,40 +63,28 @@ async function uploadSnippet(project, editor, visibility, context, repositoryRoo
 
 async function createSnippet() {
   const editor = vscode.window.activeTextEditor;
-  let repositoryRoot = null;
-  let project = null;
 
-  if (editor) {
-    const repository = gitExtensionWrapper.getActiveRepository();
-    repositoryRoot = repository && repository.rootFsPath;
-    try {
-      project = repository && (await repository.getProject());
-    } catch (e) {
-      logError(e);
-    }
-
-    if (!project) {
-      repositoryRoot = await showPicker();
-      try {
-        const selectedRepository = gitExtensionWrapper.getRepository(repositoryRoot);
-        project = selectedRepository && (await selectedRepository.getProject());
-      } catch (e) {
-        logError(e);
-      }
-    }
-
-    const visibility = await vscode.window.showQuickPick(visibilityOptions);
-
-    if (visibility) {
-      const context = await vscode.window.showQuickPick(contextOptions);
-
-      if (context) {
-        uploadSnippet(project, editor, visibility.type, context.type, repositoryRoot);
-      }
-    }
-  } else {
+  if (!editor) {
     vscode.window.showInformationMessage('GitLab Workflow: No open file.');
+    return;
   }
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  const project = repository && (await repository.getProject());
+
+  if (!project) {
+    vscode.window.showInformationMessage(
+      'GitLab Workflow: Repository does not contain GitLab project.',
+    );
+    return;
+  }
+
+  const visibility = await vscode.window.showQuickPick(visibilityOptions);
+  if (!visibility) return;
+
+  const context = await vscode.window.showQuickPick(contextOptions);
+  if (!context) return;
+
+  uploadSnippet(project, editor, visibility.type, context.type, repository.rootFsPath);
 }
 
 module.exports = {
