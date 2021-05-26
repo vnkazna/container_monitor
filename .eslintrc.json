@@ -33,6 +33,7 @@
       },
       "rules": {
         "@typescript-eslint/return-await": "error",
+        "@typescript-eslint/no-floating-promises": "error",
         "import/extensions": [
           "error",
           "ignorePackages",

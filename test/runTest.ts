@@ -20,4 +20,4 @@ async function go() {
   }
 }
 
-go();
+go().catch(console.error);

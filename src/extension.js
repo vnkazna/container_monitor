@@ -37,7 +37,7 @@ const wrapWithCatch = command => async (...args) => {
   try {
     await command(...args);
   } catch (e) {
-    await handleError(e);
+    handleError(e);
   }
 };
 

@@ -19,10 +19,16 @@ export const log = (line: string): void => globalLog(line);
 export const logError = (e: Error | IDetailedError): void =>
   isDetailedError(e) ? globalLog(e.details) : globalLog(`${e.message}\n${e.stack}`);
 
-export const handleError = async (e: Error | IDetailedError): Promise<void> => {
+export const handleError = (e: Error | IDetailedError): { onlyForTesting: Promise<void> } => {
   logError(e);
-  const choice = await vscode.window.showErrorMessage(e.message, 'Show logs');
-  if (choice === 'Show logs') {
-    await vscode.commands.executeCommand(USER_COMMANDS.SHOW_OUTPUT);
-  }
+  const showErrorMessage = async () => {
+    const choice = await vscode.window.showErrorMessage(e.message, 'Show logs');
+    if (choice === 'Show logs') {
+      await vscode.commands.executeCommand(USER_COMMANDS.SHOW_OUTPUT);
+    }
+  };
+  // This is probably the only place where we want to ignore a floating promise.
+  // We don't want to block the app and wait for user click on the "Show logs" button or close the message
+  // However, for testing this method, we need to keep the promise
+  return { onlyForTesting: showErrorMessage() };
 };

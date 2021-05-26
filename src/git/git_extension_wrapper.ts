@@ -27,10 +27,10 @@ export class GitExtensionWrapper implements vscode.Disposable {
 
   private gitExtension?: GitExtension;
 
-  private onDidChangeGitExtensionEnablement(enabled: boolean) {
+  private async onDidChangeGitExtensionEnablement(enabled: boolean) {
     if (enabled) {
       this.register();
-      this.addRepositories(this.gitApi?.repositories ?? []);
+      await this.addRepositories(this.gitApi?.repositories ?? []);
     } else {
       this.wrappedRepositories = [];
       this.repositoryCountChangedEmitter.fire();
@@ -94,7 +94,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
     this.enablementListener?.dispose();
   }
 
-  init(): void {
+  async init(): Promise<void> {
     try {
       this.gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
       if (!this.gitExtension) {
@@ -105,7 +105,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
         this.onDidChangeGitExtensionEnablement,
         this,
       );
-      this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
+      await this.onDidChangeGitExtensionEnablement(this.gitExtension.enabled);
     } catch (error) {
       handleError(error);
     }

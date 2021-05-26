@@ -48,14 +48,16 @@ export async function showMergeRequests(): Promise<void> {
 async function getActiveFile() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
-    vscode.window.showInformationMessage('GitLab Workflow: No open file.');
+    await vscode.window.showInformationMessage('GitLab Workflow: No open file.');
     return undefined;
   }
 
   const repository = gitExtensionWrapper.getActiveRepository();
 
   if (!repository) {
-    vscode.window.showInformationMessage('GitLab Workflow: Open file isn’t part of a repository.');
+    await vscode.window.showInformationMessage(
+      'GitLab Workflow: Open file isn’t part of a repository.',
+    );
     return undefined;
   }
 
@@ -110,7 +112,7 @@ export async function openCurrentMergeRequest(): Promise<void> {
 }
 
 export async function openCreateNewIssue(): Promise<void> {
-  openTemplatedLink('$projectUrl/issues/new');
+  await openTemplatedLink('$projectUrl/issues/new');
 }
 
 export async function openCreateNewMr(): Promise<void> {
@@ -119,18 +121,20 @@ export async function openCreateNewMr(): Promise<void> {
   const project = await repository.getProject();
   const branchName = await repository.getTrackingBranchName();
 
-  openUrl(`${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`);
+  await openUrl(
+    `${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`,
+  );
 }
 
 export async function openProjectPage(): Promise<void> {
-  openTemplatedLink('$projectUrl');
+  await openTemplatedLink('$projectUrl');
 }
 
 export async function openCurrentPipeline(repositoryRoot: string): Promise<void> {
   const { pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(repositoryRoot);
 
   if (pipeline) {
-    openUrl(pipeline.web_url);
+    await openUrl(pipeline.web_url);
   }
 }
 
@@ -141,6 +145,6 @@ export async function compareCurrentBranch(): Promise<void> {
   const project = await repository.getProject();
 
   if (project && repository.lastCommitSha) {
-    openUrl(`${project.webUrl}/compare/master...${repository.lastCommitSha}`);
+    await openUrl(`${project.webUrl}/compare/master...${repository.lastCommitSha}`);
   }
 }
