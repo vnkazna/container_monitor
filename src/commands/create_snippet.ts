@@ -61,7 +61,7 @@ async function uploadSnippet(
 
   const snippet = await gitLabService.createSnippet(repositoryRoot, data);
 
-  openers.openUrl(snippet.web_url);
+  await openers.openUrl(snippet.web_url);
 }
 
 export async function createSnippet() {
@@ -88,5 +88,5 @@ export async function createSnippet() {
   const context = await vscode.window.showQuickPick(contextOptions);
   if (!context) return;
 
-  uploadSnippet(project, editor, visibility.type, context.type, repository.rootFsPath);
+  await uploadSnippet(project, editor, visibility.type, context.type, repository.rootFsPath);
 }
