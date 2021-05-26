@@ -1,7 +1,8 @@
-const vscode = require('vscode');
-const openers = require('../openers');
-const gitLabService = require('../gitlab_service');
-const { gitExtensionWrapper } = require('../git/git_extension_wrapper');
+import * as vscode from 'vscode';
+import * as openers from '../openers';
+import * as gitLabService from '../gitlab_service';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { GitLabProject } from '../gitlab/gitlab_project';
 
 const visibilityOptions = [
   {
@@ -29,7 +30,13 @@ const contextOptions = [
   },
 ];
 
-async function uploadSnippet(project, editor, visibility, context, repositoryRoot) {
+async function uploadSnippet(
+  project: GitLabProject,
+  editor: vscode.TextEditor,
+  visibility: string,
+  context: string,
+  repositoryRoot: string,
+) {
   let content = '';
   const fileName = editor.document.fileName.split('/').reverse()[0];
 
@@ -45,23 +52,19 @@ async function uploadSnippet(project, editor, visibility, context, repositoryRoo
   }
 
   const data = {
+    id: project.restId,
     title: fileName,
     file_name: fileName,
     visibility,
+    content,
   };
-
-  data.content = content;
-
-  if (project) {
-    data.id = project.restId;
-  }
 
   const snippet = await gitLabService.createSnippet(repositoryRoot, data);
 
   openers.openUrl(snippet.web_url);
 }
 
-async function createSnippet() {
+export async function createSnippet() {
   const editor = vscode.window.activeTextEditor;
 
   if (!editor) {
@@ -69,7 +72,8 @@ async function createSnippet() {
     return;
   }
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  const project = repository && (await repository.getProject());
+  if (!repository) return;
+  const project = await repository.getProject();
 
   if (!project) {
     vscode.window.showInformationMessage(
@@ -86,7 +90,3 @@ async function createSnippet() {
 
   uploadSnippet(project, editor, visibility.type, context.type, repository.rootFsPath);
 }
-
-module.exports = {
-  createSnippet,
-};

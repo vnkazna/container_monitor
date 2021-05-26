@@ -477,7 +477,7 @@ export async function fetchMRIssues(mrId: number, repositoryRoot: string): Promi
 }
 
 // TODO specify the correct interface when we convert `create_snippet.js`
-export async function createSnippet(repositoryRoot: string, data: { id: string }) {
+export async function createSnippet(repositoryRoot: string, data: { id: number }) {
   try {
     const { response } = await fetch(repositoryRoot, `/projects/${data.id}/snippets`, 'POST', data);
     return response;
