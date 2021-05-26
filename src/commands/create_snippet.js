@@ -1,7 +1,6 @@
 const vscode = require('vscode');
 const openers = require('../openers');
 const gitLabService = require('../gitlab_service');
-const gitlabProjectInput = require('../gitlab_project_input');
 const { gitExtensionWrapper } = require('../git/git_extension_wrapper');
 const { logError } = require('../log');
 
@@ -30,6 +29,31 @@ const contextOptions = [
     type: 'selection',
   },
 ];
+
+async function showPicker(additionalEntries = [], placeHolder = 'Select a Gitlab Project') {
+  const repositoryRootOptions = await gitLabService.getAllGitlabProjects();
+
+  additionalEntries.forEach(additionalEntry => {
+    repositoryRootOptions.push(additionalEntry);
+  });
+
+  if (repositoryRootOptions.length === 0) {
+    return null;
+  }
+  if (repositoryRootOptions.length === 1) {
+    return repositoryRootOptions[0];
+  }
+
+  const repositoryRoot = await vscode.window.showQuickPick(repositoryRootOptions, {
+    placeHolder,
+  });
+
+  if (repositoryRoot) {
+    return repositoryRoot.uri;
+  }
+
+  return null;
+}
 
 async function uploadSnippet(project, editor, visibility, context, repositoryRoot) {
   let content = '';
@@ -79,7 +103,7 @@ async function createSnippet() {
 
     // FIXME: the empty `uri` representing user's snippets is not correctly handled
     if (!project) {
-      repositoryRoot = await gitlabProjectInput.show(
+      repositoryRoot = await showPicker(
         [
           {
             label: "User's Snippets",
