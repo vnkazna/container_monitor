@@ -2,7 +2,13 @@
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
 
-This extension integrates GitLab to VS Code by adding a new GitLab sidebar where you can find issues and merge requests created by you or assigned to you. It also extends VS Code command palette and status bar to provide more information about your project.
+This extension integrates GitLab to VS Code. It helps you:
+
+- View issues.
+- Create and review merge requests.
+- Validate your GitLab CI configuration.
+- View the status of your pipeline.
+- Create and paste snippets to, and from, your editor.
 
 ## Minimum supported version
 
@@ -12,11 +18,11 @@ GitLab Workflow requires GitLab 13.4 or later. To find your GitLab version, visi
 
 _You need to set up your access token(s) to use these features, please see [Setup](#setup) section below._
 
-### Sidebar
+### Browse issues, review MRs
 
 See your issues, MRs (including changed files) and other [custom search results](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
 
-### Status bar
+### Information about your branch - pipelines, MR, closing issue
 
 See pipeline status, open MR and closing issue links in the status bar. [Read more](#status-bar---details).
 This pipeline status automatically updates so you don't need to open GitLab to see your pipeline status.
@@ -26,6 +32,8 @@ Advanced pipeline actions allow you to view pipeline on GitLab, create a new pip
 ![_status_bar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_status-bar.gif)
 
 ### Commands
+
+You can use [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) to run the commands.
 
 - `GitLab: Search project issues (Supports filters)`. [Read more](#search-with-filters)
 - `GitLab: Search project merge requests (Supports filters)`. [Read more](#search-with-filters)
@@ -145,15 +153,6 @@ If your self-managed GitLab instance requires a custom cert/key pair you would p
 **`gitlab.ignoreCertificateErrors`** _(required: false, default: false)_
 
 If you are using a self-managed GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors. For more information, [read this comment](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26#note_61312786).
-
-## Usage
-
-- Open up Command Palette by pressing `Cmd+Shift+P`.
-- Search for `GitLab:` and you will see all the commands provided by the extension.
-
-![Screenshot of available commands](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/gitlab-vscode.png)
-
-![Pipeline actions screenshot](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/pipeline-actions.png)
 
 ## Features in-depth
 
@@ -275,7 +274,7 @@ Quickly find the CI variable you are looking for with the CI variable autocomple
 
 ![screenshot of the CI variable autocompletion](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_ci_variable_autocomplete.png)
 
-### Git Extension Integration
+### Clone GitLab projects
 
 This extension integrates with the built-in Git Extension and allows you to search for and clone projects from GitLab (command `Git: Clone`).
 
