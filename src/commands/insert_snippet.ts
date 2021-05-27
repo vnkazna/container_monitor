@@ -23,7 +23,7 @@ const pickBlob = async (blobs: GqlBlob[]) => {
 
 export const insertSnippet = async (): Promise<void> => {
   if (!vscode.window.activeTextEditor) {
-    vscode.window.showInformationMessage('There is no open file.');
+    await vscode.window.showInformationMessage('There is no open file.');
     return;
   }
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
@@ -35,7 +35,7 @@ export const insertSnippet = async (): Promise<void> => {
     .getGitLabService()
     .getSnippets(`${remote.namespace}/${remote.project}`);
   if (snippets.length === 0) {
-    vscode.window.showInformationMessage('There are no project snippets.');
+    await vscode.window.showInformationMessage('There are no project snippets.');
     return;
   }
 

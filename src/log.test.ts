@@ -71,7 +71,7 @@ describe('logging', () => {
       const executeCommand = vscode.commands.executeCommand as jest.Mock;
       showErrorMessage.mockResolvedValue('Show logs');
 
-      await handleError(new Error(message));
+      await handleError(new Error(message)).onlyForTesting;
 
       expect(executeCommand).toBeCalledWith(USER_COMMANDS.SHOW_OUTPUT);
     });

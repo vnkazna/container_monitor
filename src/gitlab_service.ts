@@ -60,7 +60,7 @@ async function fetch(
       err = `${err} You have configured tokens for ${tokens}.`;
     }
 
-    vscode.window.showInformationMessage(err);
+    await vscode.window.showInformationMessage(err);
     throw new Error(err);
   }
 
@@ -452,7 +452,7 @@ export async function handlePipelineAction(action: string, repositoryRoot: strin
       throw new UserFriendlyError(`Failed to ${action} pipeline.`, e);
     }
   } else {
-    vscode.window.showErrorMessage('GitLab Workflow: No project or pipeline found.');
+    await vscode.window.showErrorMessage('GitLab Workflow: No project or pipeline found.');
     return undefined;
   }
 }

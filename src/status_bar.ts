@@ -128,11 +128,11 @@ export class StatusBar {
     ) {
       const message = `Pipeline ${statusText}.`;
 
-      vscode.window
+      await vscode.window
         .showInformationMessage(message, { modal: false }, 'View in Gitlab')
-        .then(selection => {
+        .then(async selection => {
           if (selection === 'View in Gitlab') {
-            openers.openCurrentPipeline(repositoryRoot);
+            await openers.openCurrentPipeline(repositoryRoot);
           }
         });
     }
@@ -188,9 +188,9 @@ export class StatusBar {
         }
       }
       await this.refresh();
-      this.refreshTimer = setInterval(() => {
+      this.refreshTimer = setInterval(async () => {
         if (!vscode.window.state.focused) return;
-        this.refresh();
+        await this.refresh();
       }, 30000);
     }
   }

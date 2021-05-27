@@ -19,14 +19,14 @@ describe('GitExtensionWrapper', () => {
   });
 
   describe('initialization', () => {
-    it('creates a new GitLabRemoteSourceProviderRepository', () => {
-      wrapper.init();
+    it('creates a new GitLabRemoteSourceProviderRepository', async () => {
+      await wrapper.init();
 
       expect(GitLabRemoteSourceProviderRepository).toHaveBeenCalledWith(fakeExtension.gitApi);
     });
 
-    it('adds credentials provider to the Git Extension', () => {
-      wrapper.init();
+    it('adds credentials provider to the Git Extension', async () => {
+      await wrapper.init();
 
       expect(fakeExtension.gitApi.credentialsProviders).toEqual([gitlabCredentialsProvider]);
     });
@@ -35,7 +35,7 @@ describe('GitExtensionWrapper', () => {
   describe('repositories', () => {
     const fakeRepository = createFakeRepository({ rootUriPath: '/repository/root/path/' });
     const fakeRepository2 = createFakeRepository({ rootUriPath: '/repository/root/path2/' });
-    const waitForRepositoryCountChanged = () =>
+    const createPromiseThatResolvesWhenRepoCountChanges = () =>
       new Promise<void>(resolve => {
         const sub = wrapper.onRepositoryCountChanged(() => {
           sub.dispose();
@@ -43,11 +43,11 @@ describe('GitExtensionWrapper', () => {
         });
       });
 
-    it('returns no repositories when the extension is disabled', () => {
+    it('returns no repositories when the extension is disabled', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository];
       fakeExtension.enabled = false;
 
-      wrapper.init();
+      await wrapper.init();
 
       expect(wrapper.repositories).toEqual([]);
     });
@@ -55,8 +55,7 @@ describe('GitExtensionWrapper', () => {
     it('returns wrapped repositories when the extension is enabled', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository];
 
-      wrapper.init();
-      await waitForRepositoryCountChanged();
+      await wrapper.init();
 
       expect(wrapper.repositories).toEqual([new WrappedRepository(fakeRepository)]);
     });
@@ -70,11 +69,12 @@ describe('GitExtensionWrapper', () => {
         ${'extension was enabled'}  | ${() => fakeExtension.onDidChangeEnablementEmitter.fire(true)}
       `('calls onRepositoryCountChanged listener when $scenario', async ({ fireEvent }) => {
         const onRepositoryCountChangedListener = jest.fn();
-        wrapper.init();
+        await wrapper.init();
         wrapper.onRepositoryCountChanged(onRepositoryCountChangedListener);
 
-        fireEvent();
-        await waitForRepositoryCountChanged();
+        const countChangedPromise = createPromiseThatResolvesWhenRepoCountChanges();
+        await fireEvent();
+        await countChangedPromise;
 
         expect(onRepositoryCountChangedListener).toHaveBeenCalled();
       });
@@ -82,10 +82,11 @@ describe('GitExtensionWrapper', () => {
 
     it('adds a new wrapped repository when repository is opened', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository];
-      wrapper.init();
+      await wrapper.init();
 
+      const countChangedPromise = createPromiseThatResolvesWhenRepoCountChanges();
       fakeExtension.gitApi.onDidOpenRepositoryEmitter.fire(fakeRepository2);
-      await waitForRepositoryCountChanged();
+      await countChangedPromise;
 
       expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([
         fakeRepository.rootUri.fsPath,
@@ -95,8 +96,7 @@ describe('GitExtensionWrapper', () => {
 
     it('removes wrapped repository when repository is closed', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository, fakeRepository2];
-      wrapper.init();
-      await waitForRepositoryCountChanged();
+      await wrapper.init();
 
       fakeExtension.gitApi.onDidCloseRepositoryEmitter.fire(fakeRepository);
 
@@ -106,10 +106,11 @@ describe('GitExtensionWrapper', () => {
     it('adds all repositories when the git extension gets enabled', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository, fakeRepository2];
       fakeExtension.enabled = false;
-      wrapper.init();
+      await wrapper.init();
 
+      const countChangedPromise = createPromiseThatResolvesWhenRepoCountChanges();
       fakeExtension.onDidChangeEnablementEmitter.fire(true);
-      await waitForRepositoryCountChanged();
+      await countChangedPromise;
 
       expect(wrapper.repositories.map(r => r.rootFsPath)).toEqual([
         fakeRepository.rootUri.fsPath,
@@ -119,8 +120,7 @@ describe('GitExtensionWrapper', () => {
 
     it('returns repository wrapped repository for a repositoryRootPath', async () => {
       fakeExtension.gitApi.repositories = [fakeRepository, fakeRepository2];
-      wrapper.init();
-      await waitForRepositoryCountChanged();
+      await wrapper.init();
 
       const repository = wrapper.getRepository('/repository/root/path/');
 
