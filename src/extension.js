@@ -1,4 +1,6 @@
 const vscode = require('vscode');
+const temp = require('temp');
+const fs = require('fs/promises');
 const openers = require('./openers');
 const tokenInput = require('./token_input');
 const { tokenService } = require('./services/token_service');
@@ -6,8 +8,8 @@ const tokenServiceWrapper = require('./token_service_wrapper');
 const { extensionState } = require('./extension_state');
 const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
-const { createSnippet } = require('./commands/create_snippet');
-const { insertSnippet } = require('./commands/insert_snippet');
+const { createSnippet, visibilityOptions } = require('./commands/create_snippet');
+const { insertSnippet, pickSnippet } = require('./commands/insert_snippet');
 const sidebar = require('./sidebar');
 const ciConfigValidator = require('./ci_config_validator');
 const webviewController = require('./webview_controller');
@@ -19,6 +21,7 @@ const { REVIEW_URI_SCHEME } = require('./constants');
 const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
 const { CiCompletionProvider } = require('./completion/ci_completion_provider');
 const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
+const gitLabService = require('./gitlab_service');
 const {
   toggleResolved,
   deleteComment,
@@ -86,6 +89,56 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CANCEL_EDITING_COMMENT]: cancelEdit,
     [USER_COMMANDS.SUBMIT_COMMENT_EDIT]: submitEdit,
     [USER_COMMANDS.CREATE_COMMENT]: createComment,
+    [USER_COMMANDS.CREATE_SNIPPET_PATCH]: async () => {
+      const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+      const patch = await repository.diff();
+      const name = await vscode.window.showInputBox({ placeHolder: 'patch name' });
+      if (!name) return;
+      const visibility = await vscode.window.showQuickPick(visibilityOptions);
+      if (!visibility) return;
+
+      const data = {
+        id: (await repository.getProject()).restId,
+        title: `patch: ${name}`,
+        file_name: `${name}.patch`,
+        visibility: visibility.type,
+        content: patch,
+      };
+
+      const snippet = await gitLabService.createSnippet(repository.rootFsPath, data);
+
+      await openers.openUrl(snippet.web_url);
+    },
+    [USER_COMMANDS.APPLY_SNIPPET_PATCH]: async () => {
+      const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+      if (!repository) {
+        return;
+      }
+      const { remote } = repository;
+      const snippets = await repository
+        .getGitLabService()
+        .getSnippets(`${remote.namespace}/${remote.project}`);
+      const patchSnippets = snippets.filter(
+        s => s.title.startsWith('patch: ') && s.blobs.nodes.length === 1,
+      );
+      if (patchSnippets.length === 0) {
+        vscode.window.showInformationMessage('There are no patch snippets.');
+        return;
+      }
+
+      const result = await pickSnippet(patchSnippets);
+      if (!result) {
+        return;
+      }
+      const blobs = result.original.blobs.nodes;
+      const snippet = await repository
+        .getGitLabService()
+        .getSnippetContent(result.original, blobs[0]);
+      const tmpFilePath = temp.path({ suffix: '.patch' });
+      await fs.writeFile(tmpFilePath, snippet);
+
+      await repository.apply(tmpFilePath);
+    },
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };

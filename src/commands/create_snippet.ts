@@ -4,7 +4,7 @@ import * as gitLabService from '../gitlab_service';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GitLabProject } from '../gitlab/gitlab_project';
 
-const visibilityOptions = [
+export const visibilityOptions = [
   {
     label: 'Public',
     type: 'public',

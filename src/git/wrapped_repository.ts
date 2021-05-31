@@ -148,6 +148,14 @@ export class WrappedRepository {
     return this.rawRepository.show(sha, absolutePath).catch(() => null);
   }
 
+  async diff(): Promise<string> {
+    return this.rawRepository.diff();
+  }
+
+  async apply(patchPath: string): Promise<void> {
+    return this.rawRepository.apply(patchPath);
+  }
+
   async getTrackingBranchName(): Promise<string> {
     const branchName = this.rawRepository.state.HEAD?.name;
     assert(

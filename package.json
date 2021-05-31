@@ -78,6 +78,14 @@
         "title": "GitLab: Open current project on GitLab"
       },
       {
+        "command": "gl.createSnippetPatch",
+        "title": "GitLab: Create snippet patch"
+      },
+      {
+        "command": "gl.applySnippetPatch",
+        "title": "GitLab: Apply snippet patch"
+      },
+      {
         "command": "gl.openCurrentPipeline",
         "title": "GitLab: Open current pipeline on GitLab"
       },
@@ -747,13 +755,13 @@
     "rewire": "^4.0.1",
     "simple-git": "^2.36.1",
     "sinon": "^9.2.4",
-    "temp": "^0.9.4",
     "ts-jest": "^26.5.3",
     "typescript": "^4.2.3",
     "vsce": "^1.88.0",
     "vscode-test": "^1.5.1"
   },
   "dependencies": {
+    "temp": "^0.9.4",
     "cross-fetch": "^3.0.6",
     "dayjs": "^1.10.4",
     "graphql": "^15.5.0",

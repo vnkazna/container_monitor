@@ -179,7 +179,7 @@ export class GitLabNewService {
   async getSnippetContent(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
     const projectId = getRestIdFromGraphQLId(snippet.projectId);
     const snippetId = getRestIdFromGraphQLId(snippet.id);
-    const url = `${this.instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/master/${blob.path}/raw`;
+    const url = `${this.instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/main/${blob.path}/raw`;
     const result = await crossFetch(url, this.fetchOptions);
     if (!result.ok) {
       throw new FetchError(`Fetching snippet from ${url} failed`, result);
