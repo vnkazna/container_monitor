@@ -74,7 +74,7 @@ export class MrItemModel extends ItemModel {
       issuable: this.mr,
     });
     const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
-    const threads = discussionsOnDiff.map(discussion => {
+    discussionsOnDiff.forEach(discussion => {
       return GitLabCommentThread.createThread({
         commentController,
         repositoryRoot: this.repository.rootFsPath,
@@ -83,6 +83,6 @@ export class MrItemModel extends ItemModel {
         gitlabService,
       });
     });
-    this.setDisposableChildren([...threads, commentController]);
+    this.setDisposableChildren([commentController]);
   }
 }

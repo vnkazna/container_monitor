@@ -82,7 +82,7 @@ export class GitLabCommentThread {
       return true;
     });
     if (this.vsThread.comments.length === 0) {
-      this.dispose();
+      this.vsThread.dispose();
     }
   }
 
@@ -135,10 +135,6 @@ export class GitLabCommentThread {
     if (this.gqlDiscussion.resolvable && this.allowedToResolve()) {
       this.vsThread.contextValue = this.resolved ? 'resolved' : 'unresolved';
     }
-  }
-
-  dispose(): void {
-    this.vsThread.dispose();
   }
 
   static createThread({
