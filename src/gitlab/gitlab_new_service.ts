@@ -37,6 +37,7 @@ import {
 } from './graphql/get_project';
 import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_diff_comment';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
+import { log } from '../log';
 
 interface CreateNoteResult {
   createNote: {
@@ -419,10 +420,11 @@ export class GitLabNewService {
       );
       return result.createDiffNote.note.discussion;
     } catch (e) {
+      log(body);
       throw new UserFriendlyError(
         `Extension failed to create the comment.
          Open extension logs to see your comment text and find more details about the error.`,
-        new Error(`MR(${mrId}), text(${body}),\n${JSON.stringify(position)}, ${e}`),
+        new Error(`MR(${mrId}), ${JSON.stringify(position)}, ${e}`),
       );
     }
   }
