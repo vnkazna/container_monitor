@@ -1,5 +1,9 @@
 import { diffFile, mrVersion } from '../test_utils/entities';
-import { getAddedLinesForFile, getUnchangedLines } from './diff_line_count';
+import {
+  getAddedLinesForFile,
+  getNewLineForOldUnchangedLine,
+  getUnchangedLines,
+} from './diff_line_count';
 
 describe('diff_line_count', () => {
   const sevenNewLinesHunk = [
@@ -154,6 +158,41 @@ describe('diff_line_count', () => {
       const ranges = getUnchangedLines(mrVersion, '/invalid/path');
 
       expect(ranges).toEqual([]);
+    });
+  });
+
+  describe('getNewLineForOldUnchangedLine', () => {
+    const testMrVersion = {
+      ...mrVersion,
+      diffs: [{ ...diffFile, diff: multiHunk }],
+    };
+
+    it('returns undefined when diff file is not found', () => {
+      expect(getNewLineForOldUnchangedLine(testMrVersion, 'non/existent/path.js', 1)).toBe(
+        undefined,
+      );
+    });
+
+    it('returns undefined when the old line has been removed', () => {
+      expect(getNewLineForOldUnchangedLine(testMrVersion, diffFile.old_path, 15)).toBe(undefined);
+    });
+
+    it('returns new line index that has been parsed from the diff hunks', () => {
+      expect(getNewLineForOldUnchangedLine(testMrVersion, diffFile.old_path, 18)).toBe(16);
+    });
+
+    it('returns the same line number when the old line precedes all changes (all hunks)', () => {
+      expect(getNewLineForOldUnchangedLine(testMrVersion, diffFile.old_path, 1)).toBe(1);
+    });
+
+    it('extrapolates the last unchanged line indexes', () => {
+      // the only information we get is from the hunks
+      // for a file that's 1000 lines long we might have only a diff hunk for a change from the beginning
+      // of that file. But that change might have shifted the unchanged line old and new index difference
+      // for all lines following that change (e.g. removed line will decrease the new line index by 1 for
+      // all following lines)
+      expect(getNewLineForOldUnchangedLine(testMrVersion, diffFile.old_path, 100)).toBe(96); // this is the last unchanged line available from the diff hunk
+      expect(getNewLineForOldUnchangedLine(testMrVersion, diffFile.old_path, 1000)).toBe(996);
     });
   });
 });
