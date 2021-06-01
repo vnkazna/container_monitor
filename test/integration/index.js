@@ -6,8 +6,6 @@ const glob = require('glob');
 const { initializeTestEnvironment } = require('./test_infrastructure/initialize_test_environment');
 const { validateTestEnvironment } = require('./test_infrastructure/validate_test_environment');
 
-validateTestEnvironment();
-
 const getAllTestFiles = testsRoot =>
   new Promise((resolve, reject) => {
     glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
@@ -17,28 +15,30 @@ const getAllTestFiles = testsRoot =>
   });
 
 async function run(testsRoot) {
-  // Create the mocha test
-  const mocha = new Mocha(
-    process.env.CI && {
-      reporter: 'mocha-junit-reporter',
-      reporterOptions: {
-        mochaFile: './reports/integration.xml',
-      },
-    },
-  );
-  mocha.timeout(3000);
-  mocha.color(true);
-
-  const files = await getAllTestFiles(testsRoot);
-
-  // Add files to the test suite
-  files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
-
-  // Initialize VS Code environment for integration tests
-  initializeTestEnvironment();
-
-  // Run the mocha test
   try {
+    validateTestEnvironment();
+
+    // Create the mocha test
+    const mocha = new Mocha(
+      process.env.CI && {
+        reporter: 'mocha-junit-reporter',
+        reporterOptions: {
+          mochaFile: './reports/integration.xml',
+        },
+      },
+    );
+    mocha.timeout(3000);
+    mocha.color(true);
+
+    const files = await getAllTestFiles(testsRoot);
+
+    // Add files to the test suite
+    files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+
+    // Initialize VS Code environment for integration tests
+    initializeTestEnvironment();
+
+    // Run the mocha test
     await new Promise((res, rej) =>
       mocha.run(failures => {
         if (failures) {
