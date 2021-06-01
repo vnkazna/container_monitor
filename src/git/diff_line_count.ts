@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { DiffFilePath, findFileInDiffs } from '../utils/find_file_in_diffs';
 
 // these helper functions are simplified version of the same lodash functions
 const range = (start: number, end: number) => [...Array(end - start).keys()].map(n => n + start);
@@ -36,8 +37,6 @@ type RemovedLine = { type: typeof REMOVED; oldLine: number };
 type AddedLine = { type: typeof ADDED; newLine: number };
 type UnchangedLine = { type: typeof UNCHANGED; oldLine: number; newLine: number };
 type HunkLine = RemovedLine | AddedLine | UnchangedLine;
-
-type FilePath = { oldPath?: string; newPath?: string };
 
 /** Converts lines in the text hunk into data structures that represent type of the change and affected lines */
 const parseHunk = (hunk: string): HunkLine[] => {
@@ -81,14 +80,8 @@ const parseHunk = (hunk: string): HunkLine[] => {
   return result.lines;
 };
 
-const getHunksForFile = (mrVersion: RestMrVersion, path: FilePath): HunkLine[][] => {
-  // VS Code Uri returns absolute path (leading slash) but GitLab uses relative paths (no leading slash)
-  const removeLeadingSlash = (filePath = ''): string => filePath.replace(/^\//, '');
-  const diff = mrVersion.diffs.find(
-    d =>
-      d.new_path === removeLeadingSlash(path.newPath) ||
-      d.old_path === removeLeadingSlash(path.oldPath),
-  );
+const getHunksForFile = (mrVersion: RestMrVersion, path: DiffFilePath): HunkLine[][] => {
+  const diff = findFileInDiffs(mrVersion.diffs, path);
   if (!diff) return [];
   return getRawHunks(diff.diff).map(parseHunk);
 };

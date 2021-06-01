@@ -34,6 +34,7 @@ import {
   GetProjectQueryResult,
   queryGetProject,
 } from './graphql/get_project';
+import { removeLeadingSlash } from '../utils/remove_leading_slash';
 
 interface CreateNoteResult {
   createNote: {
@@ -205,8 +206,7 @@ export class GitLabNewService {
   }
 
   async getFileContent(path: string, ref: string, projectId: number): Promise<string> {
-    const pathWithoutFirstSlash = path.replace(/^\//, '');
-    const encodedPath = encodeURIComponent(pathWithoutFirstSlash);
+    const encodedPath = encodeURIComponent(removeLeadingSlash(path));
     const fileUrl = `${this.instanceUrl}/api/v4/projects/${projectId}/repository/files/${encodedPath}/raw?ref=${ref}`;
     const fileResult = await crossFetch(fileUrl, this.fetchOptions);
     if (!fileResult.ok) {

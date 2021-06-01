@@ -43,6 +43,7 @@ export const diffFile: RestDiffFile = {
 export const mrVersion: RestMrVersion = {
   base_commit_sha: 'aaaaaaaa',
   head_commit_sha: 'bbbbbbbb',
+  start_commit_sha: 'cccccccc',
   diffs: [diffFile],
 };
 

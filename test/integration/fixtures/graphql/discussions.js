@@ -107,6 +107,7 @@ const noteOnDiff = {
     diffRefs: {
       baseSha: '18307069cfc96892bbe93a15249bd91babfa1064',
       headSha: 'b9c6f9ad70d55a75785fb2702ab8012a69e767d3',
+      startSha: 'b9c6f9ad70d55a75785fb2702ab8012a69e767d3',
     },
     filePath: 'src/webview/src/components/LabelNote.vue',
     positionType: 'text',
