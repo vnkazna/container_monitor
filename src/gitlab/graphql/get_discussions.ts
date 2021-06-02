@@ -1,6 +1,6 @@
 import { gql } from 'graphql-request';
 import {
-  noteDetailsFragment,
+  discussionDetailsFragment,
   Node,
   GqlProjectResult,
   GqlNote,
@@ -10,26 +10,14 @@ import {
 } from './shared';
 
 const discussionsFragment = gql`
-  ${noteDetailsFragment}
+  ${discussionDetailsFragment}
   fragment discussions on DiscussionConnection {
     pageInfo {
       hasNextPage
       endCursor
     }
     nodes {
-      replyId
-      createdAt
-      resolved
-      resolvable
-      notes {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        nodes {
-          ...noteDetails
-        }
-      }
+      ...discussionDetails
     }
   }
 `;

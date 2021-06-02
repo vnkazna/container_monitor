@@ -21,6 +21,7 @@ import {
   GetDiscussionsQueryOptions,
   GqlDiscussion,
   GetDiscussionsQueryResult,
+  GqlTextDiffDiscussion,
 } from './graphql/get_discussions';
 import {
   GetSnippetsQueryOptions,
@@ -34,7 +35,9 @@ import {
   GetProjectQueryResult,
   queryGetProject,
 } from './graphql/get_project';
+import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_diff_comment';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
+import { log } from '../log';
 
 interface CreateNoteResult {
   createNote: {
@@ -109,6 +112,7 @@ const getProjectPath = (issuable: RestIssuable) => issuable.references.full.spli
 const isMr = (issuable: RestIssuable) => Boolean(issuable.sha);
 const getIssuableGqlId = (issuable: RestIssuable) =>
   `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
+const getMrGqlId = (id: number) => `gid://gitlab/MergeRequest/${id}`;
 
 export class GitLabNewService {
   client: GraphQLClient;
@@ -395,6 +399,32 @@ export class GitLabNewService {
         Your draft hasn't been lost. To see it, edit the comment.
         For more information, review the extension logs.`,
         e,
+      );
+    }
+  }
+
+  async createDiffNote(
+    mrId: number,
+    body: string,
+    position: GqlDiffPositionInput,
+  ): Promise<GqlTextDiffDiscussion> {
+    try {
+      const result = await this.client.request(createDiffNoteMutation, {
+        issuableId: getMrGqlId(mrId),
+        body,
+        position,
+      });
+      assert(
+        result?.createDiffNote?.note?.discussion,
+        `Response doesn't contain a note with discussion: ${JSON.stringify(result)}`,
+      );
+      return result.createDiffNote.note.discussion;
+    } catch (e) {
+      log(body);
+      throw new UserFriendlyError(
+        `Extension failed to create the comment.
+         Open extension logs to see your comment text and find more details about the error.`,
+        new Error(`MR(${mrId}), ${JSON.stringify(position)}, ${e}`),
       );
     }
   }

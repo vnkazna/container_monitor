@@ -6,12 +6,16 @@ const { graphql } = require('msw');
 const IssuableDataProvider = require('../../src/data_providers/issuable').DataProvider;
 const { MrItemModel } = require('../../src/data_providers/items/mr_item_model');
 const { tokenService } = require('../../src/services/token_service');
-const { submitEdit } = require('../../src/commands/mr_discussion_commands');
+const { submitEdit, createComment } = require('../../src/commands/mr_discussion_commands');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const versionsResponse = require('./fixtures/rest/versions.json');
 const versionResponse = require('./fixtures/rest/mr_version.json');
 const diffNote = require('./fixtures/rest/diff_note.json');
-const { projectWithMrDiscussions, noteOnDiff } = require('./fixtures/graphql/discussions');
+const {
+  projectWithMrDiscussions,
+  noteOnDiff,
+  discussionOnDiff,
+} = require('./fixtures/graphql/discussions');
 const mrPermissionsResponse = require('./fixtures/graphql/mr_permissions.json');
 const {
   getServer,
@@ -22,6 +26,7 @@ const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { ApiContentProvider } = require('../../src/review/api_content_provider');
 const { PROGRAMMATIC_COMMANDS } = require('../../src/command_names');
 const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
+const { toReviewUri } = require('../../src/review/review_uri');
 
 describe('MR Review', () => {
   let server;
@@ -31,7 +36,7 @@ describe('MR Review', () => {
   before(async () => {
     server = getServer([
       createJsonEndpoint('/projects/278964/merge_requests/33824/versions', versionsResponse),
-      createJsonEndpoint('/projects/278964/merge_requests/33824/notes/469379582', diffNote),
+      createJsonEndpoint('/projects/278964/merge_requests/33824/notes/469379582', diffNote), // TODO remove
       createJsonEndpoint(
         '/projects/278964/merge_requests/33824/versions/127919672',
         versionResponse,
@@ -49,6 +54,14 @@ describe('MR Review', () => {
         if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
           return res(ctx.data(mrPermissionsResponse));
         return res(ctx.data({ project: null }));
+      }),
+      graphql.mutation('CreateDiffNote', (req, res, ctx) => {
+        if (
+          req.variables.issuableId === `gid://gitlab/MergeRequest/${openMergeRequestResponse.id}` &&
+          req.variables.body === 'new comment'
+        )
+          return res(ctx.data({ createDiffNote: { note: { discussion: discussionOnDiff } } }));
+        return res(ctx.status(500));
       }),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
@@ -125,7 +138,7 @@ describe('MR Review', () => {
       await dataProvider.getChildren(mrItemModel);
 
       const { uri, range, comments } = thread;
-      assert.strictEqual(uri.path, `/${noteOnDiff.position.newPath}`);
+      assert.strictEqual(uri.path, `/${noteOnDiff.position.oldPath}`);
       assert.strictEqual(range.start.line, noteOnDiff.position.oldLine - 1);
       assert.strictEqual(comments[0].body, noteOnDiff.body);
     });
@@ -210,6 +223,29 @@ describe('MR Review', () => {
         const [, headUri] = getDiffArgs(item);
         const content = await apiContentProvider.provideTextDocumentContent(headUri);
         assert.strictEqual(content, '');
+      });
+    });
+
+    describe('Creating a new diff comment thread', () => {
+      it('should create a new comment', async () => {
+        // This URI represents old version of `src/test.js` file (versionResponse fixture) in the test MR (openMergeRequestResponse fixture)
+        const uri = toReviewUri({
+          path: `src/test.js`,
+          commit: versionResponse.base_commit_sha, // base sha === old version of the file
+          mrId: openMergeRequestResponse.id,
+          projectId: openMergeRequestResponse.project_id,
+          repositoryRoot: gitExtensionWrapper.getActiveRepository().rootFsPath,
+        });
+
+        const thread = {
+          uri,
+          range: new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0)),
+          comments: [],
+        };
+
+        await createComment({ text: 'new comment', thread });
+
+        assert.strictEqual(thread.comments.length, 1); // comment has been added
       });
     });
   });
