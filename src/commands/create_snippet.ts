@@ -68,7 +68,7 @@ export async function createSnippet() {
   const editor = vscode.window.activeTextEditor;
 
   if (!editor) {
-    vscode.window.showInformationMessage('GitLab Workflow: No open file.');
+    await vscode.window.showInformationMessage('GitLab Workflow: No open file.');
     return;
   }
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
@@ -76,7 +76,7 @@ export async function createSnippet() {
   const project = await repository.getProject();
 
   if (!project) {
-    vscode.window.showInformationMessage(
+    await vscode.window.showInformationMessage(
       'GitLab Workflow: Repository does not contain GitLab project.',
     );
     return;
