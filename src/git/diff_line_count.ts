@@ -36,8 +36,8 @@ const REMOVED = 'REMOVED';
 const ADDED = 'ADDED';
 const UNCHANGED = 'UNCHANGED';
 
-type RemovedLine = { type: typeof REMOVED; oldLine: number };
-type AddedLine = { type: typeof ADDED; newLine: number };
+type RemovedLine = { type: typeof REMOVED; oldLine: number; newLine?: never };
+type AddedLine = { type: typeof ADDED; newLine: number; oldLine?: never };
 export type UnchangedLine = { type: typeof UNCHANGED; oldLine: number; newLine: number };
 type HunkLine = RemovedLine | AddedLine | UnchangedLine;
 
@@ -118,21 +118,28 @@ const connectHunks = (parsedHunks: HunkLine[][]): HunkLine[] =>
         ...hunk,
       ]);
 
-export const getUnchangedLines = (mrVersion: RestMrVersion, oldPath: string): UnchangedLine[] =>
-  connectHunks(getHunksForFile(mrVersion, { oldPath })).filter(
-    (l): l is UnchangedLine => l.type === UNCHANGED,
-  );
+const addUnchangedLinesToBeginning = (lines: HunkLine[]): HunkLine[] => {
+  if (isEmpty(lines) || first(lines)!.oldLine === 1) return lines;
+  return connectHunks([[{ type: UNCHANGED, oldLine: 1, newLine: 1 }], lines]);
+};
+
+const ensureOldLineIsPresent = (lines: HunkLine[], oldLine: number): HunkLine[] => {
+  const lastLine = last(lines);
+  if (!lastLine?.oldLine || lastLine.oldLine >= oldLine) return lines;
+  assert(lastLine.type === UNCHANGED);
+  return connectHunks([
+    lines,
+    [{ type: UNCHANGED, oldLine, newLine: oldLine + newLineOffset(lastLine) }],
+  ]);
+};
 
 export const getNewLineForOldUnchangedLine = (
   mrVersion: RestMrVersion,
   oldPath: string,
   oldLine: number,
 ): number | undefined => {
-  const unchangedLines = getUnchangedLines(mrVersion, oldPath);
-  if (isEmpty(unchangedLines)) return undefined;
-  if (oldLine < first(unchangedLines)!.oldLine)
-    return oldLine + newLineOffset(first(unchangedLines)!);
-  if (oldLine > last(unchangedLines)!.oldLine)
-    return oldLine + newLineOffset(last(unchangedLines)!);
-  return unchangedLines.find(ul => ul.oldLine === oldLine)?.newLine;
+  const connectedHunks = connectHunks(getHunksForFile(mrVersion, { oldPath }));
+  const linesFromBeginning = addUnchangedLinesToBeginning(connectedHunks);
+  const allDiffLines = ensureOldLineIsPresent(linesFromBeginning, oldLine);
+  return allDiffLines.find(l => l.oldLine === oldLine)?.newLine;
 };
