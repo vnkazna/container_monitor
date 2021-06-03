@@ -3,6 +3,10 @@ import { REVIEW_URI_SCHEME } from '../constants';
 import { getAddedLinesForFile } from '../git/diff_line_count';
 import { fromReviewUri } from './review_uri';
 
+const lastLineEmpty = (document: vscode.TextDocument): boolean => {
+  const lastLIne = document.lineAt(document.lineCount - 1);
+  return lastLIne.isEmptyOrWhitespace;
+};
 export class CommentingRangeProvider implements vscode.CommentingRangeProvider {
   private mr: RestIssuable;
 
@@ -22,9 +26,8 @@ export class CommentingRangeProvider implements vscode.CommentingRangeProvider {
     }
     const oldFile = params.commit === this.mrVersion.base_commit_sha;
     if (oldFile) {
-      return [
-        new vscode.Range(new vscode.Position(0, 0), new vscode.Position(document.lineCount - 1, 0)),
-      ];
+      const endOfRange = lastLineEmpty(document) ? document.lineCount - 2 : document.lineCount - 1;
+      return [new vscode.Range(new vscode.Position(0, 0), new vscode.Position(endOfRange, 0))];
     }
     const result = getAddedLinesForFile(this.mrVersion, params.path);
     return result.map(
