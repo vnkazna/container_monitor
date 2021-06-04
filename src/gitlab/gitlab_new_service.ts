@@ -37,7 +37,7 @@ import {
 } from './graphql/get_project';
 import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_diff_comment';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
-import { log } from '../log';
+import { log, logError } from '../log';
 
 interface CreateNoteResult {
   createNote: {
@@ -145,6 +145,16 @@ export class GitLabNewService {
       },
       agent: this.httpAgent,
     };
+  }
+
+  async getVersion(): Promise<string | undefined> {
+    try {
+      const result = await crossFetch(`${this.instanceUrl}/api/v4/version`, this.fetchOptions);
+      return (await result.json())?.version;
+    } catch (e) {
+      logError(e);
+      return undefined;
+    }
   }
 
   async getProject(projectPath: string): Promise<GitLabProject | undefined> {
