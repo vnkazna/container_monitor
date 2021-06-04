@@ -16,7 +16,7 @@ const isEmpty = (obj: any): boolean =>
  * `@@ -38,9 +36,8 @@` reads: hunk starts at line 38 of the old version and 36 of the new version.
  */
 const getHunkStartingLine = (headerString = ''): { oldStart: number; newStart: number } | null => {
-  const headerMatch = headerString.match(/@@ -(\d+),\d+ \+(\d+),\d+ @@/);
+  const headerMatch = headerString.match(/@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
   return (
     headerMatch && {
       oldStart: parseInt(headerMatch[1], 10),
@@ -48,6 +48,7 @@ const parseHunk = (hunk: string): HunkLine[] => {
   assert(header);
   const result = remainingLines
     .filter(l => l) // no empty lines
+    .filter(l => !l.startsWith('\\')) // ignore '\ No newline at end of file'
     .reduce(
       ({ oldIndex, newIndex, lines }, line) => {
         const prefix = line[0];

@@ -100,6 +100,17 @@ describe('diff_line_count', () => {
     ` 18`,
   ].join('\n');
 
+  const hunkWithoutNewLines = [
+    '@@ -1 +1,4 @@',
+    '-# Initial readme',
+    '\\ No newline at end of file',
+    '+1',
+    '+2',
+    '+3',
+    '+4',
+    '\\ No newline at end of file',
+  ].join('\n');
+
   const testVersion = (diff: string): RestMrVersion => ({
     ...mrVersion,
     diffs: [{ ...diffFile, diff }],
@@ -112,6 +123,8 @@ describe('diff_line_count', () => {
       ${'hunkWithAddedAndRemovedLines'} | ${hunkWithAddedAndRemovedLines} | ${[13, 14, 18, 24]}
       ${'multiHunk'}                    | ${multiHunk}                    | ${[15, 39, 40, 97, 98]}
       ${'hunkWithHunkHeaders'}          | ${hunkWithHunkHeaders}          | ${[15]}
+      ${'hunkWithHunkHeaders'}          | ${hunkWithHunkHeaders}          | ${[15]}
+      ${'hunkWithoutNewLines'}          | ${hunkWithoutNewLines}          | ${[1, 2, 3, 4]}
     `('$hunkName gets correctly parsed', ({ hunk, newLines }) => {
       const ranges = getAddedLinesForFile(testVersion(hunk), diffFile.new_path);
 
