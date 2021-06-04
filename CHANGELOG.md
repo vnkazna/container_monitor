@@ -1,3 +1,17 @@
+# [3.21.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.20.1...v3.21.0) (2021-06-04)
+
+
+### Bug Fixes
+
+* remove the broken code related to creating user snippets ([bb2b8a0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bb2b8a01af81ec66f6f6b76989e13020a119cab0))
+
+
+### Features
+
+* create new MR diff comments ([f4e6e86](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/f4e6e8692865e3a6b9207eb6c7d615fbbf6fa235))
+
+
+
 ## [3.20.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.20.0...v3.20.1) (2021-05-19)
 
 
