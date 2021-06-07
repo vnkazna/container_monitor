@@ -498,12 +498,6 @@ export async function validateCIConfig(repositoryRoot: string, content: string):
 
   return Boolean(validCIConfig);
 }
-interface Discussion {
-  notes: {
-    // eslint-disable-next-line camelcase
-    created_at: string;
-  }[];
-}
 
 export async function renderMarkdown(markdown: string, repositoryRoot: string) {
   let rendered = { html: markdown };
