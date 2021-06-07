@@ -10,6 +10,14 @@ export const createAndOpenFile = async (testFileUri: vscode.Uri): Promise<void> 
   await vscode.window.showTextDocument(testFileUri);
 };
 
+export const insertTextIntoActiveEditor = async (text: string): Promise<void> => {
+  const editor = vscode.window.activeTextEditor;
+  assert(editor, 'no active editor');
+  await editor.edit(editBuilder => {
+    editBuilder.insert(editor.selection.start, text);
+  });
+};
+
 export const closeAndDeleteFile = async (testFileUri: vscode.Uri): Promise<void> => {
   await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
   const edit = new vscode.WorkspaceEdit();
