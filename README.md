@@ -62,7 +62,7 @@ Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
 
 Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
 
-You can use [autocompletion of GitLab CI variables](#ci-variable-autocompletion) in your `.gitlab-ci.yml`.
+You can use [autocompletion of GitLab CI variables](#ci-variable-autocompletion) in your `.gitlab-ci.yml` pipeline file. If you have additional pipeline files you would like to use autocomplete with, it matches on any file beginning with `.gitlab-ci` and ending with `.yml` or `.yaml`. For example: `.gitlab-ci.production.yml`.
 
 ## Setup
 
