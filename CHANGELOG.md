@@ -7,6 +7,10 @@
 * validate CI command didn't show validation result ([21080d6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/21080d6c447c25ccd1a5f36720f93ec9766e7d03))
 
 
+### Features
+
+* **editor:** extend autocomplete glob pattern ([aa41067](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/aa41067666df5119ea8cd70669a35d68b04b3d7d))
+  * Implemented by [@IAmMoen](https://gitlab.com/IAmMoen) with [MR !270](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/270) 👍
 
 # [3.21.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.20.1...v3.21.0) (2021-06-04)
 
