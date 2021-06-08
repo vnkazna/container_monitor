@@ -64,6 +64,8 @@ export class MrItemModel extends ItemModel {
       this.mr.references.full,
       this.mr.title,
     );
+    this.setDisposableChildren([commentController]);
+
     const gitlabService = this.repository.getGitLabService();
 
     if (await gitlabService.canUserCommentOnMr(this.mr)) {
@@ -83,6 +85,5 @@ export class MrItemModel extends ItemModel {
         gitlabService,
       });
     });
-    this.setDisposableChildren([commentController]);
   }
 }

@@ -16,22 +16,25 @@ describe('MrItemModel', () => {
   let commentThread: vscode.CommentThread;
   let canUserCommentOnMr = false;
   let commentController: any;
+  let gitLabService: any;
 
   const createCommentThreadMock = jest.fn();
 
   beforeEach(() => {
+    gitLabService = {
+      getDiscussions: jest.fn().mockResolvedValue([discussionOnDiff, multipleNotes]),
+      getMrDiff: jest.fn().mockResolvedValue({ diffs: [] }),
+      canUserCommentOnMr: jest.fn(async () => canUserCommentOnMr),
+    };
     const repository = createWrappedRepository({
-      gitLabService: {
-        getDiscussions: jest.fn().mockResolvedValue([discussionOnDiff, multipleNotes]),
-        getMrDiff: jest.fn().mockResolvedValue({ diffs: [] }),
-        canUserCommentOnMr: jest.fn(async () => canUserCommentOnMr),
-      },
+      gitLabService,
     });
     item = new MrItemModel(mr, repository);
     commentThread = {} as vscode.CommentThread;
 
     commentController = {
       createCommentThread: createCommentThreadMock.mockReturnValue(commentThread),
+      dispose: jest.fn(),
     };
     createCommentControllerMock.mockReturnValue(commentController);
   });
@@ -69,6 +72,17 @@ describe('MrItemModel', () => {
       await item.getChildren();
 
       expect(commentController.commentingRangeProvider).toBeInstanceOf(CommentingRangeProvider);
+    });
+
+    // this test ensures that we add comment controller to disposables before calling API.
+    it('comment controller can be disposed regardless of API failures', async () => {
+      gitLabService.getDiscussions = () => Promise.reject(new Error());
+
+      await item.getChildren();
+
+      expect(commentController.dispose).not.toHaveBeenCalled();
+      item.dispose();
+      expect(commentController.dispose).toHaveBeenCalled();
     });
   });
 });
