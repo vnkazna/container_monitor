@@ -1,3 +1,13 @@
+# [3.22.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.21.0...v3.22.0) (2021-06-08)
+
+
+### Bug Fixes
+
+*  comment controller can be disposed regardless of API failures ([28d322c](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/28d322c6d693359e72a3089cd6b2932f5acb336f))
+* validate CI command didn't show validation result ([21080d6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/21080d6c447c25ccd1a5f36720f93ec9766e7d03))
+
+
+
 # [3.21.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.20.1...v3.21.0) (2021-06-04)
 
 
