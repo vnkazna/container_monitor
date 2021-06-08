@@ -22,10 +22,10 @@ We use the following logic to lint your MR's commit messages:
 
 ```mermaid
 graph TD
-A{Is MR set to be squashed?} --no--> B[Every commit must be valid]
-A --yes--> C{Is there at least one multiline commit?}
-C --no--> D[MR title must be valid]
-C --yes--> E[First multiline commit must be valid]
+A{Are there multiple commits?} --no--> B[Commit must be valid]
+A --yes--> C
+C{Is MR set to be squashed?} --no--> D[Every commit must be valid]
+C --yes--> E[MR title must be valid]
 ```
 
 Following these conventions will result in a clear [changelog](./CHANGELOG.md) for every version.
@@ -37,7 +37,7 @@ upon merge, the maintainer will be able to use its title as the final commit mes
 
 ## Is it okay that all my commits don't follow the conventions in a single MR?
 
-If your MR contains only one logical change, you can enable the [Squash commits when merge request is accepted](https://gitlab.com/help/user/project/merge_requests/squash_and_merge) option. Then GitLab uses either the first multiline commit in your MR as commit message for the squashed changes or it uses the MR title.
+If your MR contains multiple commits but only one logical change, you can enable the [Squash commits when merge request is accepted](https://gitlab.com/help/user/project/merge_requests/squash_and_merge) option. Then GitLab uses the MR title.
 
 ## What types can I use for my commit messages?
 
