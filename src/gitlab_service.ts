@@ -484,25 +484,25 @@ export async function createSnippet(repositoryRoot: string, data: { id: number }
   }
 }
 
-export async function validateCIConfig(repositoryRoot: string, content: string): Promise<boolean> {
-  let validCIConfig = null;
+interface ValidationResponse {
+  status?: string;
+  errors: string[];
+  error: string;
+}
 
+export async function validateCIConfig(
+  repositoryRoot: string,
+  content: string,
+): Promise<ValidationResponse | undefined> {
   try {
     const { response } = await fetch(repositoryRoot, '/ci/lint', 'POST', {
       content,
     });
-    validCIConfig = response;
+    return response;
   } catch (e) {
     handleError(new UserFriendlyError('Failed to validate CI configuration.', e));
+    return undefined;
   }
-
-  return Boolean(validCIConfig);
-}
-interface Discussion {
-  notes: {
-    // eslint-disable-next-line camelcase
-    created_at: string;
-  }[];
 }
 
 export async function renderMarkdown(markdown: string, repositoryRoot: string) {
