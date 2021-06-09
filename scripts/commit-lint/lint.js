@@ -46,32 +46,19 @@ async function isConventional(message) {
   return lint(message, { ...config.rules, ...customRules }, { defaultIgnores: false });
 }
 
-const isMultiline = commit => {
-  const [, empty, body] = commit.split('\n');
-  return empty === '' && Boolean(body);
-};
-
 async function lintMr() {
   const mr = await getMr();
   const commits = await getCommitsInMr();
 
-  if (!mr.squash) {
+  if (!mr.squash || commits.length === 1) {
     console.log(
-      'INFO: MR is not set to squash, every commit message needs to conform to conventional commit standard.\n',
+      'INFO: MR is not set to squash and/or there is only one commit. Every commit message needs to conform to conventional commit standard.\n',
     );
     return Promise.all(commits.map(isConventional));
   }
 
-  const firstMultiline = commits.reverse().find(isMultiline); // first chronologically means last in the commits list
-  if (firstMultiline) {
-    console.log(
-      'INFO: MR is set to squash, GitLab is going to used the first multiline MR as commit message.\n',
-    );
-    return isConventional(firstMultiline).then(Array.of);
-  }
-
   console.log(
-    'INFO: MR is set to squash, there is no multiline commit and so GitLab is going to use the MR title.\n' +
+    'INFO: MR is set to squash. GitLab is going to use the MR title.\n' +
       "INFO: If the MR title isn't correct, you can fix it and rerun this CI Job.\n",
   );
   return isConventional(mr.title).then(Array.of);
