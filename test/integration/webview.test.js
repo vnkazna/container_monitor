@@ -3,7 +3,7 @@ const vscode = require('vscode');
 const sinon = require('sinon');
 const EventEmitter = require('events');
 const { graphql } = require('msw');
-const webviewController = require('../../src/webview_controller');
+const { webviewController } = require('../../src/webview_controller');
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const { projectWithIssueDiscussions, note2 } = require('./fixtures/graphql/discussions');
@@ -71,6 +71,10 @@ describe('GitLab webview', () => {
         eventEmitter.on('', listener);
         return { dispose: () => {} };
       });
+      // this simulates real behaviour where the webview initializes Vue app and that sends a `appReady` message
+      setTimeout(() => {
+        eventEmitter.emit('', { command: 'appReady' });
+      }, 1);
       return panel;
     });
   };
@@ -101,5 +105,22 @@ describe('GitLab webview', () => {
     const sentMessage = await waitForMessage(webviewPanel, 'noteSaved');
     assert.strictEqual(sentMessage.type, 'noteSaved');
     assert.strictEqual(sentMessage.status, undefined);
+  });
+
+  it('adds the correct panel icon', () => {
+    const { dark, light } = webviewPanel.iconPath;
+    assert.match(dark.path, /src\/assets\/images\/dark\/issues.svg$/);
+    assert.match(light.path, /src\/assets\/images\/light\/issues.svg$/);
+  });
+
+  it('substitutes the resource URLs in the HTML markup', () => {
+    const resources = [
+      'src/webview/dist/js/app\\.js',
+      'src/webview/dist/js/chunk-vendors\\.js',
+      'src/webview/dist/css/app\\.css',
+    ];
+    resources.forEach(r => {
+      assert.match(webviewPanel.webview.html, new RegExp(r, 'gm'));
+    });
   });
 });
