@@ -279,40 +279,43 @@
         {
           "command": "gl.startEditingComment",
           "group": "inline@1",
-          "when": "comment =~ /canAdmin/"
+          "when": "commentController =~ /^gitlab-mr-/ && comment =~ /canAdmin/"
         },
         {
           "command": "gl.deleteComment",
           "group": "inline@2",
-          "when": "comment =~ /canAdmin/"
+          "when": "commentController =~ /^gitlab-mr-/ && comment =~ /canAdmin/"
         }
       ],
       "comments/comment/context": [
         {
           "command": "gl.submitCommentEdit",
-          "group": "inline@1"
+          "group": "inline@1",
+          "when": "commentController =~ /^gitlab-mr-/"
         },
         {
           "command": "gl.cancelEditingComment",
-          "group": "inline@2"
+          "group": "inline@2",
+          "when": "commentController =~ /^gitlab-mr-/"
         }
       ],
       "comments/commentThread/title": [
         {
           "command": "gl.resolveThread",
           "group": "inline@1",
-          "when": "commentThread == unresolved"
+          "when": "commentController =~ /^gitlab-mr-/ && commentThread == unresolved"
         },
         {
           "command": "gl.unresolveThread",
           "group": "inline@2",
-          "when": "commentThread == resolved"
+          "when": "commentController =~ /^gitlab-mr-/ && commentThread == resolved"
         }
       ],
       "comments/commentThread/context": [
         {
           "command": "gl.createComment",
-          "group": "inline"
+          "group": "inline",
+          "when": "commentController =~ /^gitlab-mr-/"
         }
       ]
     },

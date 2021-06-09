@@ -61,7 +61,7 @@ export class MrItemModel extends ItemModel {
 
   private async initializeMrDiscussions(mrVersion: RestMrVersion): Promise<void> {
     const commentController = vscode.comments.createCommentController(
-      this.mr.references.full,
+      `gitlab-mr-${this.mr.references.full}`,
       this.mr.title,
     );
     this.setDisposableChildren([commentController]);
