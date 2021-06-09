@@ -10,7 +10,7 @@ const { createSnippet } = require('./commands/create_snippet');
 const { insertSnippet } = require('./commands/insert_snippet');
 const sidebar = require('./sidebar');
 const ciConfigValidator = require('./ci_config_validator');
-const webviewController = require('./webview_controller');
+const { webviewController } = require('./webview_controller');
 const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
 const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
 const { initializeLogging, handleError } = require('./log');
@@ -77,7 +77,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.INSERT_SNIPPET]: insertSnippet,
     [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
     [USER_COMMANDS.REFRESH_SIDEBAR]: sidebar.refresh,
-    [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.create,
+    [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.create.bind(webviewController),
     [USER_COMMANDS.SHOW_OUTPUT]: () => outputChannel.show(),
     [USER_COMMANDS.RESOLVE_THREAD]: toggleResolved,
     [USER_COMMANDS.UNRESOLVE_THREAD]: toggleResolved,
@@ -112,7 +112,8 @@ const activate = context => {
   initializeLogging(line => outputChannel.appendLine(line));
   vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new GitContentProvider());
   registerCommands(context, outputChannel);
-  webviewController.addDeps(context);
+  const isDev = process.env.NODE_ENV === 'development';
+  webviewController.init(context, isDev);
   tokenService.init(context);
   tokenServiceWrapper.init(context);
   extensionState.init(tokenService);
