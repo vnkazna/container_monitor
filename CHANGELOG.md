@@ -1,3 +1,13 @@
+## [3.22.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.22.0...v3.22.1) (2021-06-10)
+
+
+### Bug Fixes
+
+* each overview tab gets opened only once ([b4f7b1c](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b4f7b1c51d9b085762c7382b1ba7e704bfdd87e6))
+* limit commenting only to GitLab MRs ([40d2f11](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/40d2f111a9f20f9100535a9d625ae092c39f78cf))
+
+
+
 # [3.22.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.21.0...v3.22.0) (2021-06-08)
 
 
