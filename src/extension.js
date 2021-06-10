@@ -28,6 +28,7 @@ const {
   createComment,
 } = require('./commands/mr_discussion_commands');
 const { fileDecorationProvider } = require('./review/file_decoration_provider');
+const { fileDecorationProvider: dp } = require('./review/comment_file_decoration_provider');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -120,6 +121,7 @@ const activate = context => {
   registerCiCompletion(context);
   gitExtensionWrapper.init();
   context.subscriptions.push(gitExtensionWrapper);
+  vscode.window.registerFileDecorationProvider(dp);
   vscode.window.registerFileDecorationProvider(fileDecorationProvider);
 };
 

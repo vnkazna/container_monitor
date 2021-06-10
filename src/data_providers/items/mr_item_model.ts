@@ -40,8 +40,10 @@ export class MrItemModel extends ItemModel {
       title: 'Show MR Overview',
     };
     const { mrVersion } = await this.repository.reloadMr(this.mr);
+    let urisWithComments: string[] = [];
     try {
-      await this.initializeMrDiscussions(mrVersion);
+      const threads = await this.initializeMrDiscussions(mrVersion);
+      urisWithComments = threads.map(t => t.uri);
     } catch (e) {
       handleError(
         new UserFriendlyError(
@@ -54,12 +56,12 @@ export class MrItemModel extends ItemModel {
     }
 
     const changedFiles = mrVersion.diffs.map(
-      d => new ChangedFileItem(this.mr, mrVersion, d, this.repository.rootFsPath),
+      d => new ChangedFileItem(this.mr, mrVersion, d, this.repository.rootFsPath, urisWithComments),
     );
     return [overview, ...changedFiles];
   }
 
-  private async initializeMrDiscussions(mrVersion: RestMrVersion): Promise<void> {
+  private async initializeMrDiscussions(mrVersion: RestMrVersion): Promise<GitLabCommentThread[]> {
     const commentController = vscode.comments.createCommentController(
       `gitlab-mr-${this.mr.references.full}`,
       this.mr.title,
@@ -76,7 +78,7 @@ export class MrItemModel extends ItemModel {
       issuable: this.mr,
     });
     const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
-    discussionsOnDiff.forEach(discussion => {
+    return discussionsOnDiff.map(discussion => {
       return GitLabCommentThread.createThread({
         commentController,
         repositoryRoot: this.repository.rootFsPath,

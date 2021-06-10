@@ -57,6 +57,10 @@ export class GitLabCommentThread {
     this.updateThreadContext();
   }
 
+  get uri(): string {
+    return this.vsThread.uri.toString();
+  }
+
   async toggleResolved(): Promise<void> {
     await this.gitlabService.setResolved(this.gqlDiscussion.replyId, !this.resolved);
     this.resolved = !this.resolved;

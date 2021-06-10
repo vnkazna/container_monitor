@@ -42,10 +42,9 @@ export class ChangedFileItem extends TreeItem {
     mrVersion: RestMrVersion,
     file: RestDiffFile,
     repositoryPath: string,
+    urisWithComments: string[],
   ) {
-    const changeType = getChangeType(file);
-    const query = new URLSearchParams([['changeType', changeType]]).toString();
-    super(Uri.file(file.new_path).with({ query }));
+    super(Uri.file(file.new_path));
     this.description = path
       .dirname(`/${file.new_path}`)
       .split('/')
@@ -84,6 +83,15 @@ export class ChangedFileItem extends TreeItem {
           commit: mrVersion.head_commit_sha,
         });
 
+    const changeType = getChangeType(file);
+    const hasComments =
+      urisWithComments.includes(baseFileUri.toString()) ||
+      urisWithComments.includes(headFileUri.toString());
+    const query = new URLSearchParams([
+      ['changeType', changeType],
+      ['hasComments', `${hasComments}`],
+    ]).toString();
+    this.resourceUri = this.resourceUri?.with({ query });
     this.command = {
       title: 'Show changes',
       command: VS_COMMANDS.DIFF,
