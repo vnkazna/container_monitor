@@ -48,6 +48,8 @@ class WebviewController {
 
   isDev = false;
 
+  openedPanels: Record<string, vscode.WebviewPanel | undefined> = {};
+
   init(context: vscode.ExtensionContext, isDev: boolean) {
     this.context = context;
     this.isDev = isDev;
@@ -144,7 +146,22 @@ class WebviewController {
       : { light: lightIssueIcon, dark: darkIssueIcon };
   }
 
-  async create(issuable: RestIssuable, repositoryRoot: string) {
+  async open(issuable: RestIssuable, repositoryRoot: string) {
+    const panelKey = `${repositoryRoot}-${issuable.id}`;
+    const openedPanel = this.openedPanels[panelKey];
+    if (openedPanel) {
+      openedPanel.reveal();
+      return openedPanel;
+    }
+    const newPanel = await this.create(issuable, repositoryRoot);
+    this.openedPanels[panelKey] = newPanel;
+    newPanel.onDidDispose(() => {
+      this.openedPanels[panelKey] = undefined;
+    });
+    return newPanel;
+  }
+
+  private async create(issuable: RestIssuable, repositoryRoot: string) {
     assert(this.context);
     const panel = this.createPanel(issuable);
     const html = this.replaceResources(panel);

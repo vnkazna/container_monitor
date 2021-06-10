@@ -77,7 +77,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.INSERT_SNIPPET]: insertSnippet,
     [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
     [USER_COMMANDS.REFRESH_SIDEBAR]: sidebar.refresh,
-    [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.create.bind(webviewController),
+    [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.open.bind(webviewController),
     [USER_COMMANDS.SHOW_OUTPUT]: () => outputChannel.show(),
     [USER_COMMANDS.RESOLVE_THREAD]: toggleResolved,
     [USER_COMMANDS.UNRESOLVE_THREAD]: toggleResolved,
