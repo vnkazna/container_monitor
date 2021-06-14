@@ -171,4 +171,8 @@ export class WrappedRepository {
   hasSameRootAs(repository: Repository): boolean {
     return this.rootFsPath === repository.rootUri.fsPath;
   }
+
+  getVersion() {
+    return this.getGitLabService().getVersion();
+  }
 }

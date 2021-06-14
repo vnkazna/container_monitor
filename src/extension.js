@@ -28,6 +28,7 @@ const {
   createComment,
 } = require('./commands/mr_discussion_commands');
 const { fileDecorationProvider } = require('./review/file_decoration_provider');
+const { checkVersion } = require('./utils/check_version');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -107,6 +108,9 @@ const registerCiCompletion = context => {
   context.subscriptions.push(subscription);
 };
 
+/**
+ * @param {vscode.ExtensionContext} context
+ */
 const activate = context => {
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
@@ -121,6 +125,8 @@ const activate = context => {
   gitExtensionWrapper.init();
   context.subscriptions.push(gitExtensionWrapper);
   vscode.window.registerFileDecorationProvider(fileDecorationProvider);
+
+  checkVersion(gitExtensionWrapper, context);
 };
 
 exports.activate = activate;
