@@ -20,8 +20,7 @@ const urlSemanticRelease =
 const customRules = {
   'header-max-length': [2, 'always', maximumLineLength],
   'body-leading-blank': [2, 'always'],
-  'body-max-length': [1, 'always', maximumLineLength],
-  'footer-max-length': [1, 'always', maximumLineLength],
+  'footer-leading-blank': [2, 'always'],
 };
 
 async function getMr() {
