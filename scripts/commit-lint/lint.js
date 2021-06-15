@@ -15,7 +15,7 @@ const {
 } = process.env;
 
 const urlSemanticRelease =
-  'https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/commits.md';
+  'https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/developer/commits.md';
 
 const customRules = {
   'header-max-length': [2, 'always', maximumLineLength],

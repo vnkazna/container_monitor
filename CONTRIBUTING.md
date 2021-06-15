@@ -39,7 +39,7 @@ Create a [new issue from the "Feature Proposal" template](https://gitlab.com/git
 
 ### Your First Code Contribution?
 
-Read about the extension architecture in [architecture.md](docs/architecture.md). This document explains how we structure our code and will help you orientate yourself in the codebase.
+Read about the extension architecture in [architecture.md](docs/developer/architecture.md). This document explains how we structure our code and will help you orientate yourself in the codebase.
 
 For newcomers to the project, you can take a look at issues labelled as `Accepting merge requests`
 as available [here](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues?label_name[]=Accepting%20merge%20requests).
@@ -50,7 +50,7 @@ For general information how to develop and debug VS Code Extensions, please see 
 
 The following instructions will help you run the GitLab Workflow Extension locally.
 
-Please review our [Coding guidelines](docs/coding-guidelines.md) before writing new code.
+Please review our [Coding guidelines](docs/developer/coding-guidelines.md) before writing new code.
 
 #### Step - 1 : Installation Prerequisites
 
@@ -111,7 +111,7 @@ To run tests, open terminal within the project folder and run following:
 npm test
 ```
 
-See also [how to write automated tests](docs/writing-tests.md).
+See also [how to write automated tests](docs/developer/writing-tests.md).
 
 #### Step - 7 : Run linter
 
@@ -128,4 +128,4 @@ Steps to opening a merge request to contribute code to GitLab Workflow is simila
 You develop in a separate branch of your own fork and the merge request should have a related issue open in the project.
 Any Merge Request you wish to open in order to contribute to GitLab Workflow, be sure you have followed through the steps from [Configuring Development Environment](#configuring-development-environment).
 
-In this project, we don't [close issues automatically when the MR gets merged](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically). Instead, we close the issues when the MR change is [released](docs/release-process.md). Please replace `Closes #<issueId>` in the MR description with `Relates to #<issueId>`.
+In this project, we don't [close issues automatically when the MR gets merged](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically). Instead, we close the issues when the MR change is [released](docs/developer/release-process.md). Please replace `Closes #<issueId>` in the MR description with `Relates to #<issueId>`.
