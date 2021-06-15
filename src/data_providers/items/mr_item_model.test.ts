@@ -87,5 +87,16 @@ describe('MrItemModel', () => {
       item.dispose();
       expect(commentController.dispose).toHaveBeenCalled();
     });
+
+    it('when we create comment controller for the same MR, we dispose the previously created controller', async () => {
+      await item.getChildren();
+
+      expect(commentController.dispose).not.toHaveBeenCalled();
+
+      // simulates another MR item opening the same MR
+      await item.getChildren();
+
+      expect(commentController.dispose).toHaveBeenCalled();
+    });
   });
 });

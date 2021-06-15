@@ -8,6 +8,7 @@ import { UserFriendlyError } from '../../errors/user_friendly_error';
 import { GitLabCommentThread } from '../../review/gitlab_comment_thread';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
 import { WrappedRepository } from '../../git/wrapped_repository';
+import { commentControllerProvider } from '../../review/comment_controller_provider';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
@@ -60,17 +61,15 @@ export class MrItemModel extends ItemModel {
   }
 
   private async initializeMrDiscussions(mrVersion: RestMrVersion): Promise<void> {
-    const commentController = vscode.comments.createCommentController(
-      `gitlab-mr-${this.mr.references.full}`,
+    const gitlabService = this.repository.getGitLabService();
+    const userCanComment = await gitlabService.canUserCommentOnMr(this.mr);
+
+    const commentController = commentControllerProvider.borrowCommentController(
+      this.mr.references.full,
       this.mr.title,
+      userCanComment ? new CommentingRangeProvider(this.mr, mrVersion) : undefined,
     );
     this.setDisposableChildren([commentController]);
-
-    const gitlabService = this.repository.getGitLabService();
-
-    if (await gitlabService.canUserCommentOnMr(this.mr)) {
-      commentController.commentingRangeProvider = new CommentingRangeProvider(this.mr, mrVersion);
-    }
 
     const discussions = await gitlabService.getDiscussions({
       issuable: this.mr,

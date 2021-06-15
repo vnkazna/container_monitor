@@ -124,6 +124,7 @@ describe('MR Review', () => {
           thread = { uri, range, comments };
           return thread;
         },
+        dispose: () => {},
       };
       sandbox.stub(vscode.comments, 'createCommentController').returns(commentController);
     });
