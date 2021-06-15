@@ -60,7 +60,7 @@ async function run() {
 
   if (process.env.CI && onlineVariablesJson !== existingVariablesJson) {
     console.error(
-      '❌ ./src/utils/ci_variables.json has changed, go to https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/ci-variables.md.',
+      '❌ ./src/utils/ci_variables.json has changed, go to https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/developer/ci-variables.md.',
     );
     process.exit(1);
   }
