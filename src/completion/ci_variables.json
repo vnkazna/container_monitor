@@ -124,12 +124,20 @@
     "description": "Only available if the job is executed in a disposable environment (something that is created only for this job and disposed of/destroyed after the execution - all executors except `shell` and `ssh`). `true` when available."
   },
   {
+    "name": "CI_ENVIRONMENT_ACTION",
+    "description": "The action annotation specified for this job's environment. Available if [`environment:action`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentaction) is set. Can be `start`, `prepare`, or `stop`."
+  },
+  {
     "name": "CI_ENVIRONMENT_NAME",
     "description": "The name of the environment for this job. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentname) is set."
   },
   {
     "name": "CI_ENVIRONMENT_SLUG",
     "description": "The simplified version of the environment name, suitable for inclusion in DNS, URLs, Kubernetes labels, and so on. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentname) is set. The slug is [truncated to 24 characters](https://gitlab.com/gitlab-org/gitlab/-/issues/20941)."
+  },
+  {
+    "name": "CI_ENVIRONMENT_TIER",
+    "description": "The [deployment tier of the environment](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../environments/index.md#deployment-tier-of-environments) for this job."
   },
   {
     "name": "CI_ENVIRONMENT_URL",
@@ -337,7 +345,7 @@
   },
   {
     "name": "CI_PROJECT_CONFIG_PATH",
-    "description": "(Deprecated) The CI configuration path for the project. [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/321334) in GitLab 13.10. [Removal planned](https://gitlab.com/gitlab-org/gitlab/-/issues/322807) for GitLab 14.0."
+    "description": "[Removed](https://gitlab.com/gitlab-org/gitlab/-/issues/322807) in GitLab 14.0. Use `CI_CONFIG_PATH`."
   },
   {
     "name": "CI_PROJECT_DIR",
