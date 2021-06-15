@@ -71,7 +71,7 @@ To use this extension, you need to create a GitLab Personal Access Token and giv
 ### Step 1: Create your Personal Access Token
 
 - If you are using
-  - GitLab.com [click to open Personal Access Tokens page](https://gitlab.com/profile/personal_access_tokens).
+  - GitLab.com [click to open Personal Access Tokens page](https://gitlab.com/-/profile/personal_access_tokens).
   - Self-managed GitLab instance go to **Settings** and select **Access Tokens** on the left navigation menu
 - On **Add a personal access token** form:
   - Give a name to your token.
