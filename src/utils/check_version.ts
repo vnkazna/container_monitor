@@ -8,31 +8,37 @@ export const getVersionForEachRepo = async (
   context: vscode.ExtensionContext,
 ): Promise<void> => {
   const DO_NOT_SHOW_AGAIN_TEXT = 'Do not show again';
+  const toSegments = (version?: string) => {
+    const match = version?.match(/\d+/g) || [];
+    return match.map(Number);
+  };
+  const minimumSegments = toSegments(MINIMUM_VERSION);
 
   await Promise.all(
     gitExtensionWrapper.repositories.map(async repo => {
-      const version = await repo.getVersion();
-      const versionMatch = version?.match(/\d+\.\d+/);
-      if (!versionMatch) {
-        log(`Could not match version from "${version}"`);
+      const repoVersion = await repo.getVersion();
+      const versionSegments = toSegments(repoVersion);
+      if (!versionSegments.length) {
+        log(`Could not match version from "${repoVersion}"`);
         return;
       }
 
-      const versionNumber = versionMatch[0];
-      const parsedVersionNumber = parseFloat(versionNumber);
+      const minimumVersionCheckPassed = minimumSegments.every(
+        (n, i) => n <= (versionSegments[i] ?? 0),
+      );
 
-      if (parsedVersionNumber >= MINIMUM_VERSION) return;
+      if (minimumVersionCheckPassed) return;
 
-      const warningMessage = `This extension requires GitLab version ${MINIMUM_VERSION} or later. Repo "${repo.name}" is currently using ${version}.`;
+      const warningMessage = `This extension requires GitLab version ${MINIMUM_VERSION} or later. Repo "${repo.name}" is currently using ${repoVersion}.`;
 
       log(warningMessage);
 
-      // if (!context.workspaceState.get(DO_NOT_SHOW_VERSION_WARNING)) {
-      //   const action = await vscode.window.showErrorMessage(warningMessage, DO_NOT_SHOW_AGAIN_TEXT);
+      if (!context.workspaceState.get(DO_NOT_SHOW_VERSION_WARNING)) {
+        const action = await vscode.window.showErrorMessage(warningMessage, DO_NOT_SHOW_AGAIN_TEXT);
 
-      //   if (action === DO_NOT_SHOW_AGAIN_TEXT)
-      //     await context.workspaceState.update(DO_NOT_SHOW_VERSION_WARNING, true);
-      // }
+        if (action === DO_NOT_SHOW_AGAIN_TEXT)
+          await context.workspaceState.update(DO_NOT_SHOW_VERSION_WARNING, true);
+      }
     }),
   ).catch(error => log(error));
 };
