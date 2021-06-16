@@ -1,3 +1,12 @@
+## [3.23.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.23.0...v3.23.1) (2021-06-16)
+
+
+### Bug Fixes
+
+* temporarily disable version warning ([3252b73](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/3252b739b31a89cbdac14998b20b12f0a2a678cc))
+
+
+
 # [3.23.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.22.1...v3.23.0) (2021-06-16)
 
 
