@@ -27,12 +27,12 @@ export const getVersionForEachRepo = async (
 
       log(warningMessage);
 
-      if (!context.workspaceState.get(DO_NOT_SHOW_VERSION_WARNING)) {
-        const action = await vscode.window.showErrorMessage(warningMessage, DO_NOT_SHOW_AGAIN_TEXT);
+      // if (!context.workspaceState.get(DO_NOT_SHOW_VERSION_WARNING)) {
+      //   const action = await vscode.window.showErrorMessage(warningMessage, DO_NOT_SHOW_AGAIN_TEXT);
 
-        if (action === DO_NOT_SHOW_AGAIN_TEXT)
-          await context.workspaceState.update(DO_NOT_SHOW_VERSION_WARNING, true);
-      }
+      //   if (action === DO_NOT_SHOW_AGAIN_TEXT)
+      //     await context.workspaceState.update(DO_NOT_SHOW_VERSION_WARNING, true);
+      // }
     }),
   ).catch(error => log(error));
 };
