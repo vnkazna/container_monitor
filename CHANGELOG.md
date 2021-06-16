@@ -1,3 +1,18 @@
+# [3.23.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.22.1...v3.23.0) (2021-06-16)
+
+
+### Bug Fixes
+
+* **readme:** correct link to PAT settings ([f86a61c](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/f86a61cbe18464fe13be3bc74ba533661850a2f4))
+* **welcome screen:** update link to personal access token settings ([e59b91d](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/e59b91dd237bd847b9dd1a38be40ab82ae2d2081))
+
+
+### Features
+
+* warn users about out of date GitLab version ([0337ad0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0337ad0e5dd2ee04626748d5dbd871e2c41c089d))
+
+
+
 ## [3.22.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.22.0...v3.22.1) (2021-06-10)
 
 
