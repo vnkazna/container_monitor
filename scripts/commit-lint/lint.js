@@ -21,6 +21,7 @@ const customRules = {
   'header-max-length': [2, 'always', maximumLineLength],
   'body-leading-blank': [2, 'always'],
   'footer-leading-blank': [2, 'always'],
+  'subject-case': [0],
 };
 
 async function getMr() {
