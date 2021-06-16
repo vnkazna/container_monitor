@@ -7,4 +7,5 @@ export const DELETED = 'deleted';
 export const RENAMED = 'renamed';
 export const MODIFIED = 'modified';
 export const DO_NOT_SHOW_VERSION_WARNING = 'DO_NOT_SHOW_VERSION_WARNING';
-export const MINIMUM_VERSION = 13.5;
+// NOTE: This needs to _always_ be a 3 digits
+export const MINIMUM_VERSION = '13.5.0';
