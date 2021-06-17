@@ -50,6 +50,7 @@ describe('check_version', () => {
       ${'13.6.0-pre'}
       ${'13.6.0-pre-1'}
       ${'13.12.4'}
+      ${'14.0.0'}
       ${'abc13.5def'}
     `('gets $version successfully', async ({ version }) => {
       mockedRepositories = [createMockRepo(`${version}`)];
