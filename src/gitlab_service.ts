@@ -444,7 +444,7 @@ export async function handlePipelineAction(action: string, repositoryRoot: strin
     }
 
     try {
-      const { response } = await fetch(endpoint, 'POST');
+      const { response } = await fetch(repositoryRoot, endpoint, 'POST');
       return response;
     } catch (e) {
       throw new UserFriendlyError(`Failed to ${action} pipeline.`, e);
