@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { coerce, gte } from 'semver';
 import { DO_NOT_SHOW_VERSION_WARNING, MINIMUM_VERSION } from '../constants';
 import { GitExtensionWrapper } from '../git/git_extension_wrapper';
 import { log } from '../log';
@@ -8,26 +9,21 @@ export const getVersionForEachRepo = async (
   context: vscode.ExtensionContext,
 ): Promise<void> => {
   const DO_NOT_SHOW_AGAIN_TEXT = 'Do not show again';
-  const toSegments = (version?: string) => {
-    const match = version?.match(/\d+/g) || [];
-    return match.map(Number);
-  };
-  const minimumSegments = toSegments(MINIMUM_VERSION);
 
   await Promise.all(
     gitExtensionWrapper.repositories.map(async repo => {
       const repoVersion = await repo.getVersion();
-      const versionSegments = toSegments(repoVersion);
-      if (!versionSegments.length) {
-        log(`Could not match version from "${repoVersion}"`);
+      if (!repoVersion) {
+        log('No version returned.');
         return;
       }
 
-      const minimumVersionCheckPassed = minimumSegments.every(
-        (n, i) => n <= (versionSegments[i] ?? 0),
-      );
-
-      if (minimumVersionCheckPassed) return;
+      const version = coerce(repoVersion);
+      if (!version) {
+        log(`Could not match version from "${repoVersion}"`);
+        return;
+      }
+      if (gte(version, MINIMUM_VERSION)) return;
 
       const warningMessage = `This extension requires GitLab version ${MINIMUM_VERSION} or later. Repo "${repo.name}" is currently using ${repoVersion}.`;
 

@@ -731,6 +731,7 @@
     "@types/jest": "^26.0.20",
     "@types/node": "^13.13.45",
     "@types/request-promise": "^4.1.47",
+    "@types/semver": "^7.3.6",
     "@types/sinon": "^9.0.11",
     "@types/temp": "^0.8.34",
     "@types/vscode": "^1.52.0",
@@ -764,6 +765,7 @@
     "https-proxy-agent": "^5.0.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.6",
+    "semver": "^7.3.5",
     "url": "^0.11.0"
   }
 }
