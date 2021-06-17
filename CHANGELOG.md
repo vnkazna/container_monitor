@@ -1,3 +1,13 @@
+## [3.23.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.23.1...v3.23.2) (2021-06-17)
+
+
+### Bug Fixes
+
+* minimum version check ([a937eb3](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/a937eb3221b9537dca763507a07d08dd1af9b0fc))
+* prevent duplicate comments and comment controllers ([bf0773e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bf0773e78f9dd337d1acdcd2225d815bf61e75c6))
+
+
+
 ## [3.23.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.23.0...v3.23.1) (2021-06-16)
 
 
