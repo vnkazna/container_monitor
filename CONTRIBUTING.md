@@ -62,8 +62,8 @@ and configured, if not, do that first! If already done, proceed ahead.
 *  [NodeJS](https://nodejs.org/en/)
    *  Version is specified in [`.tool-versions`](.tool-versions))
    *  We use the same major node version as VS Code
-   *  You can use [`asdf`](https://asdf-vm.com/#/) to manage your node version
-*  [Npm](https://www.npmjs.com/get-npm)
+   *  Please use [`asdf`](https://asdf-vm.com/#/) with the [`nodejs` plugin](https://github.com/asdf-vm/asdf-nodejs) to manage your node version
+*  [Npm](https://www.npmjs.com/get-npm) (installed automatically by the `asdf` `nodejs` plugin)
 
 #### Step - 2 : Fork and Clone
 
