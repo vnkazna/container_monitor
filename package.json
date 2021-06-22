@@ -169,6 +169,10 @@
         "command": "gl.createComment",
         "title": "Add comment now",
         "category": "GitLab"
+      },
+      {
+        "command": "gl.checkoutMrBranch",
+        "title": "Checkout MR branch"
       }
     ],
     "menus": {
@@ -199,6 +203,10 @@
         },
         {
           "command": "gl.createComment",
+          "when": "false"
+        },
+        {
+          "command": "gl.checkoutMrBranch",
           "when": "false"
         },
         {
@@ -279,6 +287,12 @@
           "command": "gl.refreshSidebar",
           "when": "view =~ /(currentBranchInfo|issuesAndMrs)/",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "gl.checkoutMrBranch",
+          "when": "view =~ /issuesAndMrs/ && viewItem == mr-item-from-branch"
         }
       ],
       "comments/comment/title": [

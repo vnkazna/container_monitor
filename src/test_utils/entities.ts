@@ -32,6 +32,8 @@ export const mr: RestMr = {
   sha: '69ad609e8891b8aa3db85a35cd2c5747705bd76a',
   source_project_id: 9999,
   target_project_id: 9999,
+  source_branch: 'feature-a',
+  target_branch: 'main',
 };
 
 export const diffFile: RestDiffFile = {
