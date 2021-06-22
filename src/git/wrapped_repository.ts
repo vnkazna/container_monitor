@@ -79,6 +79,25 @@ export class WrappedRepository {
     return preferredRemote || branchRemote || firstRemote || 'origin';
   }
 
+  async fetch(): Promise<void> {
+    await this.rawRepository.fetch();
+  }
+
+  async checkout(branchName: string): Promise<void> {
+    await this.rawRepository.checkout(branchName);
+
+    assert(
+      this.rawRepository.state.HEAD,
+      "We can't read repository HEAD. We suspect that your `git head` command fails and we can't continue till it succeeds",
+    );
+
+    const currentBranchName = this.rawRepository.state.HEAD.name;
+    assert(
+      currentBranchName === branchName,
+      `The branch name after the checkout (${currentBranchName}) is not the branch that the extension tried to check out (${branchName}). Inspect your repository before making any more changes.`,
+    );
+  }
+
   getRemoteByName(remoteName: string): GitRemote {
     const remoteUrl = this.rawRepository.state.remotes.find(r => r.name === remoteName)?.fetchUrl;
     assert(remoteUrl, `could not find any URL for git remote with name '${this.remoteName}'`);

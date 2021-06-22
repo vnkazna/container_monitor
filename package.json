@@ -292,7 +292,7 @@
       "view/item/context": [
         {
           "command": "gl.checkoutMrBranch",
-          "when": "view =~ /issuesAndMrs/ && viewItem == mr-item-from-branch"
+          "when": "view =~ /issuesAndMrs/ && viewItem == mr-item-from-same-project"
         }
       ],
       "comments/comment/title": [

@@ -1,100 +1,96 @@
 import * as vscode from 'vscode';
-import * as sidebar from '../sidebar.js';
-import { GitExtension, Repository } from '../api/git';
 import { MrItemModel } from '../data_providers/items/mr_item_model';
-import { anotherWorkspace, mr, workspace } from '../test_utils/entities';
-import { createFakeRepository, FakeGitExtension } from '../test_utils/fake_git_extension';
 import { checkoutMrBranch } from './checkout_mr_branch';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { WrappedRepository } from '../git/wrapped_repository';
+import { mr } from '../test_utils/entities';
+import { GitErrorCodes } from '../api/git';
 
-jest.mock('../sidebar.js');
-vscode.window.showInformationMessage = jest.fn();
-vscode.window.showErrorMessage = jest.fn();
+describe('checkout MR branch', () => {
+  let mrItemModel: MrItemModel;
 
-describe('MR branch commands', () => {
-  describe('Checkout branch by Merge request', () => {
-    let commandData: MrItemModel;
+  let wrappedRepository: WrappedRepository;
 
-    let fakeExtension: FakeGitExtension;
+  beforeEach(() => {
+    const mockRepository: Partial<WrappedRepository> = {
+      fetch: jest.fn().mockResolvedValue(undefined),
+      checkout: jest.fn().mockResolvedValue(undefined),
+      lastCommitSha: mr.sha,
+    };
+    wrappedRepository = mockRepository as WrappedRepository;
+  });
 
-    let firstWorkspace: GitLabWorkspace;
-    let secondWorkspace: GitLabWorkspace;
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    let firstRepository: Repository;
-    let secondRepository: Repository;
-
+  describe('with branch from the same project', () => {
     beforeEach(() => {
-      firstWorkspace = { ...workspace };
-      secondWorkspace = { ...anotherWorkspace };
+      const mrFromTheSameProject = {
+        ...mr,
+        source_project_id: 123,
+        target_project_id: 123,
+        source_branch_name: 'feature-a',
+      };
+      mrItemModel = new MrItemModel(mrFromTheSameProject, wrappedRepository);
     });
 
-    afterEach(() => {
-      (vscode.window.showInformationMessage as jest.Mock).mockReset();
-      (vscode.window.showWarningMessage as jest.Mock).mockReset();
+    it('checks out the local branch', async () => {
+      await checkoutMrBranch(mrItemModel);
+
+      expect(wrappedRepository.fetch).toBeCalled();
+      expect(wrappedRepository.checkout).toBeCalledWith('feature-a');
     });
 
-    describe('If merge request from local branch', () => {
-      describe('Basic functionality', () => {
-        beforeEach(() => {
-          firstRepository = createFakeRepository(firstWorkspace.uri);
-          secondRepository = createFakeRepository(secondWorkspace.uri);
+    it('shows a success message', async () => {
+      await checkoutMrBranch(mrItemModel);
 
-          fakeExtension = new FakeGitExtension(firstRepository, secondRepository);
-          jest
-            .spyOn(gitExtensionWrapper, 'Extension', 'get')
-            .mockReturnValue((fakeExtension as unknown) as GitExtension);
+      expect(vscode.window.showInformationMessage).toBeCalledWith('Branch changed to feature-a');
+    });
 
-          commandData = new MrItemModel(mr, firstWorkspace);
+    it('rejects with an error if error occurred', async () => {
+      (wrappedRepository.checkout as jest.Mock).mockRejectedValue(new Error('error'));
 
-          checkoutByMRFromLocalBranch(commandData);
-        });
+      await expect(checkoutMrBranch(mrItemModel)).rejects.toEqual(new Error('error'));
+    });
 
-        it('(local-branch) Branch fetch message', () => {
-          expect((vscode.window.showInformationMessage as jest.Mock).mock.calls[0]).toEqual([
-            'Fetching branches...',
-          ]);
-        });
-
-        it('(local-branch) Was checkout', async () => {
-          await expect(firstRepository.checkout).toBeCalled();
-        });
-
-        it('(local-branch) Was fetching before checkout', async () => {
-          await expect(firstRepository.checkout).toBeCalled();
-          expect(firstRepository.fetch).toBeCalled();
-        });
-
-        it('(local-branch) There were no error messages', () => {
-          expect(vscode.window.showErrorMessage).not.toBeCalled();
-        });
-
-        it('(local-branch) Sidebar was refreshed', () => {
-          expect(sidebar.refresh).toBeCalled();
-        });
-
-        it('(local-branch) Message about success', () => {
-          const callsCount = (vscode.window.showInformationMessage as jest.Mock).mock.calls.length;
-          expect(
-            (vscode.window.showInformationMessage as jest.Mock).mock.calls[callsCount - 1],
-          ).toEqual([`Branch successfully changed to ${mr.source_branch}`]);
-        });
+    it('handles errors from the Git Extension', async () => {
+      (wrappedRepository.checkout as jest.Mock).mockRejectedValue({
+        gitErrorCode: GitErrorCodes.DirtyWorkTree,
+        stderr: 'Git standard output',
       });
-      describe('Multi-root Workspaces', () => {
-        beforeEach(() => {
-          commandData = new MrItemModel(mr, secondWorkspace);
 
-          checkoutByMRFromLocalBranch(commandData);
-        });
+      await checkoutMrBranch(mrItemModel);
 
-        it('(multi-root) The branch was checkout  from right repository', async () => {
-          await expect(secondRepository.checkout).toBeCalled();
-        });
+      expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(
+        'Checkout failed: Git standard output',
+        'See Git Log',
+      );
+    });
 
-        it('(multi-root) The branch from second repository was not checkout', async () => {
-          await expect(secondRepository.checkout).toBeCalled();
-          expect(firstRepository.fetch).not.toBeCalled();
-          expect(firstRepository.checkout).not.toBeCalled();
-        });
+    it('warns user that their local branch is not in sync', async () => {
+      (wrappedRepository as any).lastCommitSha = 'abdef'; // simulate local sha being different from mr.sha
+
+      await checkoutMrBranch(mrItemModel);
+
+      expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+        "Branch changed to feature-a, but it's out of sync with the remote branch. Synchronize it by pushing or pulling.",
+      );
+    });
+  });
+
+  describe('with branch from a forked project', () => {
+    beforeEach(() => {
+      const mrFromAFork = {
+        ...mr,
+        source_project_id: 123,
+        target_project_id: 456,
+        source_branch_name: 'feature-a',
+      };
+      mrItemModel = new MrItemModel(mrFromAFork, wrappedRepository);
+    });
+    it('throws an error', async () => {
+      await expect(checkoutMrBranch(mrItemModel)).rejects.toMatchObject({
+        message: 'this command is only available for same-project MRs',
       });
     });
   });

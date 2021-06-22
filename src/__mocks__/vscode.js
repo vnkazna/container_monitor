@@ -17,6 +17,7 @@ module.exports = {
     createCommentController: jest.fn(),
   },
   window: {
+    showInformationMessage: jest.fn(),
     showWarningMessage: jest.fn(),
     showErrorMessage: jest.fn(),
     createStatusBarItem: jest.fn(),

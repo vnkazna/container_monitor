@@ -45,4 +45,5 @@ export const PROGRAMMATIC_COMMANDS = {
 export const VS_COMMANDS = {
   DIFF: 'vscode.diff',
   OPEN: 'vscode.open',
+  GIT_SHOW_OUTPUT: 'git.showOutput',
 };

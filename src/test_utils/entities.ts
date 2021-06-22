@@ -33,7 +33,6 @@ export const mr: RestMr = {
   source_project_id: 9999,
   target_project_id: 9999,
   source_branch: 'feature-a',
-  target_branch: 'main',
 };
 
 export const diffFile: RestDiffFile = {
