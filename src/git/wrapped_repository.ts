@@ -57,7 +57,7 @@ function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
 }
 
 export interface CachedMr {
-  mr: RestIssuable;
+  mr: RestMr;
   mrVersion: RestMrVersion;
 }
 
@@ -99,7 +99,7 @@ export class WrappedRepository {
     return Boolean(this.cachedProject);
   }
 
-  async reloadMr(mr: RestIssuable): Promise<CachedMr> {
+  async reloadMr(mr: RestMr): Promise<CachedMr> {
     const mrVersion = await this.getGitLabService().getMrDiff(mr);
     const cachedMr = {
       mr,

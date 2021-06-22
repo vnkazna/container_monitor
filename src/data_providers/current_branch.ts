@@ -20,7 +20,7 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
 
   onDidChangeTreeData = this.eventEmitter.event;
 
-  private mr: RestIssuable | null = null;
+  private mr: RestMr | null = null;
 
   private disposableChildren: vscode.Disposable[] = [];
 
@@ -51,7 +51,7 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
     return new ExternalUrlItem(message, url);
   }
 
-  async createMrItem(mr: RestIssuable | null, repository: WrappedRepository) {
+  async createMrItem(mr: RestMr | null, repository: WrappedRepository) {
     if (!mr) {
       return new vscode.TreeItem('No merge request found');
     }

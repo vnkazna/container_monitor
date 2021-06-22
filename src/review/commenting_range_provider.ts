@@ -8,11 +8,11 @@ const lastLineEmpty = (document: vscode.TextDocument): boolean => {
   return lastLIne.isEmptyOrWhitespace;
 };
 export class CommentingRangeProvider implements vscode.CommentingRangeProvider {
-  private mr: RestIssuable;
+  private mr: RestMr;
 
   private mrVersion: RestMrVersion;
 
-  constructor(mr: RestIssuable, mrVersion: RestMrVersion) {
+  constructor(mr: RestMr, mrVersion: RestMrVersion) {
     this.mr = mr;
     this.mrVersion = mrVersion;
   }

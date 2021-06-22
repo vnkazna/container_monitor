@@ -32,7 +32,7 @@ const pathAndCommitFromPosition = (position: GqlTextPosition) => {
 interface CreateThreadOptions {
   commentController: vscode.CommentController;
   repositoryRoot: string;
-  mr: RestIssuable;
+  mr: RestMr;
   discussion: GqlTextDiffDiscussion;
   gitlabService: GitLabNewService;
 }
@@ -45,7 +45,7 @@ export class GitLabCommentThread {
     private vsThread: vscode.CommentThread,
     private gqlDiscussion: GqlTextDiffDiscussion,
     private gitlabService: GitLabNewService,
-    private mr: RestIssuable,
+    private mr: RestMr,
   ) {
     // SIDE-EFFECT
     this.vsThread.comments = gqlDiscussion.notes.nodes.map(note =>

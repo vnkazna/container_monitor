@@ -7,6 +7,7 @@ import * as gitLabService from './gitlab_service';
 import { createGitLabNewService } from './service_factory';
 import { logError } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
+import { isMr } from './utils/is_mr';
 
 const webviewResourcePaths = {
   appScriptUri: 'src/webview/dist/js/app.js',
@@ -140,8 +141,7 @@ class WebviewController {
     const lightMrIcon = getIconUri('light', 'merge_requests.svg');
     const darkIssueIcon = getIconUri('dark', 'issues.svg');
     const darkMrIcon = getIconUri('dark', 'merge_requests.svg');
-    const isMr = issuable.sha !== undefined;
-    return isMr
+    return isMr(issuable)
       ? { light: lightMrIcon, dark: darkMrIcon }
       : { light: lightIssueIcon, dark: darkIssueIcon };
   }

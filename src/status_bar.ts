@@ -142,7 +142,7 @@ export class StatusBar {
     this.firstRun = false;
   }
 
-  async fetchMrClosingIssue(mr: RestIssuable | null, repositoryRoot: string): Promise<void> {
+  async fetchMrClosingIssue(mr: RestMr | null, repositoryRoot: string): Promise<void> {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
       const issues = await gitLabService.fetchMRIssues(mr.iid, repositoryRoot);
@@ -162,7 +162,7 @@ export class StatusBar {
     }
   }
 
-  updateMrItem(mr: RestIssuable | null): void {
+  updateMrItem(mr: RestMr | null): void {
     if (!this.mrStatusBarItem) return;
     this.mrStatusBarItem.show();
     this.mrStatusBarItem.command = mr

@@ -375,7 +375,7 @@ export async function fetchLastJobsForCurrentBranch(
 
 export async function fetchOpenMergeRequestForCurrentBranch(
   repositoryRoot: string,
-): Promise<RestIssuable | null> {
+): Promise<RestMr | null> {
   const project = await fetchCurrentProject(repositoryRoot);
   const branchName = await gitExtensionWrapper
     .getRepository(repositoryRoot)
@@ -394,7 +394,7 @@ export async function fetchOpenMergeRequestForCurrentBranch(
 
 export async function fetchLastPipelineForMr(
   repositoryRoot: string,
-  mr: RestIssuable,
+  mr: RestMr,
 ): Promise<RestPipeline | null> {
   const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
   const { response: pipelines } = await fetch(repositoryRoot, path);
@@ -405,7 +405,7 @@ export async function fetchPipelineAndMrForCurrentBranch(
   repositoryRoot: string,
 ): Promise<{
   pipeline: RestPipeline | null;
-  mr: RestIssuable | null;
+  mr: RestMr | null;
 }> {
   // TODO: implement more granular approach to errors (deciding between expected and critical)
   // This can be done when we migrate the code to gitlab_new_service.ts

@@ -21,7 +21,7 @@ export const issue: RestIssuable = {
   name: 'Issuable Name',
 };
 
-export const mr: RestIssuable = {
+export const mr: RestMr = {
   ...issue,
   id: 2,
   iid: 2000,
@@ -29,6 +29,7 @@ export const mr: RestIssuable = {
   references: {
     full: 'gitlab-org/gitlab!2000',
   },
+  sha: '69ad609e8891b8aa3db85a35cd2c5747705bd76a',
 };
 
 export const diffFile: RestDiffFile = {
