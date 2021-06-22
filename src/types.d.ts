@@ -23,6 +23,8 @@ interface RestIssuable {
 
 interface RestMr extends RestIssuable {
   sha: string;
+  source_project_id: number;
+  target_project_id: number;
 }
 
 interface RestMrVersion {

@@ -58,6 +58,7 @@ export class MrItemModel extends ItemModel {
     if (author.avatar_url) {
       item.iconPath = vscode.Uri.parse(author.avatar_url);
     }
+    item.contextValue = `mr-item-from-${this.isFromFork ? 'fork' : 'same-project'}`;
     return item;
   }
 
@@ -120,5 +121,9 @@ export class MrItemModel extends ItemModel {
         this.mr,
       );
     });
+  }
+
+  get isFromFork(): boolean {
+    return this.mr.target_project_id !== this.mr.source_project_id;
   }
 }

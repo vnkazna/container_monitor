@@ -30,6 +30,8 @@ export const mr: RestMr = {
     full: 'gitlab-org/gitlab!2000',
   },
   sha: '69ad609e8891b8aa3db85a35cd2c5747705bd76a',
+  source_project_id: 9999,
+  target_project_id: 9999,
 };
 
 export const diffFile: RestDiffFile = {
