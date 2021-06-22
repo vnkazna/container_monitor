@@ -51,22 +51,20 @@ export class CustomQueryItemModel extends ItemModel {
     const { MR, ISSUE, SNIPPET, EPIC, VULNERABILITY } = CustomQueryType;
     switch (this.customQuery.type) {
       case MR: {
-        const mrModels = issues.map((mr: RestIssuable) => new MrItemModel(mr, this.repository));
+        const mrModels = issues.map((mr: RestMr) => new MrItemModel(mr, this.repository));
         this.setDisposableChildren(mrModels);
         return mrModels;
       }
       case ISSUE:
-        return issues.map(
-          (issue: RestIssuable) => new IssueItem(issue, this.repository.rootFsPath),
-        );
+        return issues.map((issue: RestMr) => new IssueItem(issue, this.repository.rootFsPath));
       case SNIPPET:
         return issues.map(
-          (snippet: RestIssuable) =>
+          (snippet: RestMr) =>
             new ExternalUrlItem(`$${snippet.id} · ${snippet.title}`, snippet.web_url),
         );
       case EPIC:
         return issues.map(
-          (epic: RestIssuable) => new ExternalUrlItem(`&${epic.iid} · ${epic.title}`, epic.web_url),
+          (epic: RestMr) => new ExternalUrlItem(`&${epic.iid} · ${epic.title}`, epic.web_url),
         );
       case VULNERABILITY:
         return issues.map((v: RestVulnerability) => new VulnerabilityItem(v));

@@ -203,7 +203,7 @@ export class GitLabNewService {
   }
 
   // This method has to use REST API till https://gitlab.com/gitlab-org/gitlab/-/issues/280803 gets done
-  async getMrDiff(mr: RestIssuable): Promise<RestMrVersion> {
+  async getMrDiff(mr: RestMr): Promise<RestMrVersion> {
     const versionsUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions`;
     const versionsResult = await crossFetch(versionsUrl, this.fetchOptions);
     if (!versionsResult.ok) {
@@ -278,14 +278,14 @@ export class GitLabNewService {
     return discussions.nodes.map(n => this.addHostToUrl(n));
   }
 
-  async canUserCommentOnMr(issuable: RestIssuable): Promise<boolean> {
-    const projectPath = getProjectPath(issuable);
+  async canUserCommentOnMr(mr: RestMr): Promise<boolean> {
+    const projectPath = getProjectPath(mr);
     const queryOptions: MrPermissionsQueryOptions = {
       projectPath,
-      iid: String(issuable.iid),
+      iid: String(mr.iid),
     };
     const result = await this.client.request(getMrPermissionsQuery, queryOptions);
-    assert(result?.project?.mergeRequest, `MR ${issuable.references.full} was not found.`);
+    assert(result?.project?.mergeRequest, `MR ${mr.references.full} was not found.`);
     return Boolean(result.project.mergeRequest.userPermissions?.createNote);
   }
 
@@ -369,7 +369,7 @@ export class GitLabNewService {
    * This method is used only as a replacement of optimistic locking when updating a note.
    * We request the latest note to validate that it hasn't changed since we last saw it.
    */
-  private async getMrNote(mr: RestIssuable, noteId: number): Promise<RestNote> {
+  private async getMrNote(mr: RestMr, noteId: number): Promise<RestNote> {
     const noteUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/notes/${noteId}`;
     const result = await crossFetch(noteUrl, this.fetchOptions);
     if (!result.ok) {
@@ -382,7 +382,7 @@ export class GitLabNewService {
     noteGqlId: string,
     body: string,
     originalBody: string,
-    mr: RestIssuable,
+    mr: RestMr,
   ): Promise<void> {
     const latestNote = await this.getMrNote(mr, getRestIdFromGraphQLId(noteGqlId));
     // This check is the best workaround we can do in the lack of optimistic locking

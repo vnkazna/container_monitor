@@ -29,7 +29,7 @@ const looksLikeImage = (filePath: string) =>
   imageExtensions.includes(path.extname(filePath).toLowerCase());
 
 export class ChangedFileItem extends TreeItem {
-  mr: RestIssuable;
+  mr: RestMr;
 
   mrVersion: RestMrVersion;
 
@@ -37,12 +37,7 @@ export class ChangedFileItem extends TreeItem {
 
   file: RestDiffFile;
 
-  constructor(
-    mr: RestIssuable,
-    mrVersion: RestMrVersion,
-    file: RestDiffFile,
-    repositoryPath: string,
-  ) {
+  constructor(mr: RestMr, mrVersion: RestMrVersion, file: RestDiffFile, repositoryPath: string) {
     const changeType = getChangeType(file);
     const query = new URLSearchParams([['changeType', changeType]]).toString();
     super(Uri.file(file.new_path).with({ query }));

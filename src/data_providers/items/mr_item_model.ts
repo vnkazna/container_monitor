@@ -16,7 +16,7 @@ const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextD
 };
 
 export class MrItemModel extends ItemModel {
-  constructor(readonly mr: RestIssuable, readonly repository: WrappedRepository) {
+  constructor(readonly mr: RestMr, readonly repository: WrappedRepository) {
     super();
   }
 
