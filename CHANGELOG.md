@@ -6,11 +6,6 @@
 * pipeline actions not working ([363ea1d](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/363ea1dfaffc71488ec4736d7577843bd96897fb))
 
 
-### Reverts
-
-* Revert "chore: specify that GitLab Workflow doesn't support remote workspaces" ([53e3986](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/53e39867951ccfe86ea54274afaf332b380b2cf4))
-
-
 
 ## [3.23.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.23.1...v3.23.2) (2021-06-17)
 
