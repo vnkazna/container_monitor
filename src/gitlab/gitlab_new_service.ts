@@ -38,6 +38,7 @@ import {
 import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_diff_comment';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
 import { log, logError } from '../log';
+import { isMr } from '../utils/is_mr';
 
 interface CreateNoteResult {
   createNote: {
@@ -109,7 +110,6 @@ const updateNoteBodyMutation = gql`
 `;
 
 const getProjectPath = (issuable: RestIssuable) => issuable.references.full.split(/[#!]/)[0];
-const isMr = (issuable: RestIssuable) => Boolean(issuable.sha);
 const getIssuableGqlId = (issuable: RestIssuable) =>
   `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
 const getMrGqlId = (id: number) => `gid://gitlab/MergeRequest/${id}`;
