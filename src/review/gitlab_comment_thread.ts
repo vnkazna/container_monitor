@@ -5,6 +5,7 @@ import { GitLabComment } from './gitlab_comment';
 import { toReviewUri } from './review_uri';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';
 import { GqlNote, GqlTextDiffNote, GqlTextPosition } from '../gitlab/graphql/shared';
+import { commitFromPosition, pathFromPosition } from './gql_position_parser';
 
 const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
   const note = discussion.notes.nodes[0];
@@ -20,13 +21,6 @@ const commentRangeFromPosition = (position: GqlTextPosition): vscode.Range => {
   const glLine = position.oldLine ?? position.newLine;
   const vsPosition = new vscode.Position(glLine - 1, 0); // VS Code numbers lines starting with 0, GitLab starts with 1
   return new vscode.Range(vsPosition, vsPosition);
-};
-
-const pathAndCommitFromPosition = (position: GqlTextPosition) => {
-  const onOldVersion = position.oldLine !== null;
-  const path = onOldVersion ? position.oldPath : position.newPath;
-  const commit = onOldVersion ? position.diffRefs.baseSha : position.diffRefs.headSha;
-  return { path, commit };
 };
 
 interface CreateThreadOptions {
@@ -141,7 +135,8 @@ export class GitLabCommentThread {
     const { position } = firstNoteFrom(discussion);
     const vsThread = commentController.createCommentThread(
       toReviewUri({
-        ...pathAndCommitFromPosition(position),
+        path: pathFromPosition(position),
+        commit: commitFromPosition(position),
         repositoryRoot,
         projectId: mr.project_id,
         mrId: mr.id,
