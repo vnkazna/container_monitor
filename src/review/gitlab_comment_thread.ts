@@ -2,10 +2,8 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabComment } from './gitlab_comment';
-import { toReviewUri } from './review_uri';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';
-import { GqlNote, GqlTextDiffNote, GqlTextPosition } from '../gitlab/graphql/shared';
-import { commitFromPosition, pathFromPosition } from './gql_position_parser';
+import { GqlNote, GqlTextDiffNote } from '../gitlab/graphql/shared';
 
 const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
   const note = discussion.notes.nodes[0];
@@ -16,20 +14,6 @@ const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
 const isDiffNote = (note: GqlNote): note is GqlTextDiffNote => {
   return Boolean(note.position && note.position.positionType === 'text');
 };
-
-const commentRangeFromPosition = (position: GqlTextPosition): vscode.Range => {
-  const glLine = position.oldLine ?? position.newLine;
-  const vsPosition = new vscode.Position(glLine - 1, 0); // VS Code numbers lines starting with 0, GitLab starts with 1
-  return new vscode.Range(vsPosition, vsPosition);
-};
-
-interface CreateThreadOptions {
-  commentController: vscode.CommentController;
-  repositoryRoot: string;
-  mr: RestMr;
-  discussion: GqlTextDiffDiscussion;
-  gitlabService: GitLabNewService;
-}
 
 export class GitLabCommentThread {
   private resolved: boolean;
@@ -123,29 +107,5 @@ export class GitLabCommentThread {
     if (this.gqlDiscussion.resolvable && this.allowedToResolve()) {
       this.vsThread.contextValue = this.resolved ? 'resolved' : 'unresolved';
     }
-  }
-
-  static createThread({
-    commentController,
-    repositoryRoot,
-    mr,
-    discussion,
-    gitlabService,
-  }: CreateThreadOptions): GitLabCommentThread {
-    const { position } = firstNoteFrom(discussion);
-    const vsThread = commentController.createCommentThread(
-      toReviewUri({
-        path: pathFromPosition(position),
-        commit: commitFromPosition(position),
-        repositoryRoot,
-        projectId: mr.project_id,
-        mrId: mr.id,
-      }),
-      commentRangeFromPosition(position),
-      // the comments need to know about the thread, so we first
-      // create empty thread to be able to create comments
-      [],
-    );
-    return new GitLabCommentThread(vsThread, discussion, gitlabService, mr);
   }
 }

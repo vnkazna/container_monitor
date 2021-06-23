@@ -6,12 +6,9 @@ import {
 } from '../../test/integration/fixtures/graphql/discussions.js';
 import { GitLabComment } from './gitlab_comment';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
-import { mr, project } from '../test_utils/entities';
-import { GqlTextDiffNote, GqlTextPosition } from '../gitlab/graphql/shared';
+import { mr } from '../test_utils/entities';
+import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';
-import { fromReviewUri } from './review_uri';
-
-const TEST_ROOT = '/repositoryRoot';
 
 describe('GitLabCommentThread', () => {
   let gitlabCommentThread: GitLabCommentThread;
@@ -44,21 +41,13 @@ describe('GitLabCommentThread', () => {
   };
 
   const createGitLabCommentThread = (discussion: GqlTextDiffDiscussion) => {
-    const fakeCommentController: vscode.CommentController = {
-      id: 'id',
-      label: 'label',
-      dispose: () => undefined,
-      createCommentThread: (uri, range, comments) => {
-        vsCommentThread = {
-          uri,
-          range,
-          comments,
-          collapsibleState: vscode.CommentThreadCollapsibleState.Collapsed,
-          canReply: true,
-          dispose: jest.fn(),
-        };
-        return vsCommentThread;
-      },
+    vsCommentThread = {
+      uri: {} as any,
+      range: {} as any,
+      comments: {} as any,
+      collapsibleState: vscode.CommentThreadCollapsibleState.Collapsed,
+      canReply: true,
+      dispose: jest.fn(),
     };
     gitlabService = ({
       setResolved: jest.fn(),
@@ -66,13 +55,7 @@ describe('GitLabCommentThread', () => {
       updateNoteBody: jest.fn(),
       createNote: jest.fn(),
     } as unknown) as GitLabNewService;
-    gitlabCommentThread = GitLabCommentThread.createThread({
-      commentController: fakeCommentController,
-      repositoryRoot: TEST_ROOT,
-      mr,
-      discussion,
-      gitlabService,
-    });
+    gitlabCommentThread = new GitLabCommentThread(vsCommentThread, discussion, gitlabService, mr);
   };
 
   beforeEach(() => {
@@ -81,64 +64,6 @@ describe('GitLabCommentThread', () => {
 
   it('sets collapsible state on the VS thread', () => {
     expect(vsCommentThread.collapsibleState).toBe(vscode.CommentThreadCollapsibleState.Expanded);
-  });
-
-  it('takes position from the first note', () => {
-    expect(vsCommentThread.range.start.line).toBe(noteOnDiff.position.oldLine - 1); // vs code numbers lines from 0
-  });
-
-  describe('new thread URI', () => {
-    it('populates basic uri parameters', () => {
-      const { projectId, repositoryRoot, mrId } = fromReviewUri(vsCommentThread.uri);
-
-      expect(projectId).toBe(mr.project_id);
-      expect(mrId).toBe(mr.id);
-      expect(repositoryRoot).toBe(TEST_ROOT);
-    });
-
-    it('generates uri for discussion on old diff version', () => {
-      createGitLabCommentThread(
-        createGqlTextDiffDiscussion({
-          ...noteOnDiff,
-          position: {
-            ...noteOnDiff.position,
-            oldLine: 10, // comment is on the old version of the diff
-            newLine: null,
-            oldPath: 'old/path.js',
-          } as GqlTextPosition,
-        }),
-      );
-
-      const { commit, path } = fromReviewUri(vsCommentThread.uri);
-
-      expect(commit).toBe(noteOnDiff.position.diffRefs.baseSha);
-      expect(path).toBe('old/path.js');
-    });
-
-    it('generates uri for discussion on new diff version', () => {
-      createGitLabCommentThread(
-        createGqlTextDiffDiscussion({
-          ...noteOnDiff,
-          position: {
-            ...noteOnDiff.position,
-            oldLine: null,
-            newLine: 10, // comment is on the new version of the diff
-            newPath: 'new/path.js',
-          } as GqlTextPosition,
-        }),
-      );
-
-      const { commit, path } = fromReviewUri(vsCommentThread.uri);
-
-      expect(commit).toBe(noteOnDiff.position.diffRefs.headSha);
-      expect(path).toBe('new/path.js');
-    });
-  });
-
-  it('generates uri for the discussion', () => {
-    // TODO: improve the uri tests once we merge https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/192
-    const { baseSha } = noteOnDiff.position.diffRefs; // baseSha points to the commit that the MR started from (old lines)
-    expect(vsCommentThread.uri.query).toMatch(baseSha);
   });
 
   describe('allowing replies to the thread', () => {

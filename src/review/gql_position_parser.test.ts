@@ -1,4 +1,9 @@
-import { commitFromPosition, pathFromPosition } from './gql_position_parser';
+import * as vscode from 'vscode';
+import {
+  commentRangeFromPosition,
+  commitFromPosition,
+  pathFromPosition,
+} from './gql_position_parser';
 import { noteOnDiff } from '../../test/integration/fixtures/graphql/discussions.js';
 import { GqlTextPosition } from '../gitlab/graphql/shared';
 
@@ -6,7 +11,7 @@ const { position } = noteOnDiff;
 
 const oldPosition = {
   ...position,
-  oldLine: 1,
+  oldLine: 5,
   newLine: null,
   oldPath: 'oldPath.js',
   diffRefs: {
@@ -18,7 +23,7 @@ const oldPosition = {
 const newPosition = {
   ...position,
   oldLine: null,
-  newLine: 1,
+  newLine: 20,
   newPath: 'newPath.js',
   diffRefs: {
     ...position.diffRefs,
@@ -41,5 +46,16 @@ describe('commitFromPosition', () => {
   });
   it('returns headSha for new position', () => {
     expect(commitFromPosition(newPosition)).toBe('1234');
+  });
+});
+
+describe('commentRangeFromPosition', () => {
+  it('returns range with old line', () => {
+    const line = new vscode.Position(4, 0);
+    expect(commentRangeFromPosition(oldPosition)).toEqual(new vscode.Range(line, line));
+  });
+  it('returns headSha for new position', () => {
+    const line = new vscode.Position(19, 0);
+    expect(commentRangeFromPosition(newPosition)).toEqual(new vscode.Range(line, line));
   });
 });
