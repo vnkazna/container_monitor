@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { MrItemModel } from './mr_item_model';
-import { mr } from '../../test_utils/entities';
+import { mr, repository } from '../../test_utils/entities';
 import {
   discussionOnDiff,
   noteOnDiffTextSnippet,
@@ -8,6 +8,7 @@ import {
 } from '../../../test/integration/fixtures/graphql/discussions.js';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
 import { createWrappedRepository } from '../../test_utils/create_wrapped_repository';
+import { fromReviewUri } from '../../review/review_uri';
 
 const createCommentControllerMock = vscode.comments.createCommentController as jest.Mock;
 
@@ -50,14 +51,27 @@ describe('MrItemModel', () => {
       'gitlab-mr-gitlab-org/gitlab!2000',
       'Issuable Title',
     );
-    const [uri, range] = createCommentThreadMock.mock.calls[0];
-    expect(uri.path).toBe('src/webview/src/components/LabelNoteOld.vue');
+    const [_, range] = createCommentThreadMock.mock.calls[0];
     expect(range.start.line).toBe(47);
     expect(commentThread.comments.length).toBe(1);
     const firstComment = commentThread.comments[0];
     expect(firstComment.author.name).toBe('Tomas Vik');
     expect(firstComment.mode).toBe(vscode.CommentMode.Preview);
     expect(firstComment.body).toMatch(noteOnDiffTextSnippet);
+  });
+
+  it('should associate the thread with the correct URI', async () => {
+    await item.getChildren();
+
+    const [uri] = createCommentThreadMock.mock.calls[0];
+    const { mrId, projectId, repositoryRoot, commit, path } = fromReviewUri(uri);
+    expect(mrId).toBe(mr.id);
+    expect(projectId).toBe(mr.project_id);
+    expect(repositoryRoot).toBe(repository.rootFsPath);
+
+    const discussionPosition = discussionOnDiff.notes.nodes[0].position;
+    expect(commit).toBe(discussionPosition.diffRefs.baseSha);
+    expect(path).toBe(discussionPosition.oldPath);
   });
 
   describe('commenting range', () => {

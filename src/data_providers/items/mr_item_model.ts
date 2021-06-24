@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as assert from 'assert';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
 import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';
@@ -9,10 +10,38 @@ import { GitLabCommentThread } from '../../review/gitlab_comment_thread';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
 import { WrappedRepository } from '../../git/wrapped_repository';
 import { commentControllerProvider } from '../../review/comment_controller_provider';
+import { GqlTextDiffNote } from '../../gitlab/graphql/shared';
+import { toReviewUri } from '../../review/review_uri';
+import {
+  commentRangeFromPosition,
+  commitFromPosition,
+  pathFromPosition,
+} from '../../review/gql_position_parser';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
   return firstNote?.position?.positionType === 'text';
+};
+
+const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
+  const note = discussion.notes.nodes[0];
+  assert(note, 'discussion should contain at least one note');
+  return note;
+};
+
+const uriForDiscussion = (
+  repository: WrappedRepository,
+  mr: RestMr,
+  discussion: GqlTextDiffDiscussion,
+): vscode.Uri => {
+  const { position } = firstNoteFrom(discussion);
+  return toReviewUri({
+    path: pathFromPosition(position),
+    commit: commitFromPosition(position),
+    repositoryRoot: repository.rootFsPath,
+    projectId: mr.project_id,
+    mrId: mr.id,
+  });
 };
 
 export class MrItemModel extends ItemModel {
@@ -76,13 +105,20 @@ export class MrItemModel extends ItemModel {
     });
     const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
     discussionsOnDiff.forEach(discussion => {
-      return GitLabCommentThread.createThread({
-        commentController,
-        repositoryRoot: this.repository.rootFsPath,
-        mr: this.mr,
+      const { position } = firstNoteFrom(discussion);
+      const vsThread = commentController.createCommentThread(
+        uriForDiscussion(this.repository, this.mr, discussion),
+        commentRangeFromPosition(position),
+        // the comments need to know about the thread, so we first
+        // create empty thread to be able to create comments
+        [],
+      );
+      return new GitLabCommentThread(
+        vsThread,
         discussion,
-        gitlabService,
-      });
+        this.repository.getGitLabService(),
+        this.mr,
+      );
     });
   }
 }
