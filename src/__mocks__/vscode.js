@@ -21,6 +21,7 @@ module.exports = {
     showWarningMessage: jest.fn(),
     showErrorMessage: jest.fn(),
     createStatusBarItem: jest.fn(),
+    withProgress: jest.fn(),
   },
   commands: {
     executeCommand: jest.fn(),
@@ -43,4 +44,7 @@ module.exports = {
   },
   CancellationTokenSource: jest.fn(),
   ThemeColor: jest.fn(color => color),
+  ProgressLocation: {
+    Notification: 'Notification',
+  },
 };

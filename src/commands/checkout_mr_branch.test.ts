@@ -17,6 +17,7 @@ describe('checkout MR branch', () => {
       lastCommitSha: mr.sha,
     };
     wrappedRepository = mockRepository as WrappedRepository;
+    (vscode.window.withProgress as jest.Mock).mockImplementation((_, task) => task());
   });
 
   afterEach(() => {
