@@ -31,6 +31,7 @@ export const USER_COMMANDS = {
   CANCEL_EDITING_COMMENT: 'gl.cancelEditingComment',
   SUBMIT_COMMENT_EDIT: 'gl.submitCommentEdit',
   CREATE_COMMENT: 'gl.createComment',
+  CHECKOUT_MR_BRANCH: 'gl.checkoutMrBranch',
 };
 
 /*
@@ -44,4 +45,5 @@ export const PROGRAMMATIC_COMMANDS = {
 export const VS_COMMANDS = {
   DIFF: 'vscode.diff',
   OPEN: 'vscode.open',
+  GIT_SHOW_OUTPUT: 'git.showOutput',
 };

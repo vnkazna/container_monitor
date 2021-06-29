@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { MrItemModel } from './mr_item_model';
-import { mr, repository } from '../../test_utils/entities';
+import { mr } from '../../test_utils/entities';
 import {
   discussionOnDiff,
   noteOnDiffTextSnippet,
@@ -9,6 +9,7 @@ import {
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
 import { createWrappedRepository } from '../../test_utils/create_wrapped_repository';
 import { fromReviewUri } from '../../review/review_uri';
+import { WrappedRepository } from '../../git/wrapped_repository';
 
 const createCommentControllerMock = vscode.comments.createCommentController as jest.Mock;
 
@@ -18,6 +19,7 @@ describe('MrItemModel', () => {
   let canUserCommentOnMr = false;
   let commentController: any;
   let gitLabService: any;
+  let repository: WrappedRepository;
 
   const createCommentThreadMock = jest.fn();
 
@@ -27,7 +29,7 @@ describe('MrItemModel', () => {
       getMrDiff: jest.fn().mockResolvedValue({ diffs: [] }),
       canUserCommentOnMr: jest.fn(async () => canUserCommentOnMr),
     };
-    const repository = createWrappedRepository({
+    repository = createWrappedRepository({
       gitLabService,
     });
     item = new MrItemModel(mr, repository);
@@ -43,6 +45,24 @@ describe('MrItemModel', () => {
   afterEach(() => {
     createCommentControllerMock.mockReset();
     createCommentThreadMock.mockReset();
+  });
+
+  describe('MR item context', () => {
+    it('should return return correct context when MR comes from the same project', () => {
+      item = new MrItemModel(
+        { ...mr, source_project_id: 1234, target_project_id: 1234 },
+        repository,
+      );
+      expect(item.getTreeItem().contextValue).toBe('mr-item-from-same-project');
+    });
+
+    it('should return return correct context when MR comes from a fork', () => {
+      item = new MrItemModel(
+        { ...mr, source_project_id: 5678, target_project_id: 1234 },
+        repository,
+      );
+      expect(item.getTreeItem().contextValue).toBe('mr-item-from-fork');
+    });
   });
 
   it('should add comment thread to VS Code', async () => {

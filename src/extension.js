@@ -29,6 +29,7 @@ const {
 } = require('./commands/mr_discussion_commands');
 const { fileDecorationProvider } = require('./review/file_decoration_provider');
 const { checkVersion } = require('./utils/check_version');
+const { checkoutMrBranch } = require('./commands/checkout_mr_branch');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -87,6 +88,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CANCEL_EDITING_COMMENT]: cancelEdit,
     [USER_COMMANDS.SUBMIT_COMMENT_EDIT]: submitEdit,
     [USER_COMMANDS.CREATE_COMMENT]: createComment,
+    [USER_COMMANDS.CHECKOUT_MR_BRANCH]: checkoutMrBranch,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
