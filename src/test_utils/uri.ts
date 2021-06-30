@@ -54,7 +54,7 @@ export class Uri implements vscode.Uri {
   }
 
   toJSON(): string {
-    return JSON.stringify(this);
+    return JSON.stringify({ ...this });
   }
 
   static parse(stringUri: string): Uri {

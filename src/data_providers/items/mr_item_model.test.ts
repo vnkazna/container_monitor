@@ -6,10 +6,12 @@ import {
   noteOnDiffTextSnippet,
   multipleNotes,
 } from '../../../test/integration/fixtures/graphql/discussions.js';
+import * as mrVersion from '../../../test/integration/fixtures/rest/mr_version.json';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
 import { createWrappedRepository } from '../../test_utils/create_wrapped_repository';
 import { fromReviewUri } from '../../review/review_uri';
 import { WrappedRepository } from '../../git/wrapped_repository';
+import { CHANGE_TYPE_QUERY_KEY, HAS_COMMENTS_QUERY_KEY } from '../../constants';
 
 const createCommentControllerMock = vscode.comments.createCommentController as jest.Mock;
 
@@ -94,6 +96,14 @@ describe('MrItemModel', () => {
     expect(path).toBe(discussionPosition.oldPath);
   });
 
+  it('should return changed file items as children', async () => {
+    gitLabService.getMrDiff = jest.fn().mockResolvedValue(mrVersion);
+    const [overview, changedItem] = await item.getChildren();
+    expect(changedItem.resourceUri?.path).toBe('.deleted.yml');
+    expect(changedItem.resourceUri?.query).toMatch(`${CHANGE_TYPE_QUERY_KEY}=deleted`);
+    expect(changedItem.resourceUri?.query).toMatch(`${HAS_COMMENTS_QUERY_KEY}=false`);
+  });
+
   describe('commenting range', () => {
     it('should not add a commenting range provider if user does not have permission to comment', async () => {
       canUserCommentOnMr = false;
@@ -109,17 +119,6 @@ describe('MrItemModel', () => {
       await item.getChildren();
 
       expect(commentController.commentingRangeProvider).toBeInstanceOf(CommentingRangeProvider);
-    });
-
-    // this test ensures that we add comment controller to disposables before calling API.
-    it('comment controller can be disposed regardless of API failures', async () => {
-      gitLabService.getDiscussions = () => Promise.reject(new Error());
-
-      await item.getChildren();
-
-      expect(commentController.dispose).not.toHaveBeenCalled();
-      item.dispose();
-      expect(commentController.dispose).toHaveBeenCalled();
     });
 
     it('when we create comment controller for the same MR, we dispose the previously created controller', async () => {

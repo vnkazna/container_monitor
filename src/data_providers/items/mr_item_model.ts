@@ -62,17 +62,23 @@ export class MrItemModel extends ItemModel {
     return item;
   }
 
-  async getChildren(): Promise<vscode.TreeItem[]> {
-    const overview = new vscode.TreeItem('Overview');
-    overview.iconPath = new vscode.ThemeIcon('note');
-    overview.command = {
+  private get overviewItem() {
+    const result = new vscode.TreeItem('Overview');
+    result.iconPath = new vscode.ThemeIcon('note');
+    result.command = {
       command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
       arguments: [this.mr, this.repository.rootFsPath],
       title: 'Show MR Overview',
     };
-    const { mrVersion } = await this.repository.reloadMr(this.mr);
+    return result;
+  }
+
+  private async getMrDiscussions(): Promise<GqlTextDiffDiscussion[]> {
     try {
-      await this.initializeMrDiscussions(mrVersion);
+      const discussions = await this.repository.getGitLabService().getDiscussions({
+        issuable: this.mr,
+      });
+      return discussions.filter(isTextDiffDiscussion);
     } catch (e) {
       handleError(
         new UserFriendlyError(
@@ -83,14 +89,31 @@ export class MrItemModel extends ItemModel {
         ),
       );
     }
-
-    const changedFiles = mrVersion.diffs.map(
-      d => new ChangedFileItem(this.mr, mrVersion, d, this.repository.rootFsPath),
-    );
-    return [overview, ...changedFiles];
+    return [];
   }
 
-  private async initializeMrDiscussions(mrVersion: RestMrVersion): Promise<void> {
+  async getChildren(): Promise<vscode.TreeItem[]> {
+    const { mrVersion } = await this.repository.reloadMr(this.mr);
+    const discussions = await this.getMrDiscussions();
+
+    await this.addAllCommentsToVsCode(mrVersion, discussions);
+
+    const allUrisWithComments = discussions.map(d =>
+      uriForDiscussion(this.repository, this.mr, d).toString(),
+    );
+    const changedFiles = mrVersion.diffs.map(
+      diff =>
+        new ChangedFileItem(this.mr, mrVersion, diff, this.repository.rootFsPath, uri =>
+          allUrisWithComments.includes(uri.toString()),
+        ),
+    );
+    return [this.overviewItem, ...changedFiles];
+  }
+
+  private async addAllCommentsToVsCode(
+    mrVersion: RestMrVersion,
+    discussions: GqlTextDiffDiscussion[],
+  ): Promise<void> {
     const gitlabService = this.repository.getGitLabService();
     const userCanComment = await gitlabService.canUserCommentOnMr(this.mr);
 
@@ -101,11 +124,7 @@ export class MrItemModel extends ItemModel {
     );
     this.setDisposableChildren([commentController]);
 
-    const discussions = await gitlabService.getDiscussions({
-      issuable: this.mr,
-    });
-    const discussionsOnDiff = discussions.filter(isTextDiffDiscussion);
-    discussionsOnDiff.forEach(discussion => {
+    discussions.forEach(discussion => {
       const { position } = firstNoteFrom(discussion);
       const vsThread = commentController.createCommentThread(
         uriForDiscussion(this.repository, this.mr, discussion),

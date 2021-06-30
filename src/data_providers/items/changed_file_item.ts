@@ -1,10 +1,18 @@
-import { TreeItem, Uri } from 'vscode';
+import * as vscode from 'vscode';
 import { posix as path } from 'path';
 import { toReviewUri, ReviewParams } from '../../review/review_uri';
 import { PROGRAMMATIC_COMMANDS, VS_COMMANDS } from '../../command_names';
-import { ADDED, DELETED, RENAMED, MODIFIED } from '../../constants';
+import {
+  ADDED,
+  DELETED,
+  RENAMED,
+  MODIFIED,
+  CHANGE_TYPE_QUERY_KEY,
+  HAS_COMMENTS_QUERY_KEY,
+} from '../../constants';
 
 export type ChangeType = typeof ADDED | typeof DELETED | typeof RENAMED | typeof MODIFIED;
+export type HasCommentsFn = (reviewUri: vscode.Uri) => boolean;
 
 const getChangeType = (file: RestDiffFile): ChangeType => {
   if (file.new_file) return ADDED;
@@ -28,29 +36,56 @@ const imageExtensions = [
 const looksLikeImage = (filePath: string) =>
   imageExtensions.includes(path.extname(filePath).toLowerCase());
 
-export class ChangedFileItem extends TreeItem {
-  mr: RestMr;
+const getBaseAndHeadUri = (
+  mr: RestMr,
+  mrVersion: RestMrVersion,
+  file: RestDiffFile,
+  repositoryPath: string,
+) => {
+  const commonParams: ReviewParams = {
+    repositoryRoot: repositoryPath,
+    projectId: mr.project_id,
+    mrId: mr.id,
+  };
+  const emptyFileUri = toReviewUri(commonParams);
+  const baseFileUri = file.new_file
+    ? emptyFileUri
+    : toReviewUri({
+        ...commonParams,
+        path: file.old_path,
+        commit: mrVersion.base_commit_sha,
+      });
+  const headFileUri = file.deleted_file
+    ? emptyFileUri
+    : toReviewUri({
+        ...commonParams,
+        path: file.new_path,
+        commit: mrVersion.head_commit_sha,
+      });
+  return { baseFileUri, headFileUri };
+};
 
-  mrVersion: RestMrVersion;
-
-  repositoryPath: string;
-
-  file: RestDiffFile;
-
-  constructor(mr: RestMr, mrVersion: RestMrVersion, file: RestDiffFile, repositoryPath: string) {
-    const changeType = getChangeType(file);
-    const query = new URLSearchParams([['changeType', changeType]]).toString();
-    super(Uri.file(file.new_path).with({ query }));
+export class ChangedFileItem extends vscode.TreeItem {
+  constructor(
+    mr: RestMr,
+    mrVersion: RestMrVersion,
+    file: RestDiffFile,
+    repositoryPath: string,
+    hasComment: HasCommentsFn,
+  ) {
+    super(vscode.Uri.file(file.new_path));
     this.description = path
       .dirname(`/${file.new_path}`)
       .split('/')
       .slice(1)
       .join('/');
-    this.mr = mr;
-    this.mrVersion = mrVersion;
-    this.repositoryPath = repositoryPath;
-    this.file = file;
-
+    const { baseFileUri, headFileUri } = getBaseAndHeadUri(mr, mrVersion, file, repositoryPath);
+    const hasComments = hasComment(baseFileUri) || hasComment(headFileUri);
+    const query = new URLSearchParams([
+      [CHANGE_TYPE_QUERY_KEY, getChangeType(file)],
+      [HAS_COMMENTS_QUERY_KEY, String(hasComments)],
+    ]).toString();
+    this.resourceUri = this.resourceUri?.with({ query });
     if (looksLikeImage(file.old_path) || looksLikeImage(file.new_path)) {
       this.command = {
         title: 'Images are not supported',
@@ -58,27 +93,6 @@ export class ChangedFileItem extends TreeItem {
       };
       return;
     }
-    const commonParams: ReviewParams = {
-      repositoryRoot: repositoryPath,
-      projectId: mr.project_id,
-      mrId: mr.id,
-    };
-    const emptyFileUri = toReviewUri(commonParams);
-    const baseFileUri = file.new_file
-      ? emptyFileUri
-      : toReviewUri({
-          ...commonParams,
-          path: file.old_path,
-          commit: mrVersion.base_commit_sha,
-        });
-    const headFileUri = file.deleted_file
-      ? emptyFileUri
-      : toReviewUri({
-          ...commonParams,
-          path: file.new_path,
-          commit: mrVersion.head_commit_sha,
-        });
-
     this.command = {
       title: 'Show changes',
       command: VS_COMMANDS.DIFF,

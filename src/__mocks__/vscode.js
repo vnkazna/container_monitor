@@ -2,8 +2,10 @@ const { Uri } = require('../test_utils/uri');
 const { EventEmitter } = require('../test_utils/event_emitter');
 
 module.exports = {
-  TreeItem: function TreeItem(label, collapsibleState) {
-    return { label, collapsibleState };
+  TreeItem: function TreeItem(labelOrUri, collapsibleState) {
+    return typeof labelOrUri === 'string'
+      ? { label: labelOrUri, collapsibleState }
+      : { resourceUri: labelOrUri, collapsibleState };
   },
   ThemeIcon: function ThemeIcon(id) {
     return { id };
