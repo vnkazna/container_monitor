@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { MrItemModel } from '../data_providers/items/mr_item_model';
 import { VS_COMMANDS } from '../command_names';
-import { doNotAwait } from '../utils/do_not_await';
 
 const handleGitError = async (e: { stderr: string }) => {
   const SEE_GIT_LOG = 'See Git Log';
@@ -22,9 +21,14 @@ export const checkoutMrBranch = async (mrItemModel: MrItemModel): Promise<void> 
   );
   try {
     const { repository } = mrItemModel;
-    doNotAwait(vscode.window.showInformationMessage('Fetching branches...'));
-    await repository.fetch();
-    await repository.checkout(mr.source_branch);
+    await vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: `Checking out ${mr.source_branch}` },
+      async () => {
+        await repository.fetch();
+        await repository.checkout(mr.source_branch);
+      },
+    );
+
     if (repository.lastCommitSha !== mr.sha) {
       await vscode.window.showWarningMessage(
         `Branch changed to ${mr.source_branch}, but it's out of sync with the remote branch. Synchronize it by pushing or pulling.`,
