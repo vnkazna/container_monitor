@@ -1,3 +1,13 @@
+# [3.24.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.23.3...v3.24.0) (2021-06-30)
+
+
+### Features
+
+* indicate which changed files have MR discussions ([47f244b](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/47f244bc2252b9faacc31d1007d4c1e1d65c0e9d))
+* **view issues-and-mrs:** checkout local branch for merge request ([174a955](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/174a95575ca85e9db054c3ddfbf882c755cc309a))
+
+
+
 ## [3.23.3](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.23.2...v3.23.3) (2021-06-22)
 
 
