@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ADDED, DELETED, RENAMED, MODIFIED } from '../constants';
+import { ADDED, DELETED, RENAMED, MODIFIED, CHANGE_TYPE_QUERY_KEY } from '../constants';
 
 export const decorations: Record<string, vscode.FileDecoration | undefined> = {
   [ADDED]: {
@@ -19,11 +19,11 @@ export const decorations: Record<string, vscode.FileDecoration | undefined> = {
   },
 };
 
-export const fileDecorationProvider: vscode.FileDecorationProvider = {
+export const changeTypeDecorationProvider: vscode.FileDecorationProvider = {
   provideFileDecoration: uri => {
     if (uri.scheme === 'file') {
       const params = new URLSearchParams(uri.query);
-      const changeType = params.get('changeType');
+      const changeType = params.get(CHANGE_TYPE_QUERY_KEY);
       if (changeType) {
         return decorations[changeType];
       }

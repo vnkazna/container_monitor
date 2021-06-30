@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { fileDecorationProvider, decorations } from './file_decoration_provider';
-import { ADDED, DELETED, RENAMED, MODIFIED } from '../constants';
+import { changeTypeDecorationProvider, decorations } from './change_type_decoration_provider';
+import { ADDED, DELETED, RENAMED, MODIFIED, CHANGE_TYPE_QUERY_KEY } from '../constants';
 
 describe('FileDecoratorProvider', () => {
   it.each`
@@ -10,9 +10,9 @@ describe('FileDecoratorProvider', () => {
     ${RENAMED}  | ${decorations[RENAMED]}
     ${MODIFIED} | ${decorations[MODIFIED]}
   `('Correctly maps changeType to decorator', ({ changeType, decoration }) => {
-    const uri: vscode.Uri = vscode.Uri.file(`./test?changeType=${changeType}`);
+    const uri: vscode.Uri = vscode.Uri.file(`./test?${CHANGE_TYPE_QUERY_KEY}=${changeType}`);
     const { token } = new vscode.CancellationTokenSource();
-    const returnValue = fileDecorationProvider.provideFileDecoration(uri, token);
+    const returnValue = changeTypeDecorationProvider.provideFileDecoration(uri, token);
 
     expect(returnValue).toEqual(decoration);
   });

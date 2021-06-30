@@ -27,7 +27,8 @@ const {
   submitEdit,
   createComment,
 } = require('./commands/mr_discussion_commands');
-const { fileDecorationProvider } = require('./review/file_decoration_provider');
+const { hasCommentsDecorationProvider } = require('./review/has_comments_decoration_provider');
+const { changeTypeDecorationProvider } = require('./review/change_type_decoration_provider');
 const { checkVersion } = require('./utils/check_version');
 const { checkoutMrBranch } = require('./commands/checkout_mr_branch');
 
@@ -126,7 +127,8 @@ const activate = context => {
   registerCiCompletion(context);
   gitExtensionWrapper.init();
   context.subscriptions.push(gitExtensionWrapper);
-  vscode.window.registerFileDecorationProvider(fileDecorationProvider);
+  vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
+  vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
 
   checkVersion(gitExtensionWrapper, context);
 };
