@@ -14,6 +14,7 @@ export const queryGetSnippets = gql`
             nodes {
               name
               path
+              rawPath
             }
           }
         }
@@ -29,6 +30,7 @@ export interface GetSnippetsQueryOptions {
 export interface GqlBlob {
   name: string;
   path: string;
+  rawPath: string;
 }
 
 export interface GqlSnippet {

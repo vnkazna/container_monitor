@@ -28,7 +28,7 @@ describe('Insert snippet', async () => {
         'snippet content',
       ),
       createTextEndpoint(
-        '/projects/278964/snippets/222/files/master/test2.js/raw',
+        '/projects/278964/snippets/222/files/main/test2.js/raw',
         'second blob content',
       ),
       graphql.query('GetSnippets', (req, res, ctx) => {
