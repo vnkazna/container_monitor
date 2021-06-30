@@ -5,6 +5,7 @@
 
 * indicate which changed files have MR discussions ([47f244b](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/47f244bc2252b9faacc31d1007d4c1e1d65c0e9d))
 * **view issues-and-mrs:** checkout local branch for merge request ([174a955](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/174a95575ca85e9db054c3ddfbf882c755cc309a))
+  * Big thanks to [@Musisimaru](https://gitlab.com/Musisimaru) who designed the implementation in [MR !229](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/229) 👍
 
 
 
