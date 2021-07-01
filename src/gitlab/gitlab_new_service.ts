@@ -190,11 +190,18 @@ export class GitLabNewService {
     }));
   }
 
-  // TODO change this method to use GraphQL when https://gitlab.com/gitlab-org/gitlab/-/issues/260316 is done
+  // TODO change this method to use GraphQL once the lowest supported GitLab version is 14.1.0
   async getSnippetContent(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
+    const getBranch = (rawPath: string) => {
+      // raw path example: "/gitlab-org/gitlab-vscode-extension/-/snippets/111/raw/master/okr.md"
+      const result = rawPath.match(/\/-\/snippets\/\d+\/raw\/([^/]+)\//);
+      assert(result, `The rawPath is malformed ${rawPath}`);
+      return result[1];
+    };
     const projectId = getRestIdFromGraphQLId(snippet.projectId);
     const snippetId = getRestIdFromGraphQLId(snippet.id);
-    const url = `${this.instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/master/${blob.path}/raw`;
+    const branch = getBranch(blob.rawPath);
+    const url = `${this.instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/${branch}/${blob.path}/raw`;
     const result = await crossFetch(url, this.fetchOptions);
     if (!result.ok) {
       throw new FetchError(`Fetching snippet from ${url} failed`, result);
