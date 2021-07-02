@@ -62,7 +62,7 @@ describe('GitLab tree view for current branch', () => {
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
-        'Pipeline #47 passed · Finished 4 years ago',
+        'Pipeline #47',
         '!33824 · Web IDE - remove unused actions (mappings)',
         'No closing issue found',
       ],
@@ -75,7 +75,7 @@ describe('GitLab tree view for current branch', () => {
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
-        'Pipeline #47 passed · Finished 4 years ago',
+        'Pipeline #47',
         '!33824 · Web IDE - remove unused actions (mappings)',
         '#219925 · Change primary button for editing on files',
       ],
@@ -100,11 +100,7 @@ describe('GitLab tree view for current branch', () => {
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
-      [
-        'Pipeline #47 passed · Finished 4 years ago',
-        'No merge request found',
-        'No closing issue found',
-      ],
+      ['Pipeline #47', 'No merge request found', 'No closing issue found'],
     );
   });
 
@@ -114,7 +110,7 @@ describe('GitLab tree view for current branch', () => {
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
       [
-        'Pipeline #47 passed · Finished 4 years ago',
+        'Pipeline #47',
         '!33824 · Web IDE - remove unused actions (mappings)',
         'No closing issue found',
       ],

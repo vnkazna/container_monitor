@@ -54,7 +54,15 @@ interface RestVulnerability {
 }
 
 interface RestPipeline {
-  status: 'running' | 'pending' | 'success' | 'failed' | 'canceled' | 'skipped';
+  status:
+    | 'running'
+    | 'pending'
+    | 'success'
+    | 'failed'
+    | 'canceled'
+    | 'skipped'
+    | 'waiting_for_resource'
+    | 'preparing';
   updated_at: string;
   id: number;
   project_id: number;
@@ -62,9 +70,15 @@ interface RestPipeline {
 }
 
 interface RestJob {
+  id: number;
   name: string;
   created_at: string;
-  status: string;
+  started_at?: string;
+  finished_at?: string;
+  status: 'created' | 'pending' | 'running' | 'failed' | 'success' | 'canceled' | 'skipped';
+  stage: string;
+  allow_failure: boolean;
+  web_url: string;
 }
 // Incomplete reference of the GitLab user model
 interface RestUser {
