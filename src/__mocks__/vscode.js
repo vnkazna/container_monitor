@@ -23,8 +23,9 @@ module.exports = {
     showWarningMessage: jest.fn(),
     showErrorMessage: jest.fn(),
     createStatusBarItem: jest.fn(),
-    withProgress: jest.fn(),
+    showInputBox: jest.fn(),
     showQuickPick: jest.fn(),
+    withProgress: jest.fn(),
     createQuickPick: jest.fn(),
   },
   commands: {

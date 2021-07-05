@@ -33,6 +33,7 @@ export const USER_COMMANDS = {
   CREATE_COMMENT: 'gl.createComment',
   CHECKOUT_MR_BRANCH: 'gl.checkoutMrBranch',
   CLONE_WIKI: 'gl.cloneWiki',
+  CREATE_SNIPPET_PATCH: 'gl.createSnippetPatch',
 };
 
 /*
