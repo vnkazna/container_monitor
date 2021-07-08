@@ -24,6 +24,8 @@ module.exports = {
     showErrorMessage: jest.fn(),
     createStatusBarItem: jest.fn(),
     withProgress: jest.fn(),
+    showQuickPick: jest.fn(),
+    createQuickPick: jest.fn(),
   },
   commands: {
     executeCommand: jest.fn(),

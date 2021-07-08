@@ -9,6 +9,7 @@ export const fragmentProjectDetails = gql`
     sshUrlToRepo
     fullPath
     webUrl
+    wikiEnabled
     group {
       id
     }
@@ -88,6 +89,7 @@ export interface GqlProject {
   fullPath: string;
   webUrl: string;
   group?: GqlGroup;
+  wikiEnabled: boolean;
 }
 
 export interface GqlProjectResult<T> {

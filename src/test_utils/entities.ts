@@ -91,6 +91,7 @@ export const gqlProject: GqlProject = {
   group: {
     id: 'gid://gitlab/Group/9970',
   },
+  wikiEnabled: false,
 };
 
 export const project = new GitLabProject(gqlProject);
