@@ -25,9 +25,13 @@ export function parseGitRemote(remote: string, instanceUrl?: string): GitRemote 
   if (!host || !pathname) {
     return undefined;
   }
-
+  // The instance url might have a custom route, i.e. www.company.com/gitlab. This route is
+  // optional in the remote url. This regex extracts namespace and project from the remote
+  // url while ignoring any custom route, if present. For more information see:
+  // - https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/11
+  // - https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/103
   const pathRegExp = instanceUrl ? escapeForRegExp(getInstancePath(instanceUrl)) : '';
-  const match = pathname.match(`${pathRegExp}/:?(.+)/([^/]+?)(?:.git)?/?$`);
+  const match = pathname.match(`(?:${pathRegExp})?/:?(.+)/([^/]+?)(?:.git)?/?$`);
   if (!match) {
     return undefined;
   }
