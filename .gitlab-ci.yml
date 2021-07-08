@@ -3,6 +3,7 @@ include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
   - template: Secret-Detection.gitlab-ci.yml
+  - template: Code-Quality.gitlab-ci.yml
 
 # run the pipeline only on MRs, tags, and default branch
 workflow:
@@ -10,6 +11,19 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# copied from https://gitlab.com/gitlab-org/gitlab/blob/85ce47154749f4c66401627af6e452edef0e27bd/.gitlab/ci/global.gitlab-ci.yml#L275-285
+.use-docker-in-docker:
+  image: ${GITLAB_DEPENDENCY_PROXY}docker:${DOCKER_VERSION}
+  services:
+    - docker:${DOCKER_VERSION}-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  tags:
+    # See https://gitlab.com/gitlab-com/www-gitlab-com/-/issues/7019 for tag descriptions
+    - gitlab-org-docker
 
 default:
   tags:
@@ -82,6 +96,16 @@ test-webview:
     - cd src/webview
     - npm ci
     - npm run test
+
+code_quality:
+  extends:
+    - .use-docker-in-docker
+  artifacts:
+    paths: [gl-code-quality-report.json]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 .package:
   stage: package
