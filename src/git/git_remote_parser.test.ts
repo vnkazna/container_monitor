@@ -81,4 +81,17 @@ describe('git_remote_parser', () => {
       project: 'gitlab-vscode-extension',
     });
   });
+  // For more details see: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/103
+  it('should parse remote URLs without custom path even if the instance has custom path', () => {
+    expect(
+      parseGitRemote(
+        'git@example.com:fatihacet/gitlab-vscode-extension.git',
+        'https://example.com/gitlab',
+      ),
+    ).toEqual({
+      host: 'example.com',
+      namespace: 'fatihacet',
+      project: 'gitlab-vscode-extension',
+    });
+  });
 });
