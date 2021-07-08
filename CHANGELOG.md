@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * api calls fail when instance is on custom path ([0b487a6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0b487a62b76d160a95703080a89aea94694d6e3d))
+  * Implemented by [@malinke](https://gitlab.com/malinke) with [MR !303](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/303) 👍
 * inserting snippets not working for newly created snippets ([efaf1b7](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/efaf1b74acf42a6ab80a5f2a1d96e46da34722a0))
 
 
@@ -11,6 +12,7 @@
 
 * create snippet patch ([750bae4](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/750bae4b2b8616bdf424a96f248ee51439351a1a))
 * **gitclone:** add wiki repo clone support for git clone command ([621c396](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/621c3968083a7626436bed5be83613c3a409d33f))
+  * Implemented by [@tonka3000](https://gitlab.com/tonka3000) with [MR !292](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/292) 👍
 
 
 
