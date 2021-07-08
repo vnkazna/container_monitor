@@ -84,6 +84,10 @@
         "title": "GitLab: Open current project on GitLab"
       },
       {
+        "command": "gl.createSnippetPatch",
+        "title": "GitLab: Create snippet patch"
+      },
+      {
         "command": "gl.openCurrentPipeline",
         "title": "GitLab: Open current pipeline on GitLab"
       },
@@ -289,6 +293,10 @@
         {
           "command": "gl.cloneWiki",
           "when": "!gitlab:noToken"
+        },
+        {
+          "command": "gl.createSnippetPatch",
+          "when": "gitlab:validState"
         }
       ],
       "view/title": [

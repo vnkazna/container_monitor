@@ -4,20 +4,21 @@ import * as gitLabService from '../gitlab_service';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GitLabProject } from '../gitlab/gitlab_project';
 
-const visibilityOptions = [
-  {
-    label: 'Public',
-    type: 'public',
-  },
-  {
-    label: 'Internal',
-    type: 'internal',
-  },
-  {
-    label: 'Private',
-    type: 'private',
-  },
-];
+type VisibilityItem = vscode.QuickPickItem & { type: string };
+
+const PRIVATE_VISIBILITY_ITEM: VisibilityItem = {
+  label: '$(lock) Private',
+  type: 'private',
+  description: 'The snippet is visible only to project members.',
+};
+
+const PUBLIC_VISIBILITY_ITEM: VisibilityItem = {
+  label: '$(globe) Public',
+  type: 'public',
+  description: 'The snippet can be accessed without any authentication.',
+};
+
+export const VISIBILITY_OPTIONS = [PRIVATE_VISIBILITY_ITEM, PUBLIC_VISIBILITY_ITEM];
 
 const contextOptions = [
   {
@@ -82,7 +83,7 @@ export async function createSnippet() {
     return;
   }
 
-  const visibility = await vscode.window.showQuickPick(visibilityOptions);
+  const visibility = await vscode.window.showQuickPick(VISIBILITY_OPTIONS);
   if (!visibility) return;
 
   const context = await vscode.window.showQuickPick(contextOptions);
