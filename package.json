@@ -173,6 +173,11 @@
       {
         "command": "gl.checkoutMrBranch",
         "title": "Checkout MR branch"
+      },
+      {
+        "command": "gl.cloneWiki",
+        "title": "Clone Wiki",
+        "category": "GitLab"
       }
     ],
     "menus": {
@@ -280,6 +285,10 @@
         {
           "command": "gl.refreshSidebar",
           "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.cloneWiki",
+          "when": "!gitlab:noToken"
         }
       ],
       "view/title": [

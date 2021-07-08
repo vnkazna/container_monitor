@@ -39,4 +39,8 @@ export class GitLabProject {
   get groupRestId(): number | undefined {
     return this.gqlProject.group && getRestIdFromGraphQLId(this.gqlProject.group.id);
   }
+
+  get wikiEnabled(): boolean {
+    return this.gqlProject.wikiEnabled;
+  }
 }
