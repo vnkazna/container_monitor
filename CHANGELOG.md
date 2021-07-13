@@ -1,3 +1,12 @@
+# [3.26.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.25.0...v3.26.0) (2021-07-13)
+
+
+### Features
+
+* apply snippet patch ([2cc8a54](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/2cc8a541665d1c9befa7ec0e9e5f24abcec7be00))
+
+
+
 # [3.25.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.24.0...v3.25.0) (2021-07-08)
 
 
