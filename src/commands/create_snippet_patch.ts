@@ -4,6 +4,7 @@ import * as gitLabService from '../gitlab_service';
 import * as openers from '../openers';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { VISIBILITY_OPTIONS } from './create_snippet';
+import { PATCH_FILE_SUFFIX, PATCH_TITLE_PREFIX } from '../constants';
 
 const getSnippetPatchDescription = (
   branch: string,
@@ -43,10 +44,10 @@ export const createSnippetPatch = async (): Promise<void> => {
 
   const project = await repository.getProject();
   assert(project);
-  const patchFileName = `${name}.patch`;
+  const patchFileName = `${name}${PATCH_FILE_SUFFIX}`;
   const data = {
     id: project.restId,
-    title: `patch: ${name}`,
+    title: `${PATCH_TITLE_PREFIX}${name}`,
     description: getSnippetPatchDescription(
       await repository.getTrackingBranchName(),
       repository.lastCommitSha,

@@ -257,6 +257,18 @@ You can insert public and private project snippets. The insert supports [multi-f
 
 ![insert-multi-file-snippet](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/insert-multi-file-snippet.gif)
 
+### Create and apply snippet patch
+
+Creating a snippet patch is a great way to suggest a multi-file change during MR review.
+
+1. Locally check out the branch where you want to suggest changes.
+1. Edit the project's code.
+1. Run command `GitLab: Create snippet patch`. This stores the result of the `git diff` command in a GitLab snippet in your project.
+1. VS Code opens a GitLab web page with the snippet patch. The snippet's description contains instructions on how to apply the patch.
+1. Other team members can apply the snippet using the `GitLab: Apply snippet patch` command.
+
+![Create and apply snippet patch](https://gitlab.com/gitlab-org/gitlab-vscode-extension/raw/main/src/assets/_snippet-patch.mp4)
+
 ### Compare with master
 
 You can see changes in your branch by comparing with `master` and see them on GitLab.

@@ -12,3 +12,5 @@ export const MINIMUM_VERSION = '13.5.0';
 
 export const CHANGE_TYPE_QUERY_KEY = 'changeType';
 export const HAS_COMMENTS_QUERY_KEY = 'hasComments';
+export const PATCH_TITLE_PREFIX = 'patch: ';
+export const PATCH_FILE_SUFFIX = '.patch';

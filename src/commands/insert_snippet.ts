@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
 
-const pickSnippet = async (snippets: GqlSnippet[]) => {
+export const pickSnippet = async (snippets: GqlSnippet[]) => {
   const quickPickItems = snippets.map(s => ({
     label: s.title,
     description: s.description,

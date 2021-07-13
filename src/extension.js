@@ -33,6 +33,7 @@ const { checkVersion } = require('./utils/check_version');
 const { checkoutMrBranch } = require('./commands/checkout_mr_branch');
 const { cloneWiki } = require('./commands/clone_wiki');
 const { createSnippetPatch } = require('./commands/create_snippet_patch');
+const { applySnippetPatch } = require('./commands/apply_snippet_patch');
 
 vscode.gitLabWorkflow = {
   sidebarDataProviders: [],
@@ -94,6 +95,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CHECKOUT_MR_BRANCH]: checkoutMrBranch,
     [USER_COMMANDS.CLONE_WIKI]: cloneWiki,
     [USER_COMMANDS.CREATE_SNIPPET_PATCH]: createSnippetPatch,
+    [USER_COMMANDS.APPLY_SNIPPET_PATCH]: applySnippetPatch,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
