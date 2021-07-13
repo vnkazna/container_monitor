@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import crossFetch from 'cross-fetch';
 import { GitLabNewService } from './gitlab_new_service';
-import * as snippetsResponse from '../../test/integration/fixtures/graphql/snippets.json';
+import { testSnippet1 } from '../../test/integration/fixtures/graphql/snippets.js';
 
 jest.mock('graphql-request');
 jest.mock('../services/token_service');
@@ -32,7 +32,7 @@ describe('gitlab_new_service', () => {
     `('parses the repository branch from blob rawPath', async ({ rawPath, branch }) => {
       (crossFetch as jest.Mock).mockResolvedValue({ ok: true, text: () => '' });
       const service = new GitLabNewService('https://example.com');
-      const snippet = snippetsResponse.project.snippets.nodes[0];
+      const snippet = testSnippet1;
       const blob = snippet.blobs.nodes[0];
 
       await service.getSnippetContent(snippet, { ...blob, rawPath });

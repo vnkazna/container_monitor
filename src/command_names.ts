@@ -34,6 +34,7 @@ export const USER_COMMANDS = {
   CHECKOUT_MR_BRANCH: 'gl.checkoutMrBranch',
   CLONE_WIKI: 'gl.cloneWiki',
   CREATE_SNIPPET_PATCH: 'gl.createSnippetPatch',
+  APPLY_SNIPPET_PATCH: 'gl.applySnippetPatch',
 };
 
 /*

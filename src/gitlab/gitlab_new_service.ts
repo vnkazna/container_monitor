@@ -168,9 +168,10 @@ export class GitLabNewService {
     return results.projects?.nodes?.map(project => new GitLabProject(project)) || [];
   }
 
-  async getSnippets(projectPath: string): Promise<GqlSnippet[]> {
+  async getSnippets(projectPath: string, afterCursor?: string): Promise<GqlSnippet[]> {
     const options: GetSnippetsQueryOptions = {
       projectPath,
+      afterCursor,
     };
     const result = await this.client.request<GetSnippetsQueryResult>(queryGetSnippets, options);
 
@@ -184,10 +185,16 @@ export class GitLabNewService {
     }
     const snippets = project.snippets.nodes;
     // each snippet has to contain projectId so we can make REST API call for the content
-    return snippets.map(sn => ({
+    const snippetsWithProject = snippets.map(sn => ({
       ...sn,
       projectId: project.id,
     }));
+    return project.snippets.pageInfo?.hasNextPage
+      ? [
+          ...snippetsWithProject,
+          ...(await this.getSnippets(projectPath, project.snippets.pageInfo.endCursor)),
+        ]
+      : snippetsWithProject;
   }
 
   // TODO change this method to use GraphQL once the lowest supported GitLab version is 14.1.0

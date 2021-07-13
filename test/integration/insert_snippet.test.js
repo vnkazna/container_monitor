@@ -5,7 +5,7 @@ const simpleGit = require('simple-git');
 const { graphql } = require('msw');
 const { insertSnippet } = require('../../src/commands/insert_snippet');
 const { tokenService } = require('../../src/services/token_service');
-const snippetsResponse = require('./fixtures/graphql/snippets.json');
+const { snippetsResponse } = require('./fixtures/graphql/snippets');
 const { getServer, createTextEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL, REMOTE } = require('./test_infrastructure/constants');
 const {

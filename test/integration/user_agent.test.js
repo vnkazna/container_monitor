@@ -6,7 +6,7 @@ const { API_URL_PREFIX, GITLAB_URL } = require('./test_infrastructure/constants'
 const { tokenService } = require('../../src/services/token_service');
 const gitLabService = require('../../src/gitlab_service');
 const { GitLabNewService } = require('../../src/gitlab/gitlab_new_service');
-const snippetsResponse = require('./fixtures/graphql/snippets.json');
+const { snippetsResponse } = require('./fixtures/graphql/snippets');
 const packageJson = require('../../package.json');
 const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 
