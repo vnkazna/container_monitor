@@ -5,6 +5,10 @@
 
 * apply snippet patch ([2cc8a54](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/2cc8a541665d1c9befa7ec0e9e5f24abcec7be00))
 
+### Documentation
+
+* **welcome:** Prefill token name and scopes on welcome screen ([4b9aa6c](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/commit/4b9aa6c58a9f84a4f998ff86bf492b0df09bd52f))
+  * Implemented by [@espadav8](https://gitlab.com/espadav8) with [MR !305](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/305) 👍
 
 
 # [3.25.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.24.0...v3.25.0) (2021-07-08)
