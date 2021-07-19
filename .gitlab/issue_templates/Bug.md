@@ -1,19 +1,24 @@
 <!---
 Please read this!
 
-The [minimum required GitLab version](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/README.md#minimum-supported-version) is GitLab 13.4. If you're experiencing an issue and running a self-managed version older than 13.4, please test against GitLab.com prior to submitting your bug report.
-
 Before opening a new issue, make sure to search for keywords in the issues
 filtered by the "bug" label:
 
 - https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues?label_name%5B%5D=bug
 
 and verify the issue you're about to submit isn't a duplicate.
-
-If you are facing issues around configuring Token from your GitLab.com account, see the list of already addressed Token related issues:
-
-https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues?scope=all&utf8=%E2%9C%93&state=closed&label_name[]=token-issue
 --->
+
+### Checklist
+
+<!-- Please test the latest versions, that will remove the possibility that you see a bug that is fixed in a newer version. -->
+
+- [ ] I'm using the latest version of the extension ([see the latest version in the right column of this page](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow))
+  - Extension version: *Put your extension version here*
+- [ ] I'm using the latest VS Code version ([find the latest version here](https://github.com/microsoft/vscode/releases))
+  - VS Code version: *Put your VS Code version here*
+- [ ] I'm using a supported version of GitLab ([see README for the supported version](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/README.md#minimum-supported-version))
+  - GitLab version: *Put your GitLab version here, or say "happens on `gitlab.com`"*
 
 ### Summary
 
