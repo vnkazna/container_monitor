@@ -85,7 +85,7 @@
   },
   {
     "name": "CI_DEBUG_TRACE",
-    "description": "`true` if [debug logging (tracing)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/README.md#debug-logging) is enabled."
+    "description": "`true` if [debug logging (tracing)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/index.md#debug-logging) is enabled."
   },
   {
     "name": "CI_DEFAULT_BRANCH",
@@ -125,15 +125,15 @@
   },
   {
     "name": "CI_ENVIRONMENT_ACTION",
-    "description": "The action annotation specified for this job's environment. Available if [`environment:action`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentaction) is set. Can be `start`, `prepare`, or `stop`."
+    "description": "The action annotation specified for this job's environment. Available if [`environment:action`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/index.md#environmentaction) is set. Can be `start`, `prepare`, or `stop`."
   },
   {
     "name": "CI_ENVIRONMENT_NAME",
-    "description": "The name of the environment for this job. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentname) is set."
+    "description": "The name of the environment for this job. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/index.md#environmentname) is set."
   },
   {
     "name": "CI_ENVIRONMENT_SLUG",
-    "description": "The simplified version of the environment name, suitable for inclusion in DNS, URLs, Kubernetes labels, and so on. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmentname) is set. The slug is [truncated to 24 characters](https://gitlab.com/gitlab-org/gitlab/-/issues/20941)."
+    "description": "The simplified version of the environment name, suitable for inclusion in DNS, URLs, Kubernetes labels, and so on. Available if [`environment:name`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/index.md#environmentname) is set. The slug is [truncated to 24 characters](https://gitlab.com/gitlab-org/gitlab/-/issues/20941)."
   },
   {
     "name": "CI_ENVIRONMENT_TIER",
@@ -141,7 +141,7 @@
   },
   {
     "name": "CI_ENVIRONMENT_URL",
-    "description": "The URL of the environment for this job. Available if [`environment:url`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#environmenturl) is set."
+    "description": "The URL of the environment for this job. Available if [`environment:url`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/index.md#environmenturl) is set."
   },
   {
     "name": "CI_EXTERNAL_PULL_REQUEST_IID",
@@ -205,11 +205,11 @@
   },
   {
     "name": "CI_JOB_STATUS",
-    "description": "The status of the job as each runner stage is executed. Use with [`after_script`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#after_script). Can be `success`, `failed`, or `canceled`."
+    "description": "The status of the job as each runner stage is executed. Use with [`after_script`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/index.md#after_script). Can be `success`, `failed`, or `canceled`."
   },
   {
     "name": "CI_JOB_TOKEN",
-    "description": "A token to authenticate with [certain API endpoints](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../../api/README.md#gitlab-cicd-job-token). The token is valid as long as the job is running."
+    "description": "A token to authenticate with [certain API endpoints](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../../api/index.md#gitlab-cicd-job-token). The token is valid as long as the job is running."
   },
   {
     "name": "CI_JOB_URL",
@@ -218,6 +218,10 @@
   {
     "name": "CI_KUBERNETES_ACTIVE",
     "description": "Only available if the pipeline has a Kubernetes cluster available for deployments. `true` when available."
+  },
+  {
+    "name": "CI_MERGE_REQUEST_APPROVED",
+    "description": "Approval status of the merge request. `true` when [merge request approvals](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../../user/project/merge_requests/approvals/index.md) is available and the merge request has been approved."
   },
   {
     "name": "CI_MERGE_REQUEST_ASSIGNEES",
@@ -273,7 +277,7 @@
   },
   {
     "name": "CI_MERGE_REQUEST_SOURCE_BRANCH_SHA",
-    "description": "The HEAD SHA of the source branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)**"
+    "description": "The HEAD SHA of the source branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../pipelines/pipelines_for_merged_results.md). **(PREMIUM)**"
   },
   {
     "name": "CI_MERGE_REQUEST_SOURCE_PROJECT_ID",
@@ -293,7 +297,7 @@
   },
   {
     "name": "CI_MERGE_REQUEST_TARGET_BRANCH_SHA",
-    "description": "The HEAD SHA of the target branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../merge_request_pipelines/pipelines_for_merged_results/index.md). **(PREMIUM)**"
+    "description": "The HEAD SHA of the target branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../pipelines/pipelines_for_merged_results.md). **(PREMIUM)**"
   },
   {
     "name": "CI_MERGE_REQUEST_TITLE",
@@ -301,11 +305,11 @@
   },
   {
     "name": "CI_NODE_INDEX",
-    "description": "The index of the job in the job set. Only available if the job uses [`parallel`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#parallel)."
+    "description": "The index of the job in the job set. Only available if the job uses [`parallel`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/index.md#parallel)."
   },
   {
     "name": "CI_NODE_TOTAL",
-    "description": "The total number of instances of this job running in parallel. Set to `1` if the job does not use [`parallel`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/README.md#parallel)."
+    "description": "The total number of instances of this job running in parallel. Set to `1` if the job does not use [`parallel`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../yaml/index.md#parallel)."
   },
   {
     "name": "CI_OPEN_MERGE_REQUESTS",
@@ -333,11 +337,11 @@
   },
   {
     "name": "CI_PIPELINE_SOURCE",
-    "description": "How the pipeline was triggered. Can be `push`, `web`, `schedule`, `api`, `external`, `chat`, `webide`, `merge_request_event`, `external_pull_request_event`, `parent_pipeline`, [`trigger`, or `pipeline`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/README.md#authentication-tokens)."
+    "description": "How the pipeline was triggered. Can be `push`, `web`, `schedule`, `api`, `external`, `chat`, `webide`, `merge_request_event`, `external_pull_request_event`, `parent_pipeline`, [`trigger`, or `pipeline`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/index.md#authentication-tokens)."
   },
   {
     "name": "CI_PIPELINE_TRIGGERED",
-    "description": "`true` if the job was [triggered](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/README.md)."
+    "description": "`true` if the job was [triggered](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/index.md)."
   },
   {
     "name": "CI_PIPELINE_URL",
@@ -513,6 +517,6 @@
   },
   {
     "name": "TRIGGER_PAYLOAD",
-    "description": "The webhook payload. Only available when a pipeline is [triggered with a webhook](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/README.md#using-webhook-payload-in-the-triggered-pipeline)."
+    "description": "The webhook payload. Only available when a pipeline is [triggered with a webhook](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/index.md#using-webhook-payload-in-the-triggered-pipeline)."
   }
 ]
