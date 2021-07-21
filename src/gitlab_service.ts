@@ -349,6 +349,19 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
 }
 
+function sortAndDeduplicate(jobs: RestJob[]): RestJob[] {
+  const alreadyProcessedJob = new Set();
+  return jobs
+    .sort((one, two) => (one.created_at > two.created_at ? -1 : 1))
+    .filter(job => {
+      if (alreadyProcessedJob.has(job.name)) {
+        return false;
+      }
+      alreadyProcessedJob.add(job.name);
+      return true;
+    });
+}
+
 export async function fetchLastJobsForCurrentBranch(
   repositoryRoot: string,
   pipeline: RestPipeline,
@@ -357,20 +370,7 @@ export async function fetchLastJobsForCurrentBranch(
     repositoryRoot,
     `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
   );
-  let jobs: RestJob[] = response;
-
-  // Gitlab return multiple jobs if you retry the pipeline we filter to keep only the last
-  const alreadyProcessedJob = new Set();
-  jobs = jobs.sort((one, two) => (one.created_at > two.created_at ? -1 : 1));
-  jobs = jobs.filter(job => {
-    if (alreadyProcessedJob.has(job.name)) {
-      return false;
-    }
-    alreadyProcessedJob.add(job.name);
-    return true;
-  });
-
-  return jobs;
+  return sortAndDeduplicate(response);
 }
 
 export async function fetchOpenMergeRequestForCurrentBranch(
