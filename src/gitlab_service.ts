@@ -15,13 +15,6 @@ import { GitLabProject } from './gitlab/gitlab_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
-export interface RestJob {
-  name: string;
-  // eslint-disable-next-line camelcase
-  created_at: string;
-  status: string;
-}
-
 const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => {
   const { author } = issuable;
   if (!author.avatar_url) {
@@ -349,19 +342,6 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
 }
 
-function sortAndDeduplicate(jobs: RestJob[]): RestJob[] {
-  const alreadyProcessedJob = new Set();
-  return jobs
-    .sort((one, two) => (one.created_at > two.created_at ? -1 : 1))
-    .filter(job => {
-      if (alreadyProcessedJob.has(job.name)) {
-        return false;
-      }
-      alreadyProcessedJob.add(job.name);
-      return true;
-    });
-}
-
 export async function fetchLastJobsForCurrentBranch(
   repositoryRoot: string,
   pipeline: RestPipeline,
@@ -370,7 +350,7 @@ export async function fetchLastJobsForCurrentBranch(
     repositoryRoot,
     `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
   );
-  return sortAndDeduplicate(response);
+  return response;
 }
 
 export async function fetchOpenMergeRequestForCurrentBranch(

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as gitLabService from './gitlab_service';
-import { pipeline, mr, issue } from './test_utils/entities';
+import { pipeline, mr, issue, job } from './test_utils/entities';
 import { USER_COMMANDS } from './command_names';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { asMock } from './test_utils/as_mock';
@@ -87,16 +87,52 @@ describe('status_bar', () => {
       });
       asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReturnValue([
         {
+          ...job,
           status: 'running',
           name: 'Unit Tests',
         },
         {
+          ...job,
           status: 'running',
           name: 'Integration Tests',
         },
         {
+          ...job,
           status: 'success',
           name: 'Lint',
+        },
+      ]);
+      await statusBar.init();
+      expect(getPipelineItem().text).toBe(
+        '$(pulse) GitLab: Pipeline running (Unit Tests, Integration Tests)',
+      );
+    });
+
+    it('sorts by created time (starts with newer) and deduplicates jobs for running pipeline', async () => {
+      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({
+        pipeline: {
+          ...pipeline,
+          status: 'running',
+        },
+      });
+      asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReturnValue([
+        {
+          ...job,
+          status: 'running',
+          name: 'Integration Tests',
+          created_at: '2021-07-19T12:00:00.000Z',
+        },
+        {
+          ...job,
+          status: 'running',
+          name: 'Unit Tests',
+          created_at: '2021-07-19T10:00:00.000Z',
+        },
+        {
+          ...job,
+          status: 'running',
+          name: 'Unit Tests',
+          created_at: '2021-07-19T11:00:00.000Z',
         },
       ]);
       await statusBar.init();

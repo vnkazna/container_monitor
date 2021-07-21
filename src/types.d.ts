@@ -61,6 +61,11 @@ interface RestPipeline {
   web_url: string;
 }
 
+interface RestJob {
+  name: string;
+  created_at: string;
+  status: string;
+}
 // Incomplete reference of the GitLab user model
 interface RestUser {
   id: number;
