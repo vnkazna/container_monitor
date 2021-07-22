@@ -123,7 +123,7 @@ export class StatusBar {
 
     if (status === 'running' || status === 'failed') {
       try {
-        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(repositoryRoot, pipeline);
+        const jobs = await gitLabService.fetchJobsForPipeline(repositoryRoot, pipeline);
         const processedJobs = sortAndDeduplicate(jobs);
         statusText = createStatusTextFromJobs(processedJobs, status);
       } catch (e) {

@@ -342,7 +342,7 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
 }
 
-export async function fetchLastJobsForCurrentBranch(
+export async function fetchJobsForPipeline(
   repositoryRoot: string,
   pipeline: RestPipeline,
 ): Promise<RestJob[]> {

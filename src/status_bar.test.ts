@@ -67,7 +67,7 @@ describe('status_bar', () => {
 
   describe('pipeline item', () => {
     beforeEach(() => {
-      asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReset();
+      asMock(gitLabService.fetchJobsForPipeline).mockReset();
     });
 
     it('initializes the pipeline item with success', async () => {
@@ -85,7 +85,7 @@ describe('status_bar', () => {
           status: 'running',
         },
       });
-      asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReturnValue([
+      asMock(gitLabService.fetchJobsForPipeline).mockReturnValue([
         {
           ...job,
           status: 'running',
@@ -115,7 +115,7 @@ describe('status_bar', () => {
           status: 'running',
         },
       });
-      asMock(gitLabService.fetchLastJobsForCurrentBranch).mockReturnValue([
+      asMock(gitLabService.fetchJobsForPipeline).mockReturnValue([
         {
           ...job,
           status: 'running',
