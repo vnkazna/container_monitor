@@ -49,91 +49,91 @@
       },
       {
         "command": "gl.removeToken",
-        "title": "GitLab: Remove your GitLab Personal Access Token"
+        "title": "GitLab: Remove Your GitLab Personal Access Token"
       },
       {
         "command": "gl.showIssuesAssignedToMe",
-        "title": "GitLab: Show issues assigned to me"
+        "title": "GitLab: Show Issues Assigned To Me"
       },
       {
         "command": "gl.showMergeRequestsAssignedToMe",
-        "title": "GitLab: Show merge requests assigned to me"
+        "title": "GitLab: Show Merge Requests Assigned To Me"
       },
       {
         "command": "gl.openActiveFile",
-        "title": "GitLab: Open active file on GitLab"
+        "title": "GitLab: Open Active File on GitLab"
       },
       {
         "command": "gl.copyLinkToActiveFile",
-        "title": "GitLab: Copy link to active file on GitLab"
+        "title": "GitLab: Copy Link To Active File on GitLab"
       },
       {
         "command": "gl.openCurrentMergeRequest",
-        "title": "GitLab: Open merge request for current branch"
+        "title": "GitLab: Open Merge Request For Current Branch"
       },
       {
         "command": "gl.openCreateNewIssue",
-        "title": "GitLab: Create new issue on current project"
+        "title": "GitLab: Create New Issue on Current Project"
       },
       {
         "command": "gl.openCreateNewMR",
-        "title": "GitLab: Create new merge request on current project"
+        "title": "GitLab: Create New Merge Request on Current Project"
       },
       {
         "command": "gl.openProjectPage",
-        "title": "GitLab: Open current project on GitLab"
+        "title": "GitLab: Open Current Project on GitLab"
       },
       {
         "command": "gl.createSnippetPatch",
-        "title": "GitLab: Create snippet patch"
+        "title": "GitLab: Create Snippet Patch"
       },
       {
         "command": "gl.applySnippetPatch",
-        "title": "GitLab: Apply snippet patch"
+        "title": "GitLab: Apply Snippet Patch"
       },
       {
         "command": "gl.openCurrentPipeline",
-        "title": "GitLab: Open current pipeline on GitLab"
+        "title": "GitLab: Open Current Pipeline on GitLab"
       },
       {
         "command": "gl.pipelineActions",
-        "title": "GitLab: Pipeline actions - View, Create, Retry or Cancel"
+        "title": "GitLab: Pipeline Actions - View, Create, Retry or Cancel"
       },
       {
         "command": "gl.issueSearch",
-        "title": "GitLab: Search project issues (Supports filters)"
+        "title": "GitLab: Search Project Issues (Supports Filters)"
       },
       {
         "command": "gl.mergeRequestSearch",
-        "title": "GitLab: Search project merge requests (Supports filters)"
+        "title": "GitLab: Search Project Merge Requests (Supports Filters)"
       },
       {
         "command": "gl.projectAdvancedSearch",
-        "title": "GitLab: Project Advanced Search (Issues, MR's, commits, comments...)"
+        "title": "GitLab: Project Advanced Search (Issues, MR's, Commits, Comments...)"
       },
       {
         "command": "gl.compareCurrentBranch",
-        "title": "GitLab: Compare current branch with master"
+        "title": "GitLab: Compare Current Branch With Master"
       },
       {
         "command": "gl.createSnippet",
-        "title": "GitLab: Create snippet"
+        "title": "GitLab: Create Snippet"
       },
       {
         "command": "gl.insertSnippet",
-        "title": "GitLab: Insert snippet"
+        "title": "GitLab: Insert Snippet"
       },
       {
         "command": "gl.validateCIConfig",
-        "title": "GitLab: Validate GitLab CI config"
+        "title": "GitLab: Validate GitLab CI Config"
       },
       {
         "command": "gl.showOutput",
-        "title": "GitLab: Show extension logs"
+        "title": "GitLab: Show Extension Logs"
       },
       {
         "command": "gl.refreshSidebar",
-        "title": "GitLab: Refresh sidebar",
+        "title": "GitLab: Refresh Sidebar",
         "icon": {
           "light": "src/assets/images/light/refresh.svg",
           "dark": "src/assets/images/dark/refresh.svg"
@@ -141,7 +141,7 @@
       },
       {
         "command": "gl.resolveThread",
-        "title": "Resolve thread",
+        "title": "Resolve Thread",
         "category": "GitLab",
         "icon": "$(pass)"
       },
@@ -153,7 +153,7 @@
       },
       {
         "command": "gl.deleteComment",
-        "title": "Delete comment",
+        "title": "Delete Comment",
         "category": "GitLab",
         "icon": "$(trash)"
       },
@@ -169,18 +169,28 @@
         "category": "GitLab"
       },
       {
+        "command": "gl.cancelFailedComment",
+        "title": "Cancel",
+        "category": "GitLab"
+      },
+      {
+        "command": "gl.retryFailedComment",
+        "title": "Add Comment Now",
+        "category": "GitLab"
+      },
+      {
         "command": "gl.submitCommentEdit",
-        "title": "Save comment",
+        "title": "Save Comment",
         "category": "GitLab"
       },
       {
         "command": "gl.createComment",
-        "title": "Add comment now",
+        "title": "Add Comment Now",
         "category": "GitLab"
       },
       {
         "command": "gl.checkoutMrBranch",
-        "title": "Checkout MR branch"
+        "title": "Checkout MR Branch"
       },
       {
         "command": "gl.cloneWiki",
@@ -208,6 +218,14 @@
         },
         {
           "command": "gl.cancelEditingComment",
+          "when": "false"
+        },
+        {
+          "command": "gl.cancelFailedComment",
+          "when": "false"
+        },
+        {
+          "command": "gl.retryFailedComment",
           "when": "false"
         },
         {
@@ -336,12 +354,22 @@
         {
           "command": "gl.submitCommentEdit",
           "group": "inline@1",
-          "when": "commentController =~ /^gitlab-mr-/"
+          "when": "commentController =~ /^gitlab-mr-/ && comment =~ /synced-comment/"
         },
         {
           "command": "gl.cancelEditingComment",
           "group": "inline@2",
-          "when": "commentController =~ /^gitlab-mr-/"
+          "when": "commentController =~ /^gitlab-mr-/ && comment =~ /synced-comment/"
+        },
+        {
+          "command": "gl.retryFailedComment",
+          "group": "inline@1",
+          "when": "commentController =~ /^gitlab-mr-/ && comment =~ /failed-comment/"
+        },
+        {
+          "command": "gl.cancelFailedComment",
+          "group": "inline@2",
+          "when": "commentController =~ /^gitlab-mr-/ && comment =~ /failed-comment/"
         }
       ],
       "comments/commentThread/title": [

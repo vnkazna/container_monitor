@@ -64,12 +64,12 @@ describe('logging', () => {
       handleError(new Error(message));
 
       expect(showErrorMessage).toBeCalledTimes(1);
-      expect(showErrorMessage).toBeCalledWith(message, 'Show logs');
+      expect(showErrorMessage).toBeCalledWith(message, 'Show Logs');
     });
 
     it('shows the logs when the user confirms the prompt', async () => {
       const executeCommand = vscode.commands.executeCommand as jest.Mock;
-      showErrorMessage.mockResolvedValue('Show logs');
+      showErrorMessage.mockResolvedValue('Show Logs');
 
       await handleError(new Error(message)).onlyForTesting;
 

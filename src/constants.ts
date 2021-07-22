@@ -14,3 +14,8 @@ export const CHANGE_TYPE_QUERY_KEY = 'changeType';
 export const HAS_COMMENTS_QUERY_KEY = 'hasComments';
 export const PATCH_TITLE_PREFIX = 'patch: ';
 export const PATCH_FILE_SUFFIX = '.patch';
+
+/** Synced comment is stored in the GitLab instance */
+export const SYNCED_COMMENT_CONTEXT = 'synced-comment';
+/** Failed comment is only stored in the extension, it failed to be created in GitLab */
+export const FAILED_COMMENT_CONTEXT = 'failed-comment';
