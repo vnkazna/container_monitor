@@ -15,7 +15,7 @@ describe('GitLabComment', () => {
   });
   describe('context', () => {
     it('sets context to canAdmin if the user can edit the comment', () => {
-      expect(comment.contextValue).toBe('canAdmin');
+      expect(comment.contextValue).toMatch('canAdmin');
     });
 
     it('leaves the context undefined if the user cannot edit the comment', () => {
@@ -26,7 +26,7 @@ describe('GitLabComment', () => {
           adminNote: false, // user can't edit
         },
       });
-      expect(comment.contextValue).toBe(undefined);
+      expect(comment.contextValue).not.toMatch('canAdmin');
     });
   });
 });

@@ -9,9 +9,15 @@ import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GitLabComment } from '../review/gitlab_comment';
 import { GitLabCommentThread } from '../review/gitlab_comment_thread';
 import { toReviewUri } from '../review/review_uri';
-import { deleteComment, createComment } from './mr_discussion_commands';
+import {
+  deleteComment,
+  createComment,
+  retryFailedComment,
+  CommentWithThread,
+} from './mr_discussion_commands';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { mr, mrVersion } from '../test_utils/entities';
+import { FAILED_COMMENT_CONTEXT, SYNCED_COMMENT_CONTEXT } from '../constants';
 
 jest.mock('../git/git_extension_wrapper');
 
@@ -126,6 +132,22 @@ describe('MR discussion commands', () => {
         } as unknown) as vscode.CommentThread;
       };
 
+      let mockedCreateDiffNote: jest.Mock;
+
+      beforeEach(() => {
+        mockedCreateDiffNote = jest.fn().mockResolvedValue(discussionOnDiff);
+        const mockedWrappedRepository = {
+          getMr: () => ({ mr, mrVersion: customMrVersion }),
+          getGitLabService: () => ({
+            createDiffNote: mockedCreateDiffNote,
+          }),
+        };
+
+        mocked(gitExtensionWrapper).getRepository.mockReturnValue(
+          (mockedWrappedRepository as unknown) as WrappedRepository,
+        );
+      });
+
       it.each`
         scenario            | filePath           | fileCommit                         | lineNumber | expectedOldLine | expectedNewLine
         ${'old line'}       | ${mrDiff.old_path} | ${customMrVersion.base_commit_sha} | ${2}       | ${2}            | ${undefined}
@@ -134,18 +156,6 @@ describe('MR discussion commands', () => {
       `(
         'creates thread correctly for $scenario',
         async ({ filePath, fileCommit, lineNumber, expectedOldLine, expectedNewLine }) => {
-          const mockedCreateDiffNote = jest.fn().mockResolvedValue(discussionOnDiff);
-          const mockedWrappedRepository = {
-            getMr: () => ({ mr, mrVersion: customMrVersion }),
-            getGitLabService: () => ({
-              createDiffNote: mockedCreateDiffNote,
-            }),
-          };
-
-          mocked(gitExtensionWrapper).getRepository.mockReturnValue(
-            (mockedWrappedRepository as unknown) as WrappedRepository,
-          );
-
           await createComment({
             text: 'new thread text',
             thread: createVsThread(filePath, fileCommit, lineNumber),
@@ -164,6 +174,39 @@ describe('MR discussion commands', () => {
           });
         },
       );
+
+      describe('retryFailedComment', () => {
+        let thread: vscode.CommentThread;
+        let comment: CommentWithThread;
+
+        beforeEach(() => {
+          thread = createVsThread(mrDiff.old_path, customMrVersion.base_commit_sha, 2);
+          comment = ({
+            contextValue: FAILED_COMMENT_CONTEXT,
+            body: 'failed comment body',
+            thread,
+          } as Partial<CommentWithThread>) as CommentWithThread;
+          thread.comments = [comment];
+        });
+
+        it('when retry succeeds, it will replace failed comment with synced comment', async () => {
+          await retryFailedComment(comment);
+
+          expect(thread.comments.length).toBe(1);
+          expect(thread.comments[0].body).toBe(discussionOnDiff.notes.nodes[0].body);
+          expect(thread.comments[0].contextValue).toMatch(SYNCED_COMMENT_CONTEXT);
+        });
+
+        it('when retry fails, it will leave the failed comment in the thread', async () => {
+          mockedCreateDiffNote.mockRejectedValue(new Error('failure to create a comment'));
+
+          await expect(async () => retryFailedComment(comment)).rejects.toBeInstanceOf(Error);
+
+          expect(thread.comments.length).toBe(1);
+          expect(thread.comments[0].body).toBe('failed comment body');
+          expect(thread.comments[0].contextValue).toMatch(FAILED_COMMENT_CONTEXT);
+        });
+      });
     });
   });
 });

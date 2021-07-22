@@ -26,6 +26,8 @@ const {
   cancelEdit,
   submitEdit,
   createComment,
+  cancelFailedComment,
+  retryFailedComment,
 } = require('./commands/mr_discussion_commands');
 const { hasCommentsDecorationProvider } = require('./review/has_comments_decoration_provider');
 const { changeTypeDecorationProvider } = require('./review/change_type_decoration_provider');
@@ -96,6 +98,8 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CLONE_WIKI]: cloneWiki,
     [USER_COMMANDS.CREATE_SNIPPET_PATCH]: createSnippetPatch,
     [USER_COMMANDS.APPLY_SNIPPET_PATCH]: applySnippetPatch,
+    [USER_COMMANDS.CANCEL_FAILED_COMMENT]: cancelFailedComment,
+    [USER_COMMANDS.RETRY_FAILED_COMMENT]: retryFailedComment,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };

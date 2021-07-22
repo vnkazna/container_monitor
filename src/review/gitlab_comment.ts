@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { SYNCED_COMMENT_CONTEXT } from '../constants';
 import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GitLabCommentThread } from './gitlab_comment_thread';
 
@@ -21,7 +22,9 @@ export class GitLabComment implements vscode.Comment {
   }
 
   get contextValue(): string | undefined {
-    return this.gqlNote.userPermissions.adminNote ? 'canAdmin' : undefined;
+    return `${SYNCED_COMMENT_CONTEXT}${
+      this.gqlNote.userPermissions.adminNote ? ';canAdmin' : undefined
+    }`;
   }
 
   get author(): vscode.CommentAuthorInformation {

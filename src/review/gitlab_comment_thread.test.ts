@@ -9,6 +9,7 @@ import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { mr } from '../test_utils/entities';
 import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';
+import { cancelFailedComment, CommentWithThread } from '../commands/mr_discussion_commands';
 
 describe('GitLabCommentThread', () => {
   let gitlabCommentThread: GitLabCommentThread;
@@ -269,6 +270,16 @@ describe('GitLabCommentThread', () => {
       await expect(gitlabCommentThread.reply('reply text')).rejects.toBe(error);
 
       expect(vsCommentThread.comments.length).toBe(1);
+    });
+  });
+
+  describe('cancelFailedComment', () => {
+    it('disposes the comment thread', () => {
+      const thread = ({ dispose: jest.fn() } as unknown) as vscode.CommentThread;
+
+      cancelFailedComment({ thread } as CommentWithThread);
+
+      expect(thread.dispose).toHaveBeenCalled();
     });
   });
 });

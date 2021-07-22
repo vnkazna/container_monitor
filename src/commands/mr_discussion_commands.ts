@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { FAILED_COMMENT_CONTEXT } from '../constants';
 import { getNewLineForOldUnchangedLine } from '../git/diff_line_count';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GitLabComment } from '../review/gitlab_comment';
@@ -45,6 +46,23 @@ const createNewComment = async (
   return new GitLabCommentThread(thread, discussion, repository.getGitLabService(), mr);
 };
 
+export interface CommentWithThread extends vscode.Comment {
+  thread: vscode.CommentThread;
+}
+
+const createFailedComment = (body: string, thread: vscode.CommentThread): CommentWithThread => ({
+  author: { name: '' }, // we don't want to show author name for failed comment
+  body,
+  mode: vscode.CommentMode.Editing,
+  contextValue: FAILED_COMMENT_CONTEXT,
+  thread,
+});
+
+const addFailedCommentToThread = (text: string, vsThread: vscode.CommentThread): void => {
+  vsThread.comments = [createFailedComment(text, vsThread)]; // eslint-disable-line no-param-reassign
+  vsThread.canReply = false; // eslint-disable-line no-param-reassign
+};
+
 export const toggleResolved = async (vsThread: vscode.CommentThread): Promise<void> => {
   const firstComment = vsThread.comments[0];
   assert(firstComment instanceof GitLabComment);
@@ -74,6 +92,11 @@ export const cancelEdit = (comment: GitLabComment): void => {
   comment.thread.cancelEdit(comment);
 };
 
+export const cancelFailedComment = (comment: CommentWithThread): void => {
+  const { thread } = comment;
+  thread.dispose();
+};
+
 export const submitEdit = async (comment: GitLabComment): Promise<void> => {
   return comment.thread.submitEdit(comment);
 };
@@ -86,12 +109,23 @@ export const createComment = async ({
   thread: vscode.CommentThread;
 }): Promise<void> => {
   const firstComment = thread.comments[0];
-  if (!firstComment) {
-    await createNewComment(text, thread);
-    return undefined;
+  if (!firstComment || firstComment.contextValue?.match(FAILED_COMMENT_CONTEXT)) {
+    try {
+      await createNewComment(text, thread);
+      return;
+    } catch (e) {
+      addFailedCommentToThread(text, thread);
+      throw e;
+    }
   }
   assert(firstComment instanceof GitLabComment);
   const gitlabThread = firstComment.thread;
 
-  return gitlabThread.reply(text);
+  await gitlabThread.reply(text);
+};
+
+export const retryFailedComment = async (comment: CommentWithThread): Promise<void> => {
+  const { thread } = comment;
+  const text = comment.body as string;
+  return createComment({ text, thread });
 };
