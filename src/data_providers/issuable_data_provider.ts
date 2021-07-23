@@ -20,7 +20,7 @@ async function getAllGitlabRepositories(): Promise<WrappedRepository[]> {
   return Promise.all(projectsWithUri);
 }
 
-export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
+export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
   private eventEmitter = new vscode.EventEmitter<void>();
 
   private children: ItemModel[] = [];
@@ -75,3 +75,5 @@ export class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.
     this.eventEmitter.fire();
   }
 }
+
+export const issuableDataProvider = new IssuableDataProvider();

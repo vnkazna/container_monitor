@@ -8,11 +8,10 @@ const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
 const { createSnippet } = require('./commands/create_snippet');
 const { insertSnippet } = require('./commands/insert_snippet');
-const sidebar = require('./sidebar');
 const ciConfigValidator = require('./ci_config_validator');
 const { webviewController } = require('./webview_controller');
-const IssuableDataProvider = require('./data_providers/issuable').DataProvider;
-const CurrentBranchDataProvider = require('./data_providers/current_branch').DataProvider;
+const { issuableDataProvider } = require('./data_providers/issuable_data_provider');
+const { currentBranchDataProvider } = require('./data_providers/current_branch_data_provider');
 const { initializeLogging, handleError } = require('./log');
 const { GitContentProvider } = require('./review/git_content_provider');
 const { REVIEW_URI_SCHEME } = require('./constants');
@@ -37,10 +36,6 @@ const { cloneWiki } = require('./commands/clone_wiki');
 const { createSnippetPatch } = require('./commands/create_snippet_patch');
 const { applySnippetPatch } = require('./commands/apply_snippet_patch');
 
-vscode.gitLabWorkflow = {
-  sidebarDataProviders: [],
-};
-
 const wrapWithCatch = command => async (...args) => {
   try {
     await command(...args);
@@ -50,17 +45,8 @@ const wrapWithCatch = command => async (...args) => {
 };
 
 const registerSidebarTreeDataProviders = () => {
-  const issuableDataProvider = new IssuableDataProvider();
-
-  const currentBranchDataProvider = new CurrentBranchDataProvider();
-
-  const register = (name, provider) => {
-    vscode.window.registerTreeDataProvider(name, provider);
-    vscode.gitLabWorkflow.sidebarDataProviders.push(provider);
-  };
-
-  register('issuesAndMrs', issuableDataProvider);
-  register('currentBranchInfo', currentBranchDataProvider);
+  vscode.window.registerTreeDataProvider('issuesAndMrs', issuableDataProvider);
+  vscode.window.registerTreeDataProvider('currentBranchInfo', currentBranchDataProvider);
 };
 
 const registerCommands = (context, outputChannel) => {
@@ -84,7 +70,6 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CREATE_SNIPPET]: createSnippet,
     [USER_COMMANDS.INSERT_SNIPPET]: insertSnippet,
     [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
-    [USER_COMMANDS.REFRESH_SIDEBAR]: sidebar.refresh,
     [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.open.bind(webviewController),
     [USER_COMMANDS.SHOW_OUTPUT]: () => outputChannel.show(),
     [USER_COMMANDS.RESOLVE_THREAD]: toggleResolved,
@@ -100,6 +85,10 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.APPLY_SNIPPET_PATCH]: applySnippetPatch,
     [USER_COMMANDS.CANCEL_FAILED_COMMENT]: cancelFailedComment,
     [USER_COMMANDS.RETRY_FAILED_COMMENT]: retryFailedComment,
+    [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
+      issuableDataProvider.refresh();
+      currentBranchDataProvider.refresh();
+    },
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
