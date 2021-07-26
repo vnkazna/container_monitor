@@ -15,7 +15,8 @@ import { WrappedRepository } from '../git/wrapped_repository';
 
 dayjs.extend(relativeTime);
 
-class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
+export class CurrentBranchDataProvider
+  implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
   private eventEmitter = new vscode.EventEmitter<void>();
 
   onDidChangeTreeData = this.eventEmitter.event;
@@ -109,4 +110,4 @@ class DataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeIte
   }
 }
 
-exports.DataProvider = DataProvider;
+export const currentBranchDataProvider = new CurrentBranchDataProvider();

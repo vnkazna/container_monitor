@@ -1,6 +1,6 @@
 const assert = require('assert');
 const vscode = require('vscode');
-const IssuableDataProvider = require('../../src/data_providers/issuable').DataProvider;
+const { IssuableDataProvider } = require('../../src/data_providers/issuable_data_provider');
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');

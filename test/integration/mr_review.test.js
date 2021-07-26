@@ -3,7 +3,7 @@ const sinon = require('sinon');
 const vscode = require('vscode');
 const { graphql } = require('msw');
 
-const IssuableDataProvider = require('../../src/data_providers/issuable').DataProvider;
+const { IssuableDataProvider } = require('../../src/data_providers/issuable_data_provider');
 const { MrItemModel } = require('../../src/data_providers/items/mr_item_model');
 const { tokenService } = require('../../src/services/token_service');
 const { submitEdit, createComment } = require('../../src/commands/mr_discussion_commands');
