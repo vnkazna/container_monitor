@@ -485,9 +485,8 @@ export async function createSnippet(repositoryRoot: string, data: { id: number }
 }
 
 interface ValidationResponse {
-  status?: string;
+  valid?: boolean;
   errors: string[];
-  error: string;
 }
 
 export async function validateCIConfig(
@@ -495,9 +494,16 @@ export async function validateCIConfig(
   content: string,
 ): Promise<ValidationResponse | undefined> {
   try {
-    const { response } = await fetch(repositoryRoot, '/ci/lint', 'POST', {
-      content,
-    });
+    const project = await fetchCurrentProject(repositoryRoot);
+    assert(project, 'GitLab project cannot be found');
+    const { response } = await fetch(
+      repositoryRoot,
+      `/projects/${project.restId}/ci/lint`,
+      'POST',
+      {
+        content,
+      },
+    );
     return response;
   } catch (e) {
     handleError(new UserFriendlyError('Failed to validate CI configuration.', e));
