@@ -28,7 +28,7 @@ const iconForStatus: Record<string, { icon: string; text?: string } | undefined>
 
 const getStatusText = (status: string) => iconForStatus[status]?.text || status;
 
-const createStatusTextFromJobs = (jobs: gitLabService.RestJob[], status: string) => {
+const createStatusTextFromJobs = (jobs: RestJob[], status: string) => {
   let statusText = getStatusText(status);
   const jobNames = jobs.filter(job => job.status === status).map(job => job.name);
   if (jobNames.length > MAXIMUM_DISPLAYED_JOBS) {
@@ -59,6 +59,19 @@ const openIssuableOnTheWebCommand = (issuable: RestIssuable): vscode.Command => 
   command: 'vscode.open',
   arguments: [vscode.Uri.parse(issuable.web_url)],
 });
+
+const sortAndDeduplicate = (jobs: RestJob[]): RestJob[] => {
+  const alreadyProcessedJob = new Set();
+  const compareTimeNewFirst = (a: RestJob, b: RestJob) =>
+    Date.parse(a.created_at) < Date.parse(b.created_at) ? -1 : 1;
+  return jobs.sort(compareTimeNewFirst).filter(job => {
+    if (alreadyProcessedJob.has(job.name)) {
+      return false;
+    }
+    alreadyProcessedJob.add(job.name);
+    return true;
+  });
+};
 
 export class StatusBar {
   pipelineStatusBarItem?: vscode.StatusBarItem;
@@ -110,10 +123,9 @@ export class StatusBar {
 
     if (status === 'running' || status === 'failed') {
       try {
-        const jobs = await gitLabService.fetchLastJobsForCurrentBranch(repositoryRoot, pipeline);
-        if (jobs) {
-          statusText = createStatusTextFromJobs(jobs, status);
-        }
+        const jobs = await gitLabService.fetchJobsForPipeline(repositoryRoot, pipeline);
+        const processedJobs = sortAndDeduplicate(jobs);
+        statusText = createStatusTextFromJobs(processedJobs, status);
       } catch (e) {
         logError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
       }

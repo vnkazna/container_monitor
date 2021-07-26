@@ -15,13 +15,6 @@ import { GitLabProject } from './gitlab/gitlab_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { getExtensionConfiguration } from './utils/get_extension_configuration';
 
-export interface RestJob {
-  name: string;
-  // eslint-disable-next-line camelcase
-  created_at: string;
-  status: string;
-}
-
 const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => {
   const { author } = issuable;
   if (!author.avatar_url) {
@@ -349,7 +342,7 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
   return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
 }
 
-export async function fetchLastJobsForCurrentBranch(
+export async function fetchJobsForPipeline(
   repositoryRoot: string,
   pipeline: RestPipeline,
 ): Promise<RestJob[]> {
@@ -357,20 +350,7 @@ export async function fetchLastJobsForCurrentBranch(
     repositoryRoot,
     `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
   );
-  let jobs: RestJob[] = response;
-
-  // Gitlab return multiple jobs if you retry the pipeline we filter to keep only the last
-  const alreadyProcessedJob = new Set();
-  jobs = jobs.sort((one, two) => (one.created_at > two.created_at ? -1 : 1));
-  jobs = jobs.filter(job => {
-    if (alreadyProcessedJob.has(job.name)) {
-      return false;
-    }
-    alreadyProcessedJob.add(job.name);
-    return true;
-  });
-
-  return jobs;
+  return response;
 }
 
 export async function fetchOpenMergeRequestForCurrentBranch(

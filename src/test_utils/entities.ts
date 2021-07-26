@@ -74,6 +74,12 @@ export const pipeline: RestPipeline = {
   web_url: 'https://example.com/foo/bar/pipelines/46',
 };
 
+export const job: RestJob = {
+  name: 'Unit tests',
+  status: 'success',
+  created_at: '2021-07-19T11:44:54.928Z',
+};
+
 export const repository = ({
   name: 'GitLab Project',
   rootFsPath: '/path/to/repo',
