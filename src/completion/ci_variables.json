@@ -81,7 +81,7 @@
   },
   {
     "name": "CI_CONFIG_PATH",
-    "description": "The path to the CI/CD configuration file. Defaults to `.gitlab-ci.yml`."
+    "description": "The path to the CI/CD configuration file. Defaults to `.gitlab-ci.yml`. Read-only inside a running pipeline."
   },
   {
     "name": "CI_DEBUG_TRACE",
