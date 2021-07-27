@@ -46,6 +46,13 @@ check-ci-variables:
     - npm ci
     - npm run update-ci-variables
   allow_failure: true # could be caused by changes in gitlab-org/gitlab repo, not related to current branch
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - 'src/completion/ci_variables.json'
+        - 'scripts/update_ci_variables.js'
 
 test-unit:
   stage: test
