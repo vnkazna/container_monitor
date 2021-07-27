@@ -6,6 +6,7 @@ interface ExtensionConfiguration {
   remoteName?: string;
   pipelineGitRemoteName?: string;
   featureFlags?: string[];
+  codeQualityReportPath?: string;
 }
 
 // VS Code returns a value or `null` but undefined is better for using default function arguments
@@ -18,5 +19,6 @@ export function getExtensionConfiguration(): ExtensionConfiguration {
     remoteName: turnNullToUndefined(workspaceConfig.remoteName),
     pipelineGitRemoteName: turnNullToUndefined(workspaceConfig.pipelineGitRemoteName),
     featureFlags: turnNullToUndefined(workspaceConfig.featureFlags),
+    codeQualityReportPath: turnNullToUndefined(workspaceConfig.codeQualityReportPath),
   };
 }

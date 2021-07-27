@@ -60,6 +60,10 @@
         "title": "GitLab: Show Merge Requests Assigned To Me"
       },
       {
+        "command": "gl.processCodeQuality",
+        "title": "GitLab: Process Code Quality"
+      },
+      {
         "command": "gl.openActiveFile",
         "title": "GitLab: Open Active File on GitLab"
       },
@@ -437,6 +441,14 @@
           "default": null,
           "description": "Your GitLab instance URL (default is https://gitlab.com)"
         },
+        "gitlab.codeQualityReportPath": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Path to a downloaded code quality report"
+        },
         "gitlab.showStatusBarLinks": {
           "type": "boolean",
           "default": true,
@@ -802,6 +814,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
+    "@types/lodash": "^4.14.171",
     "@types/node": "^13.13.45",
     "@types/request-promise": "^4.1.47",
     "@types/semver": "^7.3.6",
@@ -830,15 +843,16 @@
     "vscode-test": "^1.5.1"
   },
   "dependencies": {
-    "temp": "^0.9.4",
     "cross-fetch": "^3.0.6",
     "dayjs": "^1.10.4",
     "graphql": "^15.5.0",
     "graphql-request": "^3.4.0",
     "https-proxy-agent": "^5.0.0",
+    "lodash": "^4.17.21",
     "request": "^2.88.0",
     "request-promise": "^4.2.6",
     "semver": "^7.3.5",
+    "temp": "^0.9.4",
     "url": "^0.11.0"
   }
 }

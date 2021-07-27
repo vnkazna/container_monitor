@@ -35,6 +35,7 @@ const { checkoutMrBranch } = require('./commands/checkout_mr_branch');
 const { cloneWiki } = require('./commands/clone_wiki');
 const { createSnippetPatch } = require('./commands/create_snippet_patch');
 const { applySnippetPatch } = require('./commands/apply_snippet_patch');
+const { processCodeQuality } = require('./commands/process_code_quality');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -85,6 +86,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.APPLY_SNIPPET_PATCH]: applySnippetPatch,
     [USER_COMMANDS.CANCEL_FAILED_COMMENT]: cancelFailedComment,
     [USER_COMMANDS.RETRY_FAILED_COMMENT]: retryFailedComment,
+    [USER_COMMANDS.PROCESS_CODE_QUALITY]: processCodeQuality,
     [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
       issuableDataProvider.refresh();
       currentBranchDataProvider.refresh();

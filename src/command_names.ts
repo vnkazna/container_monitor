@@ -37,6 +37,7 @@ export const USER_COMMANDS = {
   CLONE_WIKI: 'gl.cloneWiki',
   CREATE_SNIPPET_PATCH: 'gl.createSnippetPatch',
   APPLY_SNIPPET_PATCH: 'gl.applySnippetPatch',
+  PROCESS_CODE_QUALITY: 'gl.processCodeQuality',
 };
 
 /*
