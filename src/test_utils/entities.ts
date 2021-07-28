@@ -75,9 +75,15 @@ export const pipeline: RestPipeline = {
 };
 
 export const job: RestJob = {
+  id: 1,
   name: 'Unit tests',
   status: 'success',
+  stage: 'test',
   created_at: '2021-07-19T11:44:54.928Z',
+  started_at: '2021-07-19T11:44:54.928Z',
+  finished_at: '2021-07-19T11:44:54.928Z',
+  allow_failure: false,
+  web_url: 'https://example.com/foo/bar/jobs/68',
 };
 
 export const repository = ({

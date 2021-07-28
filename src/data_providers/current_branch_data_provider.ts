@@ -1,19 +1,14 @@
 import * as vscode from 'vscode';
-import * as dayjs from 'dayjs';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as gitLabService from '../gitlab_service';
 import { ErrorItem } from './items/error_item';
 import { handleError } from '../log';
 import { ItemModel } from './items/item_model';
 import { MrItemModel } from './items/mr_item_model';
 import { IssueItem } from './items/issue_item';
-import { ExternalUrlItem } from './items/external_url_item';
-import { GitLabProject } from '../gitlab/gitlab_project';
 import { extensionState } from '../extension_state';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { WrappedRepository } from '../git/wrapped_repository';
-
-dayjs.extend(relativeTime);
+import { PipelineItemModel } from './items/pipeline_item_model';
 
 export class CurrentBranchDataProvider
   implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
@@ -30,26 +25,11 @@ export class CurrentBranchDataProvider
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async createPipelineItem(pipeline: RestPipeline | null, project: GitLabProject) {
+  async createPipelineItem(pipeline: RestPipeline | null, repository: WrappedRepository) {
     if (!pipeline) {
       return new vscode.TreeItem('No pipeline found');
     }
-    const statusText = pipeline.status === 'success' ? 'passed' : pipeline.status;
-    const actions = {
-      running: 'Started',
-      pending: 'Created',
-      success: 'Finished',
-      failed: 'Failed',
-      canceled: 'Canceled',
-      skipped: 'Skipped',
-    };
-    const timeAgo = dayjs(pipeline.updated_at).fromNow();
-    const actionText = actions[pipeline.status] || '';
-
-    const message = `Pipeline #${pipeline.id} ${statusText} · ${actionText} ${timeAgo}`;
-    const url = `${project.webUrl}/pipelines/${pipeline.id}`;
-
-    return new ExternalUrlItem(message, url);
+    return new PipelineItemModel(pipeline, repository);
   }
 
   async createMrItem(mr: RestMr | null, repository: WrappedRepository) {
@@ -89,7 +69,7 @@ export class CurrentBranchDataProvider
       const { pipeline, mr } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
         repository.rootFsPath,
       );
-      const pipelineItem = await this.createPipelineItem(pipeline, gitlabProject);
+      const pipelineItem = await this.createPipelineItem(pipeline, repository);
       const mrItem = await this.createMrItem(mr, repository);
       const closingIssuesItems = await this.fetchClosingIssue(repository);
       return [pipelineItem, mrItem, ...closingIssuesItems] as vscode.TreeItem[]; // TODO the actual type includes ItemMode
