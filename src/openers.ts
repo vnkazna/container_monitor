@@ -73,7 +73,7 @@ async function getActiveFile() {
   const filePath = path
     .relative(repository.rootFsPath, editor.document.uri.fsPath)
     .replace('\\', '/');
-  const fileUrl = `${currentProject!.webUrl}/blob/${branchName}/${filePath}`;
+  const fileUrl = `${currentProject!.webUrl}/blob/${encodeURIComponent(branchName)}/${filePath}`;
   let anchor = '';
 
   if (editor.selection) {
@@ -122,7 +122,9 @@ export async function openCreateNewMr(): Promise<void> {
   const branchName = await repository.getTrackingBranchName();
 
   await openUrl(
-    `${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${branchName}`,
+    `${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${encodeURIComponent(
+      branchName,
+    )}`,
   );
 }
 

@@ -175,7 +175,7 @@ async function fetchLastPipelineForCurrentBranch(
   const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
   const { response: pipelines } = await fetch(
     repositoryRoot,
-    `${pipelinesRootPath}?ref=${branchName}`,
+    `${pipelinesRootPath}?ref=${encodeURIComponent(branchName)}`,
   );
   return pipelines.length > 0 ? pipelines[0] : null;
 }
@@ -361,7 +361,9 @@ export async function fetchOpenMergeRequestForCurrentBranch(
     .getRepository(repositoryRoot)
     .getTrackingBranchName();
 
-  const path = `/projects/${project?.restId}/merge_requests?state=opened&source_branch=${branchName}`;
+  const path = `/projects/${
+    project?.restId
+  }/merge_requests?state=opened&source_branch=${encodeURIComponent(branchName)}`;
   const { response } = await fetch(repositoryRoot, path);
   const mrs = response;
 
@@ -420,7 +422,7 @@ export async function handlePipelineAction(action: string, repositoryRoot: strin
       const branchName = await gitExtensionWrapper
         .getRepository(repositoryRoot)
         .getTrackingBranchName();
-      endpoint = `/projects/${project.restId}/pipeline?ref=${branchName}`;
+      endpoint = `/projects/${project.restId}/pipeline?ref=${encodeURIComponent(branchName)}`;
     }
 
     try {
