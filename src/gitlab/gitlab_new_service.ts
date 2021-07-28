@@ -235,7 +235,8 @@ export class GitLabNewService {
 
   async getFileContent(path: string, ref: string, projectId: number): Promise<string> {
     const encodedPath = encodeURIComponent(removeLeadingSlash(path));
-    const fileUrl = `${this.instanceUrl}/api/v4/projects/${projectId}/repository/files/${encodedPath}/raw?ref=${ref}`;
+    const encodedRef = encodeURIComponent(ref);
+    const fileUrl = `${this.instanceUrl}/api/v4/projects/${projectId}/repository/files/${encodedPath}/raw?ref=${encodedRef}`;
     const fileResult = await crossFetch(fileUrl, this.fetchOptions);
     if (!fileResult.ok) {
       throw new FetchError(`Fetching file from ${fileUrl} failed`, fileResult);
