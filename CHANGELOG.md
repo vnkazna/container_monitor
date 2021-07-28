@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * error 400 when on a branch with special chars ([2645e0e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/2645e0e85cf5689f0fab6c5ac1fc12bd65289d08))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !218](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/218) 👍
 
 
 ### Features
@@ -12,6 +13,11 @@
 * show CI pipelines and jobs ([bba4609](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bba46099b6bb8aeabe2f76fb448a2aaf117669d9))
 
 
+### Community contributions 👑 (not user-facing)
+
+* Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull)
+  * [chore(ci variables): update the ci\_variables.json](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/317)
+  * [ci: run check-ci-variables job only on default branch](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/318)
 
 # [3.26.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.25.0...v3.26.0) (2021-07-13)
 
