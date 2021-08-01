@@ -50,7 +50,11 @@ export class Uri implements vscode.Uri {
   }
 
   toString(skipEncoding?: boolean): string {
-    return `${this.scheme}://${this.authority}${this.path}${this.query}#${this.fragment}`;
+    // eslint-disable-next-line prefer-const
+    let { scheme, authority, path, query, fragment } = this;
+    if (query.length > 0) query = `?${query}`;
+    if (fragment.length > 0) fragment = `#${fragment}`;
+    return `${scheme}://${authority}${path}${query}${fragment}`;
   }
 
   toJSON(): string {
@@ -59,12 +63,12 @@ export class Uri implements vscode.Uri {
 
   static parse(stringUri: string): Uri {
     const url = new URL(stringUri);
-    const [query, fragment] = url.search.split('#');
+    const [query, fragment = ''] = url.search.split('#');
     return new Uri({
-      scheme: url.protocol,
+      scheme: url.protocol.replace(/:$/, ''),
       authority: url.hostname,
       path: url.pathname,
-      query,
+      query: query.replace(/^\?/, ''),
       fragment,
     });
   }

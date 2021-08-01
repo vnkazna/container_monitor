@@ -14,7 +14,7 @@ describe('review_uri.ts', () => {
       const result = toReviewUri(reviewUriParams);
 
       expect(result.toString()).toEqual(
-        'gl-review:///review{"commit":"abcdef","mrId":2345,"projectId":1234,"repositoryRoot":"path/to/workspace"}#',
+        'gl-review:///review?{"commit":"abcdef","mrId":2345,"projectId":1234,"repositoryRoot":"path/to/workspace"}',
       );
     });
   });

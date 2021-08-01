@@ -233,15 +233,48 @@ export class GitLabNewService {
     return diffResult.json();
   }
 
-  async getFileContent(path: string, ref: string, projectId: number): Promise<string> {
+  async getFileContent(path: string, ref: string, projectId: number | string): Promise<string> {
     const encodedPath = encodeURIComponent(removeLeadingSlash(path));
     const encodedRef = encodeURIComponent(ref);
-    const fileUrl = `${this.instanceUrl}/api/v4/projects/${projectId}/repository/files/${encodedPath}/raw?ref=${encodedRef}`;
+    const encodedProject = encodeURIComponent(projectId);
+    const fileUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/files/${encodedPath}/raw?ref=${encodedRef}`;
     const fileResult = await crossFetch(fileUrl, this.fetchOptions);
     if (!fileResult.ok) {
       throw new FetchError(`Fetching file from ${fileUrl} failed`, fileResult);
     }
     return fileResult.text();
+  }
+
+  async getFile(
+    path: string,
+    ref: string,
+    projectId: number | string,
+  ): Promise<RestRepositoryFile> {
+    const encodedPath = encodeURIComponent(removeLeadingSlash(path));
+    const encodedRef = encodeURIComponent(ref);
+    const encodedProject = encodeURIComponent(projectId);
+    const fileUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/files/${encodedPath}?ref=${encodedRef}`;
+    const fileResult = await crossFetch(fileUrl, this.fetchOptions);
+    if (!fileResult.ok) {
+      throw new FetchError(`Fetching file from ${fileUrl} failed`, fileResult);
+    }
+    return fileResult.json();
+  }
+
+  async getTree(
+    path: string,
+    ref: string,
+    projectId: number | string,
+  ): Promise<RestRepositoryTreeEntry[]> {
+    const encodedPath = encodeURIComponent(removeLeadingSlash(path));
+    const encodedRef = encodeURIComponent(ref);
+    const encodedProject = encodeURIComponent(projectId);
+    const treeUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/tree?ref=${encodedRef}&path=${encodedPath}`;
+    const treeResult = await crossFetch(treeUrl, this.fetchOptions);
+    if (!treeResult.ok) {
+      throw new FetchError(`Fetching tree from ${treeUrl} failed`, treeResult);
+    }
+    return treeResult.json();
   }
 
   /*

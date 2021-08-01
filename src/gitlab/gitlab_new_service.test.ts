@@ -78,5 +78,54 @@ describe('gitlab_new_service', () => {
         expect(result).toBe(DEFAULT_FETCH_RESPONSE);
       });
     });
+
+    it('encodes the project path', async () => {
+      const service = new GitLabNewService('https://gitlab.example.com');
+      await service.getFileContent('foo', 'bar', 'baz/bat');
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/files/foo/raw?ref=bar',
+        expect.anything(),
+      );
+    });
+  });
+
+  describe('getFile', () => {
+    it('constructs the correct URL', async () => {
+      const service = new GitLabNewService('https://gitlab.example.com');
+      await service.getFile('foo', 'bar', 12345);
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/projects/12345/repository/files/foo?ref=bar',
+        expect.anything(),
+      );
+    });
+
+    it('encodes the project path', async () => {
+      const service = new GitLabNewService('https://gitlab.example.com');
+      await service.getFile('foo', 'bar', 'baz/bat');
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/files/foo?ref=bar',
+        expect.anything(),
+      );
+    });
+  });
+
+  describe('getTree', () => {
+    it('constructs the correct URL', async () => {
+      const service = new GitLabNewService('https://gitlab.example.com');
+      await service.getTree('foo', 'bar', 12345);
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/projects/12345/repository/tree?ref=bar&path=foo',
+        expect.anything(),
+      );
+    });
+
+    it('encodes the project path', async () => {
+      const service = new GitLabNewService('https://gitlab.example.com');
+      await service.getTree('foo', 'bar', 'baz/bat');
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/tree?ref=bar&path=foo',
+        expect.anything(),
+      );
+    });
   });
 });

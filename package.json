@@ -29,7 +29,8 @@
     }
   },
   "activationEvents": [
-    "*"
+    "*",
+    "onFileSystem:gitlab-remote"
   ],
   "bugs": {
     "url": "https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues",
@@ -201,6 +202,11 @@
       {
         "command": "gl.cloneWiki",
         "title": "Clone Wiki",
+        "category": "GitLab"
+      },
+      {
+        "command": "gl.openRepository",
+        "title": "Open Repository",
         "category": "GitLab"
       }
     ],
@@ -796,7 +802,19 @@
           "description": "Custom views in the GitLab panel"
         }
       }
-    }
+    },
+    "resourceLabelFormatters": [
+      {
+        "scheme": "gitlab-remote",
+        "authority": "*",
+        "formatting": {
+          "label": "${path}",
+          "stripPathStartingSeparator": true,
+          "separator": "/",
+          "workspaceSuffix": "GitLab"
+        }
+      }
+    ]
   },
   "extensionDependencies": [
     "vscode.git"

@@ -38,6 +38,7 @@ export const USER_COMMANDS = {
   CREATE_SNIPPET_PATCH: 'gl.createSnippetPatch',
   APPLY_SNIPPET_PATCH: 'gl.applySnippetPatch',
   OPEN_MR_FILE: 'gl.openMrFile',
+  OPEN_REPOSITORY: 'gl.openRepository',
 };
 
 /*

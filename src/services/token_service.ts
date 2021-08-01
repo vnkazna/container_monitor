@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
-
-const removeTrailingSlash = (url: string) => url.replace(/\/$/, '');
+import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 
 export class TokenService {
   context?: ExtensionContext;
