@@ -113,6 +113,8 @@ package_test:
   extends: .package
   artifacts:
       expire_in: 10 days
+  except:
+    - tags
 
 publish_marketplace:
   stage: publish
