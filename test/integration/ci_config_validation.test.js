@@ -24,7 +24,7 @@ describe('Validate CI config', async () => {
 
   before(async () => {
     server = getServer([
-      rest.post(`${API_URL_PREFIX}/ci/lint`, (req, res, ctx) => {
+      rest.post(`${API_URL_PREFIX}/projects/278964/ci/lint`, (req, res, ctx) => {
         switch (req.body.content) {
           case VALID_CI_CONFIG:
             return res(ctx.status(200), ctx.json(validCiLintResponse));
@@ -77,8 +77,8 @@ describe('Validate CI config', async () => {
     await validate();
 
     assert.deepStrictEqual(errorMessages, [
-      'jobs:test config contains unknown keys: scccript',
       'GitLab Workflow: Invalid CI configuration.',
+      'jobs:test config contains unknown keys: scccript',
     ]);
   });
 });
