@@ -1,3 +1,13 @@
+## [3.27.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.27.0...v3.27.1) (2021-08-02)
+
+
+### Bug Fixes
+
+* use namespace CI lint endpoint to handle includes ([b21d5ba](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b21d5baac35356295596d8a87316d571a7fb6c7e))
+* web URL for file contains backwards slashes on windows ([118fc32](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/118fc322555db4944466d6ce4321c463f6016712))
+
+
+
 # [3.27.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.26.0...v3.27.0) (2021-07-28)
 
 
