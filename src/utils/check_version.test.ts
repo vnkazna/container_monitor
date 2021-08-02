@@ -45,13 +45,13 @@ describe('check_version', () => {
 
     it.each`
       version
-      ${'13.5.0'}
-      ${'13.6.3'}
-      ${'13.6.0-pre'}
-      ${'13.6.0-pre-1'}
+      ${'13.6.0'}
+      ${'13.7.3'}
+      ${'13.7.0-pre'}
+      ${'13.7.0-pre-1'}
       ${'13.12.4'}
       ${'14.0.0'}
-      ${'abc13.5def'}
+      ${'abc13.6def'}
     `('gets $version successfully', async ({ version }) => {
       mockedRepositories = [createMockRepo(`${version}`)];
 
@@ -59,8 +59,8 @@ describe('check_version', () => {
       expect(vscode.window.showErrorMessage).not.toHaveBeenCalled();
     });
 
-    it(`shows warning when version is below 13.5`, async () => {
-      mockedRepositories = [createMockRepo(`13.4.2`)];
+    it(`shows warning when version is below 13.6`, async () => {
+      mockedRepositories = [createMockRepo(`13.5.2`)];
 
       await getVersionForEachRepo(gitExtensionWrapper, context as vscode.ExtensionContext);
       expect(vscode.window.showErrorMessage).toHaveBeenCalled();
