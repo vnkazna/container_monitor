@@ -94,4 +94,12 @@ describe('git_remote_parser', () => {
       project: 'gitlab-vscode-extension',
     });
   });
+  // For more details see: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/309
+  it('should parse remote URLs with ssh and custom port', () => {
+    expect(parseGitRemote('[git@example.com:2222]:fatihacet/gitlab-vscode-extension.git')).toEqual({
+      host: 'example.com',
+      namespace: 'fatihacet',
+      project: 'gitlab-vscode-extension',
+    });
+  });
 });
