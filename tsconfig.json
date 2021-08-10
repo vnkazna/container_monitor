@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es6",
+    "target": "ES2019",
     "outDir": "out",
     // we need to include dom library for msw to work, see https://github.com/mswjs/msw/issues/408
-    "lib": ["es6", "dom"],
+    "lib": ["ES2019", "dom"],
     "allowJs": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
