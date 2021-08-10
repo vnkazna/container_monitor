@@ -140,6 +140,12 @@
         }
       },
       {
+				"command": "gl.openMrFile",
+				"title": "Open Changed File In Local Project",
+				"category": "GitLab",
+				"icon": "$(go-to-file)"
+			},
+      {
         "command": "gl.resolveThread",
         "title": "Resolve Thread",
         "category": "GitLab",
@@ -238,6 +244,10 @@
         },
         {
           "command": "gl.checkoutMrBranch",
+          "when": "false"
+        },
+        {
+          "command": "gl.openMrFile",
           "when": "false"
         },
         {
@@ -390,6 +400,13 @@
           "group": "inline",
           "when": "commentController =~ /^gitlab-mr-/"
         }
+      ],
+      "editor/title": [
+				{
+					"command": "gl.openMrFile",
+					"when": "resourceScheme == 'gl-review' && resourceFilename != '' && isInDiffEditor",
+					"group": "navigation@-99"
+				}
       ]
     },
     "viewsContainers": {
