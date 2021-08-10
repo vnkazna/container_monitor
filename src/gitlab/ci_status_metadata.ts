@@ -6,41 +6,48 @@ export interface CiStatusMetadata {
   priority: number;
 }
 
-const check = new vscode.ThemeIcon('pass', new vscode.ThemeColor('testing.iconPassed'));
-const play = new vscode.ThemeIcon('play', new vscode.ThemeColor('debugIcon.pauseForeground'));
-const pause = new vscode.ThemeIcon(
-  'debug-pause',
-  new vscode.ThemeColor('debugIcon.pauseForeground'),
-);
-const error = new vscode.ThemeIcon('error', new vscode.ThemeColor('testing.iconErrored'));
-const circleSlash = new vscode.ThemeIcon(
-  'circle-slash',
-  new vscode.ThemeColor('testing.iconSkipped'),
-);
-const debugStepOver = new vscode.ThemeIcon(
-  'debug-step-over',
-  new vscode.ThemeColor('testing.iconSkipped'),
-);
-const question = new vscode.ThemeIcon('question', new vscode.ThemeColor('testing.iconSkipped'));
-const warning = new vscode.ThemeIcon(
-  'warning',
-  new vscode.ThemeColor('problemsWarningIcon.foreground'),
-);
+type IconName =
+  | 'pass'
+  | 'play'
+  | 'debug-pause'
+  | 'error'
+  | 'circle-slash'
+  | 'debug-step-over'
+  | 'question'
+  | 'warning';
+
+// colors
+const successColor = 'testing.iconPassed';
+const warningColor = 'problemsWarningIcon.foreground';
+const errorColor = 'testing.iconErrored';
+const inProgressColor = 'debugIcon.pauseForeground';
+const grayColor = 'testing.iconSkipped';
+
+const icon = (name: IconName, color: string) =>
+  new vscode.ThemeIcon(name, new vscode.ThemeColor(color));
 
 const STATUS_METADATA = {
-  success: { name: 'Succeeded', icon: check, priority: 1 },
-  created: { name: 'Created', icon: pause, priority: 3 },
-  waiting_for_resource: { name: 'Waiting for resource', icon: pause, priority: 4 },
-  preparing: { name: 'Preparing', icon: pause, priority: 5 },
-  pending: { name: 'Pending', icon: pause, priority: 6 },
-  skipped: { name: 'Skipped', icon: debugStepOver, priority: 7 },
-  canceled: { name: 'Cancelled', icon: circleSlash, priority: 8 },
-  failed: { name: 'Failed', icon: error, priority: 9 },
-  running: { name: 'Running', icon: play, priority: 10 },
+  success: { name: 'Succeeded', icon: icon('pass', successColor), priority: 1 },
+  created: { name: 'Created', icon: icon('debug-pause', grayColor), priority: 3 },
+  waiting_for_resource: {
+    name: 'Waiting for resource',
+    icon: icon('debug-pause', inProgressColor),
+    priority: 4,
+  },
+  preparing: { name: 'Preparing', icon: icon('debug-pause', inProgressColor), priority: 5 },
+  pending: { name: 'Pending', icon: icon('debug-pause', warningColor), priority: 6 },
+  skipped: { name: 'Skipped', icon: icon('debug-step-over', grayColor), priority: 7 },
+  canceled: { name: 'Cancelled', icon: icon('circle-slash', grayColor), priority: 8 },
+  failed: { name: 'Failed', icon: icon('error', errorColor), priority: 9 },
+  running: { name: 'Running', icon: icon('play', inProgressColor), priority: 10 },
 };
 
-const UNKNOWN_STATUS = { name: 'Status Unknown', icon: question, priority: 0 };
-const FAILED_ALLOWED = { name: 'Failed (allowed to fail)', icon: warning, priority: 2 };
+const UNKNOWN_STATUS = { name: 'Status Unknown', icon: icon('question', grayColor), priority: 0 };
+const FAILED_ALLOWED = {
+  name: 'Failed (allowed to fail)',
+  icon: icon('warning', warningColor),
+  priority: 2,
+};
 
 export const getJobMetadata = (job: RestJob): CiStatusMetadata => {
   if (job.status === 'failed' && job.allow_failure) return FAILED_ALLOWED;
