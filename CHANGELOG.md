@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * **gitRemoteParser:** allow self hosted git remote with ssh on custom port ([23f73b6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/23f73b63ddcbd0968111795f5c8d93df27986059))
+  * Implemented by [@PeterW-LWL](https://gitlab.com/PeterW-LWL) with [MR !319](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/319) 👍
 
 
 ### Features
