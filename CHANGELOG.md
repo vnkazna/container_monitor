@@ -1,3 +1,17 @@
+# [3.28.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.27.1...v3.28.0) (2021-08-11)
+
+
+### Bug Fixes
+
+* **gitRemoteParser:** allow self hosted git remote with ssh on custom port ([23f73b6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/23f73b63ddcbd0968111795f5c8d93df27986059))
+
+
+### Features
+
+* open local file during MR review ([0e05d42](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0e05d42e10c91e9f72607b419160b15d740ca4d2))
+
+
+
 ## [3.27.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.27.0...v3.27.1) (2021-08-02)
 
 

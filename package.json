@@ -2,7 +2,7 @@
   "name": "gitlab-workflow",
   "displayName": "GitLab Workflow",
   "description": "GitLab VSCode integration",
-  "version": "3.27.1",
+  "version": "3.28.0",
   "publisher": "GitLab",
   "license": "MIT",
   "repository": {
@@ -140,11 +140,11 @@
         }
       },
       {
-				"command": "gl.openMrFile",
-				"title": "Open Changed File In Local Project",
-				"category": "GitLab",
-				"icon": "$(go-to-file)"
-			},
+        "command": "gl.openMrFile",
+        "title": "Open Changed File In Local Project",
+        "category": "GitLab",
+        "icon": "$(go-to-file)"
+      },
       {
         "command": "gl.resolveThread",
         "title": "Resolve Thread",
@@ -402,11 +402,11 @@
         }
       ],
       "editor/title": [
-				{
-					"command": "gl.openMrFile",
-					"when": "resourceScheme == 'gl-review' && resourceFilename != '' && isInDiffEditor",
-					"group": "navigation@-99"
-				}
+        {
+          "command": "gl.openMrFile",
+          "when": "resourceScheme == 'gl-review' && resourceFilename != '' && isInDiffEditor",
+          "group": "navigation@-99"
+        }
       ]
     },
     "viewsContainers": {
