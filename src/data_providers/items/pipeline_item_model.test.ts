@@ -69,6 +69,19 @@ describe('PipelineItemModel', () => {
       expect(labels).toEqual(['test', 'package']);
     });
 
+    it('returns stages based on job order (asc id)', async () => {
+      asMock(gitLabService.fetchJobsForPipeline).mockResolvedValue([
+        { ...unitTestJob, id: 3 },
+        { ...integrationTestJob, id: 2 },
+        { ...packageJob, id: 1 },
+      ]);
+
+      const children = await pipelineItem.getChildren();
+      const labels = children.map(ch => ch.getTreeItem()).map(i => i.label);
+
+      expect(labels).toEqual(['package', 'test']);
+    });
+
     it('passes jobs to each unique stage', async () => {
       const childrenModels = await pipelineItem.getChildren();
 

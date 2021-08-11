@@ -7,6 +7,7 @@ import * as gitLabService from '../../gitlab_service';
 import { openInBrowserCommand } from '../../utils/open_in_browser_command';
 import { ItemModel } from './item_model';
 import { StageItemModel } from './stage_item_model';
+import { compareBy } from '../../utils/compare_by';
 
 dayjs.extend(relativeTime);
 /** removes duplicates based on === equality. Can be replaced with lodash. */
@@ -36,10 +37,11 @@ export class PipelineItemModel extends ItemModel {
       this.repository.rootFsPath,
       this.pipeline,
     );
-    const stages = getUniqueStages(jobs);
+    const jobsAsc = jobs.sort(compareBy('id'));
+    const stages = getUniqueStages(jobsAsc);
     const stagesWithJobs = stages.map(stageName => ({
       name: stageName,
-      jobs: jobs.filter(j => j.stage === stageName),
+      jobs: jobsAsc.filter(j => j.stage === stageName),
     }));
     return stagesWithJobs.map(sj => new StageItemModel(sj.name, sj.jobs));
   }
