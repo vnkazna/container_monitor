@@ -1,3 +1,13 @@
+## [3.28.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.28.0...v3.28.1) (2021-08-12)
+
+
+### Bug Fixes
+
+* ci stages not correctly sorted ([7b0c4fb](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/7b0c4fb8d7764a4f9bc51ee6ea73a18566df0a38))
+* matching instance URL with token is too strict ([9be7eb4](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/9be7eb4566adfec9a07b3800dde48079b6f84c06))
+
+
+
 # [3.28.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.27.1...v3.28.0) (2021-08-11)
 
 
