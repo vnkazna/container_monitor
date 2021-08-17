@@ -275,7 +275,7 @@ export class GitLabNewService {
     const options: GetDiscussionsQueryOptions = {
       projectPath,
       iid: String(issuable.iid),
-      endCursor,
+      afterCursor: endCursor,
     };
     const result = await this.client.request<GetDiscussionsQueryResult>(query, options);
     assert(result.project, `Project ${projectPath} was not found.`);
