@@ -53,7 +53,7 @@ export const getIssueDiscussionsQuery = gql`
 export interface GetDiscussionsQueryOptions {
   projectPath: string;
   iid: string;
-  endCursor?: string;
+  afterCursor?: string;
 }
 
 interface GqlGenericDiscussion<T extends GqlNote> {
