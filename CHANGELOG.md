@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * Merge request detail doesn't show for a large MR ([b0488d5](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b0488d521144f68e1bac1c40108fd8f2149bbc16))
+  * Implemented by [@PeterW-LWL](https://gitlab.com/PeterW-LWL) with [MR !329](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/329) 👍
 
 
 
