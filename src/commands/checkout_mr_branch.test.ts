@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { MrItemModel } from '../data_providers/items/mr_item_model';
+import { MrItemModel } from '../tree_view/items/mr_item_model';
 import { checkoutMrBranch } from './checkout_mr_branch';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { mr } from '../test_utils/entities';

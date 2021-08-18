@@ -3,8 +3,8 @@ const sinon = require('sinon');
 const vscode = require('vscode');
 const { graphql } = require('msw');
 
-const { IssuableDataProvider } = require('../../src/data_providers/issuable_data_provider');
-const { MrItemModel } = require('../../src/data_providers/items/mr_item_model');
+const { IssuableDataProvider } = require('../../src/tree_view/issuable_data_provider');
+const { MrItemModel } = require('../../src/tree_view/items/mr_item_model');
 const { tokenService } = require('../../src/services/token_service');
 const { submitEdit, createComment } = require('../../src/commands/mr_discussion_commands');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
