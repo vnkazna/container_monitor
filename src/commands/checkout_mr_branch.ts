@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
-import { MrItemModel } from '../data_providers/items/mr_item_model';
+import { MrItemModel } from '../tree_view/items/mr_item_model';
 import { VS_COMMANDS } from '../command_names';
 
 const handleGitError = async (e: { stderr: string }) => {

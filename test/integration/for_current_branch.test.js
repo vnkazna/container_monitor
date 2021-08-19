@@ -1,8 +1,6 @@
 const assert = require('assert');
 const dayjs = require('dayjs');
-const {
-  CurrentBranchDataProvider,
-} = require('../../src/data_providers/current_branch_data_provider');
+const { CurrentBranchDataProvider } = require('../../src/tree_view/current_branch_data_provider');
 const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const pipelinesResponse = require('./fixtures/rest/pipelines.json');
