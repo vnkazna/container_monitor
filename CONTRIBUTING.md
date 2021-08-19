@@ -122,6 +122,30 @@ npm run autofix # Automatically formats your code using prettier and fixes eslin
 npm run lint
 ```
 
+#### Step - 8 : Add documentation
+
+If you added or changed a feature, add the documentation to the README.
+
+The majority of the user documentation is directly in [`README.md`](README.md), because that file is rendered in:
+
+- The [extension marketplace page](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).
+- The extension overview directly in VS Code.
+
+To add documentation that includes a new image:
+
+1. Add images into the `docs/assets` folder, and commit the changes.
+1. Edit the README file, and insert full permalinks to your new images.
+   The permalinks contain the commit SHA from your first commit, and are
+   in the form of:
+
+   ```plaintext
+   https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/<COMMIT_SHA>/src/assets/imagename.png
+   ```
+
+1. Commit your text changes.
+
+For more examples, refer to the `gif` images in the README file.
+
 ### Opening Merge Requests
 
 Steps to opening a merge request to contribute code to GitLab Workflow is similar to any other open source project.

@@ -6,4 +6,5 @@ test/**
 jsconfig.json
 src/webview/node_modules
 src/assets/_*
+docs/**
 .eslintrc.json
