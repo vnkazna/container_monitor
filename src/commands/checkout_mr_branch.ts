@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import { MrItemModel } from '../tree_view/items/mr_item_model';
 import { VS_COMMANDS } from '../command_names';
 

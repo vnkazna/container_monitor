@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { job } from '../../test_utils/entities';
 import { createJobItem } from './create_job_item';
 import { VS_COMMANDS } from '../../command_names';

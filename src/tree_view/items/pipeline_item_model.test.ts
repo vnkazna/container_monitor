@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { job, pipeline, repository } from '../../test_utils/entities';
 import { PipelineItemModel } from './pipeline_item_model';
 import { VS_COMMANDS } from '../../command_names';

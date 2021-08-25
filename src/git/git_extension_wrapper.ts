@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
+import assert from 'assert';
 import * as vscode from 'vscode';
 import { API, GitExtension, Repository } from '../api/git';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';

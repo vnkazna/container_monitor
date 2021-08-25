@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as assert from 'assert';
+import assert from 'assert';
 import { promises as fs } from 'fs';
 import { VS_COMMANDS } from '../command_names';
 import { fromReviewUri } from '../review/review_uri';

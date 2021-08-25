@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import * as gitLabService from '../gitlab_service';
 import * as openers from '../openers';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';

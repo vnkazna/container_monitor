@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
 import { ChangedFileItem } from './changed_file_item';
 import { ItemModel } from './item_model';

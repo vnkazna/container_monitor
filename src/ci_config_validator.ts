@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { doNotAwait } from './utils/do_not_await';
 

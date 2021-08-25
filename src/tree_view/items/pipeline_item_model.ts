@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as dayjs from 'dayjs';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { WrappedRepository } from '../../git/wrapped_repository';
 import { getPipelineMetadata } from '../../gitlab/ci_status_metadata';
 import { openInBrowserCommand } from '../../utils/open_in_browser_command';

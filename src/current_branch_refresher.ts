@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
-import * as dayjs from 'dayjs';
+import assert from 'assert';
+import dayjs from 'dayjs';
 import * as gitLabService from './gitlab_service';
 import { logError } from './log';
 import { extensionState } from './extension_state';

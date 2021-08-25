@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 

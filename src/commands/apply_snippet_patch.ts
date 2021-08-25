@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as temp from 'temp';
-import * as assert from 'assert';
+import assert from 'assert';
 import { promises as fs } from 'fs';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { pickSnippet } from './insert_snippet';

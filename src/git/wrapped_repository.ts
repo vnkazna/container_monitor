@@ -1,6 +1,6 @@
 import * as url from 'url';
 import { basename, join } from 'path';
-import * as assert from 'assert';
+import assert from 'assert';
 import { Repository } from '../api/git';
 
 import { GITLAB_COM_URL } from '../constants';
