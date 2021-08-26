@@ -4,6 +4,7 @@
 ### Features
 
 * remote repository filesystem provider ([4476be5](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/4476be5df94e6ce977480614a0938ee7aaad35cb))
+  * Implemented by [@firelizzard](https://gitlab.com/firelizzard) with [MR !321](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/321) 👍
 
 
 
