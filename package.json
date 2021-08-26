@@ -24,8 +24,8 @@
   ],
   "capabilities": {
     "virtualWorkspaces": {
-      "supported": false,
-      "description": "GitLab Workflow doesn't support remote GitLab workspaces yet, please see https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/411 for more information."
+      "supported": "limited",
+      "description": "Only basic read-only remote filesystem is available at the moment."
     }
   },
   "activationEvents": [
