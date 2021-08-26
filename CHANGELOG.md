@@ -1,3 +1,12 @@
+# [3.29.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.28.2...v3.29.0) (2021-08-26)
+
+
+### Features
+
+* remote repository filesystem provider ([4476be5](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/4476be5df94e6ce977480614a0938ee7aaad35cb))
+
+
+
 ## [3.28.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.28.1...v3.28.2) (2021-08-18)
 
 
