@@ -31,6 +31,10 @@ Advanced pipeline actions allow you to view pipeline on GitLab, create a new pip
 
 ![status_bar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/d0589878829338b64657e592f3451f1dace41cdf/docs/assets/status-bar.gif)
 
+### Browse a remote repository
+
+Browse a GitLab repository directly in Visual Studio Code without cloning it. [Read more](#browse-a-repository-without-cloning).
+
 ### Commands
 
 You can use [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) to run the commands.
@@ -50,6 +54,7 @@ You can use [Command Palette](https://code.visualstudio.com/docs/getstarted/user
 - `GitLab: Open current project on GitLab`
 - `GitLab: Create new issue on current project`
 - `GitLab: Create new merge request on current project` - Open the merge request page to create a merge request.
+- `GitLab: Open Repository` - Browse a remote GitLab repository. [Read more](#browse-a-repository-without-cloning).
 
 Commands this extension extends/integrates with:
 
@@ -307,6 +312,44 @@ This extension integrates with the built-in Git Extension and allows you to sear
 ![Demonstration of cloning a project from gitlab.com](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/d0589878829338b64657e592f3451f1dace41cdf/docs/assets/git-clone.gif)
 
 > Note: Using the access-token for cloning with HTTPS does not work with VS Code version 1.53.x (See [discussion](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/172#note_513068345))
+
+### Browse a repository without cloning
+
+With this extension, you can browse a GitLab repository without cloning it. While similar to the [GitHub Repositories](https://marketplace.visualstudio.com/items?itemName=github.remotehub) extension, remote GitLab repository browsing is **read-only**.
+
+Prerequisite:
+
+- You have [registered an access token](#setup) for that GitLab instance.
+
+To open and browse a repository, either:
+
+- Run the **GitLab: Open Repository** command and paste in a `gitlab-remote` URL.
+- Manually add a `gitlab-remote` URL to your [workspace file](https://code.visualstudio.com/docs/editor/multi-root-workspaces#_workspace-file).
+
+#### GitLab remote URL format
+
+GitLab remote URLs follow this format:
+
+```plaintext
+gitlab-remote://<instanceUrl>/<label>?project=<projectId>&ref=<gitReference>
+```
+
+For example, the remote URL for the main GitLab project is:
+
+```plaintext
+gitlab-remote://gitlab.com/<label>?project=278964&ref=master
+```
+
+- `instanceUrl` - The GitLab instance URL, not including `https://` or `http://`. If the GitLab instance is [installed under a relative URL](https://docs.gitlab.com/ee/install/relative_url.html), the relative URL must be included in the URL. For example, the URL for the `main` branch of the project `templates/ui` on the instance `example.com/gitlab` is `gitlab-remote://example.com/gitlab/<label>?project=templates/ui&ref=main`.
+- `label` - The text VS Code uses as the name of this workspace folder:
+  - It must appear immediately after the instance URL.
+  - It must not contain unescaped URL components, such as `/` or `?`.
+  - For an instance installed at the domain root, such as `https://gitlab.com`, the label must be the first path element.
+  - For URLs that refer to the root of a repository, the label must be the last path element.
+  - Any path elements that appear after the label will be treated as a path within the repository. For example, `gitlab-remote://gitlab.com/GitLab/app?project=gitlab-org/gitlab&ref=master` refers to the `app` directory of the `gitlab-org/gitlab` repository on GitLab.com.
+- `projectId` - Can be either the numeric id (`5261717`) or the namespace (`gitlab-org/gitlab-vscode-extension`) of the project. The project namespace might not work [when your instance uses reverse proxy](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/143).
+- `gitReference` - The repository branch or commit SHA, passed verbatim to the GitLab API.
+
 
 ---
 

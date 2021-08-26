@@ -14,7 +14,7 @@ const { issuableDataProvider } = require('./tree_view/issuable_data_provider');
 const { currentBranchDataProvider } = require('./tree_view/current_branch_data_provider');
 const { initializeLogging, handleError } = require('./log');
 const { GitContentProvider } = require('./review/git_content_provider');
-const { REVIEW_URI_SCHEME } = require('./constants');
+const { REVIEW_URI_SCHEME, REMOTE_URI_SCHEME } = require('./constants');
 const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
 const { CiCompletionProvider } = require('./completion/ci_completion_provider');
 const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
@@ -36,6 +36,8 @@ const { cloneWiki } = require('./commands/clone_wiki');
 const { createSnippetPatch } = require('./commands/create_snippet_patch');
 const { applySnippetPatch } = require('./commands/apply_snippet_patch');
 const { openMrFile } = require('./commands/open_mr_file');
+const { GitLabRemoteFileSystem } = require('./remotefs/gitlab_remote_file_system');
+const { openRepository } = require('./commands/open_repository');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -86,6 +88,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.APPLY_SNIPPET_PATCH]: applySnippetPatch,
     [USER_COMMANDS.CANCEL_FAILED_COMMENT]: cancelFailedComment,
     [USER_COMMANDS.RETRY_FAILED_COMMENT]: retryFailedComment,
+    [USER_COMMANDS.OPEN_REPOSITORY]: openRepository,
     [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
       issuableDataProvider.refresh();
       currentBranchDataProvider.refresh();
@@ -119,6 +122,11 @@ const activate = context => {
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
   vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new GitContentProvider());
+  vscode.workspace.registerFileSystemProvider(
+    REMOTE_URI_SCHEME,
+    new GitLabRemoteFileSystem(),
+    GitLabRemoteFileSystem.OPTIONS,
+  );
   registerCommands(context, outputChannel);
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
@@ -128,6 +136,7 @@ const activate = context => {
   registerCiCompletion(context);
   gitExtensionWrapper.init();
   context.subscriptions.push(gitExtensionWrapper);
+
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
 
