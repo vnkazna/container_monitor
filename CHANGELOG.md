@@ -1,3 +1,12 @@
+## [3.29.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.29.0...v3.29.1) (2021-08-26)
+
+
+### Bug Fixes
+
+* enable extension for virtual workspaces ([aee6529](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/aee6529cfb46586ccb359a2d0d336de1f01b2ce6))
+
+
+
 # [3.29.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.28.2...v3.29.0) (2021-08-26)
 
 
