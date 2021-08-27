@@ -92,8 +92,12 @@
     "description": "The name of the project's default branch."
   },
   {
+    "name": "CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX",
+    "description": "The direct group image prefix for pulling images through the Dependency Proxy."
+  },
+  {
     "name": "CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX",
-    "description": "The image prefix for pulling images through the Dependency Proxy."
+    "description": "The top-level group image prefix for pulling images through the Dependency Proxy."
   },
   {
     "name": "CI_DEPENDENCY_PROXY_PASSWORD",
@@ -348,6 +352,10 @@
     "description": "The URL for the pipeline details."
   },
   {
+    "name": "CI_PROJECT_CLASSIFICATION_LABEL",
+    "description": "The project [external authorization classification label](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../../user/admin_area/settings/external_authorization.md)."
+  },
+  {
     "name": "CI_PROJECT_CONFIG_PATH",
     "description": "[Removed](https://gitlab.com/gitlab-org/gitlab/-/issues/322807) in GitLab 14.0. Use `CI_CONFIG_PATH`."
   },
@@ -405,7 +413,7 @@
   },
   {
     "name": "CI_REGISTRY_PASSWORD",
-    "description": "The password to push containers to the project's GitLab Container Registry. Only available if the Container Registry is enabled for the project."
+    "description": "The password to push containers to the project's GitLab Container Registry. Only available if the Container Registry is enabled for the project. This password value is the same as the `CI_JOB_TOKEN` and is valid only as long as the job is running. Use the `CI_DEPLOY_PASSWORD` for long-lived access to the registry"
   },
   {
     "name": "CI_REGISTRY_USER",
