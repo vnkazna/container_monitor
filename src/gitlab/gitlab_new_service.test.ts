@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import crossFetch from 'cross-fetch';
-import { GitLabNewService } from './gitlab_new_service';
+import { fetchJson, GitLabNewService } from './gitlab_new_service';
 import { testSnippet1 } from '../../test/integration/fixtures/graphql/snippets.js';
 import { DEFAULT_FETCH_RESPONSE } from '../__mocks__/cross-fetch.js';
 
@@ -127,5 +127,32 @@ describe('gitlab_new_service', () => {
         expect.anything(),
       );
     });
+  });
+});
+
+describe('fetchJson', () => {
+  it('handles an empty query', async () => {
+    await fetchJson('', 'https://example.com', {});
+    expect(crossFetch).toHaveBeenCalledWith('https://example.com?', expect.anything());
+  });
+
+  it('handles a non-empty query', async () => {
+    await fetchJson('', 'https://example.com', {}, { foo: 'bar' });
+    expect(crossFetch).toHaveBeenCalledWith('https://example.com?foo=bar', expect.anything());
+  });
+
+  it('ignores an undefined query value', async () => {
+    await fetchJson('', 'https://example.com', {}, { foo: undefined });
+    expect(crossFetch).toHaveBeenCalledWith('https://example.com?', expect.anything());
+  });
+
+  it('ignores a null query value', async () => {
+    await fetchJson('', 'https://example.com', {}, { foo: null });
+    expect(crossFetch).toHaveBeenCalledWith('https://example.com?', expect.anything());
+  });
+
+  it('does not ignore a falsy value', async () => {
+    await fetchJson('', 'https://example.com', {}, { foo: '' });
+    expect(crossFetch).toHaveBeenCalledWith('https://example.com?foo=', expect.anything());
   });
 });

@@ -1,7 +1,7 @@
 import * as https from 'https';
 import { GraphQLClient, gql } from 'graphql-request';
 import crossFetch from 'cross-fetch';
-import { URL } from 'url';
+import { URL, URLSearchParams } from 'url';
 import * as createHttpProxyAgent from 'https-proxy-agent';
 import * as assert from 'assert';
 import { tokenService } from '../services/token_service';
@@ -67,6 +67,26 @@ interface RestNote {
 
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
+}
+
+export async function fetchJson<T>(
+  label: string,
+  url: string,
+  options: RequestInit,
+  query: Record<string, string | null | undefined> = {},
+): Promise<T> {
+  const q = new URLSearchParams();
+  Object.entries(query).forEach(([name, value]) => {
+    if (typeof value !== 'undefined' && value !== null) {
+      q.set(name, value);
+    }
+  });
+
+  const result = await crossFetch(`${url}?${q}`, options);
+  if (!result.ok) {
+    throw new FetchError(`Fetching ${label} from ${url} failed`, result);
+  }
+  return result.json() as Promise<T>;
 }
 
 // TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
@@ -275,6 +295,18 @@ export class GitLabNewService {
       throw new FetchError(`Fetching tree from ${treeUrl} failed`, treeResult);
     }
     return treeResult.json();
+  }
+
+  getBranches(project: number | string, search?: string): Promise<RestBranch[]> {
+    const encodedProject = encodeURIComponent(project);
+    const branchUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/branches`;
+    return fetchJson('branches', branchUrl, this.fetchOptions, { search });
+  }
+
+  getTags(project: number | string, search?: string): Promise<RestTag[]> {
+    const encodedProject = encodeURIComponent(project);
+    const tagUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/tags`;
+    return fetchJson('tags', tagUrl, this.fetchOptions, { search });
   }
 
   /*
