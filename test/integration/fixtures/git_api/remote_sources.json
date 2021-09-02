@@ -2,9 +2,26 @@
   {
     "description": "The Gitlab Project",
     "name": "$(repo) gitlab-org/gitlab",
+    "project": {
+      "gqlProject": {
+        "description": "The Gitlab Project",
+        "fullPath": "gitlab-org/gitlab",
+        "group": {
+          "id": "gid://gitlab/Group/9970"
+        },
+        "httpUrlToRepo": "https://test.gitlab.com/gitlab-org/gitlab.git",
+        "id": "gid://gitlab/Project/278964",
+        "name": "GitLab",
+        "sshUrlToRepo": "git@test.gitlab.com:gitlab-org/gitlab.git"
+      }
+    },
     "url": [
       "git@test.gitlab.com:gitlab-org/gitlab.git",
       "https://test.gitlab.com/gitlab-org/gitlab.git"
+    ],
+    "wikiUrl": [
+      "git@test.gitlab.com:gitlab-org/gitlab.wiki.git",
+      "https://test.gitlab.com/gitlab-org/gitlab.wiki.git"
     ]
   }
 ]

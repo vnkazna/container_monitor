@@ -1,5 +1,6 @@
 import { RemoteSource, RemoteSourceProvider } from '../../api/git';
 import { GitLabNewService } from '../gitlab_new_service';
+import { GitLabProject } from '../gitlab_project';
 
 const SEARCH_LIMIT = 30;
 const getProjectQueryAttributes = {
@@ -10,6 +11,24 @@ const getProjectQueryAttributes = {
 
 export function convertUrlToWikiUrl(url: string): string {
   return url.replace(/\.git$/, '.wiki.git');
+}
+
+export type GitLabRemote = RemoteSource & {
+  project: GitLabProject;
+  url: string[];
+  wikiUrl: string[];
+};
+
+function remoteForProject(project: GitLabProject): GitLabRemote {
+  const url = [project.sshUrlToRepo, project.httpUrlToRepo];
+
+  return {
+    name: `$(repo) ${project.fullPath}`,
+    description: project.description,
+    url,
+    wikiUrl: url.map(convertUrlToWikiUrl),
+    project,
+  };
 }
 
 export class GitLabRemoteSourceProvider implements RemoteSourceProvider {
@@ -26,35 +45,19 @@ export class GitLabRemoteSourceProvider implements RemoteSourceProvider {
     this.gitlabService = new GitLabNewService(this.url);
   }
 
-  async getRemoteSources(query?: string): Promise<RemoteSource[]> {
-    const projects = await this.gitlabService.getProjects({
-      search: query,
-      ...getProjectQueryAttributes,
-    });
+  async lookupByPath(path: string): Promise<GitLabRemote | undefined> {
+    const project = await this.gitlabService.getProject(path);
+    if (!project) return undefined;
 
-    return projects.map(project => ({
-      name: `$(repo) ${project.fullPath}`,
-      description: project.description,
-      url: [project.sshUrlToRepo, project.httpUrlToRepo],
-    }));
+    return remoteForProject(project);
   }
 
-  async getRemoteWikiSources(query?: string): Promise<RemoteSource[]> {
+  async getRemoteSources(query?: string): Promise<GitLabRemote[]> {
     const projects = await this.gitlabService.getProjects({
       search: query,
       ...getProjectQueryAttributes,
     });
 
-    const wikiprojects = projects.filter(project => project.wikiEnabled);
-    return wikiprojects.map(project => {
-      return {
-        name: `$(repo) ${project.fullPath}`,
-        description: project.description,
-        url: [
-          convertUrlToWikiUrl(project.sshUrlToRepo),
-          convertUrlToWikiUrl(project.httpUrlToRepo),
-        ],
-      };
-    });
+    return projects.map(project => remoteForProject(project));
   }
 }

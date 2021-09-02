@@ -108,3 +108,34 @@ interface RestRepositoryTreeEntry {
   path: string;
   mode: string;
 }
+
+/**
+ * GET /projects/:id/repository/branches
+ *
+ * The following properties exist on the GitLab response but are not used:
+ * - merged
+ * - protected
+ * - default
+ * - developers_can_push
+ * - developers_can_merge
+ * - can_push
+ * - web_url
+ * - commit
+ */
+interface RestBranch {
+  name: string;
+}
+
+/**
+ * GET /projects/:id/repository/tags
+ *
+ * The following properties exist on the GitLab response but are not used:
+ * - commit
+ * - release
+ * - target
+ * - message
+ * - protected
+ */
+interface RestTag {
+  name: string;
+}
