@@ -20,3 +20,8 @@ export const PATCH_FILE_SUFFIX = '.patch';
 export const SYNCED_COMMENT_CONTEXT = 'synced-comment';
 /** Failed comment is only stored in the extension, it failed to be created in GitLab */
 export const FAILED_COMMENT_CONTEXT = 'failed-comment';
+
+export const README_SECTIONS = {
+  SETUP: 'setup',
+  REMOTEFS: 'browse-a-repository-without-cloning',
+};

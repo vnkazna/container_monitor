@@ -38,6 +38,7 @@ const { applySnippetPatch } = require('./commands/apply_snippet_patch');
 const { openMrFile } = require('./commands/open_mr_file');
 const { GitLabRemoteFileSystem } = require('./remotefs/gitlab_remote_file_system');
 const { openRepository } = require('./commands/open_repository');
+const { contextUtils } = require('./utils/context_utils');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -119,6 +120,8 @@ const registerCiCompletion = context => {
  * @param {vscode.ExtensionContext} context
  */
 const activate = context => {
+  contextUtils.init(context);
+
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
   vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new GitContentProvider());

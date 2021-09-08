@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { REMOTE_URI_SCHEME } from '../constants';
+import { HelpError } from '../errors/help_error';
 import { tokenService } from '../services/token_service';
 import { OpenAction, openRepository } from './open_repository';
 
@@ -49,8 +50,7 @@ describe('openRepository', () => {
     const uri = `not-${REMOTE_URI_SCHEME}://gitlab.com/GitLab?project=gitlab-org/gitlab&ref=main`;
     alwaysPick('new-window');
     alwaysInput(uri);
-    await openRepository();
-    expect(vscode.window.showErrorMessage).toHaveBeenCalled();
+    await expect(openRepository()).rejects.toThrow(HelpError);
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
   });
 });
