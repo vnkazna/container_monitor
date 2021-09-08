@@ -54,4 +54,5 @@ export const VS_COMMANDS = {
   OPEN: 'vscode.open',
   GIT_SHOW_OUTPUT: 'git.showOutput',
   GIT_CLONE: 'git.clone',
+  MARKDOWN_SHOW_PREVIEW: 'markdown.showPreview',
 };

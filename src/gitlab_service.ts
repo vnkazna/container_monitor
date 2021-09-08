@@ -14,6 +14,8 @@ import { getInstanceUrl } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { getExtensionConfiguration } from './utils/get_extension_configuration';
+import { README_SECTIONS } from './constants';
+import { HelpError } from './errors/help_error';
 
 const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => {
   const { author } = issuable;
@@ -53,8 +55,7 @@ async function fetch(
       err = `${err} You have configured tokens for ${tokens}.`;
     }
 
-    await vscode.window.showInformationMessage(err);
-    throw new Error(err);
+    throw new HelpError(err, { section: README_SECTIONS.SETUP });
   }
 
   const config: request.RequestPromiseOptions = {
@@ -155,7 +156,7 @@ export async function fetchVersion(repositoryRoot: string) {
       versionCache = response.version;
     }
   } catch (e) {
-    logError(e);
+    handleError(e);
   }
 
   return versionCache;

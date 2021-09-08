@@ -1,3 +1,4 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 interface UriOptions {
@@ -63,13 +64,12 @@ export class Uri implements vscode.Uri {
 
   static parse(stringUri: string): Uri {
     const url = new URL(stringUri);
-    const [query, fragment = ''] = url.search.split('#');
     return new Uri({
       scheme: url.protocol.replace(/:$/, ''),
       authority: url.hostname,
       path: url.pathname,
-      query: query.replace(/^\?/, ''),
-      fragment,
+      query: url.search.replace(/^\?/, ''),
+      fragment: url.hash.replace(/^#/, ''),
     });
   }
 
@@ -81,5 +81,10 @@ export class Uri implements vscode.Uri {
       query: filePath.split('?')[1] || '',
       fragment: '',
     });
+  }
+
+  static joinPath(base: Uri, ...pathSegments: string[]): Uri {
+    const { path: p, ...rest } = base;
+    return new this({ ...rest, path: path.join(p, ...pathSegments) });
   }
 }

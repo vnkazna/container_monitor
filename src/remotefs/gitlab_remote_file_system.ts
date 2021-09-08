@@ -1,10 +1,10 @@
-import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { REMOTE_URI_SCHEME } from '../constants';
+import { README_SECTIONS, REMOTE_URI_SCHEME } from '../constants';
 import { FetchError } from '../errors/fetch_error';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
-import { logError } from '../log';
+import { handleError } from '../log';
 import { tokenService } from '../services/token_service';
+import { HelpError } from '../errors/help_error';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 import { ReadOnlyFileSystem } from './readonly_file_system';
 
@@ -39,12 +39,6 @@ async function nullIf40x<T>(p: Promise<T>) {
   }
 }
 
-// Check if the error is a FileSystemError - filesystem errors should not be
-// logged.
-function isFsErr(err: unknown): boolean {
-  return err instanceof vscode.FileSystemError;
-}
-
 interface GitLabRemotePath {
   instance: vscode.Uri;
   project: string;
@@ -69,20 +63,30 @@ export class GitLabRemoteFileSystem extends ReadOnlyFileSystem {
    * instances, parseUri will throw an assertion error.
    * @param uri The URI.
    * @returns The parsed GitLab remote fs path.
+   *
    */
   static parseUri(uri: vscode.Uri): GitLabRemotePath {
-    assert.strictEqual(
-      uri.scheme,
-      REMOTE_URI_SCHEME,
-      `URI is not a GitLab remote, it begins with ${uri.scheme} but it should begin with ${REMOTE_URI_SCHEME}`,
-    );
+    if (uri.scheme !== REMOTE_URI_SCHEME) {
+      throw new HelpError(
+        `URI is not a GitLab remote. It begins with ${uri.scheme} but it should begin with ${REMOTE_URI_SCHEME}`,
+        { section: README_SECTIONS.REMOTEFS },
+      );
+    }
 
     const query = new URLSearchParams(uri.query);
     const project = query.get('project');
-    assert(project, 'URI is not a GitLab remote, URI must contain a project= query parameter');
+    if (!project)
+      throw new HelpError(
+        'URI is not a GitLab remote. The URI must contain a project= query parameter',
+        { section: README_SECTIONS.REMOTEFS },
+      );
 
     const ref = query.get('ref');
-    assert(ref, 'URI is not a GitLab remote, URI must contain a ref= query parameter');
+    if (!ref)
+      throw new HelpError(
+        'URI is not a GitLab remote. The URI must contain a ref= query parameter',
+        { section: README_SECTIONS.REMOTEFS },
+      );
 
     // Find the instance with a matching authority and a subpath that is a
     // prefix of the URI's path.
@@ -90,10 +94,11 @@ export class GitLabRemoteFileSystem extends ReadOnlyFileSystem {
       .getInstanceUrls()
       .map(x => vscode.Uri.parse(x))
       .find(x => uri.authority === x.authority && uri.path.startsWith(x.path));
-    assert(
-      instance,
-      `Cannot open ${uri}: missing token for GitLab instance ${uri.authority} - see "Setup" in the README for help`,
-    );
+    if (!instance)
+      throw new HelpError(
+        `Cannot open ${uri}: missing token for GitLab instance ${uri.authority}`,
+        { section: README_SECTIONS.SETUP },
+      );
 
     // To get the file path, we first remove the instance subpath, then the
     // project label.
@@ -166,25 +171,37 @@ export class GitLabRemoteFileSystem extends ReadOnlyFileSystem {
   }
 
   /* eslint-disable class-methods-use-this */
-  stat(uri: vscode.Uri): Promise<vscode.FileStat> {
-    return GitLabRemoteFileSystem.stat(uri).catch(e => {
-      if (!isFsErr(e)) logError(e);
+  async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
+    try {
+      return await GitLabRemoteFileSystem.stat(uri);
+    } catch (e) {
+      if (!(e instanceof vscode.FileSystemError)) {
+        handleError(e);
+      }
       throw e;
-    });
+    }
   }
 
-  readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-    return GitLabRemoteFileSystem.readDirectory(uri).catch(e => {
-      if (!isFsErr(e)) logError(e);
+  async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
+    try {
+      return await GitLabRemoteFileSystem.readDirectory(uri);
+    } catch (e) {
+      if (!(e instanceof vscode.FileSystemError)) {
+        handleError(e);
+      }
       throw e;
-    });
+    }
   }
 
-  readFile(uri: vscode.Uri): Promise<Uint8Array> {
-    return GitLabRemoteFileSystem.readFile(uri).catch(e => {
-      if (!isFsErr(e)) logError(e);
+  async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+    try {
+      return await GitLabRemoteFileSystem.readFile(uri);
+    } catch (e) {
+      if (!(e instanceof vscode.FileSystemError)) {
+        handleError(e);
+      }
       throw e;
-    });
+    }
   }
   /* eslint-enable class-methods-use-this */
 }
