@@ -521,3 +521,28 @@ export async function renderMarkdown(markdown: string, repositoryRoot: string) {
 
   return rendered.html;
 }
+
+export async function test(): Promise<any> {
+  const config: request.RequestPromiseOptions = {
+    method: 'GET',
+    headers: {
+      'PRIVATE-TOKEN': 'aa',
+      ...getUserAgentHeader(),
+    },
+    ...getHttpAgentOptions(),
+  };
+
+  config.transform = (body, response) => {
+    try {
+      return {
+        response: JSON.parse(body),
+        headers: response.headers,
+      };
+    } catch (e) {
+      handleError(new UserFriendlyError('Failed to parse GitLab API response', e));
+      return { error: e };
+    }
+  };
+
+  return await request(`https://localhost:8080/response.json`, config);
+}

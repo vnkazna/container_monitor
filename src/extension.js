@@ -12,7 +12,7 @@ const ciConfigValidator = require('./ci_config_validator');
 const { webviewController } = require('./webview_controller');
 const { issuableDataProvider } = require('./tree_view/issuable_data_provider');
 const { currentBranchDataProvider } = require('./tree_view/current_branch_data_provider');
-const { initializeLogging, handleError } = require('./log');
+const { initializeLogging, handleError, log, logError } = require('./log');
 const { GitContentProvider } = require('./review/git_content_provider');
 const { REVIEW_URI_SCHEME, REMOTE_URI_SCHEME } = require('./constants');
 const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
@@ -39,6 +39,8 @@ const { openMrFile } = require('./commands/open_mr_file');
 const { GitLabRemoteFileSystem } = require('./remotefs/gitlab_remote_file_system');
 const { openRepository } = require('./commands/open_repository');
 const { contextUtils } = require('./utils/context_utils');
+const { test } = require('./gitlab_service');
+const crossFetch = require('cross-fetch');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -119,7 +121,7 @@ const registerCiCompletion = context => {
 /**
  * @param {vscode.ExtensionContext} context
  */
-const activate = context => {
+const activate = async context => {
   contextUtils.init(context);
 
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
@@ -144,6 +146,10 @@ const activate = context => {
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
 
   checkVersion(gitExtensionWrapper, context);
+  test()
+    .then(r => log(JSON.stringify(r)))
+    .catch(e => logError(e));
+  log(await (await crossFetch('https://0.0.0.0:8080/response.json')).text());
 };
 
 exports.activate = activate;
