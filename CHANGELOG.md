@@ -4,6 +4,7 @@
 ### Features
 
 * show markdown help for missing token ([e31aedd](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/e31aedd5225ed307eac95575c0a4c88f5053f160))
+  * Implemented by [@firelizzard](https://gitlab.com/firelizzard) with [MR !333](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/333) 👍
 
 
 
