@@ -103,6 +103,10 @@ You can start using this extension right away. If your project has a pipeline fo
 
 If you want to use multiple GitLab instances you may want to configure each workspace separately. See the `gitlab.instanceUrl` configuration option in [Extension settings](#extension-settings) section.
 
+### Self-Signed Certificate Authority (CA)
+
+If your GitLab uses Self-Signed CA, please see [the SSL setup guide](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/ssl.md).
+
 ## Extension settings
 
 To learn how to change the VS Code Settings, read the official [Settings documentation](https://code.visualstudio.com/docs/getstarted/settings).
@@ -145,19 +149,19 @@ These settings don't work with [`http.proxy` setting for VS Code](https://code.v
 
 **`gitlab.ca`** _(required: false, default: null)_
 
-If your self-managed GitLab instance has a self-signed SSL certificate you would probably need to set this option in to point your certificate file. Implemented in [this issue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26).
+*Deprecated. Please see [the SSL setup guide](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/ssl.md) for more information on how to set up your self-signed CA.*
 
 **`gitlab.cert`** _(required: false, default: null)_
 
-If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate file. Please also see `gitlab.certKey` option. For more information, [read this comment](https://gitlab.com/gitlab-org/gitlab-vscode-extension/merge_requests/29#note_132284448).
+**Unsupported** - See [&6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). *If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate file. Please also see `gitlab.certKey` option.*
 
 **`gitlab.certKey`** _(required: false, default: null)_
 
-If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate key file. Please also see `gitlab.cert` option. For more information, [read this comment](https://gitlab.com/gitlab-org/gitlab-vscode-extension/merge_requests/29#note_132284448).
+**Unsupported** - See [&6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). *If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate key file. Please also see `gitlab.cert` option.*
 
 **`gitlab.ignoreCertificateErrors`** _(required: false, default: false)_
 
-If you are using a self-managed GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors. For more information, [read this comment](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/26#note_61312786).
+**Unsupported** - See [&6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). *If you are using a self-managed GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors.*
 
 ## Features in-depth
 
