@@ -71,7 +71,9 @@ describe('check_version', () => {
       mockedRepositories = [createMockRepo(BAD_VERSION)];
 
       await getVersionForEachRepo(gitExtensionWrapper, context as vscode.ExtensionContext);
-      expect(logMock.log).toHaveBeenCalledWith(`Could not match version from "${BAD_VERSION}"`);
+      expect(logMock.log).toHaveBeenCalledWith(
+        `Could not parse version from "${BAD_VERSION}", running logic for the latest GitLab version`,
+      );
     });
 
     it('stores user preference for not showing the warning', async () => {

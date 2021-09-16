@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { coerce, gte } from 'semver';
 import { DO_NOT_SHOW_VERSION_WARNING, MINIMUM_VERSION } from '../constants';
 import { GitExtensionWrapper } from '../git/git_extension_wrapper';
 import { log } from '../log';
+import { ifVersionGte } from './if_version_gte';
 
 export const getVersionForEachRepo = async (
   gitExtensionWrapper: GitExtensionWrapper,
@@ -13,28 +13,26 @@ export const getVersionForEachRepo = async (
   await Promise.all(
     gitExtensionWrapper.repositories.map(async repo => {
       const repoVersion = await repo.getVersion();
-      if (!repoVersion) {
-        log('No version returned.');
-        return;
-      }
+      await ifVersionGte(
+        repoVersion,
+        MINIMUM_VERSION,
+        () => undefined,
+        async () => {
+          const warningMessage = `This extension requires GitLab version ${MINIMUM_VERSION} or later. Repo "${repo.name}" is currently using ${repoVersion}.`;
 
-      const version = coerce(repoVersion);
-      if (!version) {
-        log(`Could not match version from "${repoVersion}"`);
-        return;
-      }
-      if (gte(version, MINIMUM_VERSION)) return;
+          log(warningMessage);
 
-      const warningMessage = `This extension requires GitLab version ${MINIMUM_VERSION} or later. Repo "${repo.name}" is currently using ${repoVersion}.`;
+          if (!context.workspaceState.get(DO_NOT_SHOW_VERSION_WARNING)) {
+            const action = await vscode.window.showErrorMessage(
+              warningMessage,
+              DO_NOT_SHOW_AGAIN_TEXT,
+            );
 
-      log(warningMessage);
-
-      if (!context.workspaceState.get(DO_NOT_SHOW_VERSION_WARNING)) {
-        const action = await vscode.window.showErrorMessage(warningMessage, DO_NOT_SHOW_AGAIN_TEXT);
-
-        if (action === DO_NOT_SHOW_AGAIN_TEXT)
-          await context.workspaceState.update(DO_NOT_SHOW_VERSION_WARNING, true);
-      }
+            if (action === DO_NOT_SHOW_AGAIN_TEXT)
+              await context.workspaceState.update(DO_NOT_SHOW_VERSION_WARNING, true);
+          }
+        },
+      );
     }),
   ).catch(error => log(error));
 };

@@ -199,7 +199,7 @@ export class WrappedRepository {
     return this.rootFsPath === repository.rootUri.fsPath;
   }
 
-  getVersion() {
+  getVersion(): Promise<string | undefined> {
     return this.getGitLabService().getVersion();
   }
 }
