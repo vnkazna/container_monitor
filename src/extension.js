@@ -30,7 +30,7 @@ const {
 } = require('./commands/mr_discussion_commands');
 const { hasCommentsDecorationProvider } = require('./review/has_comments_decoration_provider');
 const { changeTypeDecorationProvider } = require('./review/change_type_decoration_provider');
-const { checkVersion } = require('./utils/check_version');
+const { checkVersion } = require('./gitlab/check_version');
 const { checkoutMrBranch } = require('./commands/checkout_mr_branch');
 const { cloneWiki } = require('./commands/clone_wiki');
 const { createSnippetPatch } = require('./commands/create_snippet_patch');
