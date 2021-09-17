@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { FetchError } from '../errors/fetch_error';
+import { HelpError } from '../errors/help_error';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { tokenService } from '../services/token_service';
 import { GitLabRemoteFileSystem } from './gitlab_remote_file_system';
@@ -16,15 +17,21 @@ interface ProjectInfo {
   files?: Record<string, RestRepositoryFile>;
 }
 
-function newFetchError(status: number, text: string) {
+function newFetchError(url: string | undefined, status: number, text: string, bodyJson?: unknown) {
   const response: Partial<Response> = {
+    url: url as string,
     ok: false,
     redirected: false,
     status,
     statusText: text,
-
-    trailer: Promise.reject(new Error('not implemented')),
   };
+
+  if (bodyJson) {
+    response.json = () => Promise.resolve(bodyJson);
+  } else {
+    response.json = () => Promise.reject(new Error('no content'));
+  }
+
   return new FetchError(text, response as Response);
 }
 
@@ -50,11 +57,11 @@ describe('GitLabRemoteFileSystem', () => {
   let instanceUrls: string[];
 
   let projectInfo: ProjectInfo | null;
-  const getProjectInfo = (id: number | string) => {
+  const getProjectInfo = (url: string | undefined, id: number | string) => {
     if (projectInfo && (projectInfo.id === Number(id) || projectInfo.path === id)) {
       return projectInfo;
     }
-    throw newFetchError(404, 'not found');
+    throw newFetchError(url, 404, 'not found');
   };
 
   const testProject = { id: 1 };
@@ -89,7 +96,7 @@ describe('GitLabRemoteFileSystem', () => {
         ref: string,
         projectId: number | string,
       ): Promise<RestRepositoryTreeEntry[]> {
-        const proj = getProjectInfo(projectId);
+        const proj = getProjectInfo(undefined, projectId);
         if (!proj.trees || !(path in proj.trees)) return [];
         return proj.trees[path];
       },
@@ -99,14 +106,14 @@ describe('GitLabRemoteFileSystem', () => {
         ref: string,
         projectId: number | string,
       ): Promise<RestRepositoryFile> {
-        const proj = getProjectInfo(projectId);
-        if (!proj.files || !(path in proj.files)) throw newFetchError(404, 'not found');
+        const proj = getProjectInfo(undefined, projectId);
+        if (!proj.files || !(path in proj.files)) throw newFetchError(undefined, 404, 'not found');
         return proj.files[path];
       },
 
       async getFileContent(path: string, ref: string, projectId: number | string): Promise<string> {
-        const proj = getProjectInfo(projectId);
-        if (!proj.files || !(path in proj.files)) throw newFetchError(404, 'not found');
+        const proj = getProjectInfo(undefined, projectId);
+        if (!proj.files || !(path in proj.files)) throw newFetchError(undefined, 404, 'not found');
         return proj.files[path].content;
       },
     }));
@@ -190,6 +197,25 @@ describe('GitLabRemoteFileSystem', () => {
   });
 
   describe('stat', () => {
+    it('throws a HelpError if the token is expired', async () => {
+      const err = newFetchError('https://example.com', 401, 'unauthorized', {
+        error: 'invalid_token',
+      });
+      (GitLabNewService as jest.Mock).mockImplementation(() => ({
+        async getTree(): Promise<never> {
+          throw err;
+        },
+        async getFile(): Promise<never> {
+          throw err;
+        },
+      }));
+
+      projectInfo = testProjectWithTree;
+
+      const p = GitLabRemoteFileSystem.stat(testProjectFooURI);
+      await expect(p).rejects.toThrowError(HelpError);
+    });
+
     it('returns directory info for a tree', async () => {
       projectInfo = testProjectWithTree;
 

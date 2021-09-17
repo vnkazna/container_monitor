@@ -27,6 +27,18 @@ async function nullIf40x<T>(p: Promise<T>) {
     return await p;
   } catch (e) {
     if (e instanceof FetchError) {
+      // Check if the response body is a GitLab invalid token error. Skip this
+      // check if the URL is undefined. This avoids unnecessary complications
+      // for testing.
+      const body = await e.response.json().catch(() => undefined);
+      if (body?.error === 'invalid_token' && e.response.url) {
+        const { authority } = vscode.Uri.parse(e.response.url);
+        throw new HelpError(
+          `Failed to access a remote repository on ${authority} due to an expired or revoked access token. You must create a new token.`,
+          { section: README_SECTIONS.SETUP },
+        );
+      }
+
       const s = e.response.status;
 
       // Let the handler deal with 40x responses
