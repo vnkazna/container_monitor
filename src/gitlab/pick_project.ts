@@ -17,7 +17,7 @@ export async function pickProject(instanceUrl: string): Promise<GitLabRemote | u
     try {
       pick.busy = true;
       const sources = await provider.getRemoteSources(query);
-      pick.items = [otherItem, ...sources.map(x => ({ ...x, label: x.name }))];
+      pick.items = [otherItem, ...sources.map(s => ({ ...s, label: s.name }))];
     } catch (e) {
       handleError(e);
     } finally {

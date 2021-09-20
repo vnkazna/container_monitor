@@ -23,9 +23,9 @@ export async function pickGitRef(
 
       return [
         ...branches.map(
-          x => ({ ...x, refType: 'branch', label: `$(git-branch) ${x.name}` } as BranchRef),
+          b => ({ ...b, refType: 'branch', label: `$(git-branch) ${b.name}` } as BranchRef),
         ),
-        ...tags.map(x => ({ ...x, refType: 'tag', label: `$(tag) ${x.name}` } as TagRef)),
+        ...tags.map(t => ({ ...t, refType: 'tag', label: `$(tag) ${t.name}` } as TagRef)),
       ];
     },
   );
