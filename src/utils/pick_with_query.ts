@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { handleError } from '../log';
 import { showQuickPick } from './show_quickpick';
 
 /**
@@ -22,14 +23,19 @@ export type QuickPickInitOptions<T extends vscode.QuickPickItem> = Pick<
 export async function pickWithQuery<T extends vscode.QuickPickItem>(
   init: QuickPickInitOptions<T>,
   queryfn: (query?: string) => Thenable<T[]>,
-): Promise<{ picked: T | undefined; value: string }> {
+): Promise<{ picked: T | undefined; finalQuery: string }> {
   const pick = vscode.window.createQuickPick<T>();
   Object.assign(pick, init);
 
   async function getItems(query?: string) {
-    pick.busy = true;
-    pick.items = await queryfn(query);
-    pick.busy = false;
+    try {
+      pick.busy = true;
+      pick.items = await queryfn(query);
+    } catch (e) {
+      handleError(e);
+    } finally {
+      pick.busy = false;
+    }
   }
 
   pick.onDidChangeValue(getItems);
@@ -37,5 +43,5 @@ export async function pickWithQuery<T extends vscode.QuickPickItem>(
   // We only need the result from the quick pick, but the promise needs to be
   // awaited to avoid leaking errors
   const [, picked] = await Promise.all([getItems(), showQuickPick(pick)]);
-  return { picked, value: pick.value };
+  return { picked, finalQuery: pick.value };
 }

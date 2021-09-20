@@ -24,8 +24,7 @@ export async function pickWithOther<
   other: TOther & { alwaysShow: true },
   resolveOther: (_: string) => Thenable<TItem | undefined>,
 ): Promise<TItem | undefined> {
-  const initWithItems = { ...init, items: [other] };
-  const { picked, value } = await pickWithQuery(initWithItems, async query => [
+  const { picked, finalQuery: value } = await pickWithQuery(init, async query => [
     other,
     ...(await queryfn(query)),
   ]);
@@ -34,13 +33,10 @@ export async function pickWithOther<
     return picked as TItem;
   }
 
-  if (value) {
-    return resolveOther(value);
-  }
-
   const input = await vscode.window.showInputBox({
     ignoreFocusOut: init.ignoreFocusOut,
     prompt: other.description,
+    value,
   });
   if (input) {
     return resolveOther(input);
