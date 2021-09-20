@@ -18,12 +18,12 @@ export type QuickPickInitOptions<T extends vscode.QuickPickItem> = Pick<
  * @param quickpick the quickpick to show
  * @param queryfn a function that is used to update the items when the user
  * types
- * @returns the selected item
+ * @returns combination of the picked option
  */
 export async function pickWithQuery<T extends vscode.QuickPickItem>(
   init: QuickPickInitOptions<T>,
   queryfn: (query?: string) => Thenable<T[]>,
-): Promise<{ picked: T | undefined; finalQuery: string }> {
+): Promise<T | undefined> {
   const pick = vscode.window.createQuickPick<T>();
   Object.assign(pick, init);
 
@@ -43,5 +43,5 @@ export async function pickWithQuery<T extends vscode.QuickPickItem>(
   // We only need the result from the quick pick, but the promise needs to be
   // awaited to avoid leaking errors
   const [, picked] = await Promise.all([getItems(), showQuickPick(pick)]);
-  return { picked, finalQuery: pick.value };
+  return picked;
 }

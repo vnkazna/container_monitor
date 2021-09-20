@@ -10,7 +10,7 @@ export async function pickGitRef(
   project: string | number,
 ): Promise<BranchRef | TagRef | undefined> {
   const service = new GitLabNewService(instanceUrl);
-  const { picked } = await pickWithQuery(
+  const picked = await pickWithQuery(
     {
       ignoreFocusOut: true,
       placeholder: 'Select branch or tag',
