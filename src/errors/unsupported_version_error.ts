@@ -13,6 +13,6 @@ export class UnsupportedVersionError extends Error {
   }
 
   get message() {
-    return `The feature "${this.feature}" is unsupported in you version of GitLab instance (${this.currentVersion}). Please upgrade to GitLab version ${this.requiredVersion} or higher to be able to use ${this.feature}.`;
+    return `The feature "${this.feature}" is unsupported in GitLab version (${this.currentVersion}). To use ${this.feature}, upgrade to GitLab version ${this.requiredVersion} or later.`;
   }
 }
