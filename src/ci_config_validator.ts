@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
+import * as assert from 'assert';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
-import * as gitLabService from './gitlab_service';
 import { doNotAwait } from './utils/do_not_await';
 
 export async function validate(): Promise<void> {
@@ -12,19 +12,11 @@ export async function validate(): Promise<void> {
   }
 
   const content = editor.document.getText();
-  const response = await gitLabService.validateCIConfig(
-    gitExtensionWrapper.getActiveRepository()!.rootFsPath,
-    content,
-  );
-
-  if (!response) {
-    await vscode.window.showInformationMessage(
-      'GitLab Workflow: Failed to validate CI configuration.',
-    );
-    return;
-  }
-
-  const { valid, errors } = response;
+  const repository = gitExtensionWrapper.getActiveRepository();
+  assert(repository);
+  const project = await repository.getProject();
+  assert(project, "Current folder doesn't contain a GitLab project");
+  const { valid, errors } = await repository.getGitLabService().validateCIConfig(project, content);
 
   if (valid) {
     doNotAwait(

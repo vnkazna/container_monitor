@@ -126,6 +126,11 @@ const getIssuableGqlId = (issuable: RestIssuable) =>
   `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
 const getMrGqlId = (id: number) => `gid://gitlab/MergeRequest/${id}`;
 
+interface ValidationResponse {
+  valid?: boolean;
+  errors: string[];
+}
+
 export class GitLabNewService {
   client: GraphQLClient;
 
@@ -517,5 +522,19 @@ export class GitLabNewService {
         new Error(`MR(${mrId}), ${JSON.stringify(position)}, ${e}`),
       );
     }
+  }
+
+  async validateCIConfig(project: GitLabProject, content: string): Promise<ValidationResponse> {
+    const response = await crossFetch(
+      `${this.instanceUrl}/api/v4/projects/${project.restId}/ci/lint`,
+      {
+        ...this.fetchOptions,
+        headers: { ...this.fetchOptions.headers, 'Content-Type': 'application/json' },
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      },
+    );
+    if (!response.ok) throw new FetchError(`Request to validate the CI config failed`, response);
+    return response.json();
   }
 }
