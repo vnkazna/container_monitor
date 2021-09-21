@@ -25,3 +25,8 @@ export const README_SECTIONS = {
   SETUP: 'setup',
   REMOTEFS: 'browse-a-repository-without-cloning',
 };
+
+export const REQUIRED_VERSIONS = {
+  CI_CONFIG_VALIDATIONS: '13.6.0',
+  MR_DISCUSSIONS: '13.5.0',
+};

@@ -51,6 +51,8 @@ import {
   GetSnippetContentQueryOptions,
   GqlContentSnippet,
 } from './graphql/get_snippet_content';
+import { UnsupportedVersionError } from '../errors/unsupported_version_error';
+import { REQUIRED_VERSIONS } from '../constants';
 
 interface CreateNoteResult {
   createNote: {
@@ -342,6 +344,7 @@ export class GitLabNewService {
   }
 
   async getDiscussions({ issuable, endCursor }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
+    await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     const projectPath = getProjectPath(issuable);
     const query = isMr(issuable) ? getMrDiscussionsQuery : getIssueDiscussionsQuery;
     const options: GetDiscussionsQueryOptions = {
@@ -366,17 +369,25 @@ export class GitLabNewService {
   }
 
   async canUserCommentOnMr(mr: RestMr): Promise<boolean> {
-    const projectPath = getProjectPath(mr);
-    const queryOptions: MrPermissionsQueryOptions = {
-      projectPath,
-      iid: String(mr.iid),
-    };
-    const result = await this.client.request(getMrPermissionsQuery, queryOptions);
-    assert(result?.project?.mergeRequest, `MR ${mr.references.full} was not found.`);
-    return Boolean(result.project.mergeRequest.userPermissions?.createNote);
+    return ifVersionGte(
+      await this.getVersion(),
+      REQUIRED_VERSIONS.MR_DISCUSSIONS,
+      async () => {
+        const projectPath = getProjectPath(mr);
+        const queryOptions: MrPermissionsQueryOptions = {
+          projectPath,
+          iid: String(mr.iid),
+        };
+        const result = await this.client.request(getMrPermissionsQuery, queryOptions);
+        assert(result?.project?.mergeRequest, `MR ${mr.references.full} was not found.`);
+        return Boolean(result.project.mergeRequest.userPermissions?.createNote);
+      },
+      () => false,
+    );
   }
 
   async setResolved(replyId: string, resolved: boolean): Promise<void> {
+    await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
       return await this.client.request<void>(discussionSetResolved, {
         replyId,
@@ -418,6 +429,7 @@ export class GitLabNewService {
   }
 
   async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<GqlNote> {
+    await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
       const result = await this.client.request<CreateNoteResult>(createNoteMutation, {
         issuableId: getIssuableGqlId(issuable),
@@ -439,6 +451,7 @@ export class GitLabNewService {
   }
 
   async deleteNote(noteId: string): Promise<void> {
+    await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
       await this.client.request<void>(deleteNoteMutation, {
         noteId,
@@ -457,6 +470,7 @@ export class GitLabNewService {
    * We request the latest note to validate that it hasn't changed since we last saw it.
    */
   private async getMrNote(mr: RestMr, noteId: number): Promise<RestNote> {
+    await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     const noteUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/notes/${noteId}`;
     const result = await crossFetch(noteUrl, this.fetchOptions);
     if (!result.ok) {
@@ -471,6 +485,7 @@ export class GitLabNewService {
     originalBody: string,
     mr: RestMr,
   ): Promise<void> {
+    await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     const latestNote = await this.getMrNote(mr, getRestIdFromGraphQLId(noteGqlId));
     // This check is the best workaround we can do in the lack of optimistic locking
     // Issue to make this check in the GitLab instance: https://gitlab.com/gitlab-org/gitlab/-/issues/323808
@@ -505,6 +520,7 @@ export class GitLabNewService {
     body: string,
     position: GqlDiffPositionInput,
   ): Promise<GqlTextDiffDiscussion> {
+    await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
       const result = await this.client.request(createDiffNoteMutation, {
         issuableId: getMrGqlId(mrId),
@@ -525,6 +541,7 @@ export class GitLabNewService {
   }
 
   async validateCIConfig(project: GitLabProject, content: string): Promise<ValidationResponse> {
+    await this.validateVersion('CI config validation', REQUIRED_VERSIONS.CI_CONFIG_VALIDATIONS);
     const response = await crossFetch(
       `${this.instanceUrl}/api/v4/projects/${project.restId}/ci/lint`,
       {
@@ -536,5 +553,17 @@ export class GitLabNewService {
     );
     if (!response.ok) throw new FetchError(`Request to validate the CI config failed`, response);
     return response.json();
+  }
+
+  async validateVersion(featureName: string, requiredVersion: string) {
+    const currentVersion = await this.getVersion();
+    await ifVersionGte(
+      currentVersion,
+      requiredVersion,
+      () => undefined,
+      () => {
+        throw new UnsupportedVersionError(featureName, currentVersion!, requiredVersion);
+      },
+    );
   }
 }
