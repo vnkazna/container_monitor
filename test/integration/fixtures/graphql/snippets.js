@@ -61,9 +61,49 @@ const snippetsResponse = {
   },
 };
 
+const snippetWithOneBlobResponse = {
+  snippets: {
+    nodes: [
+      {
+        blobs: {
+          nodes: [
+            {
+              path: 'test.js',
+              rawPlainData: 'snippet content',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+const snippetWithTwoBlobsResponse = {
+  snippets: {
+    nodes: [
+      {
+        blobs: {
+          nodes: [
+            {
+              path: 'test1.js',
+              rawPlainData: 'snippet content',
+            },
+            {
+              path: 'test2.js',
+              rawPlainData: 'second blob content',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
 module.exports = {
   testSnippet1,
   testSnippet2,
   patchSnippet,
   snippetsResponse,
+  snippetWithOneBlobResponse,
+  snippetWithTwoBlobsResponse,
 };
