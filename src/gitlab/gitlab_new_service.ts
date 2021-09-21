@@ -13,7 +13,13 @@ import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
-import { GqlBasePosition, GqlGenericNote, GqlNote, noteDetailsFragment } from './graphql/shared';
+import {
+  GqlBasePosition,
+  GqlGenericNote,
+  GqlNote,
+  Node,
+  noteDetailsFragment,
+} from './graphql/shared';
 import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
 import {
   getIssueDiscussionsQuery,
@@ -39,6 +45,12 @@ import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_d
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
 import { logError } from '../log';
 import { isMr } from '../utils/is_mr';
+import { ifVersionGte } from './if_version_gte';
+import {
+  getSnippetContentQuery,
+  GetSnippetContentQueryOptions,
+  GqlContentSnippet,
+} from './graphql/get_snippet_content';
 
 interface CreateNoteResult {
   createNote: {
@@ -197,8 +209,8 @@ export class GitLabNewService {
       : snippetsWithProject;
   }
 
-  // TODO change this method to use GraphQL once the lowest supported GitLab version is 14.1.0
-  async getSnippetContent(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
+  // TODO remove this method once the lowest supported GitLab version is 14.1.0
+  async getSnippetContentOld(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
     const getBranch = (rawPath: string) => {
       // raw path example: "/gitlab-org/gitlab-vscode-extension/-/snippets/111/raw/master/okr.md"
       const result = rawPath.match(/\/-\/snippets\/\d+\/raw\/([^/]+)\//);
@@ -214,6 +226,28 @@ export class GitLabNewService {
       throw new FetchError(`Fetching snippet from ${url} failed`, result);
     }
     return result.text();
+  }
+
+  async getSnippetContentNew(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
+    const options: GetSnippetContentQueryOptions = { snippetId: snippet.id };
+    const result = await this.client.request<{ snippets: Node<GqlContentSnippet> }>(
+      getSnippetContentQuery,
+      options,
+    );
+    const snippetResponse = result.snippets.nodes[0];
+    assert(snippetResponse, `The requested snippet ${snippet.id} was not found`);
+    const blobResponse = snippetResponse.blobs.nodes.find(b => b.path === blob.path);
+    assert(blobResponse, `The requested snippet ${snippet.id} is missing blob ${blob.path}`);
+    return blobResponse.rawPlainData;
+  }
+
+  async getSnippetContent(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
+    return ifVersionGte(
+      await this.getVersion(),
+      '14.1.0',
+      () => this.getSnippetContentNew(snippet, blob),
+      () => this.getSnippetContentOld(snippet, blob),
+    );
   }
 
   // This method has to use REST API till https://gitlab.com/gitlab-org/gitlab/-/issues/280803 gets done

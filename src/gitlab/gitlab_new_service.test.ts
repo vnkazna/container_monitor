@@ -26,7 +26,7 @@ describe('gitlab_new_service', () => {
     });
   });
 
-  describe('getSnippetContent', () => {
+  describe('getSnippetContent uses REST for older GitLab versions', () => {
     it.each`
       rawPath                                                                                           | branch
       ${'/gitlab-org/gitlab-vscode-extension/-/snippets/111/raw/master/okr.md'}                         | ${'master'}
@@ -34,6 +34,7 @@ describe('gitlab_new_service', () => {
       ${'/gitlab-org/security/gitlab-vscode-extension/-/snippets/222/raw/customBranch/folder/test1.js'} | ${'customBranch'}
     `('parses the repository branch from blob rawPath', async ({ rawPath, branch }) => {
       const service = new GitLabNewService('https://example.com');
+      service.getVersion = async () => '14.0.0';
       const snippet = testSnippet1;
       const blob = snippet.blobs.nodes[0];
 
