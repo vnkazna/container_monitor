@@ -12,7 +12,7 @@ This extension integrates GitLab to VS Code. It helps you:
 
 ## Minimum supported version
 
-GitLab Workflow requires GitLab 13.6 or later. To find your GitLab version, visit `/help` (like `https://gitlab.com/help`).
+Minimal supported GitLab version is 13.0. Even though most of the extension features will work with older versions, we currently don't actively support GitLab instances below version 13.0.  To find your GitLab version, visit `/help` (like `https://gitlab.com/help`).
 
 ## Features
 
