@@ -20,7 +20,14 @@
   "rules": {
     "no-console": "off",
     "no-return-await": "off",
-    "import/extensions": ["error", "never"],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "vue": "never"
+      }
+    ],
     "vue/max-attributes-per-line": "off",
     "vue/html-indent": "off",
     "vue/html-closing-bracket-newline": "off",

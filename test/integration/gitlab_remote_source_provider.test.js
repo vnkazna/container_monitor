@@ -3,7 +3,7 @@ const { graphql } = require('msw');
 const { tokenService } = require('../../src/services/token_service');
 const projectsResponse = require('./fixtures/graphql/projects.json');
 const remoteSourceResult = require('./fixtures/git_api/remote_sources.json');
-const { getServer } = require('./test_infrastructure/mock_server.js');
+const { getServer } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const {
   GitLabRemoteSourceProvider,
