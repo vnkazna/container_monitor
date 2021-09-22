@@ -842,7 +842,7 @@
     "@types/semver": "^7.3.8",
     "@types/sinon": "^9.0.11",
     "@types/temp": "^0.8.34",
-    "@types/vscode": "^1.60.0",
+    "@types/vscode": "^1.52.0",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.2",
     "conventional-changelog-cli": "^2.1.1",
