@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as request from 'request-promise';
-import * as assert from 'assert';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
@@ -464,33 +463,6 @@ export async function createSnippet(repositoryRoot: string, data: { id: number }
     return response;
   } catch (e) {
     throw new UserFriendlyError('Failed to create your snippet.', e);
-  }
-}
-
-interface ValidationResponse {
-  valid?: boolean;
-  errors: string[];
-}
-
-export async function validateCIConfig(
-  repositoryRoot: string,
-  content: string,
-): Promise<ValidationResponse | undefined> {
-  try {
-    const project = await fetchCurrentProject(repositoryRoot);
-    assert(project, 'GitLab project cannot be found');
-    const { response } = await fetch(
-      repositoryRoot,
-      `/projects/${project.restId}/ci/lint`,
-      'POST',
-      {
-        content,
-      },
-    );
-    return response;
-  } catch (e) {
-    handleError(new UserFriendlyError('Failed to validate CI configuration.', e));
-    return undefined;
   }
 }
 

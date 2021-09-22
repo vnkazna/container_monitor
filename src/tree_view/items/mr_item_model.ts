@@ -17,6 +17,7 @@ import {
   commitFromPosition,
   pathFromPosition,
 } from '../../review/gql_position_parser';
+import { UnsupportedVersionError } from '../../errors/unsupported_version_error';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
@@ -80,14 +81,16 @@ export class MrItemModel extends ItemModel {
       });
       return discussions.filter(isTextDiffDiscussion);
     } catch (e) {
-      handleError(
-        new UserFriendlyError(
-          `The extension failed to preload discussions on the MR diff.
+      const error =
+        e instanceof UnsupportedVersionError
+          ? e
+          : new UserFriendlyError(
+              `The extension failed to preload discussions on the MR diff.
             It's possible that you've encountered
             https://gitlab.com/gitlab-org/gitlab/-/issues/298827.`,
-          e,
-        ),
-      );
+              e,
+            );
+      handleError(error);
     }
     return [];
   }

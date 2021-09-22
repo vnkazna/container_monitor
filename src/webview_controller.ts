@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as gitLabService from './gitlab_service';
 import { createGitLabNewService } from './service_factory';
-import { logError } from './log';
+import { handleError, logError } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { isMr } from './utils/is_mr';
 
@@ -35,7 +35,12 @@ async function initPanelIfActive(
   });
 
   const gitlabNewService = await createGitLabNewService(repositoryRoot);
-  const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(issuable);
+  const discussionsAndLabels = await gitlabNewService
+    .getDiscussionsAndLabelEvents(issuable)
+    .catch(e => {
+      handleError(e);
+      return [];
+    });
   await appReadyPromise;
   await panel.webview.postMessage({
     type: 'issuableFetch',
