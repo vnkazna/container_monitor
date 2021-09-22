@@ -5,6 +5,13 @@
     "mocha": true,
     "jest": true
   },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".ts"]
+      }
+    }
+  },
   "ignorePatterns": ["node_modules/", "src/webview/", "out"],
   "rules": {
     "no-console": "off",
@@ -13,6 +20,14 @@
       2,
       {
         "ignore": ["vscode"]
+      }
+    ],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "ts": "never"
       }
     ],
     "no-shadow": "warn",

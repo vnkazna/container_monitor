@@ -88,7 +88,7 @@ async function fetch(
     }
   };
 
-  return await request(`${apiRoot}${path}`, config);
+  return request(`${apiRoot}${path}`, config);
 }
 
 async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {
