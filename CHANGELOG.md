@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * **remote fs:** tell user when token is invalid ([25489c2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/25489c2e7a9296a1ee906d0976cd002c0f0cd126))
+  * Implemented by [@firelizzard](https://gitlab.com/firelizzard) with [MR !337](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/337) 👍
 
 
 ### Features
