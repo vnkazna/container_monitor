@@ -1,3 +1,19 @@
+# [3.31.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.30.0...v3.31.0) (2021-09-22)
+
+
+### Bug Fixes
+
+* **remote fs:** tell user when token is invalid ([25489c2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/25489c2e7a9296a1ee906d0976cd002c0f0cd126))
+
+
+### Features
+
+* disable ci validation and MR discussions for old GitLab versions ([1252c1b](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/1252c1bf5851b5c79286fe2188bff4a73835b3fd))
+* remove the minimum version check and update readme ([0da2ba8](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0da2ba81be56f8d987c9c53f76870cdc0e5ca2aa))
+* use GraphQL to get snippet content ([b2090ab](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b2090ab4df3675418caba86cd550cb1eb61561d1))
+
+
+
 # [3.30.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.29.1...v3.30.0) (2021-09-10)
 
 
