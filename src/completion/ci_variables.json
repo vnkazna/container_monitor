@@ -213,7 +213,7 @@
   },
   {
     "name": "CI_JOB_TOKEN",
-    "description": "A token to authenticate with [certain API endpoints](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../../api/index.md#gitlab-cicd-job-token). The token is valid as long as the job is running."
+    "description": "A token to authenticate with [certain API endpoints](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../jobs/ci_job_token.md). The token is valid as long as the job is running."
   },
   {
     "name": "CI_JOB_URL",
@@ -381,7 +381,7 @@
   },
   {
     "name": "CI_PROJECT_PATH_SLUG",
-    "description": "`$CI_PROJECT_PATH` in lowercase with characters that are not `a-z` or `0-9` replaced with `-`. Use in URLs and domain names."
+    "description": "`$CI_PROJECT_PATH` in lowercase with characters that are not `a-z` or `0-9` replaced with `-` and shortened to 63 bytes. Use in URLs and domain names."
   },
   {
     "name": "CI_PROJECT_REPOSITORY_LANGUAGES",
