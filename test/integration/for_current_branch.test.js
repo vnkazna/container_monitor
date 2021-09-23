@@ -56,6 +56,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('shows detached pipeline and mr for the current branch', async () => {
     server = getServer([pipelinesForMrEndpoint, mrEndpoint]);
+    await dataProvider.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -69,6 +70,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('shows standard pipeline, mr and closing issue for the current branch', async () => {
     server = getServer([pipelinesEndpoint, mrEndpoint, issueEndpoint]);
+    await dataProvider.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -82,6 +84,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('handles error for pipeline API request', async () => {
     server = getServer([mrEndpoint, issueEndpoint]);
+    await dataProvider.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -95,6 +98,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('handles error for MR API request', async () => {
     server = getServer([pipelinesEndpoint]);
+    await dataProvider.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -104,6 +108,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('handles error for issue API request', async () => {
     server = getServer([pipelinesEndpoint, mrEndpoint]);
+    await dataProvider.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),

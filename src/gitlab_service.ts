@@ -163,10 +163,10 @@ export async function fetchVersion(repositoryRoot: string) {
 
 async function fetchLastPipelineForCurrentBranch(
   repositoryRoot: string,
-): Promise<RestPipeline | null> {
+): Promise<RestPipeline | undefined> {
   const project = await fetchCurrentPipelineProject(repositoryRoot);
   if (!project) {
-    return null;
+    return undefined;
   }
 
   const branchName = await gitExtensionWrapper
@@ -355,7 +355,7 @@ export async function fetchJobsForPipeline(
 
 export async function fetchOpenMergeRequestForCurrentBranch(
   repositoryRoot: string,
-): Promise<RestMr | null> {
+): Promise<RestMr | undefined> {
   const project = await fetchCurrentProject(repositoryRoot);
   const branchName = await gitExtensionWrapper
     .getRepository(repositoryRoot)
@@ -371,38 +371,38 @@ export async function fetchOpenMergeRequestForCurrentBranch(
     return mrs[0];
   }
 
-  return null;
+  return undefined;
 }
 
 export async function fetchLastPipelineForMr(
   repositoryRoot: string,
   mr: RestMr,
-): Promise<RestPipeline | null> {
+): Promise<RestPipeline | undefined> {
   const path = `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`;
   const { response: pipelines } = await fetch(repositoryRoot, path);
-  return pipelines.length > 0 ? pipelines[0] : null;
+  return pipelines[0];
 }
 
 export async function fetchPipelineAndMrForCurrentBranch(
   repositoryRoot: string,
 ): Promise<{
-  pipeline: RestPipeline | null;
-  mr: RestMr | null;
+  pipeline?: RestPipeline;
+  mr?: RestMr;
 }> {
   // TODO: implement more granular approach to errors (deciding between expected and critical)
   // This can be done when we migrate the code to gitlab_new_service.ts
-  const turnErrorToNull: <T>(p: Promise<T>) => Promise<T | null> = p =>
+  const turnErrorToUndefined: <T>(p: Promise<T>) => Promise<T | undefined> = p =>
     p.catch(e => {
       logError(e);
-      return null;
+      return undefined;
     });
 
-  const mr = await turnErrorToNull(fetchOpenMergeRequestForCurrentBranch(repositoryRoot));
+  const mr = await turnErrorToUndefined(fetchOpenMergeRequestForCurrentBranch(repositoryRoot));
   if (mr) {
-    const pipeline = await turnErrorToNull(fetchLastPipelineForMr(repositoryRoot, mr));
+    const pipeline = await turnErrorToUndefined(fetchLastPipelineForMr(repositoryRoot, mr));
     if (pipeline) return { mr, pipeline };
   }
-  const pipeline = await turnErrorToNull(fetchLastPipelineForCurrentBranch(repositoryRoot));
+  const pipeline = await turnErrorToUndefined(fetchLastPipelineForCurrentBranch(repositoryRoot));
   return { mr, pipeline };
 }
 

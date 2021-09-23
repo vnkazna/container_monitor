@@ -110,7 +110,10 @@ export class StatusBar {
     this.mrIssueStatusBarItem?.hide();
   }
 
-  async updatePipelineItem(pipeline: RestPipeline | null, repositoryRoot: string): Promise<void> {
+  async updatePipelineItem(
+    pipeline: RestPipeline | undefined,
+    repositoryRoot: string,
+  ): Promise<void> {
     if (!this.pipelineStatusBarItem) return;
     if (!pipeline) {
       this.pipelineStatusBarItem.text = 'GitLab: No pipeline.';
@@ -154,7 +157,7 @@ export class StatusBar {
     this.firstRun = false;
   }
 
-  async fetchMrClosingIssue(mr: RestMr | null, repositoryRoot: string): Promise<void> {
+  async fetchMrClosingIssue(mr: RestMr | undefined, repositoryRoot: string): Promise<void> {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
       const issues = await gitLabService.fetchMRIssues(mr.iid, repositoryRoot);
@@ -174,7 +177,7 @@ export class StatusBar {
     }
   }
 
-  updateMrItem(mr: RestMr | null): void {
+  updateMrItem(mr: RestMr | undefined): void {
     if (!this.mrStatusBarItem) return;
     this.mrStatusBarItem.show();
     this.mrStatusBarItem.command = mr
