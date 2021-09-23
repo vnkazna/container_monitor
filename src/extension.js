@@ -2,7 +2,6 @@ const vscode = require('vscode');
 const openers = require('./openers');
 const tokenInput = require('./token_input');
 const { tokenService } = require('./services/token_service');
-const tokenServiceWrapper = require('./token_service_wrapper');
 const { extensionState } = require('./extension_state');
 const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
@@ -38,6 +37,8 @@ const { openMrFile } = require('./commands/open_mr_file');
 const { GitLabRemoteFileSystem } = require('./remotefs/gitlab_remote_file_system');
 const { openRepository } = require('./commands/open_repository');
 const { contextUtils } = require('./utils/context_utils');
+const { currentBranchRefresher, CurrentBranchRefresher } = require('./current_branch_refresher');
+const { statusBar } = require('./status_bar');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -91,7 +92,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.OPEN_REPOSITORY]: openRepository,
     [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
       issuableDataProvider.refresh();
-      currentBranchDataProvider.refresh();
+      CurrentBranchRefresher.refresh();
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
@@ -133,11 +134,14 @@ const activate = context => {
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
   tokenService.init(context);
-  tokenServiceWrapper.init(context);
   extensionState.init(tokenService);
   registerCiCompletion(context);
   gitExtensionWrapper.init();
   context.subscriptions.push(gitExtensionWrapper);
+  statusBar.init();
+  context.subscriptions.push(statusBar);
+  currentBranchRefresher.init();
+  context.subscriptions.push(currentBranchRefresher);
 
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);

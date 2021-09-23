@@ -76,8 +76,6 @@ const sortAndDeduplicate = (jobs: RestJob[]): RestJob[] => {
 export class StatusBar {
   pipelineStatusBarItem?: vscode.StatusBarItem;
 
-  refreshTimer?: NodeJS.Timeout;
-
   mrStatusBarItem?: vscode.StatusBarItem;
 
   mrIssueStatusBarItem?: vscode.StatusBarItem;
@@ -193,10 +191,6 @@ export class StatusBar {
         }
       }
       await this.refresh();
-      this.refreshTimer = setInterval(async () => {
-        if (!vscode.window.state.focused) return;
-        await this.refresh();
-      }, 30000);
     }
   }
 
@@ -211,12 +205,7 @@ export class StatusBar {
         this.mrStatusBarItem?.dispose();
       }
     }
-
-    if (this.refreshTimer) {
-      clearInterval(this.refreshTimer);
-      this.refreshTimer = undefined;
-    }
   }
 }
 
-export const instance = new StatusBar();
+export const statusBar = new StatusBar();
