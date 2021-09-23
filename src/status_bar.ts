@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-expressions */
 import * as vscode from 'vscode';
+import assert = require('assert');
 import * as openers from './openers';
 import * as gitLabService from './gitlab_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { logError } from './log';
 import { USER_COMMANDS } from './command_names';
-import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
+import { BranchState } from './current_branch_refresher';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
@@ -82,9 +82,8 @@ export class StatusBar {
 
   firstRun = true;
 
-  async refresh() {
-    const state = await CurrentBranchDataProvider.getState();
-    if (state.success) {
+  async refresh(state: BranchState) {
+    if (state.valid) {
       await this.updatePipelineItem(state.pipeline, state.repository.rootFsPath);
       this.updateMrItem(state.mr);
       this.fetchMrClosingIssue(state.mr, state.issues);
@@ -176,7 +175,8 @@ export class StatusBar {
       : '$(git-pull-request) GitLab: Create MR.';
   }
 
-  async init() {
+  init(): void {
+    assert(!this.pipelineStatusBarItem, 'The status bar is already initialized');
     if (showStatusBarLinks) {
       this.pipelineStatusBarItem = createStatusBarItem(
         '$(info) GitLab: Fetching pipeline...',
@@ -190,11 +190,10 @@ export class StatusBar {
           );
         }
       }
-      await this.refresh();
     }
   }
 
-  dispose() {
+  dispose(): void {
     if (showStatusBarLinks) {
       this.pipelineStatusBarItem?.dispose();
 
