@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as gitLabService from '../gitlab_service';
 import { ErrorItem } from './items/error_item';
-import { handleError } from '../log';
+import { logError } from '../log';
 import { ItemModel } from './items/item_model';
 import { MrItemModel } from './items/mr_item_model';
 import { IssueItem } from './items/issue_item';
@@ -76,7 +76,6 @@ export class CurrentBranchDataProvider
 
   static renderFailure(failure: Failure): vscode.TreeItem[] {
     if (failure.error) {
-      handleError(failure.error);
       return [new ErrorItem()];
     }
     return [];
@@ -114,6 +113,7 @@ export class CurrentBranchDataProvider
       }
       return { success: true, repository, pipeline, mr, issues: [] };
     } catch (e) {
+      logError(e);
       return { success: false, error: e };
     }
   }

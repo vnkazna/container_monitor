@@ -92,7 +92,6 @@ export class StatusBar {
       this.fetchMrClosingIssue(state.mr, state.issues);
     } else {
       this.hideAllItems();
-      if (state.error) logError(state.error);
     }
   }
 
