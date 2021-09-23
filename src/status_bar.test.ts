@@ -3,10 +3,12 @@ import * as gitLabService from './gitlab_service';
 import { pipeline, mr, issue, job } from './test_utils/entities';
 import { USER_COMMANDS } from './command_names';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { extensionState } from './extension_state';
 import { asMock } from './test_utils/as_mock';
 
 jest.mock('./gitlab_service');
 jest.mock('./git/git_extension_wrapper');
+jest.mock('./extension_state');
 
 asMock(vscode.workspace.getConfiguration).mockReturnValue({
   showStatusBarLinks: true,
@@ -48,6 +50,7 @@ describe('status_bar', () => {
       rootFsPath: '/folder',
       getProject: async () => ({}),
     });
+    asMock(extensionState.isValid).mockReturnValue(true);
   });
 
   afterEach(() => {

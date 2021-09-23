@@ -3,9 +3,9 @@ import * as vscode from 'vscode';
 import * as openers from './openers';
 import * as gitLabService from './gitlab_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
-import { log, logError } from './log';
+import { logError } from './log';
 import { USER_COMMANDS } from './command_names';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
@@ -85,23 +85,15 @@ export class StatusBar {
   firstRun = true;
 
   async refresh() {
-    const repository = gitExtensionWrapper.getActiveRepository();
-    if (!repository) return;
-
-    const project = await repository.getProject();
-    if (!project) {
-      log(
-        'GitLab project not found, the extension is going to hide the status bar until next refresh in 30s.',
-      );
+    const state = await CurrentBranchDataProvider.getState();
+    if (state.success) {
+      await this.updatePipelineItem(state.pipeline, state.repository.rootFsPath);
+      this.updateMrItem(state.mr);
+      this.fetchMrClosingIssue(state.mr, state.issues);
+    } else {
       this.hideAllItems();
-      return;
+      if (state.error) logError(state.error);
     }
-    const { mr, pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
-      repository.rootFsPath,
-    );
-    await this.updatePipelineItem(pipeline, repository.rootFsPath);
-    this.updateMrItem(mr);
-    await this.fetchMrClosingIssue(mr, repository.rootFsPath);
   }
 
   hideAllItems(): void {
@@ -157,14 +149,13 @@ export class StatusBar {
     this.firstRun = false;
   }
 
-  async fetchMrClosingIssue(mr: RestMr | undefined, repositoryRoot: string): Promise<void> {
+  fetchMrClosingIssue(mr: RestMr | undefined, closingIssues: RestIssuable[]): void {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
-      const issues = await gitLabService.fetchMRIssues(mr.iid, repositoryRoot);
       let text = `$(code) GitLab: No issue.`;
       let command;
 
-      const firstIssue = issues[0];
+      const firstIssue = closingIssues[0];
       if (firstIssue) {
         text = `$(code) GitLab: Issue #${firstIssue.iid}`;
         command = openIssuableOnTheWebCommand(firstIssue);

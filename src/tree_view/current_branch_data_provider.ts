@@ -10,7 +10,7 @@ import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { PipelineItemModel } from './items/pipeline_item_model';
 
-interface CurrentBranchInfo {
+export interface CurrentBranchInfo {
   success: true;
   repository: WrappedRepository;
   mr?: RestMr;
@@ -18,7 +18,7 @@ interface CurrentBranchInfo {
   pipeline?: RestPipeline;
 }
 
-interface Failure {
+export interface Failure {
   success: false;
   error?: Error;
 }
