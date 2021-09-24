@@ -22,6 +22,8 @@ export const USER_COMMANDS = {
   INSERT_SNIPPET: 'gl.insertSnippet',
   VALIDATE_CI_CONFIG: 'gl.validateCIConfig',
   SHOW_OUTPUT: 'gl.showOutput',
+  SIDEBAR_VIEW_AS_LIST: 'gl.sidebarViewAsList',
+  SIDEBAR_VIEW_AS_TREE: 'gl.sidebarViewAsTree',
   REFRESH_SIDEBAR: 'gl.refreshSidebar',
   RESOLVE_THREAD: 'gl.resolveThread',
   UNRESOLVE_THREAD: 'gl.unresolveThread',

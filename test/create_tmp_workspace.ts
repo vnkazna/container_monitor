@@ -29,7 +29,16 @@ export default async function createTmpWorkspace(autoCleanUp = true): Promise<st
   if (autoCleanUp) temp.track();
   const dirPath = await createTempFolder();
   const git = simpleGit(dirPath, { binary: 'git' });
-  await git.init();
+
+  // the new version of git support set `init.defaultBranch` globally to customize the default branch name.
+  // we need to pass `--initial-branch` option to restore the default branch name to `master`.
+  // but the old version of git does not support this option, so we need to try-catch that.
+  try {
+    await git.init({ '--initial-branch': 'master' });
+  } catch {
+    await git.init();
+  }
+
   await git.addRemote(REMOTE.NAME, REMOTE.URL);
   await git.addConfig('user.email', 'test@example.com');
   await git.addConfig('user.name', 'Test Name');

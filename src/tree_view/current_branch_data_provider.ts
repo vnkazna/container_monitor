@@ -6,6 +6,7 @@ import { IssueItem } from './items/issue_item';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { PipelineItemModel } from './items/pipeline_item_model';
 import { BranchState, ValidBranchState, InvalidBranchState } from '../current_branch_refresher';
+import { onSidebarViewStateChange } from './sidebar_view_state';
 
 export class CurrentBranchDataProvider
   implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem>
@@ -19,6 +20,10 @@ export class CurrentBranchDataProvider
   private pipelineItem?: PipelineItemModel;
 
   private mrState?: { mr: RestMr; item: MrItemModel };
+
+  constructor() {
+    onSidebarViewStateChange(() => this.refresh(this.state), this);
+  }
 
   createPipelineItem(
     repository: WrappedRepository,

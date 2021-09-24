@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
 import { PROGRAMMATIC_COMMANDS } from '../../command_names';
-import { ChangedFileItem } from './changed_file_item';
+import { ChangedFileItem, HasCommentsFn } from './changed_file_item';
 import { ItemModel } from './item_model';
 import { GqlDiscussion, GqlTextDiffDiscussion } from '../../gitlab/graphql/get_discussions';
 import { handleError } from '../../log';
@@ -18,6 +18,8 @@ import {
   pathFromPosition,
 } from '../../review/gql_position_parser';
 import { UnsupportedVersionError } from '../../errors/unsupported_version_error';
+import { ChangedFolderItem, FolderTreeItem } from './changed_folder_item';
+import { getSidebarViewState, SidebarViewState } from '../sidebar_view_state';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
@@ -46,7 +48,7 @@ const uriForDiscussion = (
 };
 
 export class MrItemModel extends ItemModel {
-  private cachedChildren?: vscode.TreeItem[];
+  private allUrisWithComments?: string[];
 
   constructor(readonly mr: RestMr, readonly repository: WrappedRepository) {
     super();
@@ -98,23 +100,40 @@ export class MrItemModel extends ItemModel {
   }
 
   async getChildren(): Promise<vscode.TreeItem[]> {
-    if (this.cachedChildren) return this.cachedChildren; // don't initialize comments twice
     const { mrVersion } = await this.repository.reloadMr(this.mr);
-    const discussions = await this.getMrDiscussions();
 
-    await this.addAllCommentsToVsCode(mrVersion, discussions);
+    // don't initialize comments twice
+    if (!this.allUrisWithComments) {
+      const discussions = await this.getMrDiscussions();
+      await this.addAllCommentsToVsCode(mrVersion, discussions);
 
-    const allUrisWithComments = discussions.map(d =>
-      uriForDiscussion(this.repository, this.mr, d).toString(),
-    );
-    const changedFiles = mrVersion.diffs.map(
-      diff =>
-        new ChangedFileItem(this.mr, mrVersion, diff, this.repository.rootFsPath, uri =>
-          allUrisWithComments.includes(uri.toString()),
+      this.allUrisWithComments = discussions.map(d =>
+        uriForDiscussion(this.repository, this.mr, d).toString(),
+      );
+    }
+
+    const hasCommentsFn: HasCommentsFn = uri =>
+      (this.allUrisWithComments as string[]).includes(uri.toString());
+
+    const createChangedFiles = (shownInList: boolean): FolderTreeItem[] =>
+      mrVersion.diffs.map(diff => ({
+        path: diff.new_path || diff.old_path,
+        item: new ChangedFileItem(
+          this.mr,
+          mrVersion as RestMrVersion,
+          diff,
+          this.repository.rootFsPath,
+          hasCommentsFn,
+          shownInList,
         ),
-    );
-    this.cachedChildren = [this.overviewItem, ...changedFiles];
-    return this.cachedChildren;
+      }));
+
+    const changedFiles =
+      getSidebarViewState() === SidebarViewState.TreeView
+        ? new ChangedFolderItem('', createChangedFiles(false)).getChildren()
+        : createChangedFiles(true).map(file => file.item);
+
+    return [this.overviewItem, ...changedFiles];
   }
 
   private async addAllCommentsToVsCode(

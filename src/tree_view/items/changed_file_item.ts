@@ -72,9 +72,13 @@ export class ChangedFileItem extends vscode.TreeItem {
     file: RestDiffFile,
     repositoryPath: string,
     hasComment: HasCommentsFn,
+    shownInList = true,
   ) {
     super(vscode.Uri.file(file.new_path));
-    this.description = path.dirname(`/${file.new_path}`).split('/').slice(1).join('/');
+    if (shownInList) {
+      // we don't need the folder information if the item is in tree view
+      this.description = path.dirname(`/${file.new_path}`).split('/').slice(1).join('/');
+    }
     const { baseFileUri, headFileUri } = getBaseAndHeadUri(mr, mrVersion, file, repositoryPath);
     const hasComments = hasComment(baseFileUri) || hasComment(headFileUri);
     const query = new URLSearchParams([
