@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
 const gitLabService = require('./gitlab_service');
 const openers = require('./openers');
-const { instance: statusBar } = require('./status_bar');
+const { currentBranchRefresher } = require('./current_branch_refresher');
 
 async function showPicker() {
   const items = [
@@ -38,7 +38,7 @@ async function showPicker() {
       selected.action,
       repository.rootFsPath,
     );
-    if (newPipeline) statusBar.refresh();
+    if (newPipeline) await currentBranchRefresher.refresh();
   }
 }
 

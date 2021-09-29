@@ -140,7 +140,7 @@ const activate = context => {
   context.subscriptions.push(gitExtensionWrapper);
   statusBar.init();
   context.subscriptions.push(statusBar);
-  currentBranchRefresher.init();
+  currentBranchRefresher.init(statusBar, currentBranchDataProvider);
   context.subscriptions.push(currentBranchRefresher);
 
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);

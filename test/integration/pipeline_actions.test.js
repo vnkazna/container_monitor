@@ -11,11 +11,11 @@ const {
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { simulateQuickPickChoice } = require('./test_infrastructure/helpers');
 const { showPicker } = require('../../src/pipeline_actions_picker');
-const { instance: statusbar } = require('../../src/status_bar');
+const { currentBranchRefresher } = require('../../src/current_branch_refresher');
 
 describe('Pipeline actions', async () => {
   let server;
-  let statusBarRefreshSpy;
+  let refresherSpy;
   const sandbox = sinon.createSandbox();
 
   before(async () => {
@@ -32,7 +32,7 @@ describe('Pipeline actions', async () => {
 
   beforeEach(async () => {
     server.resetHandlers();
-    statusBarRefreshSpy = sandbox.spy(statusbar, 'refresh');
+    refresherSpy = sandbox.spy(currentBranchRefresher, 'refresh');
   });
 
   afterEach(async () => {
@@ -48,9 +48,6 @@ describe('Pipeline actions', async () => {
     simulateQuickPickChoice(sandbox, 1); // Create a new pipeline from current branch
     await showPicker();
 
-    assert(
-      statusBarRefreshSpy.calledOnce,
-      'status bar is refreshed after successful pipeline creation',
-    );
+    assert(refresherSpy.calledOnce, 'status bar is refreshed after successful pipeline creation');
   });
 });

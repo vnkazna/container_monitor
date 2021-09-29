@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
+import * as assert from 'assert';
 import * as gitLabService from './gitlab_service';
 import { logError } from './log';
 import { extensionState } from './extension_state';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { WrappedRepository } from './git/wrapped_repository';
-import { statusBar } from './status_bar';
-import { currentBranchDataProvider } from './tree_view/current_branch_data_provider';
+import { StatusBar } from './status_bar';
+import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
 
 export interface ValidBranchState {
   valid: true;
@@ -27,18 +28,26 @@ const INVALID_STATE: InvalidBranchState = { valid: false };
 export class CurrentBranchRefresher {
   refreshTimer?: NodeJS.Timeout;
 
-  init() {
+  private statusBar?: StatusBar;
+
+  private currentBranchProvider?: CurrentBranchDataProvider;
+
+  init(statusBar: StatusBar, currentBranchProvider: CurrentBranchDataProvider) {
+    this.statusBar = statusBar;
+    this.currentBranchProvider = currentBranchProvider;
     this.refreshTimer = setInterval(async () => {
       if (!vscode.window.state.focused) return;
-      await CurrentBranchRefresher.refresh();
+      await this.refresh();
     }, 30000);
-    extensionState.onDidChangeValid(CurrentBranchRefresher.refresh);
+    extensionState.onDidChangeValid(() => this.refresh());
   }
 
-  static async refresh() {
+  async refresh() {
+    assert(this.statusBar);
+    assert(this.currentBranchProvider);
     const state = await CurrentBranchRefresher.getState();
-    await statusBar.refresh(state);
-    await currentBranchDataProvider.refresh(state);
+    await this.statusBar.refresh(state);
+    await this.currentBranchProvider.refresh(state);
   }
 
   static async getState(): Promise<BranchState> {
