@@ -17,11 +17,15 @@ export class CurrentBranchDataProvider
 
   private disposableChildren: vscode.Disposable[] = [];
 
-  static createPipelineItem(repository: WrappedRepository, pipeline?: RestPipeline) {
+  static createPipelineItem(
+    repository: WrappedRepository,
+    pipeline: RestPipeline | undefined,
+    jobs: RestJob[],
+  ) {
     if (!pipeline) {
       return new vscode.TreeItem('No pipeline found');
     }
-    return new PipelineItemModel(pipeline, repository);
+    return new PipelineItemModel(pipeline, jobs, repository);
   }
 
   createMrItem(repository: WrappedRepository, mr?: RestMr) {
@@ -42,6 +46,7 @@ export class CurrentBranchDataProvider
     const pipelineItem = CurrentBranchDataProvider.createPipelineItem(
       state.repository,
       state.pipeline,
+      state.jobs,
     );
     const mrItem = this.createMrItem(state.repository, state.mr);
     const closingIssuesItems = CurrentBranchDataProvider.createClosingIssueItems(
