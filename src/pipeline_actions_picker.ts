@@ -1,8 +1,8 @@
-const vscode = require('vscode');
-const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
-const gitLabService = require('./gitlab_service');
-const openers = require('./openers');
-const { currentBranchRefresher } = require('./current_branch_refresher');
+import * as vscode from 'vscode';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import * as gitLabService from './gitlab_service';
+import { openCurrentPipeline } from './openers';
+import { currentBranchRefresher } from './current_branch_refresher';
 
 async function showPicker() {
   const items = [
@@ -25,12 +25,13 @@ async function showPicker() {
   ];
 
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) return;
 
   const selected = await vscode.window.showQuickPick(items);
 
   if (selected) {
     if (selected.action === 'view') {
-      openers.openCurrentPipeline(repository.rootFsPath);
+      await openCurrentPipeline(repository.rootFsPath);
       return;
     }
 
