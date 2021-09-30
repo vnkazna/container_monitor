@@ -37,7 +37,7 @@ const { openMrFile } = require('./commands/open_mr_file');
 const { GitLabRemoteFileSystem } = require('./remotefs/gitlab_remote_file_system');
 const { openRepository } = require('./commands/open_repository');
 const { contextUtils } = require('./utils/context_utils');
-const { currentBranchRefresher, CurrentBranchRefresher } = require('./current_branch_refresher');
+const { currentBranchRefresher } = require('./current_branch_refresher');
 const { statusBar } = require('./status_bar');
 
 const wrapWithCatch = command => async (...args) => {
@@ -92,7 +92,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.OPEN_REPOSITORY]: openRepository,
     [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
       issuableDataProvider.refresh();
-      CurrentBranchRefresher.refresh();
+      currentBranchRefresher.refresh();
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
