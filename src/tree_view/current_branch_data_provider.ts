@@ -36,12 +36,13 @@ export class CurrentBranchDataProvider
     this.mrState = undefined;
   }
 
-  createMrItem(mr: RestMr | undefined, repository: WrappedRepository) {
-    // TODO soft refresh
+  createMrItem(state: ValidBranchState) {
+    if (!state.userInitiated && this.mrState && this.mrState.mr.id === state.mr?.id)
+      return this.mrState.item;
     this.disposeMrItem();
-    if (!mr) return new vscode.TreeItem('No merge request found');
-    const item = new MrItemModel(mr, repository);
-    this.mrState = { mr, item };
+    if (!state.mr) return new vscode.TreeItem('No merge request found');
+    const item = new MrItemModel(state.mr, state.repository);
+    this.mrState = { mr: state.mr, item };
     return item;
   }
 
@@ -71,7 +72,7 @@ export class CurrentBranchDataProvider
     this.pipelineItem?.dispose();
     this.pipelineItem = undefined;
     if (this.state.valid) {
-      const mrItem = this.createMrItem(this.state.mr, this.state.repository);
+      const mrItem = this.createMrItem(this.state);
       const { pipelineItem, closingIssuesItems } = this.renderValidState(this.state);
       return [pipelineItem, mrItem, ...closingIssuesItems];
     }

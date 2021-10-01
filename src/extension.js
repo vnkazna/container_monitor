@@ -92,7 +92,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.OPEN_REPOSITORY]: openRepository,
     [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
       issuableDataProvider.refresh();
-      currentBranchRefresher.refresh();
+      currentBranchRefresher.refresh(true);
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>

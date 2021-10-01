@@ -20,7 +20,7 @@ describe('CurrentBranchRefrehser', () => {
         rootFsPath: '/folder',
         getProject: async () => undefined,
       });
-      const state = await CurrentBranchRefresher.getState();
+      const state = await CurrentBranchRefresher.getState(false);
       expect(state.valid).toBe(false);
     });
   });
@@ -36,7 +36,7 @@ describe('CurrentBranchRefrehser', () => {
     it('fetches pipeline', async () => {
       asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({ pipeline });
 
-      const state = await CurrentBranchRefresher.getState();
+      const state = await CurrentBranchRefresher.getState(false);
 
       expect(state.valid).toBe(true);
       expect((state as ValidBranchState).pipeline).toEqual(pipeline);
@@ -46,7 +46,7 @@ describe('CurrentBranchRefrehser', () => {
       asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({ mr });
       asMock(gitLabService.fetchMRIssues).mockReturnValue([]);
 
-      const state = await CurrentBranchRefresher.getState();
+      const state = await CurrentBranchRefresher.getState(false);
 
       expect(state.valid).toBe(true);
       expect((state as ValidBranchState).mr).toEqual(mr);
@@ -56,7 +56,7 @@ describe('CurrentBranchRefrehser', () => {
       asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({ mr });
       asMock(gitLabService.fetchMRIssues).mockReturnValue([issue]);
 
-      const state = await CurrentBranchRefresher.getState();
+      const state = await CurrentBranchRefresher.getState(false);
 
       expect(state.valid).toBe(true);
       expect((state as ValidBranchState).issues).toEqual([issue]);

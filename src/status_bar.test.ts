@@ -27,11 +27,12 @@ const createFakeItem = (): vscode.StatusBarItem =>
     dispose: jest.fn(),
   } as unknown) as vscode.StatusBarItem);
 
-const createBranchInfo = (partialInfo: Partial<ValidBranchState> = {}) => ({
+const createBranchInfo = (partialInfo: Partial<ValidBranchState> = {}): ValidBranchState => ({
   valid: true,
   repository,
   issues: [],
   jobs: [],
+  userInitiated: true,
   ...partialInfo,
 });
 
