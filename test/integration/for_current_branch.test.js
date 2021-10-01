@@ -11,10 +11,13 @@ const {
   createJsonEndpoint,
 } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
+const { CurrentBranchRefresher } = require('../../src/current_branch_refresher');
+const { statusBar } = require('../../src/status_bar');
 
 describe('GitLab tree view for current branch', () => {
   let server;
   let dataProvider;
+  let refresher;
 
   const fourYearsAgo = dayjs().subtract(4, 'year');
 
@@ -44,6 +47,8 @@ describe('GitLab tree view for current branch', () => {
 
   beforeEach(() => {
     dataProvider = new CurrentBranchDataProvider();
+    refresher = new CurrentBranchRefresher();
+    refresher.init(statusBar, dataProvider);
   });
 
   afterEach(() => {
@@ -56,7 +61,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('shows detached pipeline and mr for the current branch', async () => {
     server = getServer([pipelinesForMrEndpoint, mrEndpoint]);
-    await dataProvider.refresh();
+    await refresher.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -70,7 +75,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('shows standard pipeline, mr and closing issue for the current branch', async () => {
     server = getServer([pipelinesEndpoint, mrEndpoint, issueEndpoint]);
-    await dataProvider.refresh();
+    await refresher.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -84,7 +89,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('handles error for pipeline API request', async () => {
     server = getServer([mrEndpoint, issueEndpoint]);
-    await dataProvider.refresh();
+    await refresher.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -98,7 +103,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('handles error for MR API request', async () => {
     server = getServer([pipelinesEndpoint]);
-    await dataProvider.refresh();
+    await refresher.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),
@@ -108,7 +113,7 @@ describe('GitLab tree view for current branch', () => {
 
   it('handles error for issue API request', async () => {
     server = getServer([pipelinesEndpoint, mrEndpoint]);
-    await dataProvider.refresh();
+    await refresher.refresh();
     const forCurrentBranch = await dataProvider.getChildren();
     assert.deepStrictEqual(
       forCurrentBranch.map(i => dataProvider.getTreeItem(i).label),

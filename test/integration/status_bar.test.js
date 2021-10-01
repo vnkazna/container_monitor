@@ -8,6 +8,8 @@ const { getServer, createQueryJsonEndpoint } = require('./test_infrastructure/mo
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { USER_COMMANDS } = require('../../src/command_names');
 const { updateRepositoryStatus } = require('./test_infrastructure/helpers');
+const { CurrentBranchRefresher } = require('../../src/current_branch_refresher');
+const { currentBranchDataProvider } = require('../../src/tree_view/current_branch_data_provider');
 
 describe('GitLab status bar', () => {
   let server;
@@ -47,7 +49,10 @@ describe('GitLab status bar', () => {
   });
 
   it('shows the correct pipeline item', async () => {
-    await statusBar.init();
+    statusBar.init();
+    const refresher = new CurrentBranchRefresher();
+    refresher.init(statusBar, currentBranchDataProvider);
+    await refresher.refresh();
 
     assert.strictEqual(
       vscode.window.createStatusBarItem.firstCall.firstArg,

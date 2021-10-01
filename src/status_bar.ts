@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-expressions */
 import * as vscode from 'vscode';
+import assert = require('assert');
 import * as openers from './openers';
 import * as gitLabService from './gitlab_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { logError } from './log';
 import { USER_COMMANDS } from './command_names';
-import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
+import { BranchState } from './current_branch_refresher';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
@@ -76,17 +76,14 @@ const sortAndDeduplicate = (jobs: RestJob[]): RestJob[] => {
 export class StatusBar {
   pipelineStatusBarItem?: vscode.StatusBarItem;
 
-  refreshTimer?: NodeJS.Timeout;
-
   mrStatusBarItem?: vscode.StatusBarItem;
 
   mrIssueStatusBarItem?: vscode.StatusBarItem;
 
   firstRun = true;
 
-  async refresh() {
-    const state = await CurrentBranchDataProvider.getState();
-    if (state.success) {
+  async refresh(state: BranchState) {
+    if (state.valid) {
       await this.updatePipelineItem(state.pipeline, state.repository.rootFsPath);
       this.updateMrItem(state.mr);
       this.fetchMrClosingIssue(state.mr, state.issues);
@@ -178,7 +175,8 @@ export class StatusBar {
       : '$(git-pull-request) GitLab: Create MR.';
   }
 
-  async init() {
+  init(): void {
+    assert(!this.pipelineStatusBarItem, 'The status bar is already initialized');
     if (showStatusBarLinks) {
       this.pipelineStatusBarItem = createStatusBarItem(
         '$(info) GitLab: Fetching pipeline...',
@@ -192,15 +190,10 @@ export class StatusBar {
           );
         }
       }
-      await this.refresh();
-      this.refreshTimer = setInterval(async () => {
-        if (!vscode.window.state.focused) return;
-        await this.refresh();
-      }, 30000);
     }
   }
 
-  dispose() {
+  dispose(): void {
     if (showStatusBarLinks) {
       this.pipelineStatusBarItem?.dispose();
 
@@ -211,12 +204,7 @@ export class StatusBar {
         this.mrStatusBarItem?.dispose();
       }
     }
-
-    if (this.refreshTimer) {
-      clearInterval(this.refreshTimer);
-      this.refreshTimer = undefined;
-    }
   }
 }
 
-export const instance = new StatusBar();
+export const statusBar = new StatusBar();
