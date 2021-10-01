@@ -15,9 +15,11 @@ export class CurrentBranchDataProvider
 
   private state: BranchState = { valid: false };
 
-  private disposableChildren: vscode.Disposable[] = [];
+  private pipelineItem?: PipelineItemModel;
 
-  static createPipelineItem(
+  private mrState?: { mr: RestMr; item: MrItemModel };
+
+  createPipelineItem(
     repository: WrappedRepository,
     pipeline: RestPipeline | undefined,
     jobs: RestJob[],
@@ -25,15 +27,21 @@ export class CurrentBranchDataProvider
     if (!pipeline) {
       return new vscode.TreeItem('No pipeline found');
     }
-    return new PipelineItemModel(pipeline, jobs, repository);
+    this.pipelineItem = new PipelineItemModel(pipeline, jobs, repository);
+    return this.pipelineItem;
   }
 
-  createMrItem(repository: WrappedRepository, mr?: RestMr) {
-    if (!mr) {
-      return new vscode.TreeItem('No merge request found');
-    }
+  disposeMrItem() {
+    this.mrState?.item.dispose();
+    this.mrState = undefined;
+  }
+
+  createMrItem(mr: RestMr | undefined, repository: WrappedRepository) {
+    // TODO soft refresh
+    this.disposeMrItem();
+    if (!mr) return new vscode.TreeItem('No merge request found');
     const item = new MrItemModel(mr, repository);
-    this.disposableChildren.push(item);
+    this.mrState = { mr, item };
     return item;
   }
 
@@ -42,18 +50,13 @@ export class CurrentBranchDataProvider
     return issues.map(issue => new IssueItem(issue, repository.rootFsPath));
   }
 
-  renderValidState(state: ValidBranchState): (ItemModel | vscode.TreeItem)[] {
-    const pipelineItem = CurrentBranchDataProvider.createPipelineItem(
-      state.repository,
-      state.pipeline,
-      state.jobs,
-    );
-    const mrItem = this.createMrItem(state.repository, state.mr);
+  renderValidState(state: ValidBranchState) {
+    const pipelineItem = this.createPipelineItem(state.repository, state.pipeline, state.jobs);
     const closingIssuesItems = CurrentBranchDataProvider.createClosingIssueItems(
       state.repository,
       state.issues,
     );
-    return [pipelineItem, mrItem, ...closingIssuesItems];
+    return { pipelineItem, closingIssuesItems };
   }
 
   static renderInvalidState(state: InvalidBranchState): vscode.TreeItem[] {
@@ -65,11 +68,14 @@ export class CurrentBranchDataProvider
 
   async getChildren(item: ItemModel | undefined): Promise<(ItemModel | vscode.TreeItem)[]> {
     if (item) return item.getChildren();
-    this.disposableChildren.forEach(s => s.dispose());
-    this.disposableChildren = [];
+    this.pipelineItem?.dispose();
+    this.pipelineItem = undefined;
     if (this.state.valid) {
-      return this.renderValidState(this.state);
+      const mrItem = this.createMrItem(this.state.mr, this.state.repository);
+      const { pipelineItem, closingIssuesItems } = this.renderValidState(this.state);
+      return [pipelineItem, mrItem, ...closingIssuesItems];
     }
+    this.disposeMrItem();
     return CurrentBranchDataProvider.renderInvalidState(this.state);
   }
 
@@ -79,7 +85,7 @@ export class CurrentBranchDataProvider
     return item;
   }
 
-  async refresh(state: BranchState) {
+  refresh(state: BranchState) {
     this.state = state;
     this.eventEmitter.fire();
   }

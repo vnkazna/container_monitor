@@ -61,7 +61,7 @@ export class CurrentBranchRefresher {
     assert(this.currentBranchProvider);
     const state = await CurrentBranchRefresher.getState();
     await this.statusBar.refresh(state);
-    await this.currentBranchProvider.refresh(state);
+    this.currentBranchProvider.refresh(state);
   }
 
   static async getState(): Promise<BranchState> {
