@@ -17,6 +17,9 @@ export const queryGetProjects = gql`
     ) {
       nodes {
         ...projectDetails
+        repository {
+          empty
+        }
       }
     }
   }

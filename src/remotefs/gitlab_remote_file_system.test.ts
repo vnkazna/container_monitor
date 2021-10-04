@@ -196,6 +196,26 @@ describe('GitLabRemoteFileSystem', () => {
     });
   });
 
+  describe('validateLabel', () => {
+    it.each`
+      scenario          | value          | error
+      ${'alphanumeric'} | ${'FooBar123'} | ${null}
+      ${'space'}        | ${'foo bar'}   | ${null}
+      ${'underscore'}   | ${'foo_bar'}   | ${null}
+      ${'dash'}         | ${'foo-bar'}   | ${null}
+      ${'dot'}          | ${'foo.bar'}   | ${null}
+      ${'slash'}        | ${'foo/bar'}   | ${'/'}
+      ${'colon'}        | ${'foo:bar'}   | ${':'}
+    `('$scenario', ({ value, error }) => {
+      const r = GitLabRemoteFileSystem.validateLabel(value);
+      if (!error) {
+        expect(r).toBeNull();
+      } else {
+        expect(r).toContain(`Illegal character: "${error}"`);
+      }
+    });
+  });
+
   describe('stat', () => {
     it('throws a HelpError if the token is expired', async () => {
       const err = newFetchError('https://example.com', 401, 'unauthorized', {

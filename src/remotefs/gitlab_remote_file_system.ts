@@ -119,6 +119,17 @@ export class GitLabRemoteFileSystem extends ReadOnlyFileSystem {
     return { instance, project, ref, path: pathWithoutFirstSegment };
   }
 
+  /**
+   * Checks whether the given value is a valid label for a gitlab-remote URL.
+   * @param value the value
+   * @returns A human-readable diagnostic message, or `null` when the value is valid.
+   */
+  static validateLabel(value?: string): string | null {
+    const m = value?.match(/[^-._ a-z0-9]/i);
+    if (!m) return null;
+    return `Illegal character: "${m[0]}". Allowed: alphanumeric, dash, dot, space, and underscore.`;
+  }
+
   static async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
     const { instance, project, path, ref } = await this.parseUri(uri);
     const service = newGitLabService(instance);

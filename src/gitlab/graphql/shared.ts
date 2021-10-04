@@ -90,6 +90,9 @@ export interface GqlProject {
   webUrl: string;
   group?: GqlGroup;
   wikiEnabled: boolean;
+  repository?: {
+    empty: boolean;
+  };
 }
 
 export interface GqlProjectResult<T> {
