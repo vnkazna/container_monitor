@@ -43,4 +43,8 @@ export class GitLabProject {
   get wikiEnabled(): boolean {
     return this.gqlProject.wikiEnabled;
   }
+
+  get empty(): boolean {
+    return Boolean(this.gqlProject.repository?.empty);
+  }
 }

@@ -58,6 +58,6 @@ export class GitLabRemoteSourceProvider implements RemoteSourceProvider {
       ...getProjectQueryAttributes,
     });
 
-    return projects.map(project => remoteForProject(project));
+    return projects.filter(project => !project.empty).map(project => remoteForProject(project));
   }
 }
