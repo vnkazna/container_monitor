@@ -2,7 +2,6 @@ const assert = require('assert');
 const { graphql } = require('msw');
 const { tokenService } = require('../../src/services/token_service');
 const projectsResponse = require('./fixtures/graphql/projects.json');
-const remoteSourceResult = require('./fixtures/git_api/remote_sources.json');
 const { getServer } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const {
@@ -10,6 +9,23 @@ const {
 } = require('../../src/gitlab/clone/gitlab_remote_source_provider');
 
 const token = 'abcd-secret';
+
+const validateRemoteSource = remoteSources => {
+  assert.strictEqual(remoteSources.length, 1);
+
+  const [remoteSource] = remoteSources;
+  assert.strictEqual(remoteSource.name, '$(repo) gitlab-org/gitlab');
+  assert.strictEqual(remoteSource.description, 'The Gitlab Project');
+  assert.deepStrictEqual(remoteSource.url, [
+    'git@test.gitlab.com:gitlab-org/gitlab.git',
+    'https://test.gitlab.com/gitlab-org/gitlab.git',
+  ]);
+  assert.deepStrictEqual(remoteSource.wikiUrl, [
+    'git@test.gitlab.com:gitlab-org/gitlab.wiki.git',
+    'https://test.gitlab.com/gitlab-org/gitlab.wiki.git',
+  ]);
+  assert.strictEqual(remoteSource.project.gqlId, 'gid://gitlab/Project/278964');
+};
 
 describe('GitLab Remote Source provider', () => {
   let server;
@@ -33,21 +49,17 @@ describe('GitLab Remote Source provider', () => {
   it('projects are fetched with full search', async () => {
     const sourceProvider = new GitLabRemoteSourceProvider(GITLAB_URL);
 
-    assert.deepStrictEqual(
-      await sourceProvider.getRemoteSources(),
-      remoteSourceResult,
-      'full search should return one result',
-    );
+    const remoteSources = await sourceProvider.getRemoteSources();
+
+    validateRemoteSource(remoteSources);
   });
 
   it('project search returns one result', async () => {
     const sourceProvider = new GitLabRemoteSourceProvider(GITLAB_URL);
 
-    assert.deepStrictEqual(
-      await sourceProvider.getRemoteSources('GitLab'),
-      remoteSourceResult,
-      'search for "GitLab" should return one result',
-    );
+    const remoteSources = await sourceProvider.getRemoteSources('GitLab');
+
+    validateRemoteSource(remoteSources);
   });
 
   it('projects search with nonexistent project returns no result', async () => {
