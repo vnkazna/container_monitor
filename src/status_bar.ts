@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import assert = require('assert');
 import * as openers from './openers';
-import * as gitLabService from './gitlab_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { logError } from './log';
 import { USER_COMMANDS } from './command_names';
@@ -84,7 +83,7 @@ export class StatusBar {
 
   async refresh(state: BranchState) {
     if (state.valid) {
-      await this.updatePipelineItem(state.pipeline, state.repository.rootFsPath);
+      await this.updatePipelineItem(state.pipeline, state.jobs, state.repository.rootFsPath);
       this.updateMrItem(state.mr);
       this.fetchMrClosingIssue(state.mr, state.issues);
     } else {
@@ -100,6 +99,7 @@ export class StatusBar {
 
   async updatePipelineItem(
     pipeline: RestPipeline | undefined,
+    jobs: RestJob[],
     repositoryRoot: string,
   ): Promise<void> {
     if (!this.pipelineStatusBarItem) return;
@@ -114,7 +114,6 @@ export class StatusBar {
 
     if (status === 'running' || status === 'failed') {
       try {
-        const jobs = await gitLabService.fetchJobsForPipeline(repositoryRoot, pipeline);
         const processedJobs = sortAndDeduplicate(jobs);
         statusText = createStatusTextFromJobs(processedJobs, status);
       } catch (e) {

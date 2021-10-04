@@ -27,10 +27,12 @@ const createFakeItem = (): vscode.StatusBarItem =>
     dispose: jest.fn(),
   } as unknown) as vscode.StatusBarItem);
 
-const createBranchInfo = (partialInfo: Partial<ValidBranchState> = {}) => ({
+const createBranchInfo = (partialInfo: Partial<ValidBranchState> = {}): ValidBranchState => ({
   valid: true,
   repository,
   issues: [],
+  jobs: [],
+  userInitiated: true,
   ...partialInfo,
 });
 
@@ -77,7 +79,7 @@ describe('status_bar', () => {
     });
 
     it('prints jobs for running pipeline', async () => {
-      asMock(gitLabService.fetchJobsForPipeline).mockReturnValue([
+      const jobs = [
         {
           ...job,
           status: 'running',
@@ -93,15 +95,17 @@ describe('status_bar', () => {
           status: 'success',
           name: 'Lint',
         },
-      ]);
-      await statusBar.refresh(createBranchInfo({ pipeline: { ...pipeline, status: 'running' } }));
+      ] as RestJob[];
+      await statusBar.refresh(
+        createBranchInfo({ pipeline: { ...pipeline, status: 'running' }, jobs }),
+      );
       expect(getPipelineItem().text).toBe(
         '$(pulse) GitLab: Pipeline running (Unit Tests, Integration Tests)',
       );
     });
 
     it('sorts by created time (starts with newer) and deduplicates jobs for running pipeline', async () => {
-      asMock(gitLabService.fetchJobsForPipeline).mockReturnValue([
+      const jobs = [
         {
           ...job,
           status: 'running',
@@ -120,8 +124,10 @@ describe('status_bar', () => {
           name: 'Unit Tests',
           created_at: '2021-07-19T11:00:00.000Z',
         },
-      ]);
-      await statusBar.refresh(createBranchInfo({ pipeline: { ...pipeline, status: 'running' } }));
+      ] as RestJob[];
+      await statusBar.refresh(
+        createBranchInfo({ pipeline: { ...pipeline, status: 'running' }, jobs }),
+      );
       expect(getPipelineItem().text).toBe(
         '$(pulse) GitLab: Pipeline running (Unit Tests, Integration Tests)',
       );

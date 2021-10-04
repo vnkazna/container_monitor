@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 import * as dayjs from 'dayjs';
 import { job, pipeline, repository } from '../../test_utils/entities';
 import { PipelineItemModel } from './pipeline_item_model';
-import * as gitLabService from '../../gitlab_service';
-import { asMock } from '../../test_utils/as_mock';
 import { VS_COMMANDS } from '../../command_names';
 
 jest.mock('../../gitlab_service');
@@ -21,6 +19,7 @@ describe('PipelineItemModel', () => {
           status: 'success',
           updated_at: fourYearsAgo.toString(),
         },
+        [],
         repository,
       ).getTreeItem();
     });
@@ -49,17 +48,14 @@ describe('PipelineItemModel', () => {
   });
 
   describe('children', () => {
-    const pipelineItem = new PipelineItemModel(pipeline, repository);
+    let pipelineItem: PipelineItemModel;
     const unitTestJob = { ...job, stage: 'test', name: 'unit test' };
     const integrationTestJob = { ...job, stage: 'test', name: 'integration test' };
     const packageJob = { ...job, stage: 'package', name: 'package task' };
 
     beforeEach(() => {
-      asMock(gitLabService.fetchJobsForPipeline).mockResolvedValue([
-        unitTestJob,
-        integrationTestJob,
-        packageJob,
-      ]);
+      const jobs = [unitTestJob, integrationTestJob, packageJob];
+      pipelineItem = new PipelineItemModel(pipeline, jobs, repository);
     });
 
     it('returns unique stages', async () => {
@@ -70,12 +66,13 @@ describe('PipelineItemModel', () => {
     });
 
     it('returns stages based on job order (asc id)', async () => {
-      asMock(gitLabService.fetchJobsForPipeline).mockResolvedValue([
+      const jobs = [
         { ...unitTestJob, id: 3 },
         { ...integrationTestJob, id: 2 },
         { ...packageJob, id: 1 },
-      ]);
+      ];
 
+      pipelineItem = new PipelineItemModel(pipeline, jobs, repository);
       const children = await pipelineItem.getChildren();
       const labels = children.map(ch => ch.getTreeItem()).map(i => i.label);
 
