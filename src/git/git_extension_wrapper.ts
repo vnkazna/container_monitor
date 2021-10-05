@@ -14,14 +14,20 @@ import { handleError, log } from '../log';
 export class GitExtensionWrapper implements vscode.Disposable {
   apiListeners: vscode.Disposable[] = [];
 
+  private statusChangeListeners: Record<string, vscode.Disposable | undefined> = {};
+
   private enablementListener?: vscode.Disposable;
 
   private wrappedRepositories: WrappedRepository[] = [];
 
   private repositoryCountChangedEmitter = new vscode.EventEmitter<void>();
 
+  private repositoryStateChangedEmitter = new vscode.EventEmitter<WrappedRepository>();
+
   /** Gets triggered when user adds or removes repository or when user enables and disables the git extension */
   onRepositoryCountChanged = this.repositoryCountChangedEmitter.event;
+
+  onRepositoryStateChanged = this.repositoryStateChangedEmitter.event;
 
   private gitApi?: API;
 
@@ -71,16 +77,32 @@ export class GitExtensionWrapper implements vscode.Disposable {
     }
   }
 
+  private registerStatusChangeListener(repository: WrappedRepository) {
+    const listener = repository.onRepositoryStateChanged(() =>
+      this.repositoryStateChangedEmitter.fire(repository),
+    );
+    this.statusChangeListeners[repository.rootFsPath] = listener;
+  }
+
+  private removeStatusChangeListener(repository: WrappedRepository) {
+    this.statusChangeListeners[repository.rootFsPath]?.dispose();
+    this.statusChangeListeners[repository.rootFsPath] = undefined;
+  }
+
   private async addRepositories(repositories: Repository[]) {
     await Promise.all(repositories.map(r => r.status())); // make sure the repositories are initialized
-    this.wrappedRepositories = [
-      ...this.wrappedRepositories,
-      ...repositories.map(r => new WrappedRepository(r)),
-    ];
+    const newRepositories = repositories.map(r => new WrappedRepository(r));
+    newRepositories.forEach(r => this.registerStatusChangeListener(r));
+    this.wrappedRepositories = [...this.wrappedRepositories, ...newRepositories];
     this.repositoryCountChangedEmitter.fire();
   }
 
   private removeRepository(repository: Repository) {
+    const removedRepository = this.wrappedRepositories.find(wr => wr.hasSameRootAs(repository));
+    if (!removedRepository) return;
+
+    this.removeStatusChangeListener(removedRepository);
+    removedRepository.dispose();
     this.wrappedRepositories = this.wrappedRepositories.filter(wr => !wr.hasSameRootAs(repository));
     this.repositoryCountChangedEmitter.fire();
   }

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
+import * as dayjs from 'dayjs';
 import * as gitLabService from './gitlab_service';
 import { logError } from './log';
 import { extensionState } from './extension_state';
@@ -47,14 +48,31 @@ export class CurrentBranchRefresher {
 
   private currentBranchProvider?: CurrentBranchDataProvider;
 
-  init(statusBar: StatusBar, currentBranchProvider: CurrentBranchDataProvider) {
+  private lastRefresh = dayjs().subtract(1, 'minute');
+
+  async init(statusBar: StatusBar, currentBranchProvider: CurrentBranchDataProvider) {
     this.statusBar = statusBar;
     this.currentBranchProvider = currentBranchProvider;
+    await this.clearAndSetInterval();
+    extensionState.onDidChangeValid(() => this.clearAndSetInterval());
+    vscode.window.onDidChangeWindowState(async state => {
+      if (!state.focused) {
+        return;
+      }
+      if (dayjs().diff(this.lastRefresh, 'second') > 30) {
+        await this.clearAndSetInterval();
+      }
+    });
+    gitExtensionWrapper.onRepositoryStateChanged(() => this.clearAndSetInterval());
+  }
+
+  async clearAndSetInterval(): Promise<void> {
+    global.clearInterval(this.refreshTimer!);
     this.refreshTimer = setInterval(async () => {
       if (!vscode.window.state.focused) return;
       await this.refresh();
     }, 30000);
-    extensionState.onDidChangeValid(() => this.refresh());
+    await this.refresh();
   }
 
   async refresh(userInitiated = false) {
@@ -63,6 +81,7 @@ export class CurrentBranchRefresher {
     const state = await CurrentBranchRefresher.getState(userInitiated);
     await this.statusBar.refresh(state);
     this.currentBranchProvider.refresh(state);
+    this.lastRefresh = dayjs();
   }
 
   static async getState(userInitiated: boolean): Promise<BranchState> {

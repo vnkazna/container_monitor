@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import * as url from 'url';
 import { basename, join } from 'path';
 import * as assert from 'assert';
@@ -61,15 +62,24 @@ export interface CachedMr {
   mrVersion: RestMrVersion;
 }
 
-export class WrappedRepository {
+export class WrappedRepository implements vscode.Disposable {
   private readonly rawRepository: Repository;
 
   private cachedProject?: GitLabProject;
 
   private mrCache: Record<number, CachedMr> = {};
 
+  private repositoryStateChangedEmitter = new vscode.EventEmitter<void>();
+
+  private stateChangedListener: vscode.Disposable;
+
+  onRepositoryStateChanged = this.repositoryStateChangedEmitter.event;
+
   constructor(rawRepository: Repository) {
     this.rawRepository = rawRepository;
+    this.stateChangedListener = rawRepository.state.onDidChange(() => {
+      this.repositoryStateChangedEmitter.fire();
+    });
   }
 
   private get remoteName(): string {
@@ -201,5 +211,10 @@ export class WrappedRepository {
 
   getVersion(): Promise<string | undefined> {
     return this.getGitLabService().getVersion();
+  }
+
+  dispose() {
+    this.repositoryStateChangedEmitter.dispose();
+    this.stateChangedListener.dispose();
   }
 }
