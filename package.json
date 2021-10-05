@@ -206,7 +206,7 @@
       },
       {
         "command": "gl.openRepository",
-        "title": "Open Repository",
+        "title": "Open Remote Repository",
         "category": "GitLab"
       }
     ],
