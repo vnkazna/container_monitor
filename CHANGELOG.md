@@ -1,3 +1,14 @@
+# [3.32.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.31.0...v3.32.0) (2021-10-06)
+
+
+### Features
+
+* add project/ref picker to open repo command ([5f84c2b](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/5f84c2bf7f229a16a3833c1806952d5b390fc5a8))
+* refresh MR only if it the refresh is user initiated ([428b28e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/428b28e7779f928fa5d112a186be94df45b5f74f))
+* refresh tree view and status bar together ([e5da54a](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/e5da54a6a922f703739315a2b2df1a8543c8febf))
+
+
+
 # [3.31.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.30.0...v3.31.0) (2021-09-22)
 
 
