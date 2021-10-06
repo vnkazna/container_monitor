@@ -327,7 +327,7 @@ Prerequisite:
 
 - You have [registered an access token](#setup) for that GitLab instance.
 
-![browse remote repository](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/48970718ede1b43e852f983faf4496b143a0a663/docs/assets/virtual-workspace.gif)
+![browse remote repository](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/c8d66e145569749bc05b6b63531eea3dfbb80edb/docs/assets/virtual-workspace.gif)
 
 To open and browse a repository, either:
 
