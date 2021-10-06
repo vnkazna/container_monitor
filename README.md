@@ -22,7 +22,7 @@ _You need to set up your access token(s) to use these features, please see [Setu
 
 ### Browse issues, review MRs
 
-See your issues, MRs (including changed files) and other [custom search results](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
+See your issues, MRs (including changed files) and other [custom search results](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/custom-queries.md) on a dedicated panel in the VS Code sidebar. [Read more](#sidebar---details)
 
 ### Information about your branch - pipelines, MR, closing issue
 
@@ -56,7 +56,7 @@ You can use [Command Palette](https://code.visualstudio.com/docs/getstarted/user
 - `GitLab: Open current project on GitLab`
 - `GitLab: Create new issue on current project`
 - `GitLab: Create new merge request on current project` - Open the merge request page to create a merge request.
-- `GitLab: Open Repository` - Browse a remote GitLab repository. [Read more](#browse-a-repository-without-cloning).
+- `GitLab: Open Remote Repository` - Browse a remote GitLab repository. [Read more](#browse-a-repository-without-cloning).
 
 Commands this extension extends/integrates with:
 
@@ -141,7 +141,7 @@ The name of the Git remote link corresponding to the GitLab repository with your
 
 **`gitlab.customQueries`** _(required: false)_
 
-Defines the search queries that retrieves the items shown on the GitLab Panel. See [Custom Queries documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md) for more details.
+Defines the search queries that retrieves the items shown on the GitLab Panel. See [Custom Queries documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/custom-queries.md) for more details.
 
 ### Self-signed certificates
 
@@ -194,7 +194,7 @@ From the diff, you can:
 
 ### Sidebar - details
 
-Extension will add a GitLab Workflow panel to sidebar of VS Code. The dedicated panel will allow you to see the list of your issues and MRs (you can decide the exact queries by using the [custom queries](https://gitlab.com/gitlab-org/gitlab-vscode-extension/docs/user/custom-queries.md)). Also you will be able to see pipeline, MR and issue links for your current branch.
+Extension will add a GitLab Workflow panel to sidebar of VS Code. The dedicated panel will allow you to see the list of your issues and MRs (you can decide the exact queries by using the [custom queries](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/custom-queries.md)). Also you will be able to see pipeline, MR and issue links for your current branch.
 
 You can see the issue and MR details by clicking on the issue item or by expanding the MR item and clicking on "Description". When you expand the MR, you can see all the changed files. When you click on a changed file, the extension opens the MR diff.
 
@@ -327,35 +327,16 @@ Prerequisite:
 
 - You have [registered an access token](#setup) for that GitLab instance.
 
+![browse remote repository](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/c8d66e145569749bc05b6b63531eea3dfbb80edb/docs/assets/virtual-workspace.gif)
+
 To open and browse a repository, either:
 
-- Run the **GitLab: Open Repository** command and paste in a `gitlab-remote` URL.
-- Manually add a `gitlab-remote` URL to your [workspace file](https://code.visualstudio.com/docs/editor/multi-root-workspaces#_workspace-file).
+- Run the **GitLab: Open Remote Repository** command
+- Select *Choose Project* option.
+- Select GitLab instance, project and branch/tag that you would like to browse
 
-#### GitLab remote URL format
-
-GitLab remote URLs follow this format:
-
-```plaintext
-gitlab-remote://<instanceUrl>/<label>?project=<projectId>&ref=<gitReference>
-```
-
-For example, the remote URL for the main GitLab project is:
-
-```plaintext
-gitlab-remote://gitlab.com/<label>?project=278964&ref=master
-```
-
-- `instanceUrl` - The GitLab instance URL, not including `https://` or `http://`. If the GitLab instance is [installed under a relative URL](https://docs.gitlab.com/ee/install/relative_url.html), the relative URL must be included in the URL. For example, the URL for the `main` branch of the project `templates/ui` on the instance `example.com/gitlab` is `gitlab-remote://example.com/gitlab/<label>?project=templates/ui&ref=main`.
-- `label` - The text VS Code uses as the name of this workspace folder:
-  - It must appear immediately after the instance URL.
-  - It must not contain unescaped URL components, such as `/` or `?`.
-  - For an instance installed at the domain root, such as `https://gitlab.com`, the label must be the first path element.
-  - For URLs that refer to the root of a repository, the label must be the last path element.
-  - Any path elements that appear after the label will be treated as a path within the repository. For example, `gitlab-remote://gitlab.com/GitLab/app?project=gitlab-org/gitlab&ref=master` refers to the `app` directory of the `gitlab-org/gitlab` repository on GitLab.com.
-- `projectId` - Can be either the numeric id (`5261717`) or the namespace (`gitlab-org/gitlab-vscode-extension`) of the project. The project namespace might not work [when your instance uses reverse proxy](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/143).
-- `gitReference` - The repository branch or commit SHA, passed verbatim to the GitLab API.
-
+Alternatively, run the **GitLab: Open Remote Repository** command and select "Enter gitlab-remote URL" option or manually add a `gitlab-remote` URL to your [workspace file](https://code.visualstudio.com/docs/editor/multi-root-workspaces#_workspace-file). For information about how to create GitLab remote URL, please see [GitLab remote URL format documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/remote-fs-url-format.md)
+-
 
 ---
 
