@@ -118,6 +118,10 @@ export class WrappedRepository {
     return Boolean(this.cachedProject);
   }
 
+  get branch(): string | undefined {
+    return this.rawRepository.state.HEAD?.name;
+  }
+
   async reloadMr(mr: RestMr): Promise<CachedMr> {
     const mrVersion = await this.getGitLabService().getMrDiff(mr);
     const cachedMr = {
