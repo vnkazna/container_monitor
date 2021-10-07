@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as dayjs from 'dayjs';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { getJobMetadata } from '../../gitlab/ci_status_metadata';
 import { openInBrowserCommand } from '../../utils/open_in_browser_command';
 

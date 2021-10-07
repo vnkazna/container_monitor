@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as request from 'request-promise';
+import request from 'request-promise';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';

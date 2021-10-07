@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabComment } from './gitlab_comment';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';

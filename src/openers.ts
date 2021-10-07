@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import * as gitLabService from './gitlab_service';
 import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';

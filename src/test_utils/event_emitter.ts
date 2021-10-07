@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as NodeEmitter from 'events';
+import NodeEmitter from 'events';
 
 /**
  * This is an arbitrary name. The node event emitter supports multiple

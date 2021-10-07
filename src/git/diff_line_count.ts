@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 import { DiffFilePath, findFileInDiffs } from '../utils/find_file_in_diffs';
 
 // these helper functions are simplified version of the same lodash functions

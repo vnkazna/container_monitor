@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import { SinonSandbox } from 'sinon';
 import { GitExtension } from '../../../src/api/git';
 

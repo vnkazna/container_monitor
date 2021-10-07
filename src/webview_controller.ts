@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import * as gitLabService from './gitlab_service';
 import { createGitLabNewService } from './service_factory';
 import { handleError, logError } from './log';

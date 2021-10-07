@@ -53,5 +53,3 @@ export function parseGitRemote(remote: string, instanceUrl?: string): GitRemote 
 
   return { host, namespace, project };
 }
-
-module.exports = { parseGitRemote };

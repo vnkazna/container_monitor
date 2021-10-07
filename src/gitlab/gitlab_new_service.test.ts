@@ -2,7 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 import crossFetch from 'cross-fetch';
 import { fetchJson, GitLabNewService } from './gitlab_new_service';
 import { testSnippet1 } from '../../test/integration/fixtures/graphql/snippets.js';
-import { DEFAULT_FETCH_RESPONSE } from '../__mocks__/cross-fetch.js';
+import { DEFAULT_FETCH_RESPONSE } from '../__mocks__/cross-fetch';
 
 jest.mock('graphql-request');
 jest.mock('../services/token_service');

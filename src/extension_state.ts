@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import assert from 'assert';
 import { TokenService } from './services/token_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
