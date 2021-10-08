@@ -66,9 +66,8 @@ async function chooseProject(action: Action) {
   if (!label) return;
 
   const instanceUri = vscode.Uri.parse(instance);
-  const remoteUri = instanceUri.with({
+  const remoteUri = vscode.Uri.joinPath(instanceUri, label).with({
     scheme: REMOTE_URI_SCHEME,
-    path: path.join(instanceUri.path, label),
     query: `project=${remote.project.restId}&ref=${ref.name}`,
   });
   await openUrl(remoteUri, action);
