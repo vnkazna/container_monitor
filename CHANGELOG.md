@@ -1,3 +1,18 @@
+# [3.33.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.32.0...v3.33.0) (2021-10-08)
+
+
+### Bug Fixes
+
+* open repo on Windows ([83435cf](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/83435cf326815baa7c02acf46db65914360a7e29))
+
+
+### Features
+
+* enable esModuleInterop ([ef702c7](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/ef702c7bcf9d811a7006af99ee7254f53e293e96))
+* refresh branch info when window gets focused or branch changed ([69096ce](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/69096ce702e02792504beb3b1d9111b8e1704e5c))
+
+
+
 # [3.32.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.31.0...v3.32.0) (2021-10-06)
 
 
