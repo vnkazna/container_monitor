@@ -73,8 +73,8 @@ export class WrappedRepository {
     this.rawRepository = rawRepository;
   }
 
-  private get remoteName(): string {
-    return getRemoteName(this.rawRepository.state.remotes);
+  private get remoteName(): string | undefined {
+    return getRemoteName(this.rootFsPath, this.rawRepository.state.remotes);
   }
 
   async fetch(): Promise<void> {
@@ -105,6 +105,7 @@ export class WrappedRepository {
   }
 
   async getProject(): Promise<GitLabProject | undefined> {
+    if (!this.remote) return undefined;
     if (!this.cachedProject) {
       const { namespace, project } = this.remote;
       this.cachedProject = await this.getGitLabService().getProject(`${namespace}/${project}`);
@@ -134,7 +135,8 @@ export class WrappedRepository {
     return this.mrCache[id];
   }
 
-  get remote(): GitRemote {
+  get remote(): GitRemote | undefined {
+    if (!this.remoteName) return undefined;
     return this.getRemoteByName(this.remoteName);
   }
 

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
+import { log } from '../log';
 
 export const pickSnippet = async (snippets: GqlSnippet[]) => {
   const quickPickItems = snippets.map(s => ({
@@ -31,6 +32,12 @@ export const insertSnippet = async (): Promise<void> => {
     return;
   }
   const { remote } = repository;
+  if (!remote) {
+    log(
+      `Can't create a snippet patch because repository ${repository.rootFsPath} doesn't have any remotes.`,
+    );
+    return;
+  }
   const snippets = await repository
     .getGitLabService()
     .getSnippets(`${remote.namespace}/${remote.project}`);

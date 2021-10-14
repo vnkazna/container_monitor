@@ -7,35 +7,55 @@ jest.mock('../utils/get_extension_configuration');
 
 describe('remote name provider', () => {
   describe('getRemoteName', () => {
-    const TEST_REMOTES: Remote[] = [
-      {
-        name: 'first',
-        isReadOnly: false,
-      },
-      {
-        name: 'second',
-        isReadOnly: false,
-      },
-    ];
+    const TEST_CONFIGURATION = {
+      preferredRemotes: {},
+    };
+    const TEST_REPOSITORY_ROOT = '/repository/root';
+    const FIRST_REMOTE: Remote = {
+      name: 'first',
+      isReadOnly: false,
+    };
+    const SECOND_REMOTE: Remote = {
+      name: 'second',
+      isReadOnly: false,
+    };
 
     beforeEach(() => {
-      asMock(getExtensionConfiguration).mockReturnValue({});
+      asMock(getExtensionConfiguration).mockReturnValue(TEST_CONFIGURATION);
     });
 
     it('returns the user-preferred remote name if user configured it', () => {
-      asMock(getExtensionConfiguration).mockReturnValue({ remoteName: 'configured-name' });
-      const result = getRemoteName(TEST_REMOTES);
-      expect(result).toBe('configured-name');
+      asMock(getExtensionConfiguration).mockReturnValue({
+        preferredRemotes: { [TEST_REPOSITORY_ROOT]: { remoteName: 'second' } },
+      });
+      const result = getRemoteName(TEST_REPOSITORY_ROOT, [FIRST_REMOTE, SECOND_REMOTE]);
+      expect(result).toBe('second');
     });
 
-    it('returns the first remote name if there is no configuration', () => {
-      const result = getRemoteName(TEST_REMOTES);
+    it('returns name of the remote if there is only one remote', () => {
+      const result = getRemoteName(TEST_REPOSITORY_ROOT, [FIRST_REMOTE]);
       expect(result).toBe('first');
     });
 
-    it('returns "origin" if there are no remotes', () => {
-      const result = getRemoteName([]);
-      expect(result).toBe('origin');
+    it('returns undefined if there are no remotes', () => {
+      const result = getRemoteName(TEST_REPOSITORY_ROOT, []);
+      expect(result).toBe(undefined);
+    });
+
+    it('returns undefined if there are multiple remotes, but no preferred', () => {
+      const result = getRemoteName(TEST_REPOSITORY_ROOT, [FIRST_REMOTE, SECOND_REMOTE]);
+      expect(result).toBe(undefined);
+    });
+
+    it('returns undefined if the preferred remote name does not exist', () => {
+      asMock(getExtensionConfiguration).mockReturnValue({
+        preferredRemotes: { [TEST_REPOSITORY_ROOT]: { remoteName: 'second' } },
+      });
+      const result = getRemoteName(TEST_REPOSITORY_ROOT, [
+        FIRST_REMOTE,
+        { name: 'third', isReadOnly: false },
+      ]);
+      expect(result).toBe(undefined);
     });
   });
 });
