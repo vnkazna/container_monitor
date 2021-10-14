@@ -121,15 +121,15 @@ describe('MrItemModel', () => {
       expect(commentController.commentingRangeProvider).toBeInstanceOf(CommentingRangeProvider);
     });
 
-    it('when we create comment controller for the same MR, we dispose the previously created controller', async () => {
+    it('keeps the same commentController regardless how many times we call getChildren', async () => {
       await item.getChildren();
 
+      expect(createCommentControllerMock).toHaveBeenCalledTimes(1);
+
+      await item.getChildren();
+
+      expect(createCommentControllerMock).toHaveBeenCalledTimes(1);
       expect(commentController.dispose).not.toHaveBeenCalled();
-
-      // simulates another MR item opening the same MR
-      await item.getChildren();
-
-      expect(commentController.dispose).toHaveBeenCalled();
     });
   });
 });
