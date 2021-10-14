@@ -10,6 +10,7 @@ import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { getExtensionConfiguration } from '../utils/get_extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { getRemoteName } from './remote_name_provider';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   const instanceUrls = tokenService.getInstanceUrls();
@@ -73,10 +74,7 @@ export class WrappedRepository {
   }
 
   private get remoteName(): string {
-    const preferredRemote = getExtensionConfiguration().remoteName;
-    const branchRemote = this.rawRepository.state.HEAD?.remote;
-    const firstRemote = this.rawRepository.state.remotes[0]?.name;
-    return preferredRemote || branchRemote || firstRemote || 'origin';
+    return getRemoteName(this.rawRepository.state.remotes);
   }
 
   async fetch(): Promise<void> {

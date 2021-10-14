@@ -94,34 +94,6 @@ describe('WrappedRepository', () => {
       });
     });
 
-    it('gets the remote url for user configured remote name', () => {
-      (getExtensionConfiguration as jest.Mock).mockReturnValue({
-        remoteName: 'second',
-      });
-      wrappedRepository = createWrappedRepository({
-        remotes: defaultRemotes,
-      });
-
-      expect(wrappedRepository.remote).toEqual({
-        host: 'test-instance.com',
-        namespace: 'g',
-        project: 'extension',
-      });
-    });
-
-    it('gets default remote for a branch', () => {
-      wrappedRepository = createWrappedRepository({
-        remotes: defaultRemotes,
-        headRemoteName: 'second', // the current branch is tracking a branch from 'second' remote
-      });
-
-      expect(wrappedRepository.remote).toEqual({
-        host: 'test-instance.com',
-        namespace: 'g',
-        project: 'extension',
-      });
-    });
-
     it('returns error when there are no remotes', () => {
       wrappedRepository = createWrappedRepository({
         remotes: [],
