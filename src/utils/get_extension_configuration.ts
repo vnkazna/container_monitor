@@ -1,15 +1,19 @@
 import * as vscode from 'vscode';
 import { CONFIG_NAMESPACE } from '../constants';
 
-interface PreferredRemote {
+type MutableConfigName = 'preferredRemotes';
+
+export interface PreferredRemote {
   remoteName: string;
 }
+export type PreferredRemotes = Record<string, PreferredRemote | undefined>;
+
 interface ExtensionConfiguration {
   instanceUrl?: string;
   remoteName?: string;
   pipelineGitRemoteName?: string;
   featureFlags?: string[];
-  preferredRemotes: Record<string, PreferredRemote | undefined>;
+  preferredRemotes: PreferredRemotes;
 }
 
 // VS Code returns a value or `null` but undefined is better for using default function arguments
@@ -24,4 +28,12 @@ export function getExtensionConfiguration(): ExtensionConfiguration {
     featureFlags: turnNullToUndefined(workspaceConfig.featureFlags),
     preferredRemotes: workspaceConfig.preferredRemotes,
   };
+}
+
+export async function setExtensionConfiguration(
+  name: MutableConfigName,
+  value: any,
+): Promise<void> {
+  const workspaceConfig = vscode.workspace.getConfiguration(CONFIG_NAMESPACE);
+  await workspaceConfig.update(name, value);
 }

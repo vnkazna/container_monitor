@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { WrappedRepository } from './wrapped_repository';
-import { getExtensionConfiguration } from '../utils/get_extension_configuration';
+import { getExtensionConfiguration, PreferredRemotes } from '../utils/get_extension_configuration';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
 import { mr, mrVersion, project } from '../test_utils/entities';
@@ -13,8 +13,13 @@ describe('WrappedRepository', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    (getExtensionConfiguration as jest.Mock).mockReturnValue({});
     wrappedRepository = createWrappedRepository();
+    const preferredRemotes: PreferredRemotes = {
+      [wrappedRepository.rootFsPath]: { remoteName: 'first' },
+    };
+    (getExtensionConfiguration as jest.Mock).mockReturnValue({
+      preferredRemotes,
+    });
   });
 
   describe('instanceUrl', () => {
@@ -94,12 +99,12 @@ describe('WrappedRepository', () => {
       });
     });
 
-    it('returns error when there are no remotes', () => {
+    it('returns undefined when there are no remotes', () => {
       wrappedRepository = createWrappedRepository({
         remotes: [],
       });
 
-      expect(() => wrappedRepository.remote).toThrowError();
+      expect(wrappedRepository.remote).toBeUndefined();
     });
   });
 
@@ -115,6 +120,7 @@ describe('WrappedRepository', () => {
         gitLabService: {
           getProject: () => Promise.resolve(project),
         },
+        remotes: [['first', 'git@test.gitlab.com:gitlab-org/gitlab.git']],
       });
 
       await wrappedRepository.getProject();

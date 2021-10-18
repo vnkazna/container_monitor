@@ -1,7 +1,9 @@
+import assert from 'assert';
 import * as vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { isAmbiguousRemote, setPreferredRemote } from '../git/remote_name_provider';
+import { WrappedRepository } from '../git/wrapped_repository';
 import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
-import { log } from '../log';
 
 export const pickSnippet = async (snippets: GqlSnippet[]) => {
   const quickPickItems = snippets.map(s => ({
@@ -22,22 +24,45 @@ const pickBlob = async (blobs: GqlBlob[]) => {
   return result?.original;
 };
 
+const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
+  const { remote } = repository;
+  if (remote) return remote;
+
+  if (!isAmbiguousRemote(repository.rootFsPath, repository.remoteNames)) {
+    return undefined;
+  }
+  const result = await vscode.window.showQuickPick(
+    repository.remoteNames.map(n => ({ label: n })),
+    { placeHolder: 'Select which git remote contains your GitLab project.' },
+  );
+
+  if (!result) return undefined;
+  await setPreferredRemote(repository.rootFsPath, result.label);
+  return repository.remote;
+};
+
+const ensureRepositoryWithProject = async () => {
+  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  if (!repository) {
+    return undefined;
+  }
+  const remote = await getRemoteOrSelectOne(repository);
+  if (!remote) return undefined;
+  if (!repository.getProject()) return undefined;
+  return repository;
+};
+
 export const insertSnippet = async (): Promise<void> => {
   if (!vscode.window.activeTextEditor) {
     await vscode.window.showInformationMessage('There is no open file.');
     return;
   }
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+  const repository = await ensureRepositoryWithProject();
   if (!repository) {
     return;
   }
   const { remote } = repository;
-  if (!remote) {
-    log(
-      `Can't create a snippet patch because repository ${repository.rootFsPath} doesn't have any remotes.`,
-    );
-    return;
-  }
+  assert(remote);
   const snippets = await repository
     .getGitLabService()
     .getSnippets(`${remote.namespace}/${remote.project}`);

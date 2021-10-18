@@ -74,7 +74,11 @@ export class WrappedRepository {
   }
 
   private get remoteName(): string | undefined {
-    return getRemoteName(this.rootFsPath, this.rawRepository.state.remotes);
+    return getRemoteName(this.rootFsPath, this.remoteNames);
+  }
+
+  get remoteNames(): string[] {
+    return this.rawRepository.state.remotes.map(r => r.name);
   }
 
   async fetch(): Promise<void> {
