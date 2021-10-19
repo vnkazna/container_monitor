@@ -1,3 +1,12 @@
+## [3.33.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.33.0...v3.33.1) (2021-10-19)
+
+
+### Bug Fixes
+
+* draft comments disappear after refresh ([b7553b8](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b7553b8e6706f452265fc166c85eac6629a7c06e))
+
+
+
 # [3.33.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.32.0...v3.33.0) (2021-10-08)
 
 
