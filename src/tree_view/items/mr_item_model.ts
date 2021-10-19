@@ -46,6 +46,8 @@ const uriForDiscussion = (
 };
 
 export class MrItemModel extends ItemModel {
+  private cachedChildren?: vscode.TreeItem[];
+
   constructor(readonly mr: RestMr, readonly repository: WrappedRepository) {
     super();
   }
@@ -96,6 +98,7 @@ export class MrItemModel extends ItemModel {
   }
 
   async getChildren(): Promise<vscode.TreeItem[]> {
+    if (this.cachedChildren) return this.cachedChildren; // don't initialize comments twice
     const { mrVersion } = await this.repository.reloadMr(this.mr);
     const discussions = await this.getMrDiscussions();
 
@@ -110,7 +113,8 @@ export class MrItemModel extends ItemModel {
           allUrisWithComments.includes(uri.toString()),
         ),
     );
-    return [this.overviewItem, ...changedFiles];
+    this.cachedChildren = [this.overviewItem, ...changedFiles];
+    return this.cachedChildren;
   }
 
   private async addAllCommentsToVsCode(
