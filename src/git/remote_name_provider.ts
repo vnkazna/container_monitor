@@ -1,22 +1,22 @@
 import { log } from '../log';
 import {
   getExtensionConfiguration,
-  PreferredRemotes,
+  Repositories,
   setExtensionConfiguration,
 } from '../utils/get_extension_configuration';
 
 const getPreferredRemote = (repositoryRoot: string) => {
-  const preferredRemote = getExtensionConfiguration().preferredRemotes[repositoryRoot];
-  return preferredRemote?.remoteName;
+  const preferredRemote = getExtensionConfiguration().repositories[repositoryRoot];
+  return preferredRemote?.preferredRemoteName;
 };
 
 export const setPreferredRemote = async (repositoryRoot: string, remoteName: string) => {
-  const { preferredRemotes } = getExtensionConfiguration();
-  const updatedRemotes: PreferredRemotes = {
+  const { repositories: preferredRemotes } = getExtensionConfiguration();
+  const updatedRemotes: Repositories = {
     ...preferredRemotes,
-    [repositoryRoot]: { remoteName },
+    [repositoryRoot]: { preferredRemoteName: remoteName },
   };
-  await setExtensionConfiguration('preferredRemotes', updatedRemotes);
+  await setExtensionConfiguration('repositories', updatedRemotes);
 };
 
 export const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {

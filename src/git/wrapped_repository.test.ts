@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { WrappedRepository } from './wrapped_repository';
-import { getExtensionConfiguration, PreferredRemotes } from '../utils/get_extension_configuration';
+import { getExtensionConfiguration, Repositories } from '../utils/get_extension_configuration';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
 import { mr, mrVersion, project } from '../test_utils/entities';
@@ -14,11 +14,11 @@ describe('WrappedRepository', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     wrappedRepository = createWrappedRepository();
-    const preferredRemotes: PreferredRemotes = {
-      [wrappedRepository.rootFsPath]: { remoteName: 'first' },
+    const repositories: Repositories = {
+      [wrappedRepository.rootFsPath]: { preferredRemoteName: 'first' },
     };
     (getExtensionConfiguration as jest.Mock).mockReturnValue({
-      preferredRemotes,
+      repositories,
     });
   });
 
