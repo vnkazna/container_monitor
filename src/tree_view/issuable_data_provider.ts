@@ -47,7 +47,7 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
       return [new ErrorItem('Fetching Issues and MRs failed')];
     }
     if (repositories.length === 0) return [new vscode.TreeItem('No projects found')];
-    // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
+    // FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
     const customQueries =
       vscode.workspace
         .getConfiguration(CONFIG_NAMESPACE)

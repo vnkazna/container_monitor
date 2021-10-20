@@ -12,7 +12,7 @@ import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
-import { getExtensionConfiguration } from './utils/get_extension_configuration';
+import { getExtensionConfiguration } from './utils/extension_configuration';
 import { README_SECTIONS } from './constants';
 import { HelpError } from './errors/help_error';
 

@@ -3,7 +3,7 @@ import {
   getExtensionConfiguration,
   Repositories,
   setExtensionConfiguration,
-} from '../utils/get_extension_configuration';
+} from '../utils/extension_configuration';
 
 const getPreferredRemote = (repositoryRoot: string) => {
   const preferredRemote = getExtensionConfiguration().repositories[repositoryRoot];

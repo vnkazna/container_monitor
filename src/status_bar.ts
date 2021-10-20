@@ -8,7 +8,7 @@ import { BranchState } from './current_branch_refresher';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
-// FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
+// FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
 const {
   showStatusBarLinks,
   showIssueLinkOnStatusBar,

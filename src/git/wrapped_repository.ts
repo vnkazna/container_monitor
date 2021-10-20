@@ -7,7 +7,7 @@ import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
 import { log } from '../log';
 import { GitRemote, parseGitRemote } from './git_remote_parser';
-import { getExtensionConfiguration } from '../utils/get_extension_configuration';
+import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { getRemoteName } from './remote_name_provider';

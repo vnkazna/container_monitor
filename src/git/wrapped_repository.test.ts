@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { WrappedRepository } from './wrapped_repository';
-import { getExtensionConfiguration, Repositories } from '../utils/get_extension_configuration';
+import { getExtensionConfiguration, Repositories } from '../utils/extension_configuration';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
 import { mr, mrVersion, project } from '../test_utils/entities';
 import { createWrappedRepository } from '../test_utils/create_wrapped_repository';
 
-jest.mock('../utils/get_extension_configuration');
+jest.mock('../utils/extension_configuration');
 
 describe('WrappedRepository', () => {
   let wrappedRepository: WrappedRepository;

@@ -3,10 +3,10 @@ import {
   getExtensionConfiguration,
   Repositories,
   setExtensionConfiguration,
-} from '../utils/get_extension_configuration';
+} from '../utils/extension_configuration';
 import { getRemoteName, isAmbiguousRemote, setPreferredRemote } from './remote_name_provider';
 
-jest.mock('../utils/get_extension_configuration');
+jest.mock('../utils/extension_configuration');
 
 describe('remote name provider', () => {
   const TEST_CONFIGURATION = {

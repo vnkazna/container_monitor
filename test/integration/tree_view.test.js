@@ -82,7 +82,7 @@ describe('GitLab tree view', () => {
       }),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');
-    // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
+    // FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
     await vscode.workspace.getConfiguration().update('gitlab.customQueries', customQuerySettings);
   });
 
@@ -94,7 +94,7 @@ describe('GitLab tree view', () => {
   after(async () => {
     server.close();
     await tokenService.setToken(GITLAB_URL, undefined);
-    // FIXME: if you are touching this configuration statement, move the configuration to get_extension_configuration.ts
+    // FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
     await vscode.workspace.getConfiguration().update('gitlab.customQueries', undefined);
   });
 
