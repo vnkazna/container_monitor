@@ -1,8 +1,8 @@
-import { WrappedRepository } from '../git/wrapped_repository';
 import { CustomQueryType } from '../gitlab/custom_query_type';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
+import { createWrappedRepository } from './create_wrapped_repository';
 
 export const issue: RestIssuable = {
   id: 1,
@@ -87,11 +87,7 @@ export const job: RestJob = {
   web_url: 'https://example.com/foo/bar/jobs/68',
 };
 
-export const repository = ({
-  name: 'GitLab Project',
-  rootFsPath: '/path/to/repo',
-  containsGitLabProject: true,
-} as unknown) as WrappedRepository;
+export const repository = createWrappedRepository();
 
 export const gqlProject: GqlProject = {
   id: 'gid://gitlab/Project/5261717',

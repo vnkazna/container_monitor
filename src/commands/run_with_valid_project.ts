@@ -1,15 +1,19 @@
 import * as vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
-import { isAmbiguousRemote, setPreferredRemote } from '../git/remote_name_provider';
 import { GitRemote } from '../git/git_remote_parser';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { getRepositorySettings, setPreferredRemote } from '../utils/extension_configuration';
 
 export interface RepositoryWithProject {
   repository: WrappedRepository;
   remote: GitRemote;
   project: GitLabProject;
 }
+
+const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {
+  return remoteNames.length > 1 && !getRepositorySettings(repositoryRoot)?.preferredRemoteName;
+};
 
 const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
   const { remote } = repository;

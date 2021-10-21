@@ -1,7 +1,14 @@
 import * as vscode from 'vscode';
 import { MultirootCustomQueryItemModel } from './multiroot_custom_query_item_model';
 import { CustomQueryItemModel } from './custom_query_item_model';
-import { customQuery, repository } from '../../test_utils/entities';
+import { customQuery } from '../../test_utils/entities';
+import { WrappedRepository } from '../../git/wrapped_repository';
+
+const repository = ({
+  name: 'GitLab Project',
+  rootFsPath: '/path/to/repo',
+  containsGitLabProject: true,
+} as unknown) as WrappedRepository;
 
 const projects = [
   { ...repository, name: 'project 1' },

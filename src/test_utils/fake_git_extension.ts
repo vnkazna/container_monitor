@@ -15,10 +15,7 @@ export interface FakeRepositoryOptions {
 
 export const fakeRepositoryOptions: FakeRepositoryOptions = {
   rootUriPath: '/path/to/repo',
-  remotes: [
-    ['origin', 'git@a.com:gitlab/extension.git'],
-    ['second', 'git@b.com:gitlab/extension.git'],
-  ],
+  remotes: [['origin', 'git@a.com:gitlab/extension.git']],
 };
 export const createFakeRepository = (options: Partial<FakeRepositoryOptions> = {}): Repository => {
   const { rootUriPath, remotes, headRemoteName } = { ...fakeRepositoryOptions, ...options };

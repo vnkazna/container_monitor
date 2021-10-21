@@ -1,10 +1,6 @@
 import { log } from '../log';
 import { getRepositorySettings } from '../utils/extension_configuration';
 
-export const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {
-  return remoteNames.length > 1 && !getRepositorySettings(repositoryRoot)?.preferredRemoteName;
-};
-
 export const getRemoteName = (
   repositoryRoot: string,
   remoteNames: string[],

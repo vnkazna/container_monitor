@@ -1,6 +1,6 @@
 import { asMock } from '../test_utils/as_mock';
 import { getRepositorySettings } from '../utils/extension_configuration';
-import { getRemoteName, isAmbiguousRemote } from './remote_name_provider';
+import { getRemoteName } from './remote_name_provider';
 
 jest.mock('../utils/extension_configuration');
 
@@ -40,26 +40,6 @@ describe('remote name provider', () => {
       });
       const result = getRemoteName(TEST_REPOSITORY_ROOT, ['first', 'third']);
       expect(result).toBe(undefined);
-    });
-  });
-
-  describe('isAmbiguousRemote', () => {
-    it('returns true if there are multiple remotes and no preferred remote', () => {
-      const result = isAmbiguousRemote(TEST_REPOSITORY_ROOT, ['first', 'second']);
-      expect(result).toBe(true);
-    });
-
-    it('returns false if there are multiple remotes and a preferred remote', () => {
-      asMock(getRepositorySettings).mockReturnValue({
-        preferredRemoteName: 'second',
-      });
-      const result = isAmbiguousRemote(TEST_REPOSITORY_ROOT, ['first', 'second']);
-      expect(result).toBe(false);
-    });
-
-    it('returns false if there is only one remote', () => {
-      const result = isAmbiguousRemote(TEST_REPOSITORY_ROOT, ['first']);
-      expect(result).toBe(false);
     });
   });
 });
