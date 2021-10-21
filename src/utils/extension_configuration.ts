@@ -37,3 +37,16 @@ export async function setExtensionConfiguration(
   const workspaceConfig = vscode.workspace.getConfiguration(CONFIG_NAMESPACE);
   await workspaceConfig.update(name, value);
 }
+
+export function getRepositorySettings(repositoryRoot: string): RepositorySettings | undefined {
+  return getExtensionConfiguration().repositories[repositoryRoot];
+}
+
+export const setPreferredRemote = async (repositoryRoot: string, remoteName: string) => {
+  const { repositories } = getExtensionConfiguration();
+  const updatedRemotes: Repositories = {
+    ...repositories,
+    [repositoryRoot]: { preferredRemoteName: remoteName },
+  };
+  await setExtensionConfiguration('repositories', updatedRemotes);
+};

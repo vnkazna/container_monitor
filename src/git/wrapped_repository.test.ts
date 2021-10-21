@@ -84,10 +84,9 @@ describe('WrappedRepository', () => {
   describe('remote', () => {
     const defaultRemotes: [string, string][] = [
       ['first', 'git@test.gitlab.com:gitlab-org/gitlab.git'],
-      ['second', 'https://git@test-instance.com/g/extension.git'],
     ];
 
-    it('gets the remote url for first origin', () => {
+    it('gets the remote url', () => {
       wrappedRepository = createWrappedRepository({
         remotes: defaultRemotes,
       });

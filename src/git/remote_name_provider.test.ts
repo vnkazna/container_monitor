@@ -1,26 +1,19 @@
 import { asMock } from '../test_utils/as_mock';
-import {
-  getExtensionConfiguration,
-  Repositories,
-  setExtensionConfiguration,
-} from '../utils/extension_configuration';
-import { getRemoteName, isAmbiguousRemote, setPreferredRemote } from './remote_name_provider';
+import { getRepositorySettings } from '../utils/extension_configuration';
+import { getRemoteName, isAmbiguousRemote } from './remote_name_provider';
 
 jest.mock('../utils/extension_configuration');
 
 describe('remote name provider', () => {
-  const TEST_CONFIGURATION = {
-    repositories: {},
-  };
   const TEST_REPOSITORY_ROOT = '/repository/root';
-  beforeEach(() => {
-    asMock(getExtensionConfiguration).mockReturnValue(TEST_CONFIGURATION);
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('getRemoteName', () => {
     it('returns the user-preferred remote name if user configured it', () => {
-      asMock(getExtensionConfiguration).mockReturnValue({
-        repositories: { [TEST_REPOSITORY_ROOT]: { preferredRemoteName: 'second' } },
+      asMock(getRepositorySettings).mockReturnValue({
+        preferredRemoteName: 'second',
       });
       const result = getRemoteName(TEST_REPOSITORY_ROOT, ['first', 'second']);
       expect(result).toBe('second');
@@ -42,8 +35,8 @@ describe('remote name provider', () => {
     });
 
     it('returns undefined if the preferred remote name does not exist', () => {
-      asMock(getExtensionConfiguration).mockReturnValue({
-        repositories: { [TEST_REPOSITORY_ROOT]: { preferredRemoteName: 'second' } },
+      asMock(getRepositorySettings).mockReturnValue({
+        preferredRemoteName: 'second',
       });
       const result = getRemoteName(TEST_REPOSITORY_ROOT, ['first', 'third']);
       expect(result).toBe(undefined);
@@ -57,8 +50,8 @@ describe('remote name provider', () => {
     });
 
     it('returns false if there are multiple remotes and a preferred remote', () => {
-      asMock(getExtensionConfiguration).mockReturnValue({
-        repositories: { [TEST_REPOSITORY_ROOT]: { preferredRemoteName: 'second' } },
+      asMock(getRepositorySettings).mockReturnValue({
+        preferredRemoteName: 'second',
       });
       const result = isAmbiguousRemote(TEST_REPOSITORY_ROOT, ['first', 'second']);
       expect(result).toBe(false);
@@ -67,29 +60,6 @@ describe('remote name provider', () => {
     it('returns false if there is only one remote', () => {
       const result = isAmbiguousRemote(TEST_REPOSITORY_ROOT, ['first']);
       expect(result).toBe(false);
-    });
-  });
-
-  describe('setPreferredRemote', () => {
-    it('stores preferred remote', async () => {
-      await setPreferredRemote(TEST_REPOSITORY_ROOT, 'first');
-      expect(setExtensionConfiguration).toHaveBeenCalledWith('repositories', {
-        [TEST_REPOSITORY_ROOT]: { preferredRemoteName: 'first' },
-      });
-    });
-
-    it('adds preferred remote', async () => {
-      const existingRepositoriesConfig: Repositories = {
-        [TEST_REPOSITORY_ROOT]: { preferredRemoteName: 'second' },
-      };
-      asMock(getExtensionConfiguration).mockReturnValue({
-        repositories: existingRepositoriesConfig,
-      });
-      await setPreferredRemote('/root/path', 'first');
-      expect(setExtensionConfiguration).toHaveBeenCalledWith('repositories', {
-        ...existingRepositoriesConfig,
-        '/root/path': { preferredRemoteName: 'first' },
-      });
     });
   });
 });
