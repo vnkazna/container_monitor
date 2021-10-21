@@ -7,10 +7,9 @@ import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
 import { log } from '../log';
 import { GitRemote, parseGitRemote } from './git_remote_parser';
-import { getExtensionConfiguration } from '../utils/extension_configuration';
+import { getExtensionConfiguration, getRepositorySettings } from '../utils/extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
-import { getRemoteName } from './remote_name_provider';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   const instanceUrls = tokenService.getInstanceUrls();
@@ -74,7 +73,24 @@ export class WrappedRepository {
   }
 
   private get remoteName(): string | undefined {
-    return getRemoteName(this.rootFsPath, this.remoteNames);
+    if (this.remoteNames.length === 0) {
+      log(`Repository ${this.rootFsPath} doesn't have any remotes.`);
+      return undefined;
+    }
+    if (this.remoteNames.length === 1) {
+      return this.remoteNames[0];
+    }
+    const preferred = getRepositorySettings(this.rootFsPath)?.preferredRemoteName;
+    if (!preferred) {
+      log(`No preferred remote for ${this.rootFsPath}.`);
+      return undefined;
+    }
+    if (!this.remoteNames.includes(preferred)) {
+      log(`Saved preferred remote ${preferred} doesn't exist in repository ${this.rootFsPath}`);
+      return undefined;
+    }
+
+    return preferred;
   }
 
   get remoteNames(): string[] {

@@ -1,0 +1,71 @@
+import * as vscode from 'vscode';
+import { runWithValidProject } from './run_with_valid_project';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { asMock } from '../test_utils/as_mock';
+import { createWrappedRepository } from '../test_utils/create_wrapped_repository';
+import {
+  getExtensionConfiguration,
+  getRepositorySettings,
+  RepositorySettings,
+  setPreferredRemote,
+} from '../utils/extension_configuration';
+import { project } from '../test_utils/entities';
+import { WrappedRepository } from '../git/wrapped_repository';
+import { log } from '../log';
+
+jest.mock('../git/git_extension_wrapper');
+jest.mock('../utils/extension_configuration');
+jest.mock('../log');
+
+describe('runWithValidProject', () => {
+  let repository: WrappedRepository;
+  beforeEach(() => {
+    asMock(getExtensionConfiguration).mockReturnValue({ instanceUrl: 'https://gitlab.com' });
+    asMock(log).mockImplementation(m => console.log(m));
+  });
+
+  describe('with valid project', () => {
+    beforeEach(() => {
+      repository = createWrappedRepository({
+        gitLabService: { getProject: async () => project },
+      });
+      asMock(gitExtensionWrapper.getActiveRepositoryOrSelectOne).mockResolvedValue(repository);
+    });
+
+    it('injects repository, remote, and GitLab project into the command', async () => {
+      const command = jest.fn();
+
+      await runWithValidProject(command)();
+
+      expect(command).toHaveBeenCalledWith({ repository, remote: repository.remote, project });
+    });
+  });
+
+  describe('with ambiguous remotes ', () => {
+    let repoSettings: RepositorySettings;
+
+    beforeEach(() => {
+      repository = createWrappedRepository({
+        gitLabService: { getProject: async () => project },
+        remotes: [
+          ['origin', 'git@a.com:gitlab/extension.git'],
+          ['security', 'git@b.com:gitlab/extension.git'],
+        ],
+      });
+      asMock(gitExtensionWrapper.getActiveRepositoryOrSelectOne).mockResolvedValue(repository);
+    });
+
+    it('lets user select which remote to use', async () => {
+      const command = jest.fn();
+      asMock(vscode.window.showQuickPick).mockImplementation(options => options[0]);
+      asMock(setPreferredRemote).mockImplementation((root, rn) => {
+        repoSettings = { preferredRemoteName: rn };
+      });
+      asMock(getRepositorySettings).mockImplementation(() => repoSettings);
+
+      await runWithValidProject(command)();
+
+      expect(command).toHaveBeenCalledWith({ repository, remote: repository.remote, project });
+    });
+  });
+});
