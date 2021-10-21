@@ -3,7 +3,6 @@ const sinon = require('sinon');
 const vscode = require('vscode');
 const simpleGit = require('simple-git');
 const { graphql } = require('msw');
-const { insertSnippet } = require('../../src/commands/insert_snippet');
 const { tokenService } = require('../../src/services/token_service');
 const {
   snippetsResponse,
@@ -64,14 +63,14 @@ describe('Insert snippet', async () => {
 
   it('inserts snippet when there is only one blob', async () => {
     simulateQuickPickChoice(sandbox, 0);
-    await insertSnippet();
+    await vscode.commands.executeCommand('gl.insertSnippet');
 
     assert.strictEqual(vscode.window.activeTextEditor.document.getText(), 'snippet content');
   });
 
   it('inserts snippet when there are multiple blobs', async () => {
     simulateQuickPickChoice(sandbox, 1);
-    await insertSnippet();
+    await vscode.commands.executeCommand('gl.insertSnippet');
 
     assert.strictEqual(vscode.window.activeTextEditor.document.getText(), 'second blob content');
   });
@@ -81,6 +80,11 @@ describe('Insert snippet', async () => {
     await git.removeRemote(REMOTE.NAME);
     await git.addRemote(REMOTE.NAME, 'git@test.gitlab.com:gitlab-org/nonexistent.git');
     await updateRepositoryStatus();
-    await assert.rejects(insertSnippet(), /Project gitlab-org\/nonexistent was not found./);
+    const showErrorMessage = sandbox.spy(vscode.window, 'showErrorMessage');
+    await vscode.commands.executeCommand('gl.insertSnippet');
+    assert.match(
+      showErrorMessage.firstCall.args[0],
+      /Project gitlab-org\/nonexistent was not found./,
+    );
   });
 });
