@@ -1,20 +1,25 @@
 import * as vscode from 'vscode';
 import { WrappedRepository } from './wrapped_repository';
-import { getExtensionConfiguration } from '../utils/get_extension_configuration';
+import { getExtensionConfiguration, Repositories } from '../utils/extension_configuration';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
 import { mr, mrVersion, project } from '../test_utils/entities';
 import { createWrappedRepository } from '../test_utils/create_wrapped_repository';
 
-jest.mock('../utils/get_extension_configuration');
+jest.mock('../utils/extension_configuration');
 
 describe('WrappedRepository', () => {
   let wrappedRepository: WrappedRepository;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    (getExtensionConfiguration as jest.Mock).mockReturnValue({});
     wrappedRepository = createWrappedRepository();
+    const repositories: Repositories = {
+      [wrappedRepository.rootFsPath]: { preferredRemoteName: 'first' },
+    };
+    (getExtensionConfiguration as jest.Mock).mockReturnValue({
+      repositories,
+    });
   });
 
   describe('instanceUrl', () => {
@@ -94,40 +99,12 @@ describe('WrappedRepository', () => {
       });
     });
 
-    it('gets the remote url for user configured remote name', () => {
-      (getExtensionConfiguration as jest.Mock).mockReturnValue({
-        remoteName: 'second',
-      });
-      wrappedRepository = createWrappedRepository({
-        remotes: defaultRemotes,
-      });
-
-      expect(wrappedRepository.remote).toEqual({
-        host: 'test-instance.com',
-        namespace: 'g',
-        project: 'extension',
-      });
-    });
-
-    it('gets default remote for a branch', () => {
-      wrappedRepository = createWrappedRepository({
-        remotes: defaultRemotes,
-        headRemoteName: 'second', // the current branch is tracking a branch from 'second' remote
-      });
-
-      expect(wrappedRepository.remote).toEqual({
-        host: 'test-instance.com',
-        namespace: 'g',
-        project: 'extension',
-      });
-    });
-
-    it('returns error when there are no remotes', () => {
+    it('returns undefined when there are no remotes', () => {
       wrappedRepository = createWrappedRepository({
         remotes: [],
       });
 
-      expect(() => wrappedRepository.remote).toThrowError();
+      expect(wrappedRepository.remote).toBeUndefined();
     });
   });
 
@@ -143,6 +120,7 @@ describe('WrappedRepository', () => {
         gitLabService: {
           getProject: () => Promise.resolve(project),
         },
+        remotes: [['first', 'git@test.gitlab.com:gitlab-org/gitlab.git']],
       });
 
       await wrappedRepository.getProject();

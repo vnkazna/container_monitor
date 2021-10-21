@@ -5,7 +5,7 @@ import { CustomQuery } from './gitlab/custom_query';
 
 let extensionConfiguration = {};
 
-jest.mock('./utils/get_extension_configuration', () => ({
+jest.mock('./utils/extension_configuration', () => ({
   getExtensionConfiguration: () => extensionConfiguration,
 }));
 

@@ -495,10 +495,24 @@
           "default": false,
           "description": "Ignore TLS/SSL certificate errors when calling the GitLab API"
         },
-        "gitlab.remoteName": {
-          "type": "string",
-          "default": null,
-          "description": "Name of the git remote to use in order to locate the Gitlab project"
+        "gitlab.repositories": {
+          "type": "object",
+          "scope": "machine-overridable",
+          "default": {},
+          "description": "Repository-specific settings.",
+          "examples": [{"/absolute/path/to/repo": {"preferredRemoteName": "origin"}}],
+          "patternProperties": {
+            ".*": {
+              "type":"object",
+              "required": ["preferredRemoteName"],
+              "properties": {
+                "preferredRemoteName": {
+                  "type":"string",
+                  "description": "Name of the preferred remote for each repository in the workspace."
+                }
+              }
+            }
+          }
         },
         "gitlab.pipelineGitRemoteName": {
           "type": "string",

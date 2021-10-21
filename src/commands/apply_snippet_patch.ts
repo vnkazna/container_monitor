@@ -6,6 +6,7 @@ import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { pickSnippet } from './insert_snippet';
 import { PATCH_FILE_SUFFIX } from '../constants';
 import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
+import { log } from '../log';
 
 const FETCHING_PROJECT_SNIPPETS = 'Fetching all project snippets.';
 export const NO_PATCH_SNIPPETS_MESSAGE =
@@ -20,6 +21,12 @@ export const applySnippetPatch = async (): Promise<void> => {
     return;
   }
   const { remote } = repository;
+  if (!remote) {
+    log(
+      `Can't create a snippet patch because repository ${repository.rootFsPath} doesn't have any remotes.`,
+    );
+    return;
+  }
   const snippets = await vscode.window.withProgress(
     { location: vscode.ProgressLocation.Notification, title: FETCHING_PROJECT_SNIPPETS },
     () => repository.getGitLabService().getSnippets(`${remote.namespace}/${remote.project}`),

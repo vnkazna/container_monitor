@@ -7,9 +7,10 @@ import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
 import { log } from '../log';
 import { GitRemote, parseGitRemote } from './git_remote_parser';
-import { getExtensionConfiguration } from '../utils/get_extension_configuration';
+import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { getRemoteName } from './remote_name_provider';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   const instanceUrls = tokenService.getInstanceUrls();
@@ -72,11 +73,12 @@ export class WrappedRepository {
     this.rawRepository = rawRepository;
   }
 
-  private get remoteName(): string {
-    const preferredRemote = getExtensionConfiguration().remoteName;
-    const branchRemote = this.rawRepository.state.HEAD?.remote;
-    const firstRemote = this.rawRepository.state.remotes[0]?.name;
-    return preferredRemote || branchRemote || firstRemote || 'origin';
+  private get remoteName(): string | undefined {
+    return getRemoteName(this.rootFsPath, this.remoteNames);
+  }
+
+  get remoteNames(): string[] {
+    return this.rawRepository.state.remotes.map(r => r.name);
   }
 
   async fetch(): Promise<void> {
@@ -107,6 +109,7 @@ export class WrappedRepository {
   }
 
   async getProject(): Promise<GitLabProject | undefined> {
+    if (!this.remote) return undefined;
     if (!this.cachedProject) {
       const { namespace, project } = this.remote;
       this.cachedProject = await this.getGitLabService().getProject(`${namespace}/${project}`);
@@ -136,7 +139,8 @@ export class WrappedRepository {
     return this.mrCache[id];
   }
 
-  get remote(): GitRemote {
+  get remote(): GitRemote | undefined {
+    if (!this.remoteName) return undefined;
     return this.getRemoteByName(this.remoteName);
   }
 
