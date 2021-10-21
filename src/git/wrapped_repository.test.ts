@@ -1,10 +1,15 @@
 import * as vscode from 'vscode';
 import { WrappedRepository } from './wrapped_repository';
-import { getExtensionConfiguration, Repositories } from '../utils/extension_configuration';
+import {
+  getExtensionConfiguration,
+  getRepositorySettings,
+  Repositories,
+} from '../utils/extension_configuration';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
 import { mr, mrVersion, project } from '../test_utils/entities';
 import { createWrappedRepository } from '../test_utils/create_wrapped_repository';
+import { asMock } from '../test_utils/as_mock';
 
 jest.mock('../utils/extension_configuration');
 
@@ -82,29 +87,31 @@ describe('WrappedRepository', () => {
   });
 
   describe('remote', () => {
-    const defaultRemotes: [string, string][] = [
-      ['first', 'git@test.gitlab.com:gitlab-org/gitlab.git'],
-    ];
+    const firstRemote: [string, string] = ['first', 'git@test.gitlab.com:gitlab-org/first.git'];
+    const secondRemote: [string, string] = ['second', 'git@test.gitlab.com:gitlab-org/second.git'];
 
-    it('gets the remote url', () => {
-      wrappedRepository = createWrappedRepository({
-        remotes: defaultRemotes,
-      });
+    it.each`
+      scenario                            | preferredRemoteName | remotes                        | expectedRemoteProject
+      ${'single remote'}                  | ${undefined}        | ${[firstRemote]}               | ${'first'}
+      ${'user preferred remote'}          | ${'second'}         | ${[firstRemote, secondRemote]} | ${'second'}
+      ${'no remotes'}                     | ${undefined}        | ${[]}                          | ${undefined}
+      ${'multiple remotes, no preferred'} | ${undefined}        | ${[firstRemote, secondRemote]} | ${undefined}
+      ${'wrong preferred remote'}         | ${'third'}          | ${[firstRemote, secondRemote]} | ${undefined}
+    `(
+      'behaves correctly with $scenario',
+      ({ preferredRemoteName, remotes, expectedRemoteProject }) => {
+        asMock(getRepositorySettings).mockReturnValue({
+          preferredRemoteName,
+        });
+        wrappedRepository = createWrappedRepository({
+          remotes,
+        });
 
-      expect(wrappedRepository.remote).toEqual({
-        host: 'test.gitlab.com',
-        namespace: 'gitlab-org',
-        project: 'gitlab',
-      });
-    });
+        const result = wrappedRepository.remote;
 
-    it('returns undefined when there are no remotes', () => {
-      wrappedRepository = createWrappedRepository({
-        remotes: [],
-      });
-
-      expect(wrappedRepository.remote).toBeUndefined();
-    });
+        expect(result?.project).toBe(expectedRemoteProject);
+      },
+    );
   });
 
   describe('name', () => {
