@@ -39,6 +39,7 @@ const { openRepository } = require('./commands/open_repository');
 const { contextUtils } = require('./utils/context_utils');
 const { currentBranchRefresher } = require('./current_branch_refresher');
 const { statusBar } = require('./status_bar');
+const { commandWithValidProject } = require('./commands/run_with_valid_project');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -72,7 +73,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.PROJECT_ADVANCED_SEARCH]: searchInput.showProjectAdvancedSearchInput,
     [USER_COMMANDS.COMPARE_CURRENT_BRANCH]: openers.compareCurrentBranch,
     [USER_COMMANDS.CREATE_SNIPPET]: createSnippet,
-    [USER_COMMANDS.INSERT_SNIPPET]: insertSnippet,
+    [USER_COMMANDS.INSERT_SNIPPET]: commandWithValidProject(insertSnippet),
     [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
     [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.open.bind(webviewController),
     [USER_COMMANDS.SHOW_OUTPUT]: () => outputChannel.show(),
