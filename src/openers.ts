@@ -87,18 +87,16 @@ export const openCreateNewIssue: ProjectCommand = async gitlabRepository => {
   await openTemplatedLink('$projectUrl/issues/new', gitlabRepository);
 };
 
-export async function openCreateNewMr(): Promise<void> {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
-  const project = await repository.getProject();
-  const branchName = await repository.getTrackingBranchName();
+export const openCreateNewMr: ProjectCommand = async gitlabRepository => {
+  const project = await gitlabRepository.getProject();
+  const branchName = await gitlabRepository.getTrackingBranchName();
 
   await openUrl(
-    `${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${encodeURIComponent(
+    `${project.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${encodeURIComponent(
       branchName,
     )}`,
   );
-}
+};
 
 export const openProjectPage: ProjectCommand = async gitlabRepository => {
   await openTemplatedLink('$projectUrl', gitlabRepository);
@@ -112,13 +110,10 @@ export async function openCurrentPipeline(repositoryRoot: string): Promise<void>
   }
 }
 
-export async function compareCurrentBranch(): Promise<void> {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
+export const compareCurrentBranch: ProjectCommand = async gitlabRepository => {
+  const project = await gitlabRepository.getProject();
 
-  const project = await repository.getProject();
-
-  if (project && repository.lastCommitSha) {
-    await openUrl(`${project.webUrl}/compare/master...${repository.lastCommitSha}`);
+  if (gitlabRepository.lastCommitSha) {
+    await openUrl(`${project.webUrl}/compare/master...${gitlabRepository.lastCommitSha}`);
   }
-}
+};
