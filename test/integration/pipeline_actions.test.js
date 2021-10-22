@@ -32,6 +32,8 @@ describe('Pipeline actions', async () => {
 
   beforeEach(async () => {
     server.resetHandlers();
+    // we don't want the periodic refreshing to interfere with the tests
+    currentBranchRefresher.stopTimers();
     refresherSpy = sandbox.spy(currentBranchRefresher, 'refresh');
   });
 

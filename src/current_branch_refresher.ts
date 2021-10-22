@@ -117,9 +117,13 @@ export class CurrentBranchRefresher {
     }
   }
 
-  dispose() {
+  stopTimers(): void {
     global.clearInterval(this.refreshTimer!);
     global.clearInterval(this.branchTrackingTimer!);
+  }
+
+  dispose() {
+    this.stopTimers();
   }
 }
 
