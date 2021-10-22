@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
-import { RepositoryWithProject } from './run_with_valid_project';
+import { ProjectCommand } from './run_with_valid_project';
 
 export const pickSnippet = async (snippets: GqlSnippet[]) => {
   const quickPickItems = snippets.map(s => ({
@@ -21,9 +21,7 @@ const pickBlob = async (blobs: GqlBlob[]) => {
   return result?.original;
 };
 
-export const insertSnippet = async (
-  repositoryWithProject: RepositoryWithProject,
-): Promise<void> => {
+export const insertSnippet: ProjectCommand = async repositoryWithProject => {
   if (!vscode.window.activeTextEditor) {
     await vscode.window.showInformationMessage('There is no open file.');
     return;

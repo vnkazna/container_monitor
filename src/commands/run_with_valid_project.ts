@@ -11,6 +11,9 @@ export interface RepositoryWithProject {
   project: GitLabProject;
 }
 
+/** Command that needs a valid GitLab project to run */
+export type ProjectCommand = (repositoryWithProject: RepositoryWithProject) => Promise<void>;
+
 const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {
   return remoteNames.length > 1 && !getRepositorySettings(repositoryRoot)?.preferredRemoteName;
 };
@@ -44,9 +47,7 @@ const getRepositoryWithProject = async (): Promise<RepositoryWithProject | undef
   return { repository, remote, project };
 };
 
-export const runWithValidProject = (
-  command: (repositoryWithProject: RepositoryWithProject) => Promise<void>,
-): (() => Promise<void>) => {
+export const runWithValidProject = (command: ProjectCommand): (() => Promise<void>) => {
   return async () => {
     const repositoryWithProject = await getRepositoryWithProject();
     if (!repositoryWithProject) return undefined;
