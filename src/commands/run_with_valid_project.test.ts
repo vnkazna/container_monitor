@@ -37,7 +37,9 @@ describe('runWithValidProject', () => {
 
       await runWithValidProject(command)();
 
-      expect(command).toHaveBeenCalledWith({ repository, remote: repository.remote, project });
+      expect(command).toHaveBeenCalledWith(repository);
+      expect(repository.remote?.project).toEqual('extension');
+      expect(await repository.getProject()).toEqual(project);
     });
   });
 
@@ -65,7 +67,8 @@ describe('runWithValidProject', () => {
 
       await runWithValidProject(command)();
 
-      expect(command).toHaveBeenCalledWith({ repository, remote: repository.remote, project });
+      expect(command).toHaveBeenCalledWith(repository);
+      expect(repository.remote?.host).toEqual('a.com');
     });
   });
 });

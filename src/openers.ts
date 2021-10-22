@@ -5,11 +5,11 @@ import * as gitLabService from './gitlab_service';
 import { VS_COMMANDS } from './command_names';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { WrappedRepository } from './git/wrapped_repository';
-import { GitLabProject } from './gitlab/gitlab_project';
 import {
+  GitLabRepository,
+  GitLabRepositoryAndFile,
   ProjectCommand,
   ProjectFileCommand,
-  RepositoryWithProjectFile,
 } from './commands/run_with_valid_project';
 
 export const openUrl = async (url: string): Promise<void> =>
@@ -36,12 +36,9 @@ async function getLink(linkTemplate: string, repository: WrappedRepository) {
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
-async function getLinkNew(
-  linkTemplate: string,
-  repository: WrappedRepository,
-  project: GitLabProject,
-) {
+async function getLinkNew(linkTemplate: string, repository: GitLabRepository) {
   const user = await gitLabService.fetchCurrentUser(repository.rootFsPath);
+  const project = await repository.getProject();
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
@@ -51,27 +48,24 @@ async function openTemplatedLink(linkTemplate: string) {
   await openUrl(await getLink(linkTemplate, repository));
 }
 
-async function openTemplatedLinkNew(
-  linkTemplate: string,
-  repository: WrappedRepository,
-  project: GitLabProject,
-) {
-  await openUrl(await getLinkNew(linkTemplate, repository, project));
+async function openTemplatedLinkNew(linkTemplate: string, repository: GitLabRepository) {
+  await openUrl(await getLinkNew(linkTemplate, repository));
 }
 
-export const showIssues: ProjectCommand = async ({ repository, project }) => {
-  await openTemplatedLinkNew('$projectUrl/issues?assignee_id=$userId', repository, project);
+export const showIssues: ProjectCommand = async gitlabRepository => {
+  await openTemplatedLinkNew('$projectUrl/issues?assignee_id=$userId', gitlabRepository);
 };
 
 export async function showMergeRequests(): Promise<void> {
   await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId');
 }
 
-async function getActiveFile({ repository, project, activeEditor }: RepositoryWithProjectFile) {
+async function getActiveFile({ repository, activeEditor }: GitLabRepositoryAndFile) {
   const branchName = await repository.getTrackingBranchName();
   const filePath = path
     .relative(repository.rootFsPath, activeEditor.document.uri.fsPath)
     .replace(/\\/g, '/');
+  const project = await repository.getProject();
   const fileUrl = `${project.webUrl}/blob/${encodeURIComponent(branchName)}/${filePath}`;
   let anchor = '';
 

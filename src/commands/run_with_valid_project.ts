@@ -5,23 +5,21 @@ import { WrappedRepository } from '../git/wrapped_repository';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { getRepositorySettings, setPreferredRemote } from '../utils/extension_configuration';
 
-export interface RepositoryWithProject {
-  repository: WrappedRepository;
+export type GitLabRepository = Omit<WrappedRepository, 'getProject'> & {
   remote: GitRemote;
-  project: GitLabProject;
-}
+  getProject: () => Promise<GitLabProject>;
+};
 
-export interface RepositoryWithProjectFile extends RepositoryWithProject {
+export interface GitLabRepositoryAndFile {
+  repository: GitLabRepository;
   activeEditor: vscode.TextEditor;
 }
 
 /** Command that needs a valid GitLab project to run */
-export type ProjectCommand = (repositoryWithProject: RepositoryWithProject) => Promise<void>;
+export type ProjectCommand = (gitlabRepository: GitLabRepository) => Promise<void>;
 
 /** Command that needs to be executed on an open file from a valid GitLab project */
-export type ProjectFileCommand = (
-  repositoryWithProjectFile: RepositoryWithProjectFile,
-) => Promise<void>;
+export type ProjectFileCommand = (repositoryAndFile: GitLabRepositoryAndFile) => Promise<void>;
 
 const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {
   return remoteNames.length > 1 && !getRepositorySettings(repositoryRoot)?.preferredRemoteName;
@@ -44,14 +42,14 @@ const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
   return repository.remote;
 };
 
-const addRemoteAndProject = async (
+const ensureGitLabProject = async (
   repository: WrappedRepository,
-): Promise<RepositoryWithProject | undefined> => {
+): Promise<GitLabRepository | undefined> => {
   const remote = await getRemoteOrSelectOne(repository);
   if (!remote) return undefined;
   const project = await repository.getProject();
   if (!project) return undefined;
-  return { repository, remote, project };
+  return repository as GitLabRepository;
 };
 
 export const runWithValidProject = (command: ProjectCommand): (() => Promise<void>) => {
@@ -60,7 +58,7 @@ export const runWithValidProject = (command: ProjectCommand): (() => Promise<voi
     if (!repository) {
       return undefined;
     }
-    const repositoryWithProject = await addRemoteAndProject(repository);
+    const repositoryWithProject = await ensureGitLabProject(repository);
     if (!repositoryWithProject) return undefined;
     return command(repositoryWithProject);
   };
@@ -82,8 +80,8 @@ export const runWithValidProjectFile = (command: ProjectFileCommand): (() => Pro
       );
       return undefined;
     }
-    const repositoryWithProject = await addRemoteAndProject(repository);
-    if (!repositoryWithProject) return undefined;
-    return command({ ...repositoryWithProject, activeEditor });
+    const gitlabRepository = await ensureGitLabProject(repository);
+    if (!gitlabRepository) return undefined;
+    return command({ activeEditor, repository: gitlabRepository });
   };
 };

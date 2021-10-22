@@ -21,13 +21,13 @@ const pickBlob = async (blobs: GqlBlob[]) => {
   return result?.original;
 };
 
-export const insertSnippet: ProjectCommand = async repositoryWithProject => {
+export const insertSnippet: ProjectCommand = async gitlabRepository => {
   if (!vscode.window.activeTextEditor) {
     await vscode.window.showInformationMessage('There is no open file.');
     return;
   }
-  const { repository, remote } = repositoryWithProject;
-  const snippets = await repository
+  const { remote } = gitlabRepository;
+  const snippets = await gitlabRepository
     .getGitLabService()
     .getSnippets(`${remote.namespace}/${remote.project}`);
   if (snippets.length === 0) {
@@ -44,7 +44,9 @@ export const insertSnippet: ProjectCommand = async repositoryWithProject => {
   if (!blob) {
     return;
   }
-  const snippet = await repository.getGitLabService().getSnippetContent(result.original, blob);
+  const snippet = await gitlabRepository
+    .getGitLabService()
+    .getSnippetContent(result.original, blob);
   const editor = vscode.window.activeTextEditor;
   await editor.edit(editBuilder => {
     editBuilder.insert(editor.selection.start, snippet);
