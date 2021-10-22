@@ -67,7 +67,9 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
     [USER_COMMANDS.OPEN_ACTIVE_FILE]: runWithValidProjectFile(openers.openActiveFile),
     [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: runWithValidProjectFile(openers.copyLinkToActiveFile),
-    [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: openers.openCurrentMergeRequest,
+    [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: runWithValidProjectFile(
+      openers.openCurrentMergeRequest,
+    ),
     [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: runWithValidProject(openers.openCreateNewIssue),
     [USER_COMMANDS.OPEN_CREATE_NEW_MR]: openers.openCreateNewMr,
     [USER_COMMANDS.OPEN_PROJECT_PAGE]: runWithValidProject(openers.openProjectPage),

@@ -75,16 +75,13 @@ export const copyLinkToActiveFile: ProjectFileCommand = async repositoryWithProj
   await vscode.env.clipboard.writeText(fileUrl);
 };
 
-export async function openCurrentMergeRequest(): Promise<void> {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
-
-  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(repository.rootFsPath);
+export const openCurrentMergeRequest: ProjectCommand = async gitlabRepository => {
+  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(gitlabRepository.rootFsPath);
 
   if (mr) {
     await openUrl(mr.web_url);
   }
-}
+};
 
 export const openCreateNewIssue: ProjectCommand = async gitlabRepository => {
   await openTemplatedLink('$projectUrl/issues/new', gitlabRepository);
