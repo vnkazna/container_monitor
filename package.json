@@ -93,10 +93,6 @@
         "title": "GitLab: Apply Snippet Patch"
       },
       {
-        "command": "gl.openCurrentPipeline",
-        "title": "GitLab: Open Current Pipeline on GitLab"
-      },
-      {
         "command": "gl.pipelineActions",
         "title": "GitLab: Pipeline Actions - View, Create, Retry or Cancel"
       },
@@ -286,10 +282,6 @@
         },
         {
           "command": "gl.openProjectPage",
-          "when": "gitlab:validState"
-        },
-        {
-          "command": "gl.openCurrentPipeline",
           "when": "gitlab:validState"
         },
         {

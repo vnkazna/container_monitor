@@ -73,7 +73,6 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: runWithValidProject(openers.openCreateNewIssue),
     [USER_COMMANDS.OPEN_CREATE_NEW_MR]: runWithValidProject(openers.openCreateNewMr),
     [USER_COMMANDS.OPEN_PROJECT_PAGE]: runWithValidProject(openers.openProjectPage),
-    [USER_COMMANDS.OPEN_CURRENT_PIPELINE]: openers.openCurrentPipeline,
     [USER_COMMANDS.PIPELINE_ACTIONS]: pipelineActionsPicker.showPicker,
     [USER_COMMANDS.ISSUE_SEARCH]: searchInput.showIssueSearchInput,
     [USER_COMMANDS.MERGE_REQUEST_SEARCH]: searchInput.showMergeRequestSearchInput,
