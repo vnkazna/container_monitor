@@ -39,7 +39,10 @@ const { openRepository } = require('./commands/open_repository');
 const { contextUtils } = require('./utils/context_utils');
 const { currentBranchRefresher } = require('./current_branch_refresher');
 const { statusBar } = require('./status_bar');
-const { runWithValidProject } = require('./commands/run_with_valid_project');
+const {
+  runWithValidProject,
+  runWithValidProjectFile,
+} = require('./commands/run_with_valid_project');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -60,8 +63,8 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME]: openers.showMergeRequests,
     [USER_COMMANDS.SET_TOKEN]: tokenInput.showInput,
     [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
-    [USER_COMMANDS.OPEN_ACTIVE_FILE]: openers.openActiveFile,
-    [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: openers.copyLinkToActiveFile,
+    [USER_COMMANDS.OPEN_ACTIVE_FILE]: runWithValidProjectFile(openers.openActiveFile),
+    [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: runWithValidProjectFile(openers.copyLinkToActiveFile),
     [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: openers.openCurrentMergeRequest,
     [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: openers.openCreateNewIssue,
     [USER_COMMANDS.OPEN_CREATE_NEW_MR]: openers.openCreateNewMr,

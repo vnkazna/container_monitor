@@ -11,8 +11,17 @@ export interface RepositoryWithProject {
   project: GitLabProject;
 }
 
+export interface RepositoryWithProjectFile extends RepositoryWithProject {
+  activeEditor: vscode.TextEditor;
+}
+
 /** Command that needs a valid GitLab project to run */
 export type ProjectCommand = (repositoryWithProject: RepositoryWithProject) => Promise<void>;
+
+/** Command that needs to be executed on an open file from a valid GitLab project */
+export type ProjectFileCommand = (
+  repositoryWithProjectFile: RepositoryWithProjectFile,
+) => Promise<void>;
 
 const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {
   return remoteNames.length > 1 && !getRepositorySettings(repositoryRoot)?.preferredRemoteName;
@@ -35,11 +44,9 @@ const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
   return repository.remote;
 };
 
-const getRepositoryWithProject = async (): Promise<RepositoryWithProject | undefined> => {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) {
-    return undefined;
-  }
+const addRemoteAndProject = async (
+  repository: WrappedRepository,
+): Promise<RepositoryWithProject | undefined> => {
   const remote = await getRemoteOrSelectOne(repository);
   if (!remote) return undefined;
   const project = await repository.getProject();
@@ -49,8 +56,34 @@ const getRepositoryWithProject = async (): Promise<RepositoryWithProject | undef
 
 export const runWithValidProject = (command: ProjectCommand): (() => Promise<void>) => {
   return async () => {
-    const repositoryWithProject = await getRepositoryWithProject();
+    const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+    if (!repository) {
+      return undefined;
+    }
+    const repositoryWithProject = await addRemoteAndProject(repository);
     if (!repositoryWithProject) return undefined;
     return command(repositoryWithProject);
+  };
+};
+
+export const runWithValidProjectFile = (command: ProjectFileCommand): (() => Promise<void>) => {
+  return async () => {
+    const activeEditor = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+      await vscode.window.showInformationMessage('GitLab Workflow: No open file.');
+      return undefined;
+    }
+
+    const repository = gitExtensionWrapper.getActiveRepository();
+
+    if (!repository) {
+      await vscode.window.showInformationMessage(
+        'GitLab Workflow: Open file isn’t part of a repository.',
+      );
+      return undefined;
+    }
+    const repositoryWithProject = await addRemoteAndProject(repository);
+    if (!repositoryWithProject) return undefined;
+    return command({ ...repositoryWithProject, activeEditor });
   };
 };

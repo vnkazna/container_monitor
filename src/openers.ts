@@ -2,12 +2,15 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import assert from 'assert';
 import * as gitLabService from './gitlab_service';
-import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { WrappedRepository } from './git/wrapped_repository';
 import { GitLabProject } from './gitlab/gitlab_project';
-import { ProjectCommand } from './commands/run_with_valid_project';
+import {
+  ProjectCommand,
+  ProjectFileCommand,
+  RepositoryWithProjectFile,
+} from './commands/run_with_valid_project';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
@@ -64,39 +67,16 @@ export async function showMergeRequests(): Promise<void> {
   await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId');
 }
 
-async function getActiveFile() {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    await vscode.window.showInformationMessage('GitLab Workflow: No open file.');
-    return undefined;
-  }
-
-  const repository = gitExtensionWrapper.getActiveRepository();
-
-  if (!repository) {
-    await vscode.window.showInformationMessage(
-      'GitLab Workflow: Open file isn’t part of a repository.',
-    );
-    return undefined;
-  }
-
-  let currentProject;
-  try {
-    currentProject = await repository.getProject();
-  } catch (e) {
-    handleError(e);
-    return undefined;
-  }
-
+async function getActiveFile({ repository, project, activeEditor }: RepositoryWithProjectFile) {
   const branchName = await repository.getTrackingBranchName();
   const filePath = path
-    .relative(repository.rootFsPath, editor.document.uri.fsPath)
+    .relative(repository.rootFsPath, activeEditor.document.uri.fsPath)
     .replace(/\\/g, '/');
-  const fileUrl = `${currentProject!.webUrl}/blob/${encodeURIComponent(branchName)}/${filePath}`;
+  const fileUrl = `${project.webUrl}/blob/${encodeURIComponent(branchName)}/${filePath}`;
   let anchor = '';
 
-  if (editor.selection) {
-    const { start, end } = editor.selection;
+  if (activeEditor.selection) {
+    const { start, end } = activeEditor.selection;
     anchor = `#L${start.line + 1}`;
 
     if (end.line > start.line) {
@@ -107,17 +87,14 @@ async function getActiveFile() {
   return `${fileUrl}${anchor}`;
 }
 
-export async function openActiveFile(): Promise<void> {
-  await openUrl((await getActiveFile())!);
-}
+export const openActiveFile: ProjectFileCommand = async repositoryWithProjectFile => {
+  await openUrl(await getActiveFile(repositoryWithProjectFile));
+};
 
-export async function copyLinkToActiveFile(): Promise<void> {
-  const fileUrl = await getActiveFile();
-
-  if (fileUrl) {
-    await vscode.env.clipboard.writeText(fileUrl);
-  }
-}
+export const copyLinkToActiveFile: ProjectFileCommand = async repositoryWithProjectFile => {
+  const fileUrl = await getActiveFile(repositoryWithProjectFile);
+  await vscode.env.clipboard.writeText(fileUrl);
+};
 
 export async function openCurrentMergeRequest(): Promise<void> {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
