@@ -8,6 +8,10 @@
     "description": "The additional arguments passed with the [ChatOps](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../chatops/index.md) command."
   },
   {
+    "name": "CHAT_USER_ID",
+    "description": "The chat service's user ID of the user who triggered the [ChatOps](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../chatops/index.md) command."
+  },
+  {
     "name": "CI",
     "description": "Available for all jobs executed in CI/CD. `true` when available."
   },
