@@ -6,6 +6,8 @@ import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { WrappedRepository } from './git/wrapped_repository';
+import { GitLabProject } from './gitlab/gitlab_project';
+import { ProjectCommand } from './commands/run_with_valid_project';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
@@ -31,15 +33,32 @@ async function getLink(linkTemplate: string, repository: WrappedRepository) {
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
+async function getLinkNew(
+  linkTemplate: string,
+  repository: WrappedRepository,
+  project: GitLabProject,
+) {
+  const user = await gitLabService.fetchCurrentUser(repository.rootFsPath);
+  return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
+}
+
 async function openTemplatedLink(linkTemplate: string) {
   const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
   if (!repository) return;
   await openUrl(await getLink(linkTemplate, repository));
 }
 
-export async function showIssues(): Promise<void> {
-  await openTemplatedLink('$projectUrl/issues?assignee_id=$userId');
+async function openTemplatedLinkNew(
+  linkTemplate: string,
+  repository: WrappedRepository,
+  project: GitLabProject,
+) {
+  await openUrl(await getLinkNew(linkTemplate, repository, project));
 }
+
+export const showIssues: ProjectCommand = async ({ repository, project }) => {
+  await openTemplatedLinkNew('$projectUrl/issues?assignee_id=$userId', repository, project);
+};
 
 export async function showMergeRequests(): Promise<void> {
   await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId');

@@ -56,7 +56,7 @@ const registerSidebarTreeDataProviders = () => {
 
 const registerCommands = (context, outputChannel) => {
   const commands = {
-    [USER_COMMANDS.SHOW_ISSUES_ASSIGNED_TO_ME]: openers.showIssues,
+    [USER_COMMANDS.SHOW_ISSUES_ASSIGNED_TO_ME]: runWithValidProject(openers.showIssues),
     [USER_COMMANDS.SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME]: openers.showMergeRequests,
     [USER_COMMANDS.SET_TOKEN]: tokenInput.showInput,
     [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
