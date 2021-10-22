@@ -1,6 +1,5 @@
 const sinon = require('sinon');
 const vscode = require('vscode');
-const { createSnippet } = require('../../src/commands/create_snippet');
 const { tokenService } = require('../../src/services/token_service');
 const { getServer, createPostEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
@@ -10,6 +9,7 @@ const {
   simulateQuickPickChoice,
   getRepositoryRoot,
 } = require('./test_infrastructure/helpers');
+const { USER_COMMANDS } = require('../../src/command_names');
 
 describe('Create snippet', async () => {
   let server;
@@ -44,13 +44,14 @@ describe('Create snippet', async () => {
 
   it('creates snippet form the file', async () => {
     simulateQuickPickChoice(sandbox, 0);
+    const originalExecuteCommand = vscode.commands.executeCommand;
     const expectation = sandbox
       .mock(vscode.commands)
       .expects('executeCommand')
       .once()
       .withArgs('vscode.open', vscode.Uri.parse(snippetUrl));
 
-    await createSnippet();
+    await originalExecuteCommand(USER_COMMANDS.CREATE_SNIPPET);
     expectation.verify();
   });
 });

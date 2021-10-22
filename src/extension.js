@@ -78,7 +78,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.MERGE_REQUEST_SEARCH]: searchInput.showMergeRequestSearchInput,
     [USER_COMMANDS.PROJECT_ADVANCED_SEARCH]: searchInput.showProjectAdvancedSearchInput,
     [USER_COMMANDS.COMPARE_CURRENT_BRANCH]: runWithValidProject(openers.compareCurrentBranch),
-    [USER_COMMANDS.CREATE_SNIPPET]: createSnippet,
+    [USER_COMMANDS.CREATE_SNIPPET]: runWithValidProject(createSnippet),
     [USER_COMMANDS.INSERT_SNIPPET]: runWithValidProject(insertSnippet),
     [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
     [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.open.bind(webviewController),

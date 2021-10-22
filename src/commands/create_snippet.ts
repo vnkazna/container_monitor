@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as openers from '../openers';
 import * as gitLabService from '../gitlab_service';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { ProjectCommand } from './run_with_valid_project';
 
 type VisibilityItem = vscode.QuickPickItem & { type: string };
 
@@ -65,23 +65,14 @@ async function uploadSnippet(
   await openers.openUrl(snippet.web_url);
 }
 
-export async function createSnippet() {
+export const createSnippet: ProjectCommand = async repository => {
   const editor = vscode.window.activeTextEditor;
 
   if (!editor) {
     await vscode.window.showInformationMessage('GitLab Workflow: No open file.');
     return;
   }
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
   const project = await repository.getProject();
-
-  if (!project) {
-    await vscode.window.showInformationMessage(
-      'GitLab Workflow: Repository does not contain GitLab project.',
-    );
-    return;
-  }
 
   const visibility = await vscode.window.showQuickPick(VISIBILITY_OPTIONS);
   if (!visibility) return;
@@ -90,4 +81,4 @@ export async function createSnippet() {
   if (!context) return;
 
   await uploadSnippet(project, editor, visibility.type, context.type, repository.rootFsPath);
-}
+};
