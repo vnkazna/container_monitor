@@ -1,3 +1,4 @@
+const vscode = require('vscode');
 const assert = require('assert');
 const sinon = require('sinon');
 const { tokenService } = require('../../src/services/token_service');
@@ -10,8 +11,8 @@ const {
 } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { simulateQuickPickChoice } = require('./test_infrastructure/helpers');
-const { showPicker } = require('../../src/pipeline_actions_picker');
 const { currentBranchRefresher } = require('../../src/current_branch_refresher');
+const { USER_COMMANDS } = require('../../src/command_names');
 
 describe('Pipeline actions', async () => {
   let server;
@@ -48,7 +49,7 @@ describe('Pipeline actions', async () => {
 
   it('creates a new pipeline', async () => {
     simulateQuickPickChoice(sandbox, 1); // Create a new pipeline from current branch
-    await showPicker();
+    await vscode.commands.executeCommand(USER_COMMANDS.PIPELINE_ACTIONS);
 
     assert(refresherSpy.calledOnce, 'status bar is refreshed after successful pipeline creation');
   });

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
-import * as gitLabService from './gitlab_service';
-import { openCurrentPipeline } from './openers';
-import { currentBranchRefresher } from './current_branch_refresher';
+import * as gitLabService from '../gitlab_service';
+import { openCurrentPipeline } from '../openers';
+import { currentBranchRefresher } from '../current_branch_refresher';
+import { ProjectCommand } from './run_with_valid_project';
 
-async function showPicker() {
+export const triggerPipelineAction: ProjectCommand = async repository => {
   const items = [
     {
       label: 'View latest pipeline on GitLab',
@@ -24,9 +24,6 @@ async function showPicker() {
     },
   ];
 
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
-
   const selected = await vscode.window.showQuickPick(items);
 
   if (selected) {
@@ -41,6 +38,4 @@ async function showPicker() {
     );
     if (newPipeline) await currentBranchRefresher.refresh();
   }
-}
-
-exports.showPicker = showPicker;
+};

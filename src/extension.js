@@ -3,7 +3,6 @@ const openers = require('./openers');
 const tokenInput = require('./token_input');
 const { tokenService } = require('./services/token_service');
 const { extensionState } = require('./extension_state');
-const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
 const { createSnippet } = require('./commands/create_snippet');
 const { insertSnippet } = require('./commands/insert_snippet');
@@ -43,6 +42,7 @@ const {
   runWithValidProject,
   runWithValidProjectFile,
 } = require('./commands/run_with_valid_project');
+const { triggerPipelineAction } = require('./commands/trigger_pipeline_action');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -73,7 +73,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: runWithValidProject(openers.openCreateNewIssue),
     [USER_COMMANDS.OPEN_CREATE_NEW_MR]: runWithValidProject(openers.openCreateNewMr),
     [USER_COMMANDS.OPEN_PROJECT_PAGE]: runWithValidProject(openers.openProjectPage),
-    [USER_COMMANDS.PIPELINE_ACTIONS]: pipelineActionsPicker.showPicker,
+    [USER_COMMANDS.PIPELINE_ACTIONS]: runWithValidProject(triggerPipelineAction),
     [USER_COMMANDS.ISSUE_SEARCH]: searchInput.showIssueSearchInput,
     [USER_COMMANDS.MERGE_REQUEST_SEARCH]: searchInput.showMergeRequestSearchInput,
     [USER_COMMANDS.PROJECT_ADVANCED_SEARCH]: searchInput.showProjectAdvancedSearchInput,
