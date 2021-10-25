@@ -52,7 +52,6 @@ You can use [Command Palette](https://code.visualstudio.com/docs/getstarted/user
 - `GitLab: Open merge request for current branch`
 - `GitLab: Show issues assigned to me` - Open issues assigned to you on GitLab.
 - `GitLab: Show merge requests assigned to me` - Open MRs assigned to you on GitLab.
-- `GitLab: Open current pipeline on GitLab`
 - `GitLab: Open current project on GitLab`
 - `GitLab: Create new issue on current project`
 - `GitLab: Create new merge request on current project` - Open the merge request page to create a merge request.
@@ -131,13 +130,9 @@ If you are not using the GitLab issue tracker, you can set this option to `false
 
 You can toggle visibility of the merge request link in your sidebar. You can always find a merge request link in GitLab Workflow sidebar. You should restart VS Code after updating this option.
 
-**`gitlab.remoteName`** _(required: false, default: null)_
-
-The name of the Git remote link corresponding to the GitLab repository with your merge request and issues. If no setting is provided, the extension will detect it. For example: `origin`.
-
 **`gitlab.pipelineGitRemoteName`** _(required: false, default: null)_
 
-The name of the Git remote link corresponding to the GitLab repository with your pipelines. If no setting is provided, the extension will detect it. For example: `origin`.
+The name of the Git remote name corresponding to the GitLab repository with your pipelines. If set to `null` or missing, then the extension uses the same remote as for the non-pipeline features.
 
 **`gitlab.customQueries`** _(required: false)_
 
