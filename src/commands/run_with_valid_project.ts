@@ -3,6 +3,7 @@ import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GitRemote } from '../git/git_remote_parser';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { doNotAwait } from '../utils/do_not_await';
 import { getRepositorySettings, setPreferredRemote } from '../utils/extension_configuration';
 
 export type GitLabRepository = Omit<WrappedRepository, 'getProject'> & {
@@ -21,8 +22,14 @@ export type ProjectCommand = (gitlabRepository: GitLabRepository) => Promise<voi
 /** Command that needs to be executed on an open file from a valid GitLab project */
 export type ProjectFileCommand = (repositoryAndFile: GitLabRepositoryAndFile) => Promise<void>;
 
+const getValidConfiguredRemote = (repositoryRoot: string, remoteNames: string[]) => {
+  const preferredRemoteName = getRepositorySettings(repositoryRoot)?.preferredRemoteName;
+  if (!preferredRemoteName || !remoteNames.includes(preferredRemoteName)) return undefined;
+  return preferredRemoteName;
+};
+
 const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {
-  return remoteNames.length > 1 && !getRepositorySettings(repositoryRoot)?.preferredRemoteName;
+  return remoteNames.length > 1 && !getValidConfiguredRemote(repositoryRoot, remoteNames);
 };
 
 const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
@@ -39,6 +46,11 @@ const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
 
   if (!result) return undefined;
   await setPreferredRemote(repository.rootFsPath, result.label);
+  doNotAwait(
+    vscode.window.showInformationMessage(
+      `Remote "${result.label}" has been added to your settings as your preferred remote.`,
+    ),
+  );
   return repository.remote;
 };
 

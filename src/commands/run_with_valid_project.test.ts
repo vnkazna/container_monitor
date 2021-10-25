@@ -45,6 +45,7 @@ describe('runWithValidProject', () => {
 
   describe('with ambiguous remotes ', () => {
     let repoSettings: RepositorySettings;
+    let command: jest.Mock;
 
     beforeEach(() => {
       repository = createWrappedRepository({
@@ -55,15 +56,23 @@ describe('runWithValidProject', () => {
         ],
       });
       asMock(gitExtensionWrapper.getActiveRepositoryOrSelectOne).mockResolvedValue(repository);
-    });
-
-    it('lets user select which remote to use', async () => {
-      const command = jest.fn();
+      command = jest.fn();
       asMock(vscode.window.showQuickPick).mockImplementation(options => options[0]);
       asMock(setPreferredRemote).mockImplementation((root, rn) => {
         repoSettings = { preferredRemoteName: rn };
       });
       asMock(getRepositorySettings).mockImplementation(() => repoSettings);
+    });
+
+    it('lets user select which remote to use', async () => {
+      await runWithValidProject(command)();
+
+      expect(command).toHaveBeenCalledWith(repository);
+      expect(repository.remote?.host).toEqual('a.com');
+    });
+
+    it('lets user select which remote to use if the configured remote does not exist', async () => {
+      repoSettings = { preferredRemoteName: 'invalid' };
 
       await runWithValidProject(command)();
 
