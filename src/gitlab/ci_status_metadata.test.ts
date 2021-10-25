@@ -6,7 +6,7 @@ describe('CI Status Metadata', () => {
     it('gets metadata', () => {
       const result = getJobMetadata(job);
       expect(result.icon.id).toBe('pass');
-      expect(result.name).toBe('Succeeded');
+      expect(result.name).toBe('Passed');
     });
 
     it('creates failed (allowed to fail) metadata', () => {
@@ -30,7 +30,7 @@ describe('CI Status Metadata', () => {
     it('gets metadata', () => {
       const result = getPipelineMetadata(pipeline);
       expect(result.icon.id).toBe('pass');
-      expect(result.name).toBe('Succeeded');
+      expect(result.name).toBe('Passed');
     });
 
     it('returns unknown metadata for unknown status', () => {
