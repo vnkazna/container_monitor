@@ -107,7 +107,7 @@ class WebviewController {
     if (message.command === 'renderMarkdown') {
       let rendered = await gitLabService.renderMarkdown(message.markdown, repositoryRoot);
       rendered = (rendered || '')
-        .replace(/ src=".*" alt/gim, ' alt')
+        .replace(/ src="data:/gim, ' src-ignore="data:')
         .replace(/" data-src/gim, '" src')
         .replace(/ href="\//gim, ` href="${instanceUrl}/`);
 
