@@ -1,15 +1,14 @@
 import * as vscode from 'vscode';
 import { promises as fs } from 'fs';
 import { applySnippetPatch, NO_PATCH_SNIPPETS_MESSAGE } from './apply_snippet_patch';
-import { WrappedRepository } from '../git/wrapped_repository';
 import {
   patchSnippet,
   testSnippet1,
   testSnippet2,
 } from '../../test/integration/fixtures/graphql/snippets.js';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { asMock } from '../test_utils/as_mock';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabRepository } from './run_with_valid_project';
 
 jest.mock('../git/git_extension_wrapper');
 jest.mock('../gitlab_service');
@@ -17,7 +16,7 @@ jest.mock('../gitlab_service');
 const DIFF_OUTPUT = 'diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml';
 
 describe('apply snippet patch', () => {
-  let wrappedRepository: WrappedRepository;
+  let wrappedRepository: GitLabRepository;
   let gitlabService: Partial<GitLabNewService>;
 
   const getAppliedPatchContent = async () => {
@@ -28,7 +27,7 @@ describe('apply snippet patch', () => {
 
   beforeEach(() => {
     gitlabService = {};
-    const mockRepository: Partial<WrappedRepository> = {
+    const mockRepository: Partial<GitLabRepository> = {
       remote: {
         host: 'gitlab.com',
         namespace: 'gitlab-org',
@@ -37,9 +36,8 @@ describe('apply snippet patch', () => {
       getGitLabService: () => gitlabService as GitLabNewService,
       apply: jest.fn(),
     };
-    wrappedRepository = mockRepository as WrappedRepository;
+    wrappedRepository = mockRepository as GitLabRepository;
     asMock(vscode.window.withProgress).mockImplementation((_, task) => task());
-    asMock(gitExtensionWrapper.getActiveRepositoryOrSelectOne).mockResolvedValue(wrappedRepository);
     asMock(vscode.window.showQuickPick).mockImplementation(options => options[0]);
     fs.unlink = jest.fn();
   });
@@ -52,7 +50,7 @@ describe('apply snippet patch', () => {
     gitlabService.getSnippets = async () => [patchSnippet];
     gitlabService.getSnippetContent = async () => DIFF_OUTPUT;
 
-    await applySnippetPatch();
+    await applySnippetPatch(wrappedRepository);
 
     expect(wrappedRepository.apply).toHaveBeenCalled();
     expect(await getAppliedPatchContent()).toBe(DIFF_OUTPUT);
@@ -62,7 +60,7 @@ describe('apply snippet patch', () => {
   it('shows information message when it cannot find any snippets', async () => {
     gitlabService.getSnippets = async () => [];
 
-    await applySnippetPatch();
+    await applySnippetPatch(wrappedRepository);
 
     expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(NO_PATCH_SNIPPETS_MESSAGE);
   });
@@ -70,7 +68,7 @@ describe('apply snippet patch', () => {
   it('shows information message when returned snippets are not patch snippets', async () => {
     gitlabService.getSnippets = async () => [testSnippet1, testSnippet2];
 
-    await applySnippetPatch();
+    await applySnippetPatch(wrappedRepository);
 
     expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(NO_PATCH_SNIPPETS_MESSAGE);
   });

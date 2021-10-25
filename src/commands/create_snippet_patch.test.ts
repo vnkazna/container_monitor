@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
 import { createSnippetPatch } from './create_snippet_patch';
-import { WrappedRepository } from '../git/wrapped_repository';
 import { project } from '../test_utils/entities';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { asMock } from '../test_utils/as_mock';
 import { createSnippet } from '../gitlab_service';
 import { openUrl } from '../openers';
+import { GitLabRepository } from './run_with_valid_project';
 
 jest.mock('../git/git_extension_wrapper');
 jest.mock('../gitlab_service');
@@ -15,17 +14,16 @@ const SNIPPET_URL = 'https://gitlab.com/test-group/test-project/-/snippets/21462
 const DIFF_OUTPUT = 'diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml';
 
 describe('create snippet patch', () => {
-  let wrappedRepository: WrappedRepository;
+  let wrappedRepository: GitLabRepository;
 
   beforeEach(() => {
-    const mockRepository: Partial<WrappedRepository> = {
+    const mockRepository: Partial<GitLabRepository> = {
       lastCommitSha: 'abcd1234567',
       getTrackingBranchName: async () => 'tracking-branch-name',
       getProject: async () => project,
       diff: async () => DIFF_OUTPUT,
     };
-    wrappedRepository = mockRepository as WrappedRepository;
-    asMock(gitExtensionWrapper.getActiveRepositoryOrSelectOne).mockResolvedValue(wrappedRepository);
+    wrappedRepository = mockRepository as GitLabRepository;
     asMock(vscode.window.showInputBox).mockResolvedValue('snippet_name');
     asMock(vscode.window.showQuickPick).mockImplementation(options =>
       options.filter((o: any) => o.type === 'private').pop(),
@@ -40,14 +38,14 @@ describe('create snippet patch', () => {
   });
 
   it('creates a snippet patch and opens it in a browser', async () => {
-    await createSnippetPatch();
+    await createSnippetPatch(wrappedRepository);
     expect(openUrl).toHaveBeenCalledWith(SNIPPET_URL);
   });
 
   describe('populating the create snippet request', () => {
     let formData: Record<string, string>;
     beforeEach(async () => {
-      await createSnippetPatch();
+      await createSnippetPatch(wrappedRepository);
       [[, formData]] = asMock(createSnippet).mock.calls;
     });
 
