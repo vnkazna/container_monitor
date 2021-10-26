@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
-import { RepositoryWithProject } from './run_with_valid_project';
+import { ProjectCommand } from './run_with_valid_project';
 
 export const pickSnippet = async (snippets: GqlSnippet[]) => {
   const quickPickItems = snippets.map(s => ({
@@ -21,15 +21,13 @@ const pickBlob = async (blobs: GqlBlob[]) => {
   return result?.original;
 };
 
-export const insertSnippet = async (
-  repositoryWithProject: RepositoryWithProject,
-): Promise<void> => {
+export const insertSnippet: ProjectCommand = async gitlabRepository => {
   if (!vscode.window.activeTextEditor) {
     await vscode.window.showInformationMessage('There is no open file.');
     return;
   }
-  const { repository, remote } = repositoryWithProject;
-  const snippets = await repository
+  const { remote } = gitlabRepository;
+  const snippets = await gitlabRepository
     .getGitLabService()
     .getSnippets(`${remote.namespace}/${remote.project}`);
   if (snippets.length === 0) {
@@ -46,7 +44,9 @@ export const insertSnippet = async (
   if (!blob) {
     return;
   }
-  const snippet = await repository.getGitLabService().getSnippetContent(result.original, blob);
+  const snippet = await gitlabRepository
+    .getGitLabService()
+    .getSnippetContent(result.original, blob);
   const editor = vscode.window.activeTextEditor;
   await editor.edit(editBuilder => {
     editBuilder.insert(editor.selection.start, snippet);

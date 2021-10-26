@@ -1,11 +1,14 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import assert from 'assert';
 import * as gitLabService from './gitlab_service';
-import { handleError } from './log';
 import { VS_COMMANDS } from './command_names';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
-import { WrappedRepository } from './git/wrapped_repository';
+import {
+  GitLabRepository,
+  GitLabRepositoryAndFile,
+  ProjectCommand,
+  ProjectFileCommand,
+} from './commands/run_with_valid_project';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
@@ -22,62 +25,37 @@ export const openUrl = async (url: string): Promise<void> =>
  * `gitlab.com/gitlab-org/gitlab-ce/issues?assignee_id=502136`.
  *
  * @param {string} linkTemplate
+ * @param {GitLabRepository} repository with valid gitlab project
  */
-async function getLink(linkTemplate: string, repository: WrappedRepository) {
+async function getLink(linkTemplate: string, repository: GitLabRepository) {
   const user = await gitLabService.fetchCurrentUser(repository.rootFsPath);
   const project = await repository.getProject();
-
-  assert(project, 'Failed to fetch project');
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
-async function openTemplatedLink(linkTemplate: string) {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
+async function openTemplatedLink(linkTemplate: string, repository: GitLabRepository) {
   await openUrl(await getLink(linkTemplate, repository));
 }
 
-export async function showIssues(): Promise<void> {
-  await openTemplatedLink('$projectUrl/issues?assignee_id=$userId');
-}
+export const showIssues: ProjectCommand = async gitlabRepository => {
+  await openTemplatedLink('$projectUrl/issues?assignee_id=$userId', gitlabRepository);
+};
 
-export async function showMergeRequests(): Promise<void> {
-  await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId');
-}
+export const showMergeRequests: ProjectCommand = async gitlabRepository => {
+  await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId', gitlabRepository);
+};
 
-async function getActiveFile() {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    await vscode.window.showInformationMessage('GitLab Workflow: No open file.');
-    return undefined;
-  }
-
-  const repository = gitExtensionWrapper.getActiveRepository();
-
-  if (!repository) {
-    await vscode.window.showInformationMessage(
-      'GitLab Workflow: Open file isn’t part of a repository.',
-    );
-    return undefined;
-  }
-
-  let currentProject;
-  try {
-    currentProject = await repository.getProject();
-  } catch (e) {
-    handleError(e);
-    return undefined;
-  }
-
+async function getActiveFile({ repository, activeEditor }: GitLabRepositoryAndFile) {
   const branchName = await repository.getTrackingBranchName();
   const filePath = path
-    .relative(repository.rootFsPath, editor.document.uri.fsPath)
+    .relative(repository.rootFsPath, activeEditor.document.uri.fsPath)
     .replace(/\\/g, '/');
-  const fileUrl = `${currentProject!.webUrl}/blob/${encodeURIComponent(branchName)}/${filePath}`;
+  const project = await repository.getProject();
+  const fileUrl = `${project.webUrl}/blob/${encodeURIComponent(branchName)}/${filePath}`;
   let anchor = '';
 
-  if (editor.selection) {
-    const { start, end } = editor.selection;
+  if (activeEditor.selection) {
+    const { start, end } = activeEditor.selection;
     anchor = `#L${start.line + 1}`;
 
     if (end.line > start.line) {
@@ -88,49 +66,41 @@ async function getActiveFile() {
   return `${fileUrl}${anchor}`;
 }
 
-export async function openActiveFile(): Promise<void> {
-  await openUrl((await getActiveFile())!);
-}
+export const openActiveFile: ProjectFileCommand = async repositoryWithProjectFile => {
+  await openUrl(await getActiveFile(repositoryWithProjectFile));
+};
 
-export async function copyLinkToActiveFile(): Promise<void> {
-  const fileUrl = await getActiveFile();
+export const copyLinkToActiveFile: ProjectFileCommand = async repositoryWithProjectFile => {
+  const fileUrl = await getActiveFile(repositoryWithProjectFile);
+  await vscode.env.clipboard.writeText(fileUrl);
+};
 
-  if (fileUrl) {
-    await vscode.env.clipboard.writeText(fileUrl);
-  }
-}
-
-export async function openCurrentMergeRequest(): Promise<void> {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
-
-  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(repository.rootFsPath);
+export const openCurrentMergeRequest: ProjectCommand = async gitlabRepository => {
+  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(gitlabRepository.rootFsPath);
 
   if (mr) {
     await openUrl(mr.web_url);
   }
-}
+};
 
-export async function openCreateNewIssue(): Promise<void> {
-  await openTemplatedLink('$projectUrl/issues/new');
-}
+export const openCreateNewIssue: ProjectCommand = async gitlabRepository => {
+  await openTemplatedLink('$projectUrl/issues/new', gitlabRepository);
+};
 
-export async function openCreateNewMr(): Promise<void> {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
-  const project = await repository.getProject();
-  const branchName = await repository.getTrackingBranchName();
+export const openCreateNewMr: ProjectCommand = async gitlabRepository => {
+  const project = await gitlabRepository.getProject();
+  const branchName = await gitlabRepository.getTrackingBranchName();
 
   await openUrl(
-    `${project!.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${encodeURIComponent(
+    `${project.webUrl}/merge_requests/new?merge_request%5Bsource_branch%5D=${encodeURIComponent(
       branchName,
     )}`,
   );
-}
+};
 
-export async function openProjectPage(): Promise<void> {
-  await openTemplatedLink('$projectUrl');
-}
+export const openProjectPage: ProjectCommand = async gitlabRepository => {
+  await openTemplatedLink('$projectUrl', gitlabRepository);
+};
 
 export async function openCurrentPipeline(repositoryRoot: string): Promise<void> {
   const { pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(repositoryRoot);
@@ -140,13 +110,10 @@ export async function openCurrentPipeline(repositoryRoot: string): Promise<void>
   }
 }
 
-export async function compareCurrentBranch(): Promise<void> {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  if (!repository) return;
+export const compareCurrentBranch: ProjectCommand = async gitlabRepository => {
+  const project = await gitlabRepository.getProject();
 
-  const project = await repository.getProject();
-
-  if (project && repository.lastCommitSha) {
-    await openUrl(`${project.webUrl}/compare/master...${repository.lastCommitSha}`);
+  if (gitlabRepository.lastCommitSha) {
+    await openUrl(`${project.webUrl}/compare/master...${gitlabRepository.lastCommitSha}`);
   }
-}
+};

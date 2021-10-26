@@ -3,7 +3,6 @@ const openers = require('./openers');
 const tokenInput = require('./token_input');
 const { tokenService } = require('./services/token_service');
 const { extensionState } = require('./extension_state');
-const pipelineActionsPicker = require('./pipeline_actions_picker');
 const searchInput = require('./search_input');
 const { createSnippet } = require('./commands/create_snippet');
 const { insertSnippet } = require('./commands/insert_snippet');
@@ -39,7 +38,11 @@ const { openRepository } = require('./commands/open_repository');
 const { contextUtils } = require('./utils/context_utils');
 const { currentBranchRefresher } = require('./current_branch_refresher');
 const { statusBar } = require('./status_bar');
-const { runWithValidProject } = require('./commands/run_with_valid_project');
+const {
+  runWithValidProject,
+  runWithValidProjectFile,
+} = require('./commands/run_with_valid_project');
+const { triggerPipelineAction } = require('./commands/trigger_pipeline_action');
 
 const wrapWithCatch = command => async (...args) => {
   try {
@@ -56,23 +59,26 @@ const registerSidebarTreeDataProviders = () => {
 
 const registerCommands = (context, outputChannel) => {
   const commands = {
-    [USER_COMMANDS.SHOW_ISSUES_ASSIGNED_TO_ME]: openers.showIssues,
-    [USER_COMMANDS.SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME]: openers.showMergeRequests,
+    [USER_COMMANDS.SHOW_ISSUES_ASSIGNED_TO_ME]: runWithValidProject(openers.showIssues),
+    [USER_COMMANDS.SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME]: runWithValidProject(
+      openers.showMergeRequests,
+    ),
     [USER_COMMANDS.SET_TOKEN]: tokenInput.showInput,
     [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
-    [USER_COMMANDS.OPEN_ACTIVE_FILE]: openers.openActiveFile,
-    [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: openers.copyLinkToActiveFile,
-    [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: openers.openCurrentMergeRequest,
-    [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: openers.openCreateNewIssue,
-    [USER_COMMANDS.OPEN_CREATE_NEW_MR]: openers.openCreateNewMr,
-    [USER_COMMANDS.OPEN_PROJECT_PAGE]: openers.openProjectPage,
-    [USER_COMMANDS.OPEN_CURRENT_PIPELINE]: openers.openCurrentPipeline,
-    [USER_COMMANDS.PIPELINE_ACTIONS]: pipelineActionsPicker.showPicker,
+    [USER_COMMANDS.OPEN_ACTIVE_FILE]: runWithValidProjectFile(openers.openActiveFile),
+    [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: runWithValidProjectFile(openers.copyLinkToActiveFile),
+    [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: runWithValidProjectFile(
+      openers.openCurrentMergeRequest,
+    ),
+    [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: runWithValidProject(openers.openCreateNewIssue),
+    [USER_COMMANDS.OPEN_CREATE_NEW_MR]: runWithValidProject(openers.openCreateNewMr),
+    [USER_COMMANDS.OPEN_PROJECT_PAGE]: runWithValidProject(openers.openProjectPage),
+    [USER_COMMANDS.PIPELINE_ACTIONS]: runWithValidProject(triggerPipelineAction),
     [USER_COMMANDS.ISSUE_SEARCH]: searchInput.showIssueSearchInput,
     [USER_COMMANDS.MERGE_REQUEST_SEARCH]: searchInput.showMergeRequestSearchInput,
     [USER_COMMANDS.PROJECT_ADVANCED_SEARCH]: searchInput.showProjectAdvancedSearchInput,
-    [USER_COMMANDS.COMPARE_CURRENT_BRANCH]: openers.compareCurrentBranch,
-    [USER_COMMANDS.CREATE_SNIPPET]: createSnippet,
+    [USER_COMMANDS.COMPARE_CURRENT_BRANCH]: runWithValidProject(openers.compareCurrentBranch),
+    [USER_COMMANDS.CREATE_SNIPPET]: runWithValidProject(createSnippet),
     [USER_COMMANDS.INSERT_SNIPPET]: runWithValidProject(insertSnippet),
     [USER_COMMANDS.VALIDATE_CI_CONFIG]: ciConfigValidator.validate,
     [PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT]: webviewController.open.bind(webviewController),
@@ -86,8 +92,8 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CREATE_COMMENT]: createComment,
     [USER_COMMANDS.CHECKOUT_MR_BRANCH]: checkoutMrBranch,
     [USER_COMMANDS.CLONE_WIKI]: cloneWiki,
-    [USER_COMMANDS.CREATE_SNIPPET_PATCH]: createSnippetPatch,
-    [USER_COMMANDS.APPLY_SNIPPET_PATCH]: applySnippetPatch,
+    [USER_COMMANDS.CREATE_SNIPPET_PATCH]: runWithValidProject(createSnippetPatch),
+    [USER_COMMANDS.APPLY_SNIPPET_PATCH]: runWithValidProject(applySnippetPatch),
     [USER_COMMANDS.CANCEL_FAILED_COMMENT]: cancelFailedComment,
     [USER_COMMANDS.RETRY_FAILED_COMMENT]: retryFailedComment,
     [USER_COMMANDS.OPEN_REPOSITORY]: openRepository,

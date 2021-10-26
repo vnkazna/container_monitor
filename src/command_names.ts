@@ -13,7 +13,6 @@ export const USER_COMMANDS = {
   OPEN_CREATE_NEW_ISSUE: 'gl.openCreateNewIssue',
   OPEN_CREATE_NEW_MR: 'gl.openCreateNewMR',
   OPEN_PROJECT_PAGE: 'gl.openProjectPage',
-  OPEN_CURRENT_PIPELINE: 'gl.openCurrentPipeline',
   PIPELINE_ACTIONS: 'gl.pipelineActions',
   ISSUE_SEARCH: 'gl.issueSearch',
   MERGE_REQUEST_SEARCH: 'gl.mergeRequestSearch',

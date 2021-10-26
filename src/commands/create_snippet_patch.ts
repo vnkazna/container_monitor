@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import assert from 'assert';
 import * as gitLabService from '../gitlab_service';
 import * as openers from '../openers';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { VISIBILITY_OPTIONS } from './create_snippet';
 import { PATCH_FILE_SUFFIX, PATCH_TITLE_PREFIX } from '../constants';
+import { ProjectCommand } from './run_with_valid_project';
 
 const getSnippetPatchDescription = (
   branch: string,
@@ -28,9 +28,7 @@ Apply this snippet:
 *This snippet was created with the [GitLab Workflow VS Code extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).*
 `;
 
-export const createSnippetPatch = async (): Promise<void> => {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  assert(repository);
+export const createSnippetPatch: ProjectCommand = async repository => {
   assert(repository.lastCommitSha);
   const patch = await repository.diff();
   const name = await vscode.window.showInputBox({
@@ -43,7 +41,6 @@ export const createSnippetPatch = async (): Promise<void> => {
   if (!visibility) return;
 
   const project = await repository.getProject();
-  assert(project);
   const patchFileName = `${name}${PATCH_FILE_SUFFIX}`;
   const data = {
     id: project.restId,

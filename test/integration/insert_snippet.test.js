@@ -18,6 +18,7 @@ const {
   getRepositoryRoot,
   updateRepositoryStatus,
 } = require('./test_infrastructure/helpers');
+const { USER_COMMANDS } = require('../../src/command_names');
 
 describe('Insert snippet', async () => {
   let server;
@@ -63,14 +64,14 @@ describe('Insert snippet', async () => {
 
   it('inserts snippet when there is only one blob', async () => {
     simulateQuickPickChoice(sandbox, 0);
-    await vscode.commands.executeCommand('gl.insertSnippet');
+    await vscode.commands.executeCommand(USER_COMMANDS.INSERT_SNIPPET);
 
     assert.strictEqual(vscode.window.activeTextEditor.document.getText(), 'snippet content');
   });
 
   it('inserts snippet when there are multiple blobs', async () => {
     simulateQuickPickChoice(sandbox, 1);
-    await vscode.commands.executeCommand('gl.insertSnippet');
+    await vscode.commands.executeCommand(USER_COMMANDS.INSERT_SNIPPET);
 
     assert.strictEqual(vscode.window.activeTextEditor.document.getText(), 'second blob content');
   });
@@ -81,7 +82,7 @@ describe('Insert snippet', async () => {
     await git.addRemote(REMOTE.NAME, 'git@test.gitlab.com:gitlab-org/nonexistent.git');
     await updateRepositoryStatus();
     const showErrorMessage = sandbox.spy(vscode.window, 'showErrorMessage');
-    await vscode.commands.executeCommand('gl.insertSnippet');
+    await vscode.commands.executeCommand(USER_COMMANDS.INSERT_SNIPPET);
     assert.match(
       showErrorMessage.firstCall.args[0],
       /Project gitlab-org\/nonexistent was not found./,
