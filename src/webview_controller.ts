@@ -8,6 +8,7 @@ import { createGitLabNewService } from './service_factory';
 import { handleError, logError } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { isMr } from './utils/is_mr';
+import { makeHtmlLinksAbsolute } from './utils/make_html_links_absolute';
 
 const webviewResourcePaths = {
   appScriptUri: 'src/webview/dist/js/app.js',
@@ -106,10 +107,7 @@ class WebviewController {
     const instanceUrl = await getInstanceUrl(repositoryRoot);
     if (message.command === 'renderMarkdown') {
       let rendered = await gitLabService.renderMarkdown(message.markdown, repositoryRoot);
-      rendered = (rendered || '')
-        .replace(/ src="data:/gim, ' src-ignore="data:')
-        .replace(/" data-src/gim, '" src')
-        .replace(/ href="\//gim, ` href="${instanceUrl}/`);
+      rendered = makeHtmlLinksAbsolute(rendered || '', instanceUrl);
 
       await panel.webview.postMessage({
         type: 'markdownRendered',
