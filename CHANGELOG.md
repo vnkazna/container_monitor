@@ -1,3 +1,17 @@
+# [3.34.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.33.1...v3.34.0) (2021-10-26)
+
+
+### Bug Fixes
+
+* replace only fixed-size strings in rendered HTML ([c8f1116](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/c8f11166578c1fa6f3476fa6dbc97a0e85ae4eb0))
+
+
+### Features
+
+* support multiple remotes ([f45c3ac](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/f45c3acff78e74c70fcc981e7613e9e9e7694dce))
+
+
+
 ## [3.33.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.33.0...v3.33.1) (2021-10-19)
 
 

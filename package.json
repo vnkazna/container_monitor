@@ -2,7 +2,7 @@
   "name": "gitlab-workflow",
   "displayName": "GitLab Workflow",
   "description": "GitLab VSCode integration",
-  "version": "3.33.1",
+  "version": "3.34.0",
   "publisher": "GitLab",
   "license": "MIT",
   "repository": {
@@ -492,14 +492,22 @@
           "scope": "machine-overridable",
           "default": {},
           "description": "Repository-specific settings.",
-          "examples": [{"/absolute/path/to/repo": {"preferredRemoteName": "origin"}}],
+          "examples": [
+            {
+              "/absolute/path/to/repo": {
+                "preferredRemoteName": "origin"
+              }
+            }
+          ],
           "patternProperties": {
             ".*": {
-              "type":"object",
-              "required": ["preferredRemoteName"],
+              "type": "object",
+              "required": [
+                "preferredRemoteName"
+              ],
               "properties": {
                 "preferredRemoteName": {
-                  "type":"string",
+                  "type": "string",
                   "description": "Name of the preferred remote for each repository in the workspace."
                 }
               }
