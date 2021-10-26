@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import assert from 'assert';
 import * as gitLabService from '../../gitlab_service';
 import { handleError } from '../../log';
 import { ErrorItem } from './error_item';
@@ -16,28 +17,20 @@ export class CustomQueryItemModel extends ItemModel {
 
   private customQuery: CustomQuery;
 
-  constructor(
-    customQuery: CustomQuery,
-    repository: WrappedRepository,
-    readonly showProject = false,
-  ) {
+  constructor(customQuery: CustomQuery, repository: WrappedRepository) {
     super();
     this.repository = repository;
     this.customQuery = customQuery;
   }
 
   getTreeItem(): vscode.TreeItem {
-    if (!this.repository.containsGitLabProject) {
-      return new ErrorItem(`${this.repository.name}: Project failed to load`);
-    }
+    assert(this.repository.containsGitLabProject);
 
     const item = new vscode.TreeItem(
-      this.showProject ? this.repository.name : this.customQuery.name,
+      this.customQuery.name,
       vscode.TreeItemCollapsibleState.Collapsed,
     );
-    item.iconPath = this.showProject
-      ? new vscode.ThemeIcon('project')
-      : new vscode.ThemeIcon('filter');
+    item.iconPath = new vscode.ThemeIcon('filter');
     return item;
   }
 
