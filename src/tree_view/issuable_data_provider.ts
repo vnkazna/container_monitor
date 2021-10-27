@@ -1,15 +1,13 @@
 import * as vscode from 'vscode';
 import { CustomQueryItemModel } from './items/custom_query_item_model';
-import { MultirootCustomQueryItemModel } from './items/multiroot_custom_query_item_model';
-
-import { CustomQuery } from '../gitlab/custom_query';
 import { ItemModel } from './items/item_model';
-import { CONFIG_CUSTOM_QUERIES, CONFIG_NAMESPACE } from '../constants';
 import { logError } from '../log';
 import { ErrorItem } from './items/error_item';
 import { extensionState } from '../extension_state';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { WrappedRepository } from '../git/wrapped_repository';
+import { getExtensionConfiguration } from '../utils/extension_configuration';
+import { RepositoryItemModel } from './items/repository_item_model';
 
 async function getAllGitlabRepositories(): Promise<WrappedRepository[]> {
   const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
@@ -46,17 +44,15 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
       logError(e);
       return [new ErrorItem('Fetching Issues and MRs failed')];
     }
-    if (repositories.length === 0) return [new vscode.TreeItem('No projects found')];
-    // FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
-    const customQueries =
-      vscode.workspace
-        .getConfiguration(CONFIG_NAMESPACE)
-        .get<CustomQuery[]>(CONFIG_CUSTOM_QUERIES) || [];
+    const { customQueries } = getExtensionConfiguration();
     if (repositories.length === 1) {
-      this.children = customQueries.map(q => new CustomQueryItemModel(q, repositories[0]));
+      const [repository] = repositories;
+      if (!repository.containsGitLabProject)
+        return [new ErrorItem(`${repository.name}: Project failed to load`)];
+      this.children = customQueries.map(q => new CustomQueryItemModel(q, repository));
       return this.children;
     }
-    this.children = customQueries.map(q => new MultirootCustomQueryItemModel(q, repositories));
+    this.children = repositories.map(r => new RepositoryItemModel(r, customQueries));
     return this.children;
   }
 
