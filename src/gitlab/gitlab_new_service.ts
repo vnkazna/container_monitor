@@ -53,6 +53,8 @@ import {
 } from './graphql/get_snippet_content';
 import { UnsupportedVersionError } from '../errors/unsupported_version_error';
 import { REQUIRED_VERSIONS } from '../constants';
+import { makeMarkdownLinksAbsolute } from '../utils/make_markdown_links_absolute';
+import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
 
 interface CreateNoteResult {
   createNote: {
@@ -354,12 +356,13 @@ export class GitLabNewService {
     The GraphQL endpoint sends us the note.htmlBody with links that start with `/`.
     This works well for the the GitLab webapp, but in VS Code we need to add the full host.
   */
-  private addHostToUrl(discussion: GqlDiscussion): GqlDiscussion {
+  private addHostToUrl(discussion: GqlDiscussion, projectPath: string): GqlDiscussion {
     const prependHost: <T extends GqlBasePosition | null>(
       note: GqlGenericNote<T>,
     ) => GqlGenericNote<T> = note => ({
       ...note,
-      bodyHtml: note.bodyHtml.replace(/href="\//, `href="${this.instanceUrl}/`),
+      body: makeMarkdownLinksAbsolute(note.body, projectPath, this.instanceUrl),
+      bodyHtml: makeHtmlLinksAbsolute(note.bodyHtml, this.instanceUrl),
       author: {
         ...note.author,
         avatarUrl:
@@ -397,7 +400,7 @@ export class GitLabNewService {
       });
       return [...discussions.nodes, ...remainingPages];
     }
-    return discussions.nodes.map(n => this.addHostToUrl(n));
+    return discussions.nodes.map(n => this.addHostToUrl(n, projectPath));
   }
 
   async canUserCommentOnMr(mr: RestMr): Promise<boolean> {
