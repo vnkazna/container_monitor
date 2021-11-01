@@ -1,16 +1,16 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // TODO maybe run the test-compile at the same time to prevent running extension that doesn't compile
     {
       "type": "npm",
-      "script": "compile",
+      "script": "esbuild",
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": [],
-      "label": "npm: compile",
-      "detail": "tsc -p ./"
+      "label": "npm: esbuild"
     },
     {
       "type": "npm",

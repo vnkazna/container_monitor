@@ -40,7 +40,7 @@
     "color": "#805DE7",
     "theme": "dark"
   },
-  "main": "out/src/extension",
+  "main": "out/extension",
   "icon": "src/assets/logo.png",
   "contributes": {
     "commands": [
@@ -862,12 +862,13 @@
     "vscode.git"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild -- --minify",
+    "esbuild": "esbuild ./src/extension.js --bundle --outfile=out/extension.js --external:vscode --platform=node --sourcemap",
+    "esbuild-watch": "npm run esbuild -- --watch",
+    "test-compile": "tsc -p ./",
     "postinstall": "cd src/webview && npm install",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
     "test-unit": "jest",
-    "test-integration": "npm run compile && node ./out/test/runTest.js",
+    "test-integration": "npm run esbuild && npm run test-compile && node ./out/test/runTest.js",
     "create-test-workspace": "npm run compile && node ./scripts/create_workspace_for_test_debugging.js",
     "test": "npm run test-unit && npm run test-integration",
     "lint": "eslint --ext .js --ext .ts . && prettier --check '**/*.{js,ts,vue,json}' && cd src/webview && npm run lint",
@@ -889,6 +890,7 @@
     "@typescript-eslint/parser": "^5.3.1",
     "conventional-changelog-cli": "^2.1.1",
     "eslint": "^8.2.0",
+    "esbuild": "^0.13.12",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
