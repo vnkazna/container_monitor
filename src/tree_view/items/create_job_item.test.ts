@@ -4,9 +4,7 @@ import { job } from '../../test_utils/entities';
 import { createJobItem } from './create_job_item';
 import { VS_COMMANDS } from '../../command_names';
 
-const fourYearsAgo = dayjs()
-  .subtract(4, 'year')
-  .toString();
+const fourYearsAgo = dayjs().subtract(4, 'year').toString();
 describe('item created by createJobItem', () => {
   const jobItem = createJobItem({
     ...job,
@@ -37,12 +35,8 @@ describe('item created by createJobItem', () => {
   });
 
   describe('showing relative time', () => {
-    const threeYearsAgo = dayjs()
-      .subtract(3, 'year')
-      .toString();
-    const twoYearsAgo = dayjs()
-      .subtract(2, 'year')
-      .toString();
+    const threeYearsAgo = dayjs().subtract(3, 'year').toString();
+    const twoYearsAgo = dayjs().subtract(2, 'year').toString();
 
     const testJob = {
       ...job,

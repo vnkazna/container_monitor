@@ -26,11 +26,11 @@ describe('MR discussion commands', () => {
     let mockedComment: GitLabComment;
 
     beforeEach(() => {
-      mockedComment = ({
+      mockedComment = {
         thread: {
           deleteComment: jest.fn(),
         },
-      } as unknown) as GitLabComment;
+      } as unknown as GitLabComment;
     });
 
     afterEach(() => {
@@ -62,16 +62,16 @@ describe('MR discussion commands', () => {
   describe('create comment', () => {
     describe('responding in a thread', () => {
       it('responds if the thread already contains comments', async () => {
-        const mockedGitLabThread = ({
+        const mockedGitLabThread = {
           reply: jest.fn(),
-        } as unknown) as GitLabCommentThread;
+        } as unknown as GitLabCommentThread;
         const comment = GitLabComment.fromGqlNote(
           noteOnDiff as GqlTextDiffNote,
           mockedGitLabThread,
         );
-        const mockedVsThread = ({
+        const mockedVsThread = {
           comments: [comment],
-        } as unknown) as vscode.CommentThread;
+        } as unknown as vscode.CommentThread;
 
         await createComment({
           text: 'reply text',
@@ -123,13 +123,13 @@ describe('MR discussion commands', () => {
           projectId: mr.project_id,
           mrId: mr.id,
         });
-        return ({
+        return {
           comments: [],
           uri,
           range: {
             start: new vscode.Position(lineNumber - 1, 0), // VS Code indexes lines starting from 0
           },
-        } as unknown) as vscode.CommentThread;
+        } as unknown as vscode.CommentThread;
       };
 
       let mockedCreateDiffNote: jest.Mock;
@@ -144,7 +144,7 @@ describe('MR discussion commands', () => {
         };
 
         mocked(gitExtensionWrapper).getRepository.mockReturnValue(
-          (mockedWrappedRepository as unknown) as WrappedRepository,
+          mockedWrappedRepository as unknown as WrappedRepository,
         );
       });
 
@@ -181,11 +181,11 @@ describe('MR discussion commands', () => {
 
         beforeEach(() => {
           thread = createVsThread(mrDiff.old_path, customMrVersion.base_commit_sha, 2);
-          comment = ({
+          comment = {
             contextValue: FAILED_COMMENT_CONTEXT,
             body: 'failed comment body',
             thread,
-          } as Partial<CommentWithThread>) as CommentWithThread;
+          } as Partial<CommentWithThread> as CommentWithThread;
           thread.comments = [comment];
         });
 

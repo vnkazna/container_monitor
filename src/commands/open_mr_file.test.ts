@@ -18,7 +18,7 @@ describe('openMrFile', () => {
   beforeEach(() => {
     jest
       .spyOn(gitExtensionWrapper, 'getRepository')
-      .mockReturnValue(({ getMr: () => ({ mrVersion }) } as unknown) as WrappedRepository);
+      .mockReturnValue({ getMr: () => ({ mrVersion }) } as unknown as WrappedRepository);
     asMock(fs.promises.access).mockResolvedValue(undefined);
   });
 

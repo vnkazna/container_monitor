@@ -37,7 +37,7 @@ describe('WrappedRepository', () => {
 
     beforeEach(() => {
       tokens = {};
-      tokenService.init((fakeContext as any) as vscode.ExtensionContext);
+      tokenService.init(fakeContext as any as vscode.ExtensionContext);
     });
     it('should return configured instanceUrl', async () => {
       (getExtensionConfiguration as jest.Mock).mockReturnValue({

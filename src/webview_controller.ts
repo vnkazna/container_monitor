@@ -99,41 +99,41 @@ class WebviewController {
     });
   }
 
-  private createMessageHandler = (
-    panel: vscode.WebviewPanel,
-    issuable: RestIssuable,
-    repositoryRoot: string,
-  ) => async (message: any) => {
-    const instanceUrl = await getInstanceUrl(repositoryRoot);
-    if (message.command === 'renderMarkdown') {
-      let rendered = await gitLabService.renderMarkdown(message.markdown, repositoryRoot);
-      rendered = makeHtmlLinksAbsolute(rendered || '', instanceUrl);
+  private createMessageHandler =
+    (panel: vscode.WebviewPanel, issuable: RestIssuable, repositoryRoot: string) =>
+    async (message: any) => {
+      const instanceUrl = await getInstanceUrl(repositoryRoot);
+      if (message.command === 'renderMarkdown') {
+        let rendered = await gitLabService.renderMarkdown(message.markdown, repositoryRoot);
+        rendered = makeHtmlLinksAbsolute(rendered || '', instanceUrl);
 
-      await panel.webview.postMessage({
-        type: 'markdownRendered',
-        ref: message.ref,
-        object: message.object,
-        markdown: rendered,
-      });
-    }
-
-    if (message.command === 'saveNote') {
-      const gitlabNewService = await createGitLabNewService(repositoryRoot);
-      try {
-        await gitlabNewService.createNote(issuable, message.note, message.replyId);
-        const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(issuable);
         await panel.webview.postMessage({
-          type: 'issuableFetch',
-          issuable,
-          discussions: discussionsAndLabels,
+          type: 'markdownRendered',
+          ref: message.ref,
+          object: message.object,
+          markdown: rendered,
         });
-        await panel.webview.postMessage({ type: 'noteSaved' });
-      } catch (e) {
-        logError(e);
-        await panel.webview.postMessage({ type: 'noteSaved', status: false });
       }
-    }
-  };
+
+      if (message.command === 'saveNote') {
+        const gitlabNewService = await createGitLabNewService(repositoryRoot);
+        try {
+          await gitlabNewService.createNote(issuable, message.note, message.replyId);
+          const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(
+            issuable,
+          );
+          await panel.webview.postMessage({
+            type: 'issuableFetch',
+            issuable,
+            discussions: discussionsAndLabels,
+          });
+          await panel.webview.postMessage({ type: 'noteSaved' });
+        } catch (e) {
+          logError(e);
+          await panel.webview.postMessage({ type: 'noteSaved', status: false });
+        }
+      }
+    };
 
   private getIconPathForIssuable(issuable: RestIssuable) {
     const getIconUri = (shade: string, file: string) =>

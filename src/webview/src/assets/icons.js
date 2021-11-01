@@ -13,22 +13,18 @@ export default {
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-2A5 5 0 1 0 8 3a5 5 0 0 0 0 10zM6 7h4a1 1 0 0 1 0 2H6a1 1 0 1 1 0-2z"></path></svg>',
   issue_open:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-2A5 5 0 1 0 8 3a5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path></svg>',
-  user:
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M11.325 7.225a4 4 0 1 0-6.65 0A4.002 4.002 0 0 0 2 11v4h12v-4a4.002 4.002 0 0 0-2.675-3.775zM10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 9a2 2 0 0 0-2 2v2h8v-2a2 2 0 0 0-2-2H6z"></path></svg>',
+  user: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M11.325 7.225a4 4 0 1 0-6.65 0A4.002 4.002 0 0 0 2 11v4h12v-4a4.002 4.002 0 0 0-2.675-3.775zM10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 9a2 2 0 0 0-2 2v2h8v-2a2 2 0 0 0-2-2H6z"></path></svg>',
   timer:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M9 0a1 1 0 1 1 0 2v.07c1.19.171 2.282.64 3.2 1.33.028-.038.059-.073.093-.107l1-1a1 1 0 1 1 1.414 1.414l-1 1c-.034.034-.07.065-.107.093A7 7 0 1 1 7 2.07V2a1 1 0 0 1 0-2h2zM8 4a5 5 0 1 0 0 10A5 5 0 0 0 8 4zm0 1a1 1 0 0 1 1 1v2.586l1.707 1.707a1 1 0 0 1-1.414 1.414L7 9.414V6a1 1 0 0 1 1-1z"></path></svg>',
   task_done:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M7.646 7.854l1.415-1.415a1 1 0 1 1 1.414 1.415l-2.121 2.12a.997.997 0 0 1-1.415 0L5.525 8.562A1 1 0 1 1 6.94 7.146l.707.708zM5 2h6a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5z"></path></svg>',
-  fork:
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M9 11.268a2 2 0 1 1-2 0V8.874A4.002 4.002 0 0 1 4 5v-.268a2 2 0 1 1 2 0V5a2 2 0 1 0 4 0v-.268a2 2 0 1 1 2 0V5a4.002 4.002 0 0 1-3 3.874v2.394zM11 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM5 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path></svg>',
+  fork: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M9 11.268a2 2 0 1 1-2 0V8.874A4.002 4.002 0 0 1 4 5v-.268a2 2 0 1 1 2 0V5a2 2 0 1 0 4 0v-.268a2 2 0 1 1 2 0V5a4.002 4.002 0 0 1-3 3.874v2.394zM11 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM5 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path></svg>',
   eye_slash:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M2.638 10.676a10.548 10.548 0 0 1-1.431-1.92 1.483 1.483 0 0 1 0-1.511C2.855 4.453 5.15 3 8 3c.716 0 1.396.092 2.04.273l1.567-1.566a1 1 0 0 1 1.414 1.414l-9.9 9.9a1 1 0 1 1-1.414-1.414l.93-.931zm5.668-5.669A6.337 6.337 0 0 0 8 5c-2.053 0-3.692.966-5 3 .319.496.657.928 1.016 1.298l.999-.999a3 3 0 0 1 3.284-3.284l.007-.008zm-2.76 7.59l1.649-1.65c.26.036.53.053.805.053 2.053 0 3.692-.966 5-3a7.91 7.91 0 0 0-1.292-1.566l1.383-1.383c.627.603 1.195 1.335 1.702 2.194a1.483 1.483 0 0 1 0 1.51C13.145 11.547 10.85 13 8 13a7.37 7.37 0 0 1-2.454-.404zm1.693-1.694l3.664-3.664a3 3 0 0 1-3.663 3.663z"></path></svg>',
-  eye:
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M7.906 11c1.98 0 3.562-.966 4.824-3-1.262-2.034-2.843-3-4.824-3a3 3 0 0 1 0 6zm-.002 0a3 3 0 0 1 0-6c-1.98 0-3.56.967-4.82 3 1.26 2.033 2.84 3 4.82 3zm.002 2c-2.812 0-5.075-1.453-6.702-4.245a1.5 1.5 0 0 1 0-1.51C2.831 4.453 5.094 3 7.906 3c2.813 0 5.076 1.453 6.703 4.245a1.5 1.5 0 0 1 0 1.51C12.982 11.547 10.719 13 7.906 13zM9 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path></svg>',
+  eye: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M7.906 11c1.98 0 3.562-.966 4.824-3-1.262-2.034-2.843-3-4.824-3a3 3 0 0 1 0 6zm-.002 0a3 3 0 0 1 0-6c-1.98 0-3.56.967-4.82 3 1.26 2.033 2.84 3 4.82 3zm.002 2c-2.812 0-5.075-1.453-6.702-4.245a1.5 1.5 0 0 1 0-1.51C2.831 4.453 5.094 3 7.906 3c2.813 0 5.076 1.453 6.703 4.245a1.5 1.5 0 0 1 0 1.51C12.982 11.547 10.719 13 7.906 13zM9 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path></svg>',
   clock:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M9 4v3.586l1.707 1.707a1 1 0 0 1-1.414 1.414L7 8.414V4a1 1 0 0 1 2 0zm7 4A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-2 0A6 6 0 1 0 2 8a6 6 0 0 0 12 0z"></path></svg>',
-  lock:
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M4 6V4a4 4 0 1 1 8 0v2h2v10H2V6h2zm2 0h4V4a2 2 0 1 0-4 0v2zM4 8v6h8V8H4zm3 2h2v2H7v-2z"></path></svg>',
+  lock: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M4 6V4a4 4 0 1 1 8 0v2h2v10H2V6h2zm2 0h4V4a2 2 0 1 0-4 0v2zM4 8v6h8V8H4zm3 2h2v2H7v-2z"></path></svg>',
   lock_open:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" d="M9 10v2H7v-2h2zM4 6V4a4 4 0 0 1 7.78-1.31 1 1 0 1 1-1.908.606 2 2 0 0 0-3.872.704v2h8v10H2V6h2zm0 2v6h8V8H4z"></path></svg>',
   arrow_right:

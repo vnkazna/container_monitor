@@ -30,9 +30,9 @@ export default {
       </div>
       <div class="timelineContent">
         <div class="note-header">
-          <user-avatar :user="author" :size="40" :show-avatar="false" style="margin-right: 2px;" />
+          <user-avatar :user="author" :size="40" :show-avatar="false" style="margin-right: 2px" />
           ·
-          <date :date="noteable.createdAt" style="margin-left: 2px;" />
+          <date :date="noteable.createdAt" style="margin-left: 2px" />
         </div>
         <div class="note-body">
           <div class="body" v-html="noteable.bodyHtml" />

@@ -69,9 +69,7 @@ export default {
     <button class="primary js-submit" @click="addComment" :disabled="!canSubmit">
       {{ buttonTitle }}
     </button>
-    <button class="secondary js-cancel" v-if="isThreadReply" @click="cancelEdit">
-      Cancel
-    </button>
+    <button class="secondary js-cancel" v-if="isThreadReply" @click="cancelEdit">Cancel</button>
     <span v-if="isFailed">Failed to save your comment. Please try again.</span>
   </div>
 </template>

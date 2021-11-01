@@ -20,7 +20,7 @@ describe('GitLabRemoteSourceProviderRepository', () => {
     tokenService.getInstanceUrls = () => ['https://test2.gitlab.com'];
     // TODO: maybe introduce something like an initialize method instead of doing the work in constructor
     // eslint-disable-next-line no-new
-    new GitLabRemoteSourceProviderRepository((fakeExtension.gitApi as unknown) as API);
+    new GitLabRemoteSourceProviderRepository(fakeExtension.gitApi as unknown as API);
 
     expect(fakeExtension.gitApi.remoteSourceProviders.length).toBe(1);
 
@@ -35,7 +35,7 @@ describe('GitLabRemoteSourceProviderRepository', () => {
     tokenService.getInstanceUrls = () => ['https://test2.gitlab.com', 'https://test3.gitlab.com'];
     // TODO: maybe introduce something like an initialize method instead of doing the work in constructor
     // eslint-disable-next-line no-new
-    new GitLabRemoteSourceProviderRepository((fakeExtension.gitApi as unknown) as API);
+    new GitLabRemoteSourceProviderRepository(fakeExtension.gitApi as unknown as API);
 
     expect(fakeExtension.gitApi.remoteSourceProviders.length).toBe(2);
 

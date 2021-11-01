@@ -16,20 +16,20 @@ describe('CI Status Metadata', () => {
     });
 
     it('returns unknown metadata for unknown status', () => {
-      const result = getJobMetadata(({
+      const result = getJobMetadata({
         ...job,
         status: 'unknown',
-      } as unknown) as RestJob);
+      } as unknown as RestJob);
 
       expect(result.icon.id).toBe('question');
       expect(result.name).toBe('Status Unknown');
     });
 
     it('returns "Delayed" for a scheduled job', () => {
-      const result = getJobMetadata(({
+      const result = getJobMetadata({
         ...job,
         status: 'scheduled',
-      } as unknown) as RestJob);
+      } as unknown as RestJob);
 
       expect(result.icon.id).toBe('clock');
       expect(result.name).toBe('Delayed');
@@ -44,10 +44,10 @@ describe('CI Status Metadata', () => {
     });
 
     it('returns unknown metadata for unknown status', () => {
-      const result = getPipelineMetadata(({
+      const result = getPipelineMetadata({
         ...pipeline,
         status: 'unknown',
-      } as unknown) as RestPipeline);
+      } as unknown as RestPipeline);
 
       expect(result.icon.id).toBe('question');
       expect(result.name).toBe('Status Unknown');

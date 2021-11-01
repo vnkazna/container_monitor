@@ -4,11 +4,11 @@ import { customQuery } from '../../test_utils/entities';
 import { WrappedRepository } from '../../git/wrapped_repository';
 import { RepositoryItemModel } from './repository_item_model';
 
-const repository = ({
+const repository = {
   name: 'GitLab Project',
   rootFsPath: '/path/to/repo',
   containsGitLabProject: true,
-} as unknown) as WrappedRepository;
+} as unknown as WrappedRepository;
 
 describe('RepositoryItemModel', () => {
   let item: RepositoryItemModel;

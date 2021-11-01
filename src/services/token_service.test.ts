@@ -17,7 +17,7 @@ describe('TokenService', () => {
       },
     };
     tokenService = new TokenService();
-    tokenService.init((fakeContext as unknown) as ExtensionContext);
+    tokenService.init(fakeContext as unknown as ExtensionContext);
   });
 
   it.each`

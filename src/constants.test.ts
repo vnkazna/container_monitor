@@ -9,12 +9,7 @@ describe('readme sections', () => {
     const readme = await fs.readFile(path.join(__dirname, '..', 'README.md'), 'utf-8');
 
     readme.replace(/^#+(.*)$/gm, (s, heading) => {
-      headings.push(
-        (heading as string)
-          .trim()
-          .toLowerCase()
-          .replace(/\W/g, '-'),
-      );
+      headings.push((heading as string).trim().toLowerCase().replace(/\W/g, '-'));
       return s;
     });
   });

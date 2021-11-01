@@ -14,10 +14,7 @@ export class StageItemModel extends ItemModel {
   getTreeItem(): vscode.TreeItem {
     const item = new vscode.TreeItem(this.stageName, vscode.TreeItemCollapsibleState.Expanded);
     const mostSevereStatusMetadata = first(
-      this.jobs
-        .map(getJobMetadata)
-        .sort(compareBy('priority'))
-        .reverse(),
+      this.jobs.map(getJobMetadata).sort(compareBy('priority')).reverse(),
     );
     item.iconPath = mostSevereStatusMetadata?.icon;
     item.tooltip = mostSevereStatusMetadata?.name;

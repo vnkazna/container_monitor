@@ -869,7 +869,7 @@
     "mocha": "^7.0.1",
     "mocha-junit-reporter": "^2.0.2",
     "msw": "^0.29.0",
-    "prettier": "^1.19.1",
+    "prettier": "^2.4.1",
     "rewire": "^4.0.1",
     "simple-git": "^2.45.1",
     "sinon": "^9.2.4",

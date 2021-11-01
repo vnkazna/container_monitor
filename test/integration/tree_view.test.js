@@ -70,15 +70,13 @@ describe('GitLab tree view', () => {
       }),
       createQueryJsonEndpoint('/projects/278964/merge_requests', {
         '?scope=assigned_to_me&state=opened': [openMergeRequestResponse],
-        '?scope=assigned_to_me&state=all&author_id=7237201&assignee_id=7237201&wip=yes&labels=frontend,backend&milestone=13.6&search=query&created_before=2020-10-11T03:45:40Z&created_after=2018-11-01T03:45:40Z&updated_before=2020-10-30T03:45:40Z&updated_after=2018-11-01T03:45:40Z&order_by=updated_at&sort=asc&per_page=30': [
-          { ...openMergeRequestResponse, title: 'Custom Query MR' },
-        ],
+        '?scope=assigned_to_me&state=all&author_id=7237201&assignee_id=7237201&wip=yes&labels=frontend,backend&milestone=13.6&search=query&created_before=2020-10-11T03:45:40Z&created_after=2018-11-01T03:45:40Z&updated_before=2020-10-30T03:45:40Z&updated_after=2018-11-01T03:45:40Z&order_by=updated_at&sort=asc&per_page=30':
+          [{ ...openMergeRequestResponse, title: 'Custom Query MR' }],
       }),
       createQueryJsonEndpoint('/projects/278964/issues', {
         '?scope=assigned_to_me&state=opened': [openIssueResponse],
-        '?scope=assigned_to_me&state=opened&confidential=true&not[labels]=backstage&not[milestone]=13.5&not[author_username]=johndoe&not[assignee_username]=johndoe&not[search]=bug&not[in]=description': [
-          { ...openIssueResponse, title: 'Custom Query Issue' },
-        ],
+        '?scope=assigned_to_me&state=opened&confidential=true&not[labels]=backstage&not[milestone]=13.5&not[author_username]=johndoe&not[assignee_username]=johndoe&not[search]=bug&not[in]=description':
+          [{ ...openIssueResponse, title: 'Custom Query Issue' }],
       }),
     ]);
     await tokenService.setToken(GITLAB_URL, 'abcd-secret');

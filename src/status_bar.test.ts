@@ -21,11 +21,11 @@ asMock(vscode.workspace.getConfiguration).mockReturnValue({
 import { StatusBar } from './status_bar';
 
 const createFakeItem = (): vscode.StatusBarItem =>
-  (({
+  ({
     show: jest.fn(),
     hide: jest.fn(),
     dispose: jest.fn(),
-  } as unknown) as vscode.StatusBarItem);
+  } as unknown as vscode.StatusBarItem);
 
 const createBranchInfo = (partialInfo: Partial<ValidBranchState> = {}): ValidBranchState => ({
   valid: true,
