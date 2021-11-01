@@ -14,7 +14,8 @@ type IconName =
   | 'circle-slash'
   | 'debug-step-over'
   | 'question'
-  | 'warning';
+  | 'warning'
+  | 'clock';
 
 // colors
 const successColor = 'testing.iconPassed';
@@ -36,10 +37,11 @@ const STATUS_METADATA = {
   },
   preparing: { name: 'Preparing', icon: icon('debug-pause', inProgressColor), priority: 5 },
   pending: { name: 'Pending', icon: icon('debug-pause', warningColor), priority: 6 },
-  skipped: { name: 'Skipped', icon: icon('debug-step-over', grayColor), priority: 7 },
-  canceled: { name: 'Cancelled', icon: icon('circle-slash', grayColor), priority: 8 },
-  failed: { name: 'Failed', icon: icon('error', errorColor), priority: 9 },
-  running: { name: 'Running', icon: icon('play', inProgressColor), priority: 10 },
+  scheduled: { name: 'Delayed', icon: icon('clock', grayColor), priority: 7 },
+  skipped: { name: 'Skipped', icon: icon('debug-step-over', grayColor), priority: 8 },
+  canceled: { name: 'Cancelled', icon: icon('circle-slash', grayColor), priority: 9 },
+  failed: { name: 'Failed', icon: icon('error', errorColor), priority: 10 },
+  running: { name: 'Running', icon: icon('play', inProgressColor), priority: 11 },
 };
 
 const UNKNOWN_STATUS = { name: 'Status Unknown', icon: icon('question', grayColor), priority: 0 };
