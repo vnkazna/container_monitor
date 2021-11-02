@@ -8,7 +8,8 @@ import { PipelineItemModel } from './items/pipeline_item_model';
 import { BranchState, ValidBranchState, InvalidBranchState } from '../current_branch_refresher';
 
 export class CurrentBranchDataProvider
-  implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
+  implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem>
+{
   private eventEmitter = new vscode.EventEmitter<void>();
 
   onDidChangeTreeData = this.eventEmitter.event;

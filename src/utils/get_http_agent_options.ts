@@ -14,9 +14,8 @@ interface GitLabHttpAgentOptions {
 export const getHttpAgentOptions = (): GitLabHttpAgentOptions => {
   const result: GitLabHttpAgentOptions = {};
   // FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
-  const { ignoreCertificateErrors, ca, cert, certKey } = vscode.workspace.getConfiguration(
-    'gitlab',
-  );
+  const { ignoreCertificateErrors, ca, cert, certKey } =
+    vscode.workspace.getConfiguration('gitlab');
 
   result.rejectUnauthorized = !ignoreCertificateErrors;
   if (ca) {

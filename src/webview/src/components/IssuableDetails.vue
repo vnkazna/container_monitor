@@ -67,9 +67,7 @@ export default {
       <date :date="issuable.created_at" />
       by
       <user-avatar :user="issuable.author" :show-handle="false" />
-      <a :href="issuable.web_url" class="view-link">
-        Open in GitLab
-      </a>
+      <a :href="issuable.web_url" class="view-link"> Open in GitLab </a>
     </div>
     <div class="title">
       <h2>{{ issuable.title }}</h2>

@@ -74,11 +74,7 @@ export class ChangedFileItem extends vscode.TreeItem {
     hasComment: HasCommentsFn,
   ) {
     super(vscode.Uri.file(file.new_path));
-    this.description = path
-      .dirname(`/${file.new_path}`)
-      .split('/')
-      .slice(1)
-      .join('/');
+    this.description = path.dirname(`/${file.new_path}`).split('/').slice(1).join('/');
     const { baseFileUri, headFileUri } = getBaseAndHeadUri(mr, mrVersion, file, repositoryPath);
     const hasComments = hasComment(baseFileUri) || hasComment(headFileUri);
     const query = new URLSearchParams([

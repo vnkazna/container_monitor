@@ -62,9 +62,7 @@ export default {
     </button>
     <template v-if="isRepliesVisible">
       <note v-for="note in replies" :key="note.id" :noteable="note" />
-      <button v-if="!isEditing" class="reply js-reply" @click="toggleEditting">
-        Reply
-      </button>
+      <button v-if="!isEditing" class="reply js-reply" @click="toggleEditting">Reply</button>
       <comment-form v-if="isEditing" :reply-id="noteable.replyId" @cancel-edit="toggleEditting" />
     </template>
   </div>

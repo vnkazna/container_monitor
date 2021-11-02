@@ -19,14 +19,14 @@ export const fakeRepositoryOptions: FakeRepositoryOptions = {
 };
 export const createFakeRepository = (options: Partial<FakeRepositoryOptions> = {}): Repository => {
   const { rootUriPath, remotes, headRemoteName } = { ...fakeRepositoryOptions, ...options };
-  return ({
+  return {
     rootUri: vscode.Uri.file(rootUriPath),
     state: {
       remotes: remotes.map(([name, fetchUrl]) => ({ name, fetchUrl })),
       HEAD: { remote: headRemoteName },
     },
     status: async () => undefined,
-  } as unknown) as Repository;
+  } as unknown as Repository;
 };
 
 /**
@@ -90,6 +90,6 @@ export class FakeGitExtension {
   onDidChangeEnablement = this.onDidChangeEnablementEmitter.event;
 
   getAPI(): API {
-    return (this.gitApi as unknown) as API;
+    return this.gitApi as unknown as API;
   }
 }

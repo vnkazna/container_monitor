@@ -4,7 +4,5 @@ export const ensureAbsoluteAvatarUrl = (instanceUrl: string, avatarUrl: string):
   if (!avatarUrl.startsWith('/')) {
     return avatarUrl;
   }
-  return vscode.Uri.parse(instanceUrl)
-    .with({ path: avatarUrl })
-    .toString();
+  return vscode.Uri.parse(instanceUrl).with({ path: avatarUrl }).toString();
 };

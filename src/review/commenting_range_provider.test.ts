@@ -35,26 +35,26 @@ describe('CommentingRangeProvider', () => {
   });
 
   it('returns full range (all lines in the document) for old file', () => {
-    const testDocument = ({
+    const testDocument = {
       uri: oldFileUrl,
       lineCount: 200,
       lineAt: () => ({
         isEmptyOrWhitespace: false,
       }),
-    } as unknown) as vscode.TextDocument;
+    } as unknown as vscode.TextDocument;
     expect(commentingRangeProvider.provideCommentingRanges(testDocument)).toEqual([
       new vscode.Range(new vscode.Position(0, 0), new vscode.Position(199, 0)),
     ]);
   });
 
   it('returns range without the last line for old file if the last line is empty', () => {
-    const testDocument = ({
+    const testDocument = {
       uri: oldFileUrl,
       lineCount: 200,
       lineAt: () => ({
         isEmptyOrWhitespace: true,
       }),
-    } as unknown) as vscode.TextDocument;
+    } as unknown as vscode.TextDocument;
     expect(commentingRangeProvider.provideCommentingRanges(testDocument)).toEqual([
       new vscode.Range(new vscode.Position(0, 0), new vscode.Position(198, 0)),
     ]);

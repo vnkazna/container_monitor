@@ -50,12 +50,12 @@ describe('GitLabCommentThread', () => {
       canReply: true,
       dispose: jest.fn(),
     };
-    gitlabService = ({
+    gitlabService = {
       setResolved: jest.fn(),
       deleteNote: jest.fn(),
       updateNoteBody: jest.fn(),
       createNote: jest.fn(),
-    } as unknown) as GitLabNewService;
+    } as unknown as GitLabNewService;
     gitlabCommentThread = new GitLabCommentThread(vsCommentThread, discussion, gitlabService, mr);
   };
 
@@ -275,7 +275,7 @@ describe('GitLabCommentThread', () => {
 
   describe('cancelFailedComment', () => {
     it('disposes the comment thread', () => {
-      const thread = ({ dispose: jest.fn() } as unknown) as vscode.CommentThread;
+      const thread = { dispose: jest.fn() } as unknown as vscode.CommentThread;
 
       cancelFailedComment({ thread } as CommentWithThread);
 

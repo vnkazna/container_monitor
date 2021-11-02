@@ -6,11 +6,11 @@ import { CustomQueryItemModel } from './custom_query_item_model';
 
 describe('CustomQueryItem', () => {
   let item: vscode.TreeItem;
-  const repository = ({
+  const repository = {
     name: 'GitLab Project',
     rootFsPath: '/path/to/repo',
     containsGitLabProject: true,
-  } as unknown) as WrappedRepository;
+  } as unknown as WrappedRepository;
 
   describe('item labeled as a query', () => {
     beforeEach(() => {

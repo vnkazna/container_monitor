@@ -24,8 +24,7 @@ describe('GitContentProvider', () => {
 
   beforeEach(() => {
     getFileContent = jest.fn();
-    gitExtensionWrapper.getRepository = () =>
-      (({ getFileContent } as unknown) as WrappedRepository);
+    gitExtensionWrapper.getRepository = () => ({ getFileContent } as unknown as WrappedRepository);
   });
 
   it('provides file content from a git repository', async () => {

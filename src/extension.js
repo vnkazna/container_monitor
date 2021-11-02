@@ -44,13 +44,15 @@ const {
 } = require('./commands/run_with_valid_project');
 const { triggerPipelineAction } = require('./commands/trigger_pipeline_action');
 
-const wrapWithCatch = command => async (...args) => {
-  try {
-    await command(...args);
-  } catch (e) {
-    handleError(e);
-  }
-};
+const wrapWithCatch =
+  command =>
+  async (...args) => {
+    try {
+      await command(...args);
+    } catch (e) {
+      handleError(e);
+    }
+  };
 
 const registerSidebarTreeDataProviders = () => {
   vscode.window.registerTreeDataProvider('issuesAndMrs', issuableDataProvider);

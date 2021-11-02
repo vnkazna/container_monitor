@@ -16,19 +16,21 @@ import { getExtensionConfiguration } from './utils/extension_configuration';
 import { README_SECTIONS } from './constants';
 import { HelpError } from './errors/help_error';
 
-const normalizeAvatarUrl = (instanceUrl: string) => (issuable: RestIssuable): RestIssuable => {
-  const { author } = issuable;
-  if (!author.avatar_url) {
-    return issuable;
-  }
-  return {
-    ...issuable,
-    author: {
-      ...author,
-      avatar_url: ensureAbsoluteAvatarUrl(instanceUrl, author.avatar_url),
-    },
+const normalizeAvatarUrl =
+  (instanceUrl: string) =>
+  (issuable: RestIssuable): RestIssuable => {
+    const { author } = issuable;
+    if (!author.avatar_url) {
+      return issuable;
+    }
+    return {
+      ...issuable,
+      author: {
+        ...author,
+        avatar_url: ensureAbsoluteAvatarUrl(instanceUrl, author.avatar_url),
+      },
+    };
   };
-};
 
 let versionCache: string | null = null;
 
@@ -383,9 +385,7 @@ export async function fetchLastPipelineForMr(
   return pipelines[0];
 }
 
-export async function fetchPipelineAndMrForCurrentBranch(
-  repositoryRoot: string,
-): Promise<{
+export async function fetchPipelineAndMrForCurrentBranch(repositoryRoot: string): Promise<{
   pipeline?: RestPipeline;
   mr?: RestMr;
 }> {
