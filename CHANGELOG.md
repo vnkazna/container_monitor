@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * delayed job has unknown status in sidebar tree ([875a9c1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/875a9c1a83a35d1c3b13a56c20cba8ff686e6ea1))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !367](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/367) 👍
 * images not working in MR/Issue comments ([16d03ff](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/16d03ff863c7962948c6bc534b743fa4748134e7))
 * show user an error when project can't be found ([c6c7307](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/c6c7307c0eac9f22e8d84d96e71a0704bda95618))
 
