@@ -43,6 +43,25 @@ describe('runWithValidProject', () => {
     });
   });
 
+  describe('without project', () => {
+    beforeEach(() => {
+      repository = createWrappedRepository({
+        gitLabService: { getProject: async () => undefined },
+      });
+      asMock(gitExtensionWrapper.getActiveRepositoryOrSelectOne).mockResolvedValue(repository);
+    });
+
+    it('throws an error', async () => {
+      const command = jest.fn();
+
+      await expect(runWithValidProject(command)()).rejects.toThrowError(
+        /Project \S+ was not found/,
+      );
+
+      expect(command).not.toHaveBeenCalledWith(repository);
+    });
+  });
+
   describe('with ambiguous remotes ', () => {
     let repoSettings: RepositorySettings;
     let command: jest.Mock;

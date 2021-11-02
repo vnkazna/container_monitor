@@ -4,7 +4,7 @@ import { GitRemote } from '../git/git_remote_parser';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { doNotAwait } from '../utils/do_not_await';
-import { getRepositorySettings, setPreferredRemote } from '../utils/extension_configuration';
+import { setPreferredRemote } from '../utils/extension_configuration';
 
 export type GitLabRepository = Omit<WrappedRepository, 'getProject'> & {
   remote: GitRemote;
@@ -22,22 +22,14 @@ export type ProjectCommand = (gitlabRepository: GitLabRepository) => Promise<voi
 /** Command that needs to be executed on an open file from a valid GitLab project */
 export type ProjectFileCommand = (repositoryAndFile: GitLabRepositoryAndFile) => Promise<void>;
 
-const getValidConfiguredRemote = (repositoryRoot: string, remoteNames: string[]) => {
-  const preferredRemoteName = getRepositorySettings(repositoryRoot)?.preferredRemoteName;
-  if (!preferredRemoteName || !remoteNames.includes(preferredRemoteName)) return undefined;
-  return preferredRemoteName;
-};
-
-const isAmbiguousRemote = (repositoryRoot: string, remoteNames: string[]) => {
-  return remoteNames.length > 1 && !getValidConfiguredRemote(repositoryRoot, remoteNames);
-};
-
 const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
   const { remote } = repository;
   if (remote) return remote;
 
-  if (!isAmbiguousRemote(repository.rootFsPath, repository.remoteNames)) {
-    return undefined;
+  if (repository.remoteNames.length === 0) {
+    throw new Error(
+      `Repository "${repository.rootFsPath}" has no remotes. Add a git remote that points to a GitLab project to continue.`,
+    );
   }
   const result = await vscode.window.showQuickPick(
     repository.remoteNames.map(n => ({ label: n })),
@@ -60,7 +52,12 @@ const ensureGitLabProject = async (
   const remote = await getRemoteOrSelectOne(repository);
   if (!remote) return undefined;
   const project = await repository.getProject();
-  if (!project) return undefined;
+  if (!project)
+    throw new Error(
+      `Project "${remote.namespace}/${remote.project}" was not found on "${repository.instanceUrl}" GitLab instance.
+      Make sure your git remote points to an existing GitLab project.`,
+    );
+
   return repository as GitLabRepository;
 };
 
