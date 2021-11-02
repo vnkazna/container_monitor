@@ -1,14 +1,11 @@
 const assert = require('assert');
 const { graphql } = require('msw');
-const { tokenService } = require('../../src/services/token_service');
 const projectsResponse = require('./fixtures/graphql/projects.json');
 const { getServer } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const {
   GitLabRemoteSourceProvider,
 } = require('../../src/gitlab/clone/gitlab_remote_source_provider');
-
-const token = 'abcd-secret';
 
 const validateRemoteSource = remoteSources => {
   assert.strictEqual(remoteSources.length, 1);
@@ -38,12 +35,10 @@ describe('GitLab Remote Source provider', () => {
         return res(ctx.data(projectsResponse));
       }),
     ]);
-    await tokenService.setToken(GITLAB_URL, token);
   });
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('projects are fetched with full search', async () => {

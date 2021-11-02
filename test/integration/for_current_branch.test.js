@@ -1,7 +1,6 @@
 const assert = require('assert');
 const dayjs = require('dayjs');
 const { CurrentBranchDataProvider } = require('../../src/tree_view/current_branch_data_provider');
-const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const pipelinesResponse = require('./fixtures/rest/pipelines.json');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
@@ -10,7 +9,6 @@ const {
   createQueryJsonEndpoint,
   createJsonEndpoint,
 } = require('./test_infrastructure/mock_server');
-const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { CurrentBranchRefresher } = require('../../src/current_branch_refresher');
 const { statusBar } = require('../../src/status_bar');
 
@@ -41,10 +39,6 @@ describe('GitLab tree view for current branch', () => {
     openIssueResponse,
   ]);
 
-  before(async () => {
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
-  });
-
   beforeEach(() => {
     dataProvider = new CurrentBranchDataProvider();
     refresher = new CurrentBranchRefresher();
@@ -53,10 +47,6 @@ describe('GitLab tree view for current branch', () => {
 
   afterEach(() => {
     server.close();
-  });
-
-  after(async () => {
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('shows detached pipeline and mr for the current branch', async () => {

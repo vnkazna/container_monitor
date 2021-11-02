@@ -5,7 +5,6 @@ const { graphql } = require('msw');
 
 const { IssuableDataProvider } = require('../../src/tree_view/issuable_data_provider');
 const { MrItemModel } = require('../../src/tree_view/items/mr_item_model');
-const { tokenService } = require('../../src/services/token_service');
 const { submitEdit, createComment } = require('../../src/commands/mr_discussion_commands');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const versionsResponse = require('./fixtures/rest/versions.json');
@@ -22,7 +21,6 @@ const {
   createJsonEndpoint,
   createQueryTextEndpoint,
 } = require('./test_infrastructure/mock_server');
-const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { ApiContentProvider } = require('../../src/review/api_content_provider');
 const { PROGRAMMATIC_COMMANDS } = require('../../src/command_names');
 const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
@@ -64,7 +62,6 @@ describe('MR Review', () => {
         return res(ctx.status(500));
       }),
     ]);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   beforeEach(() => {
@@ -78,7 +75,6 @@ describe('MR Review', () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   const getTreeItem = model => dataProvider.getTreeItem(model);

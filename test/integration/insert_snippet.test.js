@@ -3,14 +3,13 @@ const sinon = require('sinon');
 const vscode = require('vscode');
 const simpleGit = require('simple-git');
 const { graphql } = require('msw');
-const { tokenService } = require('../../src/services/token_service');
 const {
   snippetsResponse,
   snippetWithOneBlobResponse,
   snippetWithTwoBlobsResponse,
 } = require('./fixtures/graphql/snippets');
 const { getServer } = require('./test_infrastructure/mock_server');
-const { GITLAB_URL, REMOTE } = require('./test_infrastructure/constants');
+const { REMOTE } = require('./test_infrastructure/constants');
 const {
   createAndOpenFile,
   closeAndDeleteFile,
@@ -40,7 +39,6 @@ describe('Insert snippet', async () => {
         return res(ctx.data({ project: null }));
       }),
     ]);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   beforeEach(async () => {
@@ -59,7 +57,6 @@ describe('Insert snippet', async () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('inserts snippet when there is only one blob', async () => {

@@ -4,13 +4,13 @@
     // TODO maybe run the test-compile at the same time to prevent running extension that doesn't compile
     {
       "type": "npm",
-      "script": "esbuild",
+      "script": "test-compile",
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": [],
-      "label": "npm: esbuild"
+      "label": "npm: test-compile"
     },
     {
       "type": "npm",

@@ -2,10 +2,8 @@ const assert = require('assert');
 const sinon = require('sinon');
 const vscode = require('vscode');
 const { StatusBar } = require('../../src/status_bar');
-const { tokenService } = require('../../src/services/token_service');
 const pipelinesResponse = require('./fixtures/rest/pipelines.json');
 const { getServer, createQueryJsonEndpoint } = require('./test_infrastructure/mock_server');
-const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { USER_COMMANDS } = require('../../src/command_names');
 const { updateRepositoryStatus } = require('./test_infrastructure/helpers');
 const { CurrentBranchRefresher } = require('../../src/current_branch_refresher');
@@ -27,7 +25,6 @@ describe('GitLab status bar', () => {
     server = getServer([
       createQueryJsonEndpoint('/projects/278964/pipelines', { '?ref=master': pipelinesResponse }),
     ]);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
     await updateRepositoryStatus();
   });
 
@@ -45,7 +42,6 @@ describe('GitLab status bar', () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('shows the correct pipeline item', async () => {
