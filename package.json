@@ -1,7 +1,7 @@
 {
   "name": "gitlab-workflow",
   "displayName": "GitLab Workflow",
-  "description": "GitLab VSCode integration",
+  "description": "GitLab extension for Visual Studio Code",
   "version": "3.35.0",
   "publisher": "GitLab",
   "license": "MIT",
