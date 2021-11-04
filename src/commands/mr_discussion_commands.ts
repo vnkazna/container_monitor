@@ -97,9 +97,8 @@ export const cancelFailedComment = (comment: CommentWithThread): void => {
   thread.dispose();
 };
 
-export const submitEdit = async (comment: GitLabComment): Promise<void> => {
-  return comment.thread.submitEdit(comment);
-};
+export const submitEdit = async (comment: GitLabComment): Promise<void> =>
+  comment.thread.submitEdit(comment);
 
 export const createComment = async ({
   text,

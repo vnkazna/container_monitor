@@ -61,8 +61,9 @@ const ensureGitLabProject = async (
   return repository as GitLabRepository;
 };
 
-export const runWithValidProject = (command: ProjectCommand): (() => Promise<void>) => {
-  return async () => {
+export const runWithValidProject =
+  (command: ProjectCommand): (() => Promise<void>) =>
+  async () => {
     const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
     if (!repository) {
       return undefined;
@@ -71,10 +72,10 @@ export const runWithValidProject = (command: ProjectCommand): (() => Promise<voi
     if (!repositoryWithProject) return undefined;
     return command(repositoryWithProject);
   };
-};
 
-export const runWithValidProjectFile = (command: ProjectFileCommand): (() => Promise<void>) => {
-  return async () => {
+export const runWithValidProjectFile =
+  (command: ProjectFileCommand): (() => Promise<void>) =>
+  async () => {
     const activeEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
       await vscode.window.showInformationMessage('GitLab Workflow: No open file.');
@@ -93,4 +94,3 @@ export const runWithValidProjectFile = (command: ProjectFileCommand): (() => Pro
     if (!gitlabRepository) return undefined;
     return command({ activeEditor, repository: gitlabRepository });
   };
-};

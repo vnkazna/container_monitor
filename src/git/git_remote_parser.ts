@@ -12,9 +12,7 @@ const getInstancePath = (instanceUrl: string) => {
   return pathname ? pathname.replace(/\/$/, '') : '';
 };
 
-const escapeForRegExp = (str: string) => {
-  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-};
+const escapeForRegExp = (str: string) => str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
 
 function normalizeSshRemote(remote: string): string {
   // Regex to match git SSH remotes with custom port.

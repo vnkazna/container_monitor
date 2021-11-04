@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 /**
  * An issuable instance repesents one of these entities:
  *  - Merge Request

@@ -3,9 +3,7 @@ import * as vscode from 'vscode';
 import { API, Repository } from '../api/git';
 import { EventEmitter } from './event_emitter';
 
-const removeFromArray = (array: any[], element: any): any[] => {
-  return array.filter(el => el !== element);
-};
+const removeFromArray = (array: any[], element: any): any[] => array.filter(el => el !== element);
 
 export interface FakeRepositoryOptions {
   rootUriPath: string;

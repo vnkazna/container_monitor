@@ -26,9 +26,7 @@ export const closeAndDeleteFile = async (testFileUri: vscode.Uri): Promise<void>
 };
 
 export const simulateQuickPickChoice = (sandbox: SinonSandbox, nthItem: number): void => {
-  sandbox.stub(vscode.window, 'showQuickPick').callsFake(async options => {
-    return (await options)[nthItem];
-  });
+  sandbox.stub(vscode.window, 'showQuickPick').callsFake(async options => (await options)[nthItem]);
 };
 
 export const getRepositoryRoot = (): string => {

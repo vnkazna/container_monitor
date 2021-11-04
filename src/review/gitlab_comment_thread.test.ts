@@ -31,15 +31,13 @@ describe('GitLabCommentThread', () => {
 
   const createGqlTextDiffDiscussion: (...notes: GqlTextDiffNote[]) => GqlTextDiffDiscussion = (
     ...notes
-  ) => {
-    return {
-      ...discussionOnDiff,
-      notes: {
-        ...discussionOnDiff.notes,
-        nodes: notes,
-      },
-    };
-  };
+  ) => ({
+    ...discussionOnDiff,
+    notes: {
+      ...discussionOnDiff.notes,
+      nodes: notes,
+    },
+  });
 
   const createGitLabCommentThread = (discussion: GqlTextDiffDiscussion) => {
     vsCommentThread = {

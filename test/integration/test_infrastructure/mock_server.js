@@ -5,9 +5,7 @@ const projectResponse = require('../fixtures/graphql/project.json');
 const versionResponse = require('../fixtures/rest/version.json');
 
 const createJsonEndpoint = (path, response) =>
-  rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(response));
-  });
+  rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => res(ctx.status(200), ctx.json(response)));
 
 const sortRequestQuery = search =>
   search
@@ -33,9 +31,7 @@ const createQueryJsonEndpoint = (path, queryResponseMap) =>
   });
 
 const createTextEndpoint = (path, response) =>
-  rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
-    return res(ctx.status(200), ctx.text(response));
-  });
+  rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => res(ctx.status(200), ctx.text(response)));
 
 const createQueryTextEndpoint = (path, queryResponseMap) =>
   rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
@@ -48,9 +44,9 @@ const createQueryTextEndpoint = (path, queryResponseMap) =>
   });
 
 const createPostEndpoint = (path, response) =>
-  rest.post(`${API_URL_PREFIX}${path}`, (req, res, ctx) => {
-    return res(ctx.status(201), ctx.json(response));
-  });
+  rest.post(`${API_URL_PREFIX}${path}`, (req, res, ctx) =>
+    res(ctx.status(201), ctx.json(response)),
+  );
 
 const notFoundByDefault = rest.get(/.*/, (req, res, ctx) => {
   console.warn(`API call ${req.url.toString()} doesn't have a query handler.`);
