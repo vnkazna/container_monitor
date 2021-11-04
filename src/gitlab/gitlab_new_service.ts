@@ -66,7 +66,7 @@ interface CreateNoteResult {
 interface RestLabelEvent {
   label: unknown;
   body: string;
-  // eslint-disable-next-line camelcase
+
   created_at: string;
 }
 

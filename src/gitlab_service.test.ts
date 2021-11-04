@@ -9,19 +9,15 @@ jest.mock('./utils/extension_configuration', () => ({
   getExtensionConfiguration: () => extensionConfiguration,
 }));
 
-jest.mock('./utils/get_instance_url', () => {
-  return {
-    getInstanceUrl: () => 'INSTANCE_URL',
-  };
-});
-jest.mock('./services/token_service', () => {
-  return {
-    tokenService: {
-      getToken: () => 'TOKEN',
-      getInstanceUrls: () => [],
-    },
-  };
-});
+jest.mock('./utils/get_instance_url', () => ({
+  getInstanceUrl: () => 'INSTANCE_URL',
+}));
+jest.mock('./services/token_service', () => ({
+  tokenService: {
+    getToken: () => 'TOKEN',
+    getInstanceUrls: () => [],
+  },
+}));
 
 const TEST_REPOSITORY = {
   remote: {

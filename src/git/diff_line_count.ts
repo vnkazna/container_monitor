@@ -25,13 +25,11 @@ const getHunkStartingLine = (headerString = ''): { oldStart: number; newStart: n
   );
 };
 
-const getRawHunks = (diff: string): string[] => {
-  return diff
+const getRawHunks = (diff: string): string[] =>
+  diff
     .replace(/^@@/, '') // remove first @@ because we'll remove all the other @@ by splitting
     .split('\n@@')
     .map(h => `@@${h}`); // prepend the removed @@ to all hunks
-};
-
 const REMOVED = 'REMOVED';
 const ADDED = 'ADDED';
 const UNCHANGED = 'UNCHANGED';

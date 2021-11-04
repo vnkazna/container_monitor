@@ -18,13 +18,8 @@ describe('CI variable completion', () => {
       });
     };
 
-    const openCompletion = async position => {
-      return vscode.commands.executeCommand(
-        'vscode.executeCompletionItemProvider',
-        gitlabCiYml,
-        position,
-      );
-    };
+    const openCompletion = async position =>
+      vscode.commands.executeCommand('vscode.executeCompletionItemProvider', gitlabCiYml, position);
 
     beforeEach(async () => {
       const ext = vscode.extensions.getExtension('gitlab.gitlab-workflow');

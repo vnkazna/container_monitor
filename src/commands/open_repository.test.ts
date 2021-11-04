@@ -33,12 +33,10 @@ describe('openRepository', () => {
   beforeEach(() => {
     tokenService.getInstanceUrls = () => instanceUrls;
 
-    (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => {
-      return {
-        onDidChangeValue: jest.fn(),
-        items: [],
-      };
-    });
+    (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => ({
+      onDidChangeValue: jest.fn(),
+      items: [],
+    }));
   });
 
   it('stops if the open action quick pick is canceled', async () => {

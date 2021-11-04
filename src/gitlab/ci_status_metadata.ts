@@ -56,6 +56,5 @@ export const getJobMetadata = (job: RestJob): CiStatusMetadata => {
   return STATUS_METADATA[job.status] || UNKNOWN_STATUS;
 };
 
-export const getPipelineMetadata = (pipeline: RestPipeline): CiStatusMetadata => {
-  return STATUS_METADATA[pipeline.status] || UNKNOWN_STATUS;
-};
+export const getPipelineMetadata = (pipeline: RestPipeline): CiStatusMetadata =>
+  STATUS_METADATA[pipeline.status] || UNKNOWN_STATUS;

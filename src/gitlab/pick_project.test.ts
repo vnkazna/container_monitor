@@ -33,12 +33,10 @@ describe('pickProject', () => {
   beforeEach(() => {
     tokenService.getInstanceUrls = () => instanceUrls;
 
-    (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => {
-      return {
-        onDidChangeValue: jest.fn(),
-        items: [],
-      };
-    });
+    (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => ({
+      onDidChangeValue: jest.fn(),
+      items: [],
+    }));
 
     (GitLabRemoteSourceProvider as jest.Mock).mockImplementation(() => ({
       getRemoteSources(query?: string) {

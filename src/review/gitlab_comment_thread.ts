@@ -11,9 +11,8 @@ const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
   return note;
 };
 
-const isDiffNote = (note: GqlNote): note is GqlTextDiffNote => {
-  return Boolean(note.position && note.position.positionType === 'text');
-};
+const isDiffNote = (note: GqlNote): note is GqlTextDiffNote =>
+  Boolean(note.position && note.position.positionType === 'text');
 
 export class GitLabCommentThread {
   private resolved: boolean;

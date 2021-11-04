@@ -99,6 +99,7 @@ class WebviewController {
     });
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private createMessageHandler =
     (panel: vscode.WebviewPanel, issuable: RestIssuable, repositoryRoot: string) =>
     async (message: any) => {
