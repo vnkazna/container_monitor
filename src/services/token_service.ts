@@ -1,7 +1,21 @@
 import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
+import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 
+const getEnvironmentVariables = () => {
+  const { GITLAB_WORKFLOW_INSTANCE_URL, GITLAB_WORKFLOW_TOKEN } = process.env;
+  if (!GITLAB_WORKFLOW_INSTANCE_URL || !GITLAB_WORKFLOW_TOKEN) return undefined;
+  return {
+    instanceUrl: GITLAB_WORKFLOW_INSTANCE_URL,
+    token: GITLAB_WORKFLOW_TOKEN,
+  };
+};
+
+const environmentTokenForInstance = (instanceUrl: string) =>
+  instanceUrl === getEnvironmentVariables()?.instanceUrl
+    ? getEnvironmentVariables()?.token
+    : undefined;
 export class TokenService {
   context?: ExtensionContext;
 
@@ -21,13 +35,23 @@ export class TokenService {
   }
 
   getInstanceUrls(): string[] {
+    return [...this.getRemovableInstanceUrls(), getEnvironmentVariables()?.instanceUrl].filter(
+      notNullOrUndefined,
+    );
+  }
+
+  getRemovableInstanceUrls(): string[] {
     return Object.keys(this.glTokenMap);
   }
 
   getToken(instanceUrl: string): string | undefined {
     // the first part of the return (`this.glTokenMap[instanceUrl]`)
     // can be removed on 2022-08-15 (year after new tokens can't contain trailing slash)
-    return this.glTokenMap[instanceUrl] || this.glTokenMap[removeTrailingSlash(instanceUrl)];
+    return (
+      this.glTokenMap[instanceUrl] ||
+      this.glTokenMap[removeTrailingSlash(instanceUrl)] ||
+      environmentTokenForInstance(instanceUrl)
+    );
   }
 
   async setToken(instanceUrl: string, token: string | undefined): Promise<void> {
