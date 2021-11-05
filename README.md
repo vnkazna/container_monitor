@@ -100,6 +100,15 @@ That's it. 🏁
 
 You can start using this extension right away. If your project has a pipeline for last commit and a MR from your current branch, you should see them on VS Code status bar. 🎉
 
+### Set token with environment variables
+
+If you often delete your VS Code storage (such as in Gitpod containers) you can create environment variables before starting VS Code. If you set the token in an environment variable you don't have to set the personal access token every time you delete your VS Code storage.
+
+ - `GITLAB_WORKFLOW_INSTANCE_URL`: GitLab instance URL (e.g. https://gitlab.com).
+ - `GITLAB_WORKFLOW_TOKEN`: personal access token, which you created [in a previous step](#step-1-create-your-personal-access-token).
+
+The token configured in an environment variable is overridden if you configure a token for the same GitLab instance in the extension.
+
 ### Multiple GitLab instances
 
 If you want to use multiple GitLab instances you may want to configure each workspace separately. See the `gitlab.instanceUrl` configuration option in [Extension settings](#extension-settings) section.

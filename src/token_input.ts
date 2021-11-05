@@ -1,8 +1,8 @@
-const vscode = require('vscode');
-const { GITLAB_COM_URL } = require('./constants');
-const { tokenService } = require('./services/token_service');
+import vscode from 'vscode';
+import { GITLAB_COM_URL } from './constants';
+import { tokenService } from './services/token_service';
 
-async function showInput() {
+export async function showInput() {
   const instance = await vscode.window.showInputBox({
     ignoreFocusOut: true,
     value: GITLAB_COM_URL,
@@ -21,8 +21,8 @@ async function showInput() {
   }
 }
 
-async function removeTokenPicker() {
-  const instanceUrls = tokenService.getInstanceUrls();
+export async function removeTokenPicker() {
+  const instanceUrls = tokenService.getRemovableInstanceUrls();
   const selectedInstanceUrl = await vscode.window.showQuickPick(instanceUrls, {
     ignoreFocusOut: true,
     placeHolder: 'Select Gitlab instance for PAT removal',
@@ -32,6 +32,3 @@ async function removeTokenPicker() {
     await tokenService.setToken(selectedInstanceUrl, undefined);
   }
 }
-
-exports.showInput = showInput;
-exports.removeTokenPicker = removeTokenPicker;

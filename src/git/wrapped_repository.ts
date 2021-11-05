@@ -10,6 +10,7 @@ import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { getExtensionConfiguration, getRepositorySettings } from '../utils/extension_configuration';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   const instanceUrls = tokenService.getInstanceUrls();
@@ -46,7 +47,7 @@ function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
   // try to determine the instance URL heuristically
   const gitRemoteHosts = gitRemoteUrls
     .map((uri: string) => parseGitRemote(uri)?.host)
-    .filter((h): h is string => Boolean(h));
+    .filter(notNullOrUndefined);
   const heuristicUrl = heuristicInstanceUrl(gitRemoteHosts);
   if (heuristicUrl) {
     return heuristicUrl;
@@ -167,7 +168,7 @@ export class WrappedRepository {
   get instanceUrl(): string {
     const remoteUrls = this.rawRepository.state.remotes
       .map(r => r.fetchUrl)
-      .filter((r): r is string => Boolean(r));
+      .filter(notNullOrUndefined);
     return getInstanceUrlFromRemotes(remoteUrls);
   }
 
