@@ -1,3 +1,17 @@
+# [3.36.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.35.0...v3.36.0) (2021-11-08)
+
+
+### Bug Fixes
+
+* retry loading failed project ([15bb715](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/15bb7156d2bd16e1ea4c4c0bff07e859b1592417))
+
+
+### Features
+
+* use GitLab credentials from environment variables ([9f22adc](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/9f22adc5dcd40f1317a92d2177d74242bfca8f95))
+
+
+
 # [3.35.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.34.0...v3.35.0) (2021-11-02)
 
 
