@@ -30,6 +30,6 @@ describe('Issuable Data Provider', () => {
     repositories = [{ ...repository, getProject: () => undefined }];
     const children = await provider.getChildren(undefined);
     expect(children.length).toBe(1);
-    expect((children[0] as any).label).toMatch(/Project failed to load/);
+    expect((children[0] as any).label).toMatch(/failed to load/);
   });
 });

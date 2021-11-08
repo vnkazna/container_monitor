@@ -46,6 +46,7 @@ export const USER_COMMANDS = {
 export const PROGRAMMATIC_COMMANDS = {
   SHOW_RICH_CONTENT: 'gl.showRichContent',
   NO_IMAGE_REVIEW: 'gl.noImageReview',
+  DIAGNOSE_REPOSITORY: 'gl.diagnoseRepository',
 };
 
 export const VS_COMMANDS = {
