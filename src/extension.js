@@ -41,6 +41,7 @@ const { statusBar } = require('./status_bar');
 const {
   runWithValidProject,
   runWithValidProjectFile,
+  diagnoseRepository,
 } = require('./commands/run_with_valid_project');
 const { triggerPipelineAction } = require('./commands/trigger_pipeline_action');
 
@@ -104,6 +105,7 @@ const registerCommands = (context, outputChannel) => {
       currentBranchRefresher.refresh(true);
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
+    [PROGRAMMATIC_COMMANDS.DIAGNOSE_REPOSITORY]: diagnoseRepository,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };

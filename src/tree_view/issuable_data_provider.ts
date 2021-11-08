@@ -8,6 +8,7 @@ import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { WrappedRepository } from '../git/wrapped_repository';
 import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { RepositoryItemModel } from './items/repository_item_model';
+import { InvalidProjectItem } from './items/invalid_project_item';
 
 async function getAllGitlabRepositories(): Promise<WrappedRepository[]> {
   const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
@@ -47,8 +48,7 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
     const { customQueries } = getExtensionConfiguration();
     if (repositories.length === 1) {
       const [repository] = repositories;
-      if (!repository.containsGitLabProject)
-        return [new ErrorItem(`${repository.name}: Project failed to load`)];
+      if (!repository.containsGitLabProject) return [new InvalidProjectItem(repository)];
       this.children = customQueries.map(q => new CustomQueryItemModel(q, repository));
       return this.children;
     }

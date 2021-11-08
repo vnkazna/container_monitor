@@ -3,7 +3,7 @@ import { CustomQueryItemModel } from './custom_query_item_model';
 import { CustomQuery } from '../../gitlab/custom_query';
 import { ItemModel } from './item_model';
 import { WrappedRepository } from '../../git/wrapped_repository';
-import { ErrorItem } from './error_item';
+import { InvalidProjectItem } from './invalid_project_item';
 
 export class RepositoryItemModel extends ItemModel {
   private repository: WrappedRepository;
@@ -17,9 +17,7 @@ export class RepositoryItemModel extends ItemModel {
   }
 
   getTreeItem(): vscode.TreeItem {
-    if (!this.repository.containsGitLabProject) {
-      return new ErrorItem(`${this.repository.name}: Project failed to load`);
-    }
+    if (!this.repository.containsGitLabProject) return new InvalidProjectItem(this.repository);
     const item = new vscode.TreeItem(
       this.repository.name,
       vscode.TreeItemCollapsibleState.Collapsed,

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { USER_COMMANDS } from '../command_names';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GitRemote } from '../git/git_remote_parser';
 import { WrappedRepository } from '../git/wrapped_repository';
@@ -94,3 +95,9 @@ export const runWithValidProjectFile =
     if (!gitlabRepository) return undefined;
     return command({ activeEditor, repository: gitlabRepository });
   };
+
+export const diagnoseRepository = async (repository: WrappedRepository) => {
+  const repositoryWithProject = await ensureGitLabProject(repository);
+  if (!repositoryWithProject) return vscode.commands.executeCommand(USER_COMMANDS.SHOW_OUTPUT);
+  return vscode.commands.executeCommand(USER_COMMANDS.REFRESH_SIDEBAR);
+};
