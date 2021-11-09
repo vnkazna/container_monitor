@@ -29,7 +29,7 @@
     }
   },
   "activationEvents": [
-    "*",
+    "onStartupFinished",
     "onFileSystem:gitlab-remote"
   ],
   "bugs": {
@@ -863,12 +863,12 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run esbuild -- --minify",
-    "esbuild": "esbuild ./src/extension.js --bundle --outfile=out/extension.js --external:vscode --platform=node --sourcemap",
+    "esbuild": "esbuild ./src/extension.js --bundle --outfile=out/extension.js --external:vscode --platform=node --target=node14.18 --sourcemap",
     "esbuild-watch": "npm run esbuild -- --watch",
-    "test-compile": "tsc -p ./",
+    "test-compile": "tsc -p ./ && npm run esbuild",
     "postinstall": "cd src/webview && npm install",
     "test-unit": "jest",
-    "test-integration": "npm run esbuild && npm run test-compile && node ./out/test/runTest.js",
+    "test-integration": "npm run test-compile && node ./out/test/runTest.js",
     "create-test-workspace": "npm run test-compile && node ./scripts/create_workspace_for_test_debugging.js",
     "test": "npm run test-unit && npm run test-integration",
     "lint": "eslint --ext .js --ext .ts . && prettier --check '**/*.{js,ts,vue,json}' && cd src/webview && npm run lint",
@@ -890,7 +890,7 @@
     "@typescript-eslint/parser": "^5.3.1",
     "conventional-changelog-cli": "^2.1.1",
     "eslint": "^8.2.0",
-    "esbuild": "^0.13.12",
+    "esbuild": "^0.13.13",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
