@@ -11,7 +11,10 @@ import { CommentingRangeProvider } from '../../review/commenting_range_provider'
 import { createWrappedRepository } from '../../test_utils/create_wrapped_repository';
 import { fromReviewUri } from '../../review/review_uri';
 import { WrappedRepository } from '../../git/wrapped_repository';
-import { CHANGE_TYPE_QUERY_KEY, HAS_COMMENTS_QUERY_KEY } from '../../constants';
+import { DELETED, CHANGE_TYPE_QUERY_KEY, HAS_COMMENTS_QUERY_KEY } from '../../constants';
+import { setSidebarViewState, SidebarViewState } from '../sidebar_view_state';
+import { ChangedFolderItem } from './changed_folder_item';
+import { ChangedFileItem } from './changed_file_item';
 
 const createCommentControllerMock = vscode.comments.createCommentController as jest.Mock;
 
@@ -98,10 +101,25 @@ describe('MrItemModel', () => {
 
   it('should return changed file items as children', async () => {
     gitLabService.getMrDiff = jest.fn().mockResolvedValue(mrVersion);
-    const [overview, changedItem] = await item.getChildren();
+    await setSidebarViewState(SidebarViewState.ListView);
+    const [, changedItem] = await item.getChildren();
     expect(changedItem.resourceUri?.path).toBe('.deleted.yml');
     expect(changedItem.resourceUri?.query).toMatch(`${CHANGE_TYPE_QUERY_KEY}=deleted`);
     expect(changedItem.resourceUri?.query).toMatch(`${HAS_COMMENTS_QUERY_KEY}=false`);
+  });
+
+  it('should return changed file items in tree view', async () => {
+    gitLabService.getMrDiff = jest.fn().mockResolvedValue(mrVersion);
+    await setSidebarViewState(SidebarViewState.TreeView);
+    const [, folderItem, fileItem] = await item.getChildren();
+
+    expect(folderItem).toBeInstanceOf(ChangedFolderItem);
+    expect(folderItem.label).toBe('src');
+
+    expect(fileItem).toBeInstanceOf(ChangedFileItem);
+    expect(fileItem.resourceUri?.path).toBe('.deleted.yml');
+    expect(fileItem.resourceUri?.query).toMatch(`${CHANGE_TYPE_QUERY_KEY}=${DELETED}`);
+    expect(fileItem.resourceUri?.query).toMatch(`${HAS_COMMENTS_QUERY_KEY}=false`);
   });
 
   describe('commenting range', () => {

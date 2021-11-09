@@ -44,6 +44,7 @@ const {
   diagnoseRepository,
 } = require('./commands/run_with_valid_project');
 const { triggerPipelineAction } = require('./commands/trigger_pipeline_action');
+const { setSidebarViewState, SidebarViewState } = require('./tree_view/sidebar_view_state');
 
 const wrapWithCatch =
   command =>
@@ -100,6 +101,8 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.CANCEL_FAILED_COMMENT]: cancelFailedComment,
     [USER_COMMANDS.RETRY_FAILED_COMMENT]: retryFailedComment,
     [USER_COMMANDS.OPEN_REPOSITORY]: openRepository,
+    [USER_COMMANDS.SIDEBAR_VIEW_AS_LIST]: () => setSidebarViewState(SidebarViewState.ListView),
+    [USER_COMMANDS.SIDEBAR_VIEW_AS_TREE]: () => setSidebarViewState(SidebarViewState.TreeView),
     [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
       issuableDataProvider.refresh();
       currentBranchRefresher.refresh(true);
@@ -133,6 +136,7 @@ const registerCiCompletion = context => {
 const activate = context => {
   contextUtils.init(context);
 
+  setSidebarViewState(SidebarViewState.ListView);
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
   vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new GitContentProvider());

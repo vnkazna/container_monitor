@@ -129,6 +129,16 @@
         "title": "GitLab: Show Extension Logs"
       },
       {
+        "command": "gl.sidebarViewAsList",
+        "title": "GitLab: Sidebar View as List",
+        "icon": "$(list-flat)"
+      },
+      {
+        "command": "gl.sidebarViewAsTree",
+        "title": "GitLab: Sidebar View as Tree",
+        "icon": "$(list-tree)"
+      },
+      {
         "command": "gl.refreshSidebar",
         "title": "GitLab: Refresh Sidebar",
         "icon": {
@@ -317,6 +327,14 @@
           "when": "gitlab:validState && editorIsOpen"
         },
         {
+          "command": "gl.sidebarViewAsList",
+          "when": "false"
+        },
+        {
+          "command": "gl.sidebarViewAsTree",
+          "when": "false"
+        },
+        {
           "command": "gl.refreshSidebar",
           "when": "gitlab:validState"
         },
@@ -335,9 +353,19 @@
       ],
       "view/title": [
         {
+          "command": "gl.sidebarViewAsList",
+          "when": "view =~ /(currentBranchInfo|issuesAndMrs)/ && gitlab.sidebarView == tree",
+          "group": "navigation@1"
+        },
+        {
+          "command": "gl.sidebarViewAsTree",
+          "when": "view =~ /(currentBranchInfo|issuesAndMrs)/ && gitlab.sidebarView == list",
+          "group": "navigation@1"
+        },
+        {
           "command": "gl.refreshSidebar",
           "when": "view =~ /(currentBranchInfo|issuesAndMrs)/",
-          "group": "navigation"
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [

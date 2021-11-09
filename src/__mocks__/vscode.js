@@ -5,9 +5,12 @@ const { FileSystemError } = require('../test_utils/file_system_error');
 
 module.exports = {
   TreeItem: function TreeItem(labelOrUri, collapsibleState) {
-    return typeof labelOrUri === 'string'
-      ? { label: labelOrUri, collapsibleState }
-      : { resourceUri: labelOrUri, collapsibleState };
+    this.collapsibleState = collapsibleState;
+    if (typeof labelOrUri === 'string') {
+      this.label = labelOrUri;
+    } else {
+      this.resourceUri = labelOrUri;
+    }
   },
   ThemeIcon: function ThemeIcon(id) {
     return { id };
