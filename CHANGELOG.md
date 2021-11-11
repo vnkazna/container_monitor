@@ -1,3 +1,12 @@
+# [3.37.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.36.1...v3.37.0) (2021-11-11)
+
+
+### Features
+
+* add 'view as tree' option ([#407](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/407)) ([dc11640](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/dc116408dbe67759091ce2fc8c1a24af0bd5d81c))
+
+
+
 ## [3.36.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.36.0...v3.36.1) (2021-11-08)
 
 * no extension changes, only upgrading release tooling
