@@ -4,6 +4,7 @@
 ### Features
 
 * add 'view as tree' option ([#407](https://gitlab.com/gitlab-org/gitlab-vscode-extension/issues/407)) ([dc11640](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/dc116408dbe67759091ce2fc8c1a24af0bd5d81c))
+  * Implemented by [Liming Jin](https://gitlab.com/jinliming2) with [MR !346](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/346) 👍
 
 
 
