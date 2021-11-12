@@ -21,14 +21,7 @@ async function run(testsRoot) {
     validateTestEnvironment();
 
     // Create the mocha test
-    const mocha = new Mocha(
-      process.env.CI && {
-        reporter: 'mocha-junit-reporter',
-        reporterOptions: {
-          mochaFile: './reports/integration.xml',
-        },
-      },
-    );
+    const mocha = new Mocha();
     mocha.timeout(3000);
     mocha.color(true);
 
