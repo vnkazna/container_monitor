@@ -14,6 +14,18 @@ const getAllTestFiles = testsRoot =>
     });
   });
 
+/**
+ * Windows is not case sensitive when accessing files, but node is. For some reason, __dirname which
+ * is used by `require()` for resolving modules contains a lower case drive letter (e.g. c:\\workspace\extension\tests)
+ * but the testsRoot passed in by VS Code contains upper case drive letter (e.g. C:\\workspace\extension\tests).
+ *
+ * This causes the singleton module initialization to initialize different modules than the ones that are used by tests.
+ */
+const ensureLowerCaseDriveLetter = path => {
+  const [drive, ...rest] = path;
+  return `${drive.toLowerCase()}${rest.join('')}`;
+};
+
 async function run(testsRoot) {
   require('source-map-support').install(); // eslint-disable-line global-require
 
@@ -25,13 +37,14 @@ async function run(testsRoot) {
     mocha.timeout(3000);
     mocha.color(true);
 
-    const files = await getAllTestFiles(testsRoot);
+    const winFriendlyTestsRoot = ensureLowerCaseDriveLetter(testsRoot);
+    const files = await getAllTestFiles(winFriendlyTestsRoot);
 
     // Add files to the test suite
-    files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+    files.forEach(f => mocha.addFile(path.resolve(winFriendlyTestsRoot, f)));
 
     // Initialize VS Code environment for integration tests
-    await initializeTestEnvironment(testsRoot);
+    await initializeTestEnvironment(winFriendlyTestsRoot);
 
     // Run the mocha test
     await new Promise((res, rej) =>
