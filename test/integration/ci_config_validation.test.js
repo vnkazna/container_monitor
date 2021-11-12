@@ -53,7 +53,7 @@ describe('Validate CI config', async () => {
 
   beforeEach(async () => {
     server.resetHandlers();
-    testFileUri = vscode.Uri.parse(`${getRepositoryRoot()}/.gitlab-ci.yml`);
+    testFileUri = vscode.Uri.file(`${getRepositoryRoot()}/.gitlab-ci.yml`);
     await createAndOpenFile(testFileUri);
   });
 
