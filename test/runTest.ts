@@ -7,7 +7,8 @@ async function go() {
   try {
     const extensionDevelopmentPath = path.resolve(__dirname, '../..');
     const extensionTestsPath = path.resolve(__dirname, './integration');
-    const temporaryWorkspace = await createTmpWorkspace();
+    const isWin = process.platform === 'win32';
+    const temporaryWorkspace = await createTmpWorkspace(!isWin); // don't cleanup the temp files on windows, it caused failure in the CI runner
     console.log(temporaryWorkspace);
     await runTests({
       extensionDevelopmentPath,
