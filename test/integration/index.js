@@ -15,6 +15,8 @@ const getAllTestFiles = testsRoot =>
   });
 
 async function run(testsRoot) {
+  require('source-map-support').install(); // eslint-disable-line global-require
+
   try {
     validateTestEnvironment();
 
@@ -36,7 +38,7 @@ async function run(testsRoot) {
     files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
     // Initialize VS Code environment for integration tests
-    initializeTestEnvironment();
+    await initializeTestEnvironment(testsRoot);
 
     // Run the mocha test
     await new Promise((res, rej) =>

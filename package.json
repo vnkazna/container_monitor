@@ -29,7 +29,7 @@
     }
   },
   "activationEvents": [
-    "*",
+    "onStartupFinished",
     "onFileSystem:gitlab-remote"
   ],
   "bugs": {
@@ -40,7 +40,7 @@
     "color": "#805DE7",
     "theme": "dark"
   },
-  "main": "out/src/extension",
+  "main": "out/extension",
   "icon": "src/assets/logo.png",
   "contributes": {
     "commands": [
@@ -862,13 +862,14 @@
     "vscode.git"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild -- --minify",
+    "esbuild": "esbuild ./src/extension.js --bundle --outfile=out/extension.js --external:vscode --platform=node --target=node14.18 --sourcemap",
+    "esbuild-watch": "npm run esbuild -- --watch",
+    "test-compile": "tsc -p ./ && npm run esbuild",
     "postinstall": "cd src/webview && npm install",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
     "test-unit": "jest",
-    "test-integration": "npm run compile && node ./out/test/runTest.js",
-    "create-test-workspace": "npm run compile && node ./scripts/create_workspace_for_test_debugging.js",
+    "test-integration": "npm run test-compile && node ./out/test/runTest.js",
+    "create-test-workspace": "npm run test-compile && node ./scripts/create_workspace_for_test_debugging.js",
     "test": "npm run test-unit && npm run test-integration",
     "lint": "eslint --ext .js --ext .ts . && prettier --check '**/*.{js,ts,vue,json}' && cd src/webview && npm run lint",
     "autofix": "eslint --fix . && prettier --write '**/*.{js,ts,vue,json}' && cd src/webview && npm run autofix",
@@ -889,6 +890,7 @@
     "@typescript-eslint/parser": "^5.3.1",
     "conventional-changelog-cli": "^2.1.1",
     "eslint": "^8.2.0",
+    "esbuild": "^0.13.13",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
@@ -901,6 +903,7 @@
     "simple-git": "^2.45.1",
     "sinon": "^12.0.1",
     "ts-jest": "^27.0.7",
+    "source-map-support": "^0.5.20",
     "typescript": "^4.4.3",
     "vsce": "^1.99.0",
     "vscode-test": "^1.6.1"

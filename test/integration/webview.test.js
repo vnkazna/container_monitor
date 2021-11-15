@@ -4,12 +4,10 @@ const sinon = require('sinon');
 const EventEmitter = require('events');
 const { graphql } = require('msw');
 const { webviewController } = require('../../src/webview_controller');
-const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const { projectWithIssueDiscussions, note2 } = require('./fixtures/graphql/discussions');
 
 const { getServer, createJsonEndpoint } = require('./test_infrastructure/mock_server');
-const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 
 const waitForMessage = (panel, type) =>
@@ -51,7 +49,6 @@ describe('GitLab webview', () => {
         [],
       ),
     ]);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   /*
@@ -92,7 +89,6 @@ describe('GitLab webview', () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('sends a message', async () => {

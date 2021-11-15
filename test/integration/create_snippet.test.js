@@ -1,6 +1,5 @@
 const sinon = require('sinon');
 const vscode = require('vscode');
-const { tokenService } = require('../../src/services/token_service');
 const { getServer, createPostEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
 const {
@@ -23,7 +22,6 @@ describe('Create snippet', async () => {
         web_url: snippetUrl,
       }),
     ]);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   beforeEach(async () => {
@@ -39,7 +37,6 @@ describe('Create snippet', async () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('creates snippet form the file', async () => {

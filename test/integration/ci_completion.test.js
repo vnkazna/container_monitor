@@ -22,8 +22,6 @@ describe('CI variable completion', () => {
       vscode.commands.executeCommand('vscode.executeCompletionItemProvider', gitlabCiYml, position);
 
     beforeEach(async () => {
-      const ext = vscode.extensions.getExtension('gitlab.gitlab-workflow');
-      await ext.activate();
       await createAndOpenFile(gitlabCiYml);
     });
 

@@ -41,4 +41,20 @@ describe('TokenService', () => {
 
     expect(tokenService.getToken('https://gitlab.com/')).toBe('abc');
   });
+
+  it('can set and get one token', async () => {
+    expect(tokenService.getToken('https://gitlab.com')).toBeUndefined();
+
+    await tokenService.setToken('https://gitlab.com', 'abc');
+    expect(tokenService.getToken('https://gitlab.com')).toBe('abc');
+  });
+
+  it('can retrieve all instance URLs', async () => {
+    await tokenService.setToken('https://gitlab.com', 'abc');
+    await tokenService.setToken('https://dev.gitlab.com', 'def');
+    expect(tokenService.getRemovableInstanceUrls()).toEqual([
+      'https://gitlab.com',
+      'https://dev.gitlab.com',
+    ]);
+  });
 });

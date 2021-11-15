@@ -2,18 +2,31 @@ const sinon = require('sinon');
 const assert = require('assert');
 const vscode = require('vscode');
 const { rest } = require('msw');
-const { tokenService } = require('../../src/services/token_service');
 const validCiLintResponse = require('./fixtures/rest/ci_lint_valid.json');
 const invalidCiLintResponse = require('./fixtures/rest/ci_lint_invalid.json');
 const { getServer } = require('./test_infrastructure/mock_server');
-const { GITLAB_URL, API_URL_PREFIX } = require('./test_infrastructure/constants');
+const { API_URL_PREFIX } = require('./test_infrastructure/constants');
 const {
   createAndOpenFile,
   closeAndDeleteFile,
   getRepositoryRoot,
   insertTextIntoActiveEditor,
 } = require('./test_infrastructure/helpers');
-const { validate } = require('../../src/ci_config_validator');
+const { USER_COMMANDS } = require('../../src/command_names');
+const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
+
+const ensureRepository = async () => {
+  await gitExtensionWrapper.init();
+  if (gitExtensionWrapper.repositories.length > 0) return undefined;
+  const createPromiseThatResolvesWhenRepoCountChanges = () =>
+    new Promise(resolve => {
+      const sub = gitExtensionWrapper.onRepositoryCountChanged(() => {
+        sub.dispose();
+        resolve(undefined);
+      });
+    });
+  return createPromiseThatResolvesWhenRepoCountChanges();
+};
 
 describe('Validate CI config', async () => {
   let server;
@@ -35,7 +48,7 @@ describe('Validate CI config', async () => {
         }
       }),
     ]);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
+    await ensureRepository();
   });
 
   beforeEach(async () => {
@@ -51,7 +64,6 @@ describe('Validate CI config', async () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('shows info message for valid config', async () => {
@@ -62,7 +74,7 @@ describe('Validate CI config', async () => {
       .resolves();
     await insertTextIntoActiveEditor(VALID_CI_CONFIG);
 
-    await validate();
+    await vscode.commands.executeCommand(USER_COMMANDS.VALIDATE_CI_CONFIG);
 
     informationMessageMock.verify();
   });
@@ -74,7 +86,7 @@ describe('Validate CI config', async () => {
     });
     await insertTextIntoActiveEditor(INVALID_CI_CONFIG);
 
-    await validate();
+    await vscode.commands.executeCommand(USER_COMMANDS.VALIDATE_CI_CONFIG);
 
     assert.deepStrictEqual(errorMessages, [
       'GitLab Workflow: Invalid CI configuration.',

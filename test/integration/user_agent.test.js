@@ -3,7 +3,6 @@ const { setupServer } = require('msw/node');
 const { rest, graphql } = require('msw');
 const assert = require('assert');
 const { API_URL_PREFIX, GITLAB_URL } = require('./test_infrastructure/constants');
-const { tokenService } = require('../../src/services/token_service');
 const gitLabService = require('../../src/gitlab_service');
 const { GitLabNewService } = require('../../src/gitlab/gitlab_new_service');
 const { snippetsResponse } = require('./fixtures/graphql/snippets');
@@ -36,8 +35,6 @@ describe('User-Agent header', () => {
       }),
     );
     server.listen();
-
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   beforeEach(() => {
@@ -47,7 +44,6 @@ describe('User-Agent header', () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   it('is sent with requests from GitLabService', async () => {

@@ -1,7 +1,6 @@
 const assert = require('assert');
 const vscode = require('vscode');
 const { IssuableDataProvider } = require('../../src/tree_view/issuable_data_provider');
-const { tokenService } = require('../../src/services/token_service');
 const openIssueResponse = require('./fixtures/rest/open_issue.json');
 const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const userResponse = require('./fixtures/rest/user.json');
@@ -79,7 +78,6 @@ describe('GitLab tree view', () => {
           [{ ...openIssueResponse, title: 'Custom Query Issue' }],
       }),
     ]);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
     // FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
     await vscode.workspace.getConfiguration().update('gitlab.customQueries', customQuerySettings);
   });
@@ -91,7 +89,6 @@ describe('GitLab tree view', () => {
 
   after(async () => {
     server.close();
-    await tokenService.setToken(GITLAB_URL, undefined);
     // FIXME: if you are touching this configuration statement, move the configuration to extension_configuration.ts
     await vscode.workspace.getConfiguration().update('gitlab.customQueries', undefined);
   });

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as gitLabService from '../gitlab_service';
 import { openCurrentPipeline } from '../openers';
-import { currentBranchRefresher } from '../current_branch_refresher';
 import { ProjectCommand } from './run_with_valid_project';
+import { USER_COMMANDS } from '../command_names';
 
 export const triggerPipelineAction: ProjectCommand = async repository => {
   const items = [
@@ -36,6 +36,6 @@ export const triggerPipelineAction: ProjectCommand = async repository => {
       selected.action,
       repository.rootFsPath,
     );
-    if (newPipeline) await currentBranchRefresher.refresh();
+    if (newPipeline) await vscode.commands.executeCommand(USER_COMMANDS.REFRESH_SIDEBAR);
   }
 };
