@@ -2,6 +2,7 @@ const sinon = require('sinon');
 const assert = require('assert');
 const vscode = require('vscode');
 const { rest } = require('msw');
+const { EOL } = require('os');
 const validCiLintResponse = require('./fixtures/rest/ci_lint_valid.json');
 const invalidCiLintResponse = require('./fixtures/rest/ci_lint_invalid.json');
 const { getServer } = require('./test_infrastructure/mock_server');
@@ -31,8 +32,8 @@ const ensureRepository = async () => {
 describe('Validate CI config', async () => {
   let server;
   let testFileUri;
-  const VALID_CI_CONFIG = [`test:`, `  stage: test`, `  script:`, `    - echo 1`].join(['\n']);
-  const INVALID_CI_CONFIG = [`test:`, `  stage: test`, `  scccript:`, `    - echo 1`].join(['\n']);
+  const VALID_CI_CONFIG = [`test:`, `  stage: test`, `  script:`, `    - echo 1`].join([EOL]);
+  const INVALID_CI_CONFIG = [`test:`, `  stage: test`, `  scccript:`, `    - echo 1`].join([EOL]);
   const sandbox = sinon.createSandbox();
 
   before(async () => {
