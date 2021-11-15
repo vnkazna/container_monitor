@@ -32,9 +32,10 @@ async function run(testsRoot) {
   try {
     validateTestEnvironment();
 
+    const isWin = process.platform === 'win32';
     // Create the mocha test
     const mocha = new Mocha();
-    mocha.timeout(3000);
+    mocha.timeout(isWin ? 10000 : 3000); // It takes longer to run the test on windows CI runners
     mocha.color(true);
 
     const winFriendlyTestsRoot = ensureLowerCaseDriveLetter(testsRoot);
