@@ -29,11 +29,11 @@ describe('PipelineItemModel', () => {
     });
 
     it('has tooltip', () => {
-      expect(item.tooltip).toBe('Pipeline #123 · Succeeded · 4 years ago');
+      expect(item.tooltip).toBe('Pipeline #123 · Passed · 4 years ago');
     });
 
     it('has description', () => {
-      expect(item.description).toBe('Succeeded');
+      expect(item.description).toBe('Passed');
     });
 
     it('has icon', () => {

@@ -28,7 +28,7 @@ const icon = (name: IconName, color: string) =>
   new vscode.ThemeIcon(name, new vscode.ThemeColor(color));
 
 const STATUS_METADATA = {
-  success: { name: 'Succeeded', icon: icon('pass', successColor), priority: 1 },
+  success: { name: 'Passed', icon: icon('pass', successColor), priority: 1 },
   created: { name: 'Created', icon: icon('debug-pause', grayColor), priority: 3 },
   waiting_for_resource: {
     name: 'Waiting for resource',
