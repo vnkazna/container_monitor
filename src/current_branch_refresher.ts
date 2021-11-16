@@ -54,17 +54,17 @@ export class CurrentBranchRefresher {
 
   private previousBranchName = '';
 
-  async init(statusBar: StatusBar, currentBranchProvider: CurrentBranchDataProvider) {
+  init(statusBar: StatusBar, currentBranchProvider: CurrentBranchDataProvider) {
     this.statusBar = statusBar;
     this.currentBranchProvider = currentBranchProvider;
-    await this.clearAndSetInterval();
-    extensionState.onDidChangeValid(() => this.clearAndSetInterval());
+    this.clearAndSetInterval();
+    extensionState.onDidChangeValid(() => this.clearAndSetIntervalAndRefresh());
     vscode.window.onDidChangeWindowState(async state => {
       if (!state.focused) {
         return;
       }
       if (dayjs().diff(this.lastRefresh, 'second') > 30) {
-        await this.clearAndSetInterval();
+        await this.clearAndSetIntervalAndRefresh();
       }
     });
     // This polling is not ideal. The alternative is to listen on repository state
@@ -75,18 +75,22 @@ export class CurrentBranchRefresher {
       const currentBranch = gitExtensionWrapper.getActiveRepository()?.branch;
       if (currentBranch && currentBranch !== this.previousBranchName) {
         this.previousBranchName = currentBranch;
-        await this.clearAndSetInterval();
+        await this.clearAndSetIntervalAndRefresh();
       }
     }, 1000);
   }
 
-  async clearAndSetInterval(): Promise<void> {
+  async clearAndSetIntervalAndRefresh(): Promise<void> {
+    await this.clearAndSetInterval();
+    await this.refresh();
+  }
+
+  clearAndSetInterval(): void {
     global.clearInterval(this.refreshTimer!);
     this.refreshTimer = setInterval(async () => {
       if (!vscode.window.state.focused) return;
       await this.refresh();
     }, 30000);
-    await this.refresh();
   }
 
   async refresh(userInitiated = false) {

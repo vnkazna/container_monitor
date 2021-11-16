@@ -1,54 +1,55 @@
-const vscode = require('vscode');
-const openers = require('./openers');
-const tokenInput = require('./token_input');
-const { tokenService } = require('./services/token_service');
-const { extensionState } = require('./extension_state');
-const searchInput = require('./search_input');
-const { createSnippet } = require('./commands/create_snippet');
-const { insertSnippet } = require('./commands/insert_snippet');
-const ciConfigValidator = require('./ci_config_validator');
-const { webviewController } = require('./webview_controller');
-const { issuableDataProvider } = require('./tree_view/issuable_data_provider');
-const { currentBranchDataProvider } = require('./tree_view/current_branch_data_provider');
-const { initializeLogging, handleError } = require('./log');
-const { GitContentProvider } = require('./review/git_content_provider');
-const { REVIEW_URI_SCHEME, REMOTE_URI_SCHEME } = require('./constants');
-const { USER_COMMANDS, PROGRAMMATIC_COMMANDS } = require('./command_names');
-const { CiCompletionProvider } = require('./completion/ci_completion_provider');
-const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
-const {
+import vscode from 'vscode';
+import * as openers from './openers';
+import * as tokenInput from './token_input';
+import { tokenService } from './services/token_service';
+import { extensionState } from './extension_state';
+import searchInput from './search_input.js';
+import { createSnippet } from './commands/create_snippet';
+import { insertSnippet } from './commands/insert_snippet';
+import * as ciConfigValidator from './ci_config_validator';
+import { webviewController } from './webview_controller';
+import { issuableDataProvider } from './tree_view/issuable_data_provider';
+import { currentBranchDataProvider } from './tree_view/current_branch_data_provider';
+import { initializeLogging, handleError, log } from './log';
+import { GitContentProvider } from './review/git_content_provider';
+import { REVIEW_URI_SCHEME, REMOTE_URI_SCHEME } from './constants';
+import { USER_COMMANDS, PROGRAMMATIC_COMMANDS } from './command_names';
+import { CiCompletionProvider } from './completion/ci_completion_provider';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import {
   toggleResolved,
   deleteComment,
-  editComment: startEdit,
+  editComment as startEdit,
   cancelEdit,
   submitEdit,
   createComment,
   cancelFailedComment,
   retryFailedComment,
-} = require('./commands/mr_discussion_commands');
-const { hasCommentsDecorationProvider } = require('./review/has_comments_decoration_provider');
-const { changeTypeDecorationProvider } = require('./review/change_type_decoration_provider');
-const { checkoutMrBranch } = require('./commands/checkout_mr_branch');
-const { cloneWiki } = require('./commands/clone_wiki');
-const { createSnippetPatch } = require('./commands/create_snippet_patch');
-const { applySnippetPatch } = require('./commands/apply_snippet_patch');
-const { openMrFile } = require('./commands/open_mr_file');
-const { GitLabRemoteFileSystem } = require('./remotefs/gitlab_remote_file_system');
-const { openRepository } = require('./commands/open_repository');
-const { contextUtils } = require('./utils/context_utils');
-const { currentBranchRefresher } = require('./current_branch_refresher');
-const { statusBar } = require('./status_bar');
-const {
+} from './commands/mr_discussion_commands';
+import { hasCommentsDecorationProvider } from './review/has_comments_decoration_provider';
+import { changeTypeDecorationProvider } from './review/change_type_decoration_provider';
+import { checkoutMrBranch } from './commands/checkout_mr_branch';
+import { cloneWiki } from './commands/clone_wiki';
+import { createSnippetPatch } from './commands/create_snippet_patch';
+import { applySnippetPatch } from './commands/apply_snippet_patch';
+import { openMrFile } from './commands/open_mr_file';
+import { GitLabRemoteFileSystem } from './remotefs/gitlab_remote_file_system';
+import { openRepository } from './commands/open_repository';
+import { contextUtils } from './utils/context_utils';
+import { currentBranchRefresher } from './current_branch_refresher';
+import { statusBar } from './status_bar';
+import {
   runWithValidProject,
   runWithValidProjectFile,
   diagnoseRepository,
-} = require('./commands/run_with_valid_project');
-const { triggerPipelineAction } = require('./commands/trigger_pipeline_action');
-const { setSidebarViewState, SidebarViewState } = require('./tree_view/sidebar_view_state');
+} from './commands/run_with_valid_project';
+import { triggerPipelineAction } from './commands/trigger_pipeline_action';
+import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
+import { doNotAwait } from './utils/do_not_await';
 
 const wrapWithCatch =
-  command =>
-  async (...args) => {
+  (command: (...args: unknown[]) => unknown) =>
+  async (...args: unknown[]) => {
     try {
       await command(...args);
     } catch (e) {
@@ -61,7 +62,10 @@ const registerSidebarTreeDataProviders = () => {
   vscode.window.registerTreeDataProvider('currentBranchInfo', currentBranchDataProvider);
 };
 
-const registerCommands = (context, outputChannel) => {
+const registerCommands = (
+  context: vscode.ExtensionContext,
+  outputChannel: vscode.OutputChannel,
+) => {
   const commands = {
     [USER_COMMANDS.SHOW_ISSUES_ASSIGNED_TO_ME]: runWithValidProject(openers.showIssues),
     [USER_COMMANDS.SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME]: runWithValidProject(
@@ -71,7 +75,7 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
     [USER_COMMANDS.OPEN_ACTIVE_FILE]: runWithValidProjectFile(openers.openActiveFile),
     [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: runWithValidProjectFile(openers.copyLinkToActiveFile),
-    [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: runWithValidProjectFile(
+    [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: runWithValidProject(
       openers.openCurrentMergeRequest,
     ),
     [USER_COMMANDS.OPEN_CREATE_NEW_ISSUE]: runWithValidProject(openers.openCreateNewIssue),
@@ -103,9 +107,9 @@ const registerCommands = (context, outputChannel) => {
     [USER_COMMANDS.OPEN_REPOSITORY]: openRepository,
     [USER_COMMANDS.SIDEBAR_VIEW_AS_LIST]: () => setSidebarViewState(SidebarViewState.ListView),
     [USER_COMMANDS.SIDEBAR_VIEW_AS_TREE]: () => setSidebarViewState(SidebarViewState.TreeView),
-    [USER_COMMANDS.REFRESH_SIDEBAR]: () => {
+    [USER_COMMANDS.REFRESH_SIDEBAR]: async () => {
       issuableDataProvider.refresh();
-      currentBranchRefresher.refresh(true);
+      await currentBranchRefresher.refresh(true);
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
     [PROGRAMMATIC_COMMANDS.DIAGNOSE_REPOSITORY]: diagnoseRepository,
@@ -114,13 +118,15 @@ const registerCommands = (context, outputChannel) => {
   };
 
   Object.keys(commands).forEach(cmd => {
-    context.subscriptions.push(vscode.commands.registerCommand(cmd, wrapWithCatch(commands[cmd])));
+    context.subscriptions.push(
+      vscode.commands.registerCommand(cmd, wrapWithCatch(commands[cmd] as any)),
+    );
   });
 
   registerSidebarTreeDataProviders();
 };
 
-const registerCiCompletion = context => {
+const registerCiCompletion = (context: vscode.ExtensionContext) => {
   const subscription = vscode.languages.registerCompletionItemProvider(
     { pattern: '**/.gitlab-ci*.{yml,yaml}' },
     new CiCompletionProvider(),
@@ -133,10 +139,8 @@ const registerCiCompletion = context => {
 /**
  * @param {vscode.ExtensionContext} context
  */
-const activate = context => {
+const activate = async (context: vscode.ExtensionContext) => {
   contextUtils.init(context);
-
-  setSidebarViewState(SidebarViewState.ListView);
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
   vscode.workspace.registerTextDocumentContentProvider(REVIEW_URI_SCHEME, new GitContentProvider());
@@ -149,9 +153,7 @@ const activate = context => {
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
   tokenService.init(context);
-  extensionState.init(tokenService);
   registerCiCompletion(context);
-  gitExtensionWrapper.init();
   context.subscriptions.push(gitExtensionWrapper);
   statusBar.init();
   context.subscriptions.push(statusBar);
@@ -160,6 +162,15 @@ const activate = context => {
 
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
+  // we don't want to hold the extension startup by waiting on VS Code and GitLab API
+  doNotAwait(
+    Promise.all([
+      setSidebarViewState(SidebarViewState.ListView),
+      extensionState.init(tokenService),
+      gitExtensionWrapper.init(),
+      currentBranchRefresher.refresh(),
+    ]).catch(e => handleError(e)),
+  );
 };
 
 exports.activate = activate;
