@@ -21,16 +21,16 @@ export class Help {
   static async showError(error: HelpError, severity = HelpMessageSeverity.Info): Promise<void> {
     let shouldShow = false;
     switch (severity) {
-      default:
-        shouldShow = !!(await vscode.window.showInformationMessage(error.message, 'Show Help'));
-        break;
-
       case HelpMessageSeverity.Warning:
         shouldShow = !!(await vscode.window.showWarningMessage(error.message, 'Show Help'));
         break;
 
       case HelpMessageSeverity.Error:
         shouldShow = !!(await vscode.window.showErrorMessage(error.message, 'Show Help'));
+        break;
+
+      default:
+        shouldShow = !!(await vscode.window.showInformationMessage(error.message, 'Show Help'));
         break;
     }
 

@@ -34,6 +34,8 @@ export class ChangedFolderItem extends TreeItem {
     // concatenate folder names
     if (!isRoot(folderName) && this.files.length === 0 && this.subfolderNames.length === 1) {
       const subfolderName = this.subfolderNames[0];
+      // FIXME: this constructor return was introduced before the rule
+      // eslint-disable-next-line no-constructor-return
       return new ChangedFolderItem(
         path.join(folderName, subfolderName),
         this.subfolders.map(relativePath(subfolderName)),

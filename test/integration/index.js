@@ -42,6 +42,7 @@ async function run(testsRoot) {
 
     // Run the mocha test
     await new Promise((res, rej) =>
+      // eslint-disable-next-line no-promise-executor-return
       mocha.run(failures => {
         if (failures) {
           rej(failures);

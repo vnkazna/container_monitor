@@ -19,7 +19,9 @@ describe('pickProject', () => {
   const alwaysPickOptionN = (n: number, v?: string) => {
     (showQuickPick as jest.Mock).mockImplementation(async picker => {
       // Wait for a moment for the list to be populated
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise(r => {
+        setTimeout(r, 1);
+      });
       // eslint-disable-next-line no-param-reassign
       if (v) picker.value = v;
       return picker.items[n];
