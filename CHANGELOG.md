@@ -4,11 +4,13 @@
 ### Bug Fixes
 
 * rename Succeeded CI job status to Passed ([28c4864](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/28c4864b3c2ca7a221ba6f242714aa4d8a4c434b))
+  * Implemented by [Justin Mai](https://gitlab.com/Justin.Mai) with [MR !361](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/361) 👍
 
 
 ### Performance Improvements
 
 * reduce packaged extension size ([10334ac](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/10334ac57721431bc39dc07c9322f68b4ae9ee6f))
+  * Big thanks to [Ethan Reesor](https://gitlab.com/firelizzard) who designed the original implementation in [Draft: Bundle with esbuild](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/334). He also helped with measuring performance and consulting the final implementation in [perf: reduce packaged extension size](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/368) 👍
 
 
 
