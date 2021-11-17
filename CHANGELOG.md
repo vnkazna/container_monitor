@@ -1,3 +1,17 @@
+# [3.38.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.37.0...v3.38.0) (2021-11-17)
+
+
+### Bug Fixes
+
+* rename Succeeded CI job status to Passed ([28c4864](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/28c4864b3c2ca7a221ba6f242714aa4d8a4c434b))
+
+
+### Performance Improvements
+
+* reduce packaged extension size ([10334ac](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/10334ac57721431bc39dc07c9322f68b4ae9ee6f))
+
+
+
 # [3.37.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.36.1...v3.37.0) (2021-11-11)
 
 
