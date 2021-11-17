@@ -38,7 +38,7 @@ async function fetch(
   repositoryRoot: string,
   path: string,
   method = 'GET',
-  data?: Record<string, unknown>,
+  data: Record<string, unknown> | undefined = undefined,
 ) {
   const instanceUrl = await getInstanceUrl(repositoryRoot);
   const apiRoot = `${instanceUrl}/api/v4`;
