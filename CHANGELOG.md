@@ -1,3 +1,12 @@
+## [3.38.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.38.0...v3.38.1) (2021-11-22)
+
+
+### Bug Fixes
+
+* make Vue template rendering safer ([086dfbe](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/086dfbe24079b1b2aa80981b6daf2c6d2286263b))
+
+
+
 # [3.38.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.37.0...v3.38.0) (2021-11-17)
 
 
