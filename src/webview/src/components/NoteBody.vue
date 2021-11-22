@@ -1,8 +1,13 @@
 <script>
+import { SafeHtmlDirective } from '../directives/safe_html/safe_html';
+
 const md = require('markdown-it')().use(require('markdown-it-checkbox'));
 
 export default {
   name: 'NoteBody',
+  directives: {
+    SafeHtml: SafeHtmlDirective,
+  },
   props: {
     note: {
       type: Object,
@@ -38,7 +43,7 @@ export default {
 
 <template>
   <div class="note-body">
-    <div class="body" v-html="renderedNoteBody" />
+    <div class="body" v-safe-html="renderedNoteBody" />
   </div>
 </template>
 

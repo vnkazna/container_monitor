@@ -1,7 +1,7 @@
 <script>
 import UserAvatar from './UserAvatar';
-import icons from '../assets/icons';
 import Date from './Date';
+import LabelIcon from './icons/LabelIcon';
 
 export default {
   props: {
@@ -13,10 +13,8 @@ export default {
   components: {
     UserAvatar,
     Date,
+    LabelIcon,
   },
-  data: () => ({
-    icon: icons.label,
-  }),
   computed: {
     author() {
       return this.noteable.user;
@@ -38,7 +36,9 @@ export default {
   <li class="note label-note">
     <div class="timeline-entry-inner">
       <div class="timelineIcon">
-        <span class="avatar" v-html="icon" />
+        <span class="avatar">
+          <label-icon />
+        </span>
       </div>
       <div class="timelineContent">
         <div class="note-header">

@@ -1,7 +1,8 @@
 <script>
 import Note from './Note';
 import CommentForm from './CommentForm';
-import icons from '../assets/icons';
+import ChevronDownIcon from './icons/ChevronDownIcon';
+import ChevronRightIcon from './icons/ChevronRightIcon';
 
 export default {
   name: 'Discussion',
@@ -21,6 +22,8 @@ export default {
   components: {
     Note,
     CommentForm,
+    ChevronDownIcon,
+    ChevronRightIcon,
   },
   computed: {
     initialDiscussion() {
@@ -36,7 +39,7 @@ export default {
       return this.isRepliesVisible ? 'Collapse replies' : 'Expand replies';
     },
     toggleRepliesIcon() {
-      return this.isRepliesVisible ? this.chevronDownSvg : this.chevronRightSvg;
+      return this.isRepliesVisible ? ChevronDownIcon : ChevronRightIcon;
     },
   },
   methods: {
@@ -47,10 +50,6 @@ export default {
       this.isEditing = !this.isEditing;
     },
   },
-  created() {
-    this.chevronDownSvg = icons.chevronDown;
-    this.chevronRightSvg = icons.chevronRight;
-  },
 };
 </script>
 
@@ -58,7 +57,7 @@ export default {
   <div class="discussion">
     <note :noteable="initialDiscussion" />
     <button v-if="hasReplies" @click="toggleReplies" class="collapse js-collapse">
-      <span class="chevron" v-html="toggleRepliesIcon" /> {{ toggleRepliesText }}
+      <component :is="toggleRepliesIcon" /> {{ toggleRepliesText }}
     </button>
     <template v-if="isRepliesVisible">
       <note v-for="note in replies" :key="note.id" :noteable="note" />
@@ -81,7 +80,7 @@ export default {
     margin: 0;
   }
 
-  .chevron svg {
+  svg {
     width: 10px;
     height: 10px;
   }
