@@ -9,7 +9,7 @@ const ciVariables = require('../../src/completion/ci_variables.json');
 
 describe('CI variable completion', () => {
   describe('.gitlab-ci.yml', () => {
-    const gitlabCiYml = vscode.Uri.parse(`${getRepositoryRoot()}/.gitlab-ci.yml`);
+    const gitlabCiYml = vscode.Uri.file(`${getRepositoryRoot()}/.gitlab-ci.yml`);
 
     const write = async string => {
       const editor = vscode.window.activeTextEditor;

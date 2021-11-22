@@ -57,7 +57,7 @@ describe('git_extension_wrapper', () => {
       describe('with open editor', () => {
         let testFileUri;
         beforeEach(async () => {
-          testFileUri = vscode.Uri.parse(`${getRepositoryRoot()}/newfile.js`);
+          testFileUri = vscode.Uri.file(`${getRepositoryRoot()}/newfile.js`);
           await createAndOpenFile(testFileUri);
         });
 
