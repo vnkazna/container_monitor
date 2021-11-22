@@ -3,6 +3,7 @@ import NoteBody from './NoteBody';
 import UserAvatar from './UserAvatar';
 import icons from '../assets/icons';
 import Date from './Date';
+import { SafeHtmlDirective } from '../directives/safe_html/safe_html';
 
 export default {
   props: {
@@ -10,6 +11,9 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  directives: {
+    SafeHtml: SafeHtmlDirective,
   },
   components: {
     NoteBody,
@@ -60,9 +64,6 @@ export default {
     }
     if (this.noteable.body.match(/task/)) {
       this.icon = icons.task_done;
-    }
-    if (this.noteable.body.match(/label/)) {
-      this.icon = icons.label;
     }
     if (this.noteable.body.match(/mentioned in/)) {
       this.icon = icons.comment_dots;
@@ -119,7 +120,7 @@ export default {
   <li class="note system-note">
     <div class="timeline-entry-inner">
       <div class="timelineIcon">
-        <span v-html="icon" />
+        <span v-safe-html="icon" />
       </div>
       <div class="timelineContent" v-if="multiLine">
         <div class="note-header">
