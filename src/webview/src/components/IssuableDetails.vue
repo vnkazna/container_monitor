@@ -1,6 +1,7 @@
 <script>
 import UserAvatar from './UserAvatar';
 import Date from './Date';
+import { SafeHtmlDirective } from '../directives/safe_html/safe_html';
 
 const md = require('markdown-it')().use(require('markdown-it-checkbox'));
 
@@ -10,6 +11,9 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  directives: {
+    SafeHtml: SafeHtmlDirective,
   },
   components: {
     UserAvatar,
@@ -72,7 +76,7 @@ export default {
     <div class="title">
       <h2>{{ issuable.title }}</h2>
     </div>
-    <div class="description" v-html="description" />
+    <div class="description" v-safe-html="description" />
   </div>
 </template>
 

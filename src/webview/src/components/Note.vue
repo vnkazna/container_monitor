@@ -1,9 +1,13 @@
 <script>
 import UserAvatar from './UserAvatar';
 import Date from './Date';
+import { SafeHtmlDirective } from '../directives/safe_html/safe_html';
 
 export default {
   name: 'Note',
+  directives: {
+    SafeHtml: SafeHtmlDirective,
+  },
   props: {
     noteable: {
       type: Object,
@@ -35,7 +39,7 @@ export default {
           <date :date="noteable.createdAt" style="margin-left: 2px" />
         </div>
         <div class="note-body">
-          <div class="body" v-html="noteable.bodyHtml" />
+          <div class="body" v-safe-html="noteable.bodyHtml" />
         </div>
       </div>
     </div>
