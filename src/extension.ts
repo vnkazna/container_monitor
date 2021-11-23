@@ -139,7 +139,7 @@ const registerCiCompletion = (context: vscode.ExtensionContext) => {
 /**
  * @param {vscode.ExtensionContext} context
  */
-const activate = async (context: vscode.ExtensionContext) => {
+export const activate = async (context: vscode.ExtensionContext) => {
   contextUtils.init(context);
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));
@@ -172,5 +172,3 @@ const activate = async (context: vscode.ExtensionContext) => {
     ]).catch(e => handleError(e)),
   );
 };
-
-exports.activate = activate;
