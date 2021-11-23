@@ -17,5 +17,5 @@
     "useUnknownInCatchVariables": false
   },
   "exclude": ["src/webview"],
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*", "test/**/*", "webpack.config.js"]
 }

@@ -13,6 +13,13 @@
     },
     {
       "type": "npm",
+      "script": "web-compile",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: web-compile"
+    },
+    {
+      "type": "npm",
       "script": "eslint",
       "problemMatcher": ["$eslint-stylish"],
       "label": "npm: eslint",
