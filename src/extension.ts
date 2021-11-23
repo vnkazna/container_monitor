@@ -46,16 +46,7 @@ import {
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
-
-const wrapWithCatch =
-  (command: (...args: unknown[]) => unknown) =>
-  async (...args: unknown[]) => {
-    try {
-      await command(...args);
-    } catch (e) {
-      handleError(e);
-    }
-  };
+import { wrapWithCatch } from './utils/wrap_with_catch';
 
 const registerSidebarTreeDataProviders = () => {
   vscode.window.registerTreeDataProvider('issuesAndMrs', issuableDataProvider);
