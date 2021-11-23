@@ -5,6 +5,7 @@
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
     "gitlab.gitlab-workflow",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "amodio.tsl-problem-matcher"
   ]
 }

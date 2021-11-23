@@ -15,8 +15,11 @@
       "type": "npm",
       "script": "web-compile",
       "group": "build",
-      "problemMatcher": [],
-      "label": "npm: web-compile"
+      "isBackground": true,
+      "problemMatcher": [
+				"$ts-webpack-watch",
+				"$tslint-webpack-watch"
+			],
     },
     {
       "type": "npm",

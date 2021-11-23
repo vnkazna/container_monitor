@@ -858,7 +858,7 @@
   "scripts": {
     "vscode:prepublish": "npm run esbuild -- --minify",
     "esbuild": "esbuild ./src/extension.js --bundle --outfile=out/extension.js --external:vscode --platform=node --target=node14.18 --sourcemap",
-    "esbuild-web": "webpack",
+    "esbuild-web": "webpack --watch",
     "esbuild-watch": "npm run esbuild -- --watch",
     "test-compile": "tsc -p ./ && npm run esbuild",
     "web-compile": "npm run esbuild-web",

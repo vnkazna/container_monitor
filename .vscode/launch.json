@@ -23,9 +23,9 @@
 				"--extensionDevelopmentPath=${workspaceRoot}",
 				"--extensionDevelopmentKind=web"
 			],
-			// "outFiles": [
-			// 	"${workspaceFolder}/dist/web/**/*.js"
-			// ],
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
       "preLaunchTask": "npm: web-compile",
 		},
     {
