@@ -15,7 +15,7 @@
       "type": "npm",
       "script": "web-compile",
       "group": "build",
-      "isBackground": true,
+      "isBackground": false,
       "problemMatcher": [
 				"$ts-webpack-watch",
 				"$tslint-webpack-watch"

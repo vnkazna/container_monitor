@@ -37,6 +37,13 @@ const webExtensionConfig = {
       // see https://webpack.js.org/configuration/resolve/#resolvefallback
       // for the list of Node.js core module polyfills.
       assert: require.resolve('assert'),
+      url: require.resolve('url'),
+      http: require.resolve('stream-http'),
+      https: require.resolve('https-browserify'),
+      // https: false,
+      fs: false,
+      net: false,
+      tls: false,
     },
   },
   module: {

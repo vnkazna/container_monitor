@@ -1,7 +1,7 @@
 import * as https from 'https';
 import { GraphQLClient, gql } from 'graphql-request';
 import crossFetch from 'cross-fetch';
-import { URL, URLSearchParams } from 'url';
+import url from 'url';
 import createHttpProxyAgent from 'https-proxy-agent';
 import assert from 'assert';
 import { tokenService } from '../services/token_service';
@@ -79,6 +79,9 @@ interface GetDiscussionsOptions {
   endCursor?: string;
 }
 
+const LocalURL = URL || url.URL;
+const LocalURLSearchParams = URLSearchParams || url.URLSearchParams;
+
 interface RestNote {
   body: string;
 }
@@ -95,7 +98,7 @@ export async function fetchJson<T>(
   options: RequestInit,
   query: Record<string, QueryValue> = {},
 ): Promise<T> {
-  const q = new URLSearchParams();
+  const q = new LocalURLSearchParams();
   Object.entries(query).forEach(([name, value]) => {
     if (typeof value !== 'undefined' && value !== null) {
       q.set(name, `${value}`);
@@ -181,7 +184,7 @@ export class GitLabNewService {
   constructor(readonly instanceUrl: string, readonly pipelineInstanceUrl?: string) {
     const ensureEndsWithSlash = (url: string) => url.replace(/\/?$/, '/');
 
-    const endpoint = new URL('./api/graphql', ensureEndsWithSlash(this.instanceUrl)).href; // supports GitLab instances that are on a custom path, e.g. "https://example.com/gitlab"
+    const endpoint = new LocalURL('./api/graphql', ensureEndsWithSlash(this.instanceUrl)).href; // supports GitLab instances that are on a custom path, e.g. "https://example.com/gitlab"
 
     this.client = new GraphQLClient(endpoint, this.fetchOptions);
   }
