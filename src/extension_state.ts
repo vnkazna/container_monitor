@@ -27,7 +27,7 @@ export class ExtensionState {
   }
 
   isValid(): boolean {
-    return this.hasAnyTokens();
+    return this.hasAnyTokens() && hasOpenRepositories();
   }
 
   async updateExtensionStatus(): Promise<void> {

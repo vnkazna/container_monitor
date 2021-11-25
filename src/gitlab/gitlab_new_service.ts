@@ -622,7 +622,7 @@ export class GitLabNewService {
     );
   }
 
-  async getFirstUserByUsername(username: string) {
+  async getFirstUserByUsername(username: string): Promise<RestUser | undefined> {
     const usersUrl = `${this.instanceUrl}/api/v4/users`;
     const users = await fetchJson('users', usersUrl, this.fetchOptions, { username });
     return (users as RestUser[])[0];
@@ -642,10 +642,6 @@ export class GitLabNewService {
       state: state || 'opened',
     };
 
-    const version = await this.getVersion();
-
-    if (!version) return [];
-
     if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
       config.scope = 'all';
     } else if (
@@ -654,12 +650,6 @@ export class GitLabNewService {
       config.scope !== 'created_by_me'
     ) {
       config.scope = 'all';
-    }
-
-    // Normalize scope parameter for version < 11 instances.
-    const [major] = version.split('.');
-    if (parseInt(major, 10) < 11) {
-      config.scope = config.scope.replace(/_/g, '-');
     }
 
     let path = '';
