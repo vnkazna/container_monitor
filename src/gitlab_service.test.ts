@@ -83,14 +83,14 @@ describe('fetchIssueables', () => {
     responses?: unknown[];
   }
 
-  const setupFetchIssuable = ({ version = '13.9', responses = [] }: SetupFetchOptions = {}) => {
+  const setupFetchIssuable = ({ responses = [] }: SetupFetchOptions = {}) => {
     request = require('request-promise');
     const { fetchIssuables } = require('./gitlab_service');
     jest.mock('request-promise', () => jest.fn(() => ({ response: [] })));
     fetchIssuablesRef = fetchIssuables;
 
     const createResponseImplementation = (response: unknown) => () => ({ response });
-    const implementations = [{ version }, ...responses].map(createResponseImplementation);
+    const implementations = responses.map(createResponseImplementation);
 
     implementations.forEach(imp => request.mockImplementationOnce(imp));
   };
@@ -104,25 +104,6 @@ describe('fetchIssueables', () => {
   const getProjectUrl = (calls: any[]) => getMockCall(calls, '/api/v4/projects')[0];
 
   const getGroupUrl = (calls: any[]) => getMockCall(calls, '/api/v4/groups')[0];
-
-  describe('handles versions', () => {
-    it('replaces _ in versions before 11', async () => {
-      setupFetchIssuable({ version: '10' });
-
-      await fetchIssuablesHelper({ scope: 'assigned_to_me' });
-
-      expect(request.mock.calls[1][0]).toContain('assigned-to-me');
-    });
-
-    it('leaves _ in versions after 10', async () => {
-      setupFetchIssuable({ version: '11' });
-
-      await fetchIssuablesHelper({ scope: 'assigned_to_me' });
-
-      const projectUrl = getProjectUrl(request.mock.calls);
-      expect(projectUrl).toContain('assigned_to_me');
-    });
-  });
 
   describe('handles types', () => {
     it.each`
@@ -163,7 +144,7 @@ describe('fetchIssueables', () => {
     it('sets no author parameter', async () => {
       setupFetchIssuable();
       await fetchIssuablesHelper({ type: CustomQueryType.ISSUE });
-      const search = new URLSearchParams(request.mock.calls[1][0]);
+      const search = new URLSearchParams(request.mock.calls[0][0]);
       expect(search.get('author_username')).toBeNull();
       expect(search.get('author_id')).toBeNull();
     });
@@ -171,7 +152,7 @@ describe('fetchIssueables', () => {
     it('sets author_username parameter', async () => {
       setupFetchIssuable();
       await fetchIssuablesHelper({ type: CustomQueryType.ISSUE, author: 'testuser' });
-      const search = new URLSearchParams(request.mock.calls[1][0]);
+      const search = new URLSearchParams(request.mock.calls[0][0]);
       expect(search.get('author_username')).toEqual('testuser');
       expect(search.get('author_id')).toBeNull();
     });
@@ -181,7 +162,7 @@ describe('fetchIssueables', () => {
         responses: [[{ id: 1 }]],
       });
       await fetchIssuablesHelper({ type: CustomQueryType.MR, author: 'testuser' });
-      const search = new URLSearchParams(request.mock.calls[2][0]);
+      const search = new URLSearchParams(request.mock.calls[1][0]);
       expect(search.get('author_username')).toBeNull();
       expect(search.get('author_id')).toEqual('1');
     });
@@ -191,7 +172,7 @@ describe('fetchIssueables', () => {
         responses: [[]],
       });
       await fetchIssuablesHelper({ type: CustomQueryType.MR, author: 'testuser' });
-      const search = new URLSearchParams(request.mock.calls[2][0]);
+      const search = new URLSearchParams(request.mock.calls[1][0]);
       expect(search.get('author_username')).toBeNull();
       expect(search.get('author_id')).toEqual('-1');
     });
@@ -200,7 +181,7 @@ describe('fetchIssueables', () => {
   it('sets reviewer parameter', async () => {
     setupFetchIssuable();
     await fetchIssuablesHelper({ type: CustomQueryType.MR, reviewer: 'reviewer' });
-    const search = new URLSearchParams(request.mock.calls[1][0]);
+    const search = new URLSearchParams(request.mock.calls[0][0]);
     expect(search.get('reviewer_username')).toEqual('reviewer');
   });
 
@@ -208,14 +189,14 @@ describe('fetchIssueables', () => {
     it('sets "all" parameter', async () => {
       setupFetchIssuable();
       await fetchIssuablesHelper({ searchIn: 'all' });
-      const search = new URLSearchParams(request.mock.calls[1][0]);
+      const search = new URLSearchParams(request.mock.calls[0][0]);
       expect(search.get('in')).toEqual('title,description');
     });
 
     it('sets "in" parameter', async () => {
       setupFetchIssuable();
       await fetchIssuablesHelper({ searchIn: 'title' });
-      const search = new URLSearchParams(request.mock.calls[1][0]);
+      const search = new URLSearchParams(request.mock.calls[0][0]);
       expect(search.get('in')).toEqual('title');
     });
   });
@@ -224,7 +205,7 @@ describe('fetchIssueables', () => {
     it('sets wip parameter', async () => {
       setupFetchIssuable();
       await fetchIssuablesHelper({ wip: 'true' });
-      const search = new URLSearchParams(request.mock.calls[1][0]);
+      const search = new URLSearchParams(request.mock.calls[0][0]);
       expect(search.get('wip')).toEqual('true');
     });
   });
@@ -255,7 +236,7 @@ describe('fetchIssueables', () => {
         severityLevels: ['severityLevel1', 'severityLevel2'],
         confidenceLevels: ['confidenceLevel1', 'confidenceLevel2'],
       });
-      const search = new URLSearchParams(request.mock.calls[1][0]);
+      const search = new URLSearchParams(request.mock.calls[0][0]);
 
       expect(search.get('confidential')).toEqual('true');
       expect(search.get('not[labels]')).toEqual('label1,label2');

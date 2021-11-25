@@ -32,8 +32,6 @@ const normalizeAvatarUrl =
     };
   };
 
-let versionCache: string | null = null;
-
 async function fetch(
   repositoryRoot: string,
   path: string,
@@ -150,19 +148,6 @@ async function fetchFirstUserByUsername(repositoryRoot: string, userName: string
   }
 }
 
-export async function fetchVersion(repositoryRoot: string) {
-  try {
-    if (!versionCache) {
-      const { response } = await fetch(repositoryRoot, '/version');
-      versionCache = response.version;
-    }
-  } catch (e) {
-    handleError(e);
-  }
-
-  return versionCache;
-}
-
 async function fetchLastPipelineForCurrentBranch(
   repositoryRoot: string,
 ): Promise<RestPipeline | undefined> {
@@ -194,10 +179,8 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
   };
   let issuable = null;
 
-  const version = await fetchVersion(repositoryRoot);
-
   const project = await fetchCurrentProjectSwallowError(repositoryRoot);
-  if (!version || !project) return [];
+  if (!project) return [];
 
   if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
     config.scope = 'all';
@@ -207,12 +190,6 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
     config.scope !== 'created_by_me'
   ) {
     config.scope = 'all';
-  }
-
-  // Normalize scope parameter for version < 11 instances.
-  const [major] = version.split('.');
-  if (parseInt(major, 10) < 11) {
-    config.scope = config.scope.replace(/_/g, '-');
   }
 
   let path = '';
@@ -455,15 +432,6 @@ export async function createSnippet(repositoryRoot: string, data: { id: number }
 
 export async function renderMarkdown(markdown: string, repositoryRoot: string) {
   let rendered = { html: markdown };
-  const version = await fetchVersion(repositoryRoot);
-  if (!version) {
-    return markdown;
-  }
-  const [major] = version.split('.');
-
-  if (parseInt(major, 10) < 11) {
-    return markdown;
-  }
 
   try {
     const project = await fetchCurrentProject(repositoryRoot);
