@@ -787,10 +787,6 @@
                   ]
                 }
               },
-              "pipelineId": {
-                "type": "number | string",
-                "description": "Returns vulnerabilities belonging to specified pipeline. \"branch\" returns vulnerabilities belonging to latest pipeline of the current branch. Works only with vulnerabilities"
-              },
               "reviewer": {
                 "type": "string",
                 "description": "Returns GitLab Merge Requests assigned for review to the given username. When set to \"<current_user>\", the extension uses the current user's username."

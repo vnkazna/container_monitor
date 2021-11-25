@@ -186,7 +186,7 @@ type QueryValue = string | boolean | string[] | number | undefined;
 
 export async function fetchIssuables(params: CustomQuery, repositoryRoot: string) {
   const { type, scope, state, author, assignee, wip } = params;
-  let { searchIn, pipelineId, reviewer } = params;
+  let { searchIn, reviewer } = params;
   const config = {
     type: type || 'merge_requests',
     scope: scope || 'all',
@@ -302,19 +302,6 @@ export async function fetchIssuables(params: CustomQuery, repositoryRoot: string
       'not[search]': params.excludeSearch,
       'not[in]': params.excludeSearchIn,
     };
-  }
-
-  /**
-   * Pipeline parameters
-   */
-  // FIXME: this 'branch' or actual numerical ID most likely doesn't make sense from user perspective
-  //        Also, the logic allows for `pipeline_id=branch` query which doesn't make sense
-  //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
-  if (pipelineId) {
-    if (pipelineId === 'branch') {
-      pipelineId = (await fetchLastPipelineForCurrentBranch(repositoryRoot))?.id;
-    }
-    search.append('pipeline_id', `${pipelineId}`);
   }
 
   /**
