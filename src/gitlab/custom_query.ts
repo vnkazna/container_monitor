@@ -29,7 +29,6 @@ export interface CustomQuery {
   severityLevels?: string[];
   confidenceLevels?: string[];
   searchIn: string;
-  pipelineId?: number | 'branch';
   noItemText: string;
   reviewer?: string;
 }

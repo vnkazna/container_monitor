@@ -87,4 +87,3 @@ with other entry types.
 | `reportTypes` | false | n/a | Returns vulnerabilities belonging to specified report types. Works only with vulnerabilities. Possible values: `sast`, `dast`, `dependency_scanning`, `container_scanning`. |
 | `severityLevels` | false | `all` | Returns vulnerabilities belonging to specified severity levels. Works only with vulnerabilities. Possible values: `undefined`, `info`, `unknown`, `low`, `medium`, `high`, `critical`. |
 | `confidenceLevels` | false | `all` | Returns vulnerabilities belonging to specified confidence levels. Works only with vulnerabilities. Possible values: `undefined`, `ignore`, `unknown`, `experimental`, `low`, `medium`, `high`, `confirmed`. |
-| `pipelineId` | false | n/a | Returns vulnerabilities belonging to specified pipeline. `branch` returns vulnerabilities belonging to latest pipeline of the current branch. Works only with vulnerabilities. |

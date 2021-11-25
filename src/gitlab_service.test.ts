@@ -53,7 +53,6 @@ describe('fetchIssueables', () => {
     state: 'opened',
     wip: '',
     searchIn: '',
-    pipelineId: undefined,
     confidential: false,
     excludeLabels: undefined,
     excludeMilestone: undefined,
@@ -278,15 +277,6 @@ describe('fetchIssueables', () => {
       expect(search.get('report_type')).toEqual('reportType1,reportType2');
       expect(search.get('severity')).toEqual('severityLevel1,severityLevel2');
       expect(search.get('confidence')).toEqual('confidenceLevel1,confidenceLevel2');
-    });
-  });
-
-  describe('pipeline parameters', () => {
-    it('sets pipeline_id when given a number', async () => {
-      setupFetchIssuable();
-      await fetchIssuablesHelper({ pipelineId: 1 });
-      const search = new URLSearchParams(request.mock.calls[1][0]);
-      expect(search.get('pipeline_id')).toEqual('1');
     });
   });
 
