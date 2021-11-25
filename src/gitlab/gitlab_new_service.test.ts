@@ -183,12 +183,8 @@ describe('gitlab_new_service', () => {
       confidenceLevels: undefined,
     };
 
-    const getMockCall = (calls: any[], pattern: string) =>
-      calls.find((call: string[]) => call[0].includes(pattern));
-
-    const getProjectUrl = (calls: any[]) => getMockCall(calls, '/api/v4/projects')[0];
-
-    const getGroupUrl = (calls: any[]) => getMockCall(calls, '/api/v4/groups')[0];
+    const getFetchedUrl = () => asMock(crossFetch).mock.calls[0][0];
+    const getFetchedParams = () => new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
 
     describe('handles types', () => {
       it.each`
@@ -203,22 +199,20 @@ describe('gitlab_new_service', () => {
         ${CustomQueryType.MR}            | ${'created_by_me'}  | ${'created_by_me'}
       `('sets scope based on type: $type', async ({ type, scope, expectation }) => {
         await gitLabService.getIssuables({ ...defaultParams, scope, type }, project);
-        const projectUrl = getProjectUrl(asMock(crossFetch).mock.calls);
-        expect(projectUrl).toContain(expectation);
+        expect(getFetchedUrl()).toContain(expectation);
       });
 
       it.each`
-        type                             | getUrl           | scope    | queries                                | path
-        ${CustomQueryType.EPIC}          | ${getGroupUrl}   | ${'all'} | ${{ include_ancestor_groups: 'true' }} | ${'/groups/9970/epics'}
-        ${CustomQueryType.VULNERABILITY} | ${getProjectUrl} | ${'all'} | ${{ scope: 'all' }}                    | ${'/projects/5261717/vulnerability_findings'}
-        ${CustomQueryType.MR}            | ${getProjectUrl} | ${'all'} | ${{ scope: 'all' }}                    | ${'/projects/5261717/merge_requests'}
-      `('sets path based on type: $type', async ({ type, getUrl, scope, queries, path }) => {
+        type                             | scope    | queries                                | path
+        ${CustomQueryType.EPIC}          | ${'all'} | ${{ include_ancestor_groups: 'true' }} | ${'/groups/9970/epics'}
+        ${CustomQueryType.VULNERABILITY} | ${'all'} | ${{ scope: 'all' }}                    | ${'/projects/5261717/vulnerability_findings'}
+        ${CustomQueryType.MR}            | ${'all'} | ${{ scope: 'all' }}                    | ${'/projects/5261717/merge_requests'}
+      `('sets path based on type: $type', async ({ type, scope, queries, path }) => {
         await gitLabService.getIssuables({ ...defaultParams, scope, type }, project);
-        const url = getUrl(asMock(crossFetch).mock.calls);
-        const search = new URLSearchParams(url.split('?')[1]);
+        const url = getFetchedUrl();
         expect(url).toContain(path);
         Object.entries(queries).forEach(([key, query]) => {
-          expect(search.get(key)).toEqual(query);
+          expect(getFetchedParams().get(key)).toEqual(query);
         });
       });
     });
@@ -229,9 +223,8 @@ describe('gitlab_new_service', () => {
           { ...defaultParams, type: CustomQueryType.ISSUE },
           project,
         );
-        const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
-        expect(search.get('author_username')).toBeNull();
-        expect(search.get('author_id')).toBeNull();
+        expect(getFetchedParams().get('author_username')).toBeNull();
+        expect(getFetchedParams().get('author_id')).toBeNull();
       });
 
       it('sets author_username parameter', async () => {
@@ -239,9 +232,8 @@ describe('gitlab_new_service', () => {
           { ...defaultParams, type: CustomQueryType.ISSUE, author: 'testuser' },
           project,
         );
-        const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
-        expect(search.get('author_username')).toEqual('testuser');
-        expect(search.get('author_id')).toBeNull();
+        expect(getFetchedParams().get('author_username')).toEqual('testuser');
+        expect(getFetchedParams().get('author_id')).toBeNull();
       });
 
       it('sets author_id parameter if author is found', async () => {
@@ -250,9 +242,8 @@ describe('gitlab_new_service', () => {
           { ...defaultParams, type: CustomQueryType.MR, author: 'testuser' },
           project,
         );
-        const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
-        expect(search.get('author_username')).toBeNull();
-        expect(search.get('author_id')).toEqual('1');
+        expect(getFetchedParams().get('author_username')).toBeNull();
+        expect(getFetchedParams().get('author_id')).toEqual('1');
       });
     });
 
@@ -261,29 +252,25 @@ describe('gitlab_new_service', () => {
         { ...defaultParams, type: CustomQueryType.ISSUE, reviewer: 'reviewer' },
         project,
       );
-      const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
-      expect(search.get('reviewer_username')).toEqual('reviewer');
+      expect(getFetchedParams().get('reviewer_username')).toEqual('reviewer');
     });
 
     describe('searchIn parameters', () => {
       it('sets "all" parameter', async () => {
         await gitLabService.getIssuables({ ...defaultParams, searchIn: 'all' }, project);
-        const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
-        expect(search.get('in')).toEqual('title,description');
+        expect(getFetchedParams().get('in')).toEqual('title,description');
       });
 
       it('sets "in" parameter', async () => {
         await gitLabService.getIssuables({ ...defaultParams, searchIn: 'title' }, project);
-        const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
-        expect(search.get('in')).toEqual('title');
+        expect(getFetchedParams().get('in')).toEqual('title');
       });
     });
 
     describe('WIP/Draft', () => {
       it('sets wip parameter', async () => {
         await gitLabService.getIssuables({ ...defaultParams, wip: 'true' }, project);
-        const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
-        expect(search.get('wip')).toEqual('true');
+        expect(getFetchedParams().get('wip')).toEqual('true');
       });
     });
 
@@ -316,28 +303,28 @@ describe('gitlab_new_service', () => {
           },
           project,
         );
-        const search = new URLSearchParams(asMock(crossFetch).mock.calls[0][0]);
+        const params = getFetchedParams();
 
-        expect(search.get('confidential')).toEqual('true');
-        expect(search.get('not[labels]')).toEqual('label1,label2');
-        expect(search.get('not[milestone]')).toEqual('excludeMilestone');
-        expect(search.get('not[author_username]')).toEqual('excludeAuthor');
-        expect(search.get('not[assignee_username]')).toEqual('excludeAssignee');
-        expect(search.get('not[search]')).toEqual('excludeSearch');
-        expect(search.get('not[in]')).toEqual('excludeSearchIn');
-        expect(search.get('labels')).toEqual('label1,label2');
-        expect(search.get('milestone')).toEqual('milestone');
-        expect(search.get('search')).toEqual('search');
-        expect(search.get('created_before')).toEqual('createdBefore');
-        expect(search.get('created_after')).toEqual('createdAfter');
-        expect(search.get('updated_before')).toEqual('updatedBefore');
-        expect(search.get('updated_after')).toEqual('updatedAfter');
-        expect(search.get('order_by')).toEqual('orderBy');
-        expect(search.get('sort')).toEqual('sort');
-        expect(search.get('per_page')).toEqual('20');
-        expect(search.get('report_type')).toEqual('reportType1,reportType2');
-        expect(search.get('severity')).toEqual('severityLevel1,severityLevel2');
-        expect(search.get('confidence')).toEqual('confidenceLevel1,confidenceLevel2');
+        expect(params.get('confidential')).toEqual('true');
+        expect(params.get('not[labels]')).toEqual('label1,label2');
+        expect(params.get('not[milestone]')).toEqual('excludeMilestone');
+        expect(params.get('not[author_username]')).toEqual('excludeAuthor');
+        expect(params.get('not[assignee_username]')).toEqual('excludeAssignee');
+        expect(params.get('not[search]')).toEqual('excludeSearch');
+        expect(params.get('not[in]')).toEqual('excludeSearchIn');
+        expect(params.get('labels')).toEqual('label1,label2');
+        expect(params.get('milestone')).toEqual('milestone');
+        expect(params.get('search')).toEqual('search');
+        expect(params.get('created_before')).toEqual('createdBefore');
+        expect(params.get('created_after')).toEqual('createdAfter');
+        expect(params.get('updated_before')).toEqual('updatedBefore');
+        expect(params.get('updated_after')).toEqual('updatedAfter');
+        expect(params.get('order_by')).toEqual('orderBy');
+        expect(params.get('sort')).toEqual('sort');
+        expect(params.get('per_page')).toEqual('20');
+        expect(params.get('report_type')).toEqual('reportType1,reportType2');
+        expect(params.get('severity')).toEqual('severityLevel1,severityLevel2');
+        expect(params.get('confidence')).toEqual('confidenceLevel1,confidenceLevel2');
       });
     });
   });
