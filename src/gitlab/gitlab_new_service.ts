@@ -8,6 +8,8 @@ import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
 import { ensureAbsoluteAvatarUrl } from '../utils/ensure_absolute_avatar_url';
+import { CustomQueryType } from './custom_query_type';
+import { CustomQuery } from './custom_query';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
 import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
@@ -43,7 +45,7 @@ import {
 } from './graphql/get_project';
 import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_diff_comment';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
-import { logError } from '../log';
+import { handleError, logError } from '../log';
 import { isMr } from '../utils/is_mr';
 import { ifVersionGte } from './if_version_gte';
 import {
@@ -80,6 +82,8 @@ interface GetDiscussionsOptions {
 interface RestNote {
   body: string;
 }
+
+type QueryValue = string | boolean | string[] | number | undefined;
 
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
@@ -600,5 +604,175 @@ export class GitLabNewService {
         throw new UnsupportedVersionError(featureName, currentVersion!, requiredVersion);
       },
     );
+  }
+
+  async getFirstUserByUsername(username: string) {
+    const usersUrl = `${this.instanceUrl}/api/v4/users`;
+    const users = await fetchJson('users', usersUrl, this.fetchOptions, { username });
+    return (users as RestUser[])[0];
+  }
+
+  async getCurrentUser(): Promise<RestUser> {
+    const usersUrl = `${this.instanceUrl}/api/v4/user`;
+    return fetchJson('users', usersUrl, this.fetchOptions);
+  }
+
+  async fetchIssuables(params: CustomQuery, project: GitLabProject) {
+    const { type, scope, state, author, assignee, wip } = params;
+    let { searchIn, pipelineId, reviewer } = params;
+    const config = {
+      type: type || 'merge_requests',
+      scope: scope || 'all',
+      state: state || 'opened',
+    };
+    let issuable = null;
+
+    const version = await this.getVersion();
+
+    if (!version) return [];
+
+    if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
+      config.scope = 'all';
+    } else if (
+      (config.type === 'issues' || config.type === 'merge_requests') &&
+      config.scope !== 'assigned_to_me' &&
+      config.scope !== 'created_by_me'
+    ) {
+      config.scope = 'all';
+    }
+
+    // Normalize scope parameter for version < 11 instances.
+    const [major] = version.split('.');
+    if (parseInt(major, 10) < 11) {
+      config.scope = config.scope.replace(/_/g, '-');
+    }
+
+    let path = '';
+    const search = new URLSearchParams();
+    search.append('state', config.state);
+
+    /**
+     * Set path based on config.type
+     */
+    if (config.type === 'epics') {
+      if (project.groupRestId) {
+        path = `/groups/${project.groupRestId}/${config.type}`;
+        search.append('include_ancestor_groups', 'true');
+      } else {
+        return [];
+      }
+    } else {
+      const searchKind =
+        config.type === CustomQueryType.VULNERABILITY ? 'vulnerability_findings' : config.type;
+      path = `/projects/${project.restId}/${searchKind}`;
+      search.append('scope', config.scope);
+    }
+
+    /**
+     * Author parameters
+     */
+    if (config.type === 'issues') {
+      if (author) {
+        search.append('author_username', author);
+      }
+    } else if (author) {
+      const authorUser = await this.getFirstUserByUsername(author);
+      if (authorUser) search.append('author_id', String(authorUser.id));
+    }
+
+    /**
+     * Assignee parameters
+     */
+    if (assignee === 'Any' || assignee === 'None') {
+      search.append('assignee_id', assignee);
+    } else if (assignee && config.type === 'issues') {
+      search.append('assignee_username', assignee);
+    } else if (assignee) {
+      const assigneeUser = await this.getFirstUserByUsername(assignee);
+      if (assigneeUser) search.append('author_id', String(assigneeUser.id));
+    }
+
+    /**
+     * Reviewer parameters
+     */
+    if (reviewer) {
+      if (reviewer === '<current_user>') {
+        const user = await this.getCurrentUser();
+        reviewer = user.username;
+      }
+      search.append('reviewer_username', reviewer);
+    }
+
+    /**
+     * Search in parameters
+     */
+    if (searchIn) {
+      if (searchIn === 'all') {
+        searchIn = 'title,description';
+      }
+      search.append('in', searchIn);
+    }
+
+    /**
+     * Handle WIP/Draft for merge_request config.type
+     */
+    if (config.type === 'merge_requests' && wip) {
+      search.append('wip', wip);
+    }
+
+    /**
+     * Query parameters related to issues
+     */
+    let issueQueryParams: Record<string, QueryValue> = {};
+    if (config.type === 'issues') {
+      issueQueryParams = {
+        confidential: params.confidential,
+        'not[labels]': params.excludeLabels,
+        'not[milestone]': params.excludeMilestone,
+        'not[author_username]': params.excludeAuthor,
+        'not[assignee_username]': params.excludeAssignee,
+        'not[search]': params.excludeSearch,
+        'not[in]': params.excludeSearchIn,
+      };
+    }
+
+    /**
+     * Pipeline parameters
+     */
+    // FIXME: this 'branch' or actual numerical ID most likely doesn't make sense from user perspective
+    //        Also, the logic allows for `pipeline_id=branch` query which doesn't make sense
+    //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
+    if (pipelineId) {
+      if (pipelineId === 'branch') {
+        pipelineId = (await fetchLastPipelineForCurrentBranch(repositoryRoot))?.id;
+      }
+      search.append('pipeline_id', `${pipelineId}`);
+    }
+
+    /**
+     * Miscellaneous parameters
+     */
+    const queryParams: Record<string, QueryValue> = {
+      labels: params.labels,
+      milestone: params.milestone,
+      search: params.search,
+      created_before: params.createdBefore,
+      created_after: params.createdAfter,
+      updated_before: params.updatedBefore,
+      updated_after: params.updatedAfter,
+      order_by: params.orderBy,
+      sort: params.sort,
+      per_page: params.maxResults,
+      report_type: params.reportTypes,
+      severity: params.severityLevels,
+      confidence: params.confidenceLevels,
+      ...issueQueryParams,
+    };
+    const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
+    usedQueryParamNames.forEach(name => search.append(name, `${queryParams[name]}`));
+
+    const { response } = await fetch(repositoryRoot, `${path}?${search.toString()}`);
+    issuable = response;
+    return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
   }
 }

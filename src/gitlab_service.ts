@@ -5,8 +5,6 @@ import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
 import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
-import { CustomQueryType } from './gitlab/custom_query_type';
-import { CustomQuery } from './gitlab/custom_query';
 import { ensureAbsoluteAvatarUrl } from './utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl } from './utils/get_instance_url';
@@ -138,16 +136,6 @@ export async function fetchCurrentUser(repositoryRoot: string): Promise<RestUser
   }
 }
 
-async function fetchFirstUserByUsername(repositoryRoot: string, userName: string) {
-  try {
-    const { response: users } = await fetch(repositoryRoot, `/users?username=${userName}`);
-    return users[0];
-  } catch (e) {
-    handleError(new UserFriendlyError('Error when fetching GitLab user.', e));
-    return undefined;
-  }
-}
-
 async function fetchLastPipelineForCurrentBranch(
   repositoryRoot: string,
 ): Promise<RestPipeline | undefined> {
@@ -165,147 +153,6 @@ async function fetchLastPipelineForCurrentBranch(
     `${pipelinesRootPath}?ref=${encodeURIComponent(branchName)}`,
   );
   return pipelines.length > 0 ? pipelines[0] : null;
-}
-
-type QueryValue = string | boolean | string[] | number | undefined;
-
-export async function fetchIssuables(params: CustomQuery, repositoryRoot: string) {
-  const { type, scope, state, author, assignee, wip } = params;
-  let { searchIn, reviewer } = params;
-  const config = {
-    type: type || 'merge_requests',
-    scope: scope || 'all',
-    state: state || 'opened',
-  };
-  let issuable = null;
-
-  const project = await fetchCurrentProjectSwallowError(repositoryRoot);
-  if (!project) return [];
-
-  if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
-    config.scope = 'all';
-  } else if (
-    (config.type === 'issues' || config.type === 'merge_requests') &&
-    config.scope !== 'assigned_to_me' &&
-    config.scope !== 'created_by_me'
-  ) {
-    config.scope = 'all';
-  }
-
-  let path = '';
-  const search = new URLSearchParams();
-  search.append('state', config.state);
-
-  /**
-   * Set path based on config.type
-   */
-  if (config.type === 'epics') {
-    if (project.groupRestId) {
-      path = `/groups/${project.groupRestId}/${config.type}`;
-      search.append('include_ancestor_groups', 'true');
-    } else {
-      return [];
-    }
-  } else {
-    const searchKind =
-      config.type === CustomQueryType.VULNERABILITY ? 'vulnerability_findings' : config.type;
-    path = `/projects/${project.restId}/${searchKind}`;
-    search.append('scope', config.scope);
-  }
-
-  /**
-   * Author parameters
-   */
-  if (config.type === 'issues') {
-    if (author) {
-      search.append('author_username', author);
-    }
-  } else if (author) {
-    const authorUser = await fetchFirstUserByUsername(repositoryRoot, author);
-    search.append('author_id', (authorUser && authorUser.id) || '-1');
-  }
-
-  /**
-   * Assignee parameters
-   */
-  if (assignee === 'Any' || assignee === 'None') {
-    search.append('assignee_id', assignee);
-  } else if (assignee && config.type === 'issues') {
-    search.append('assignee_username', assignee);
-  } else if (assignee) {
-    const assigneeUser = await fetchFirstUserByUsername(repositoryRoot, assignee);
-    search.append('assignee_id', (assigneeUser && assigneeUser.id) || '-1');
-  }
-
-  /**
-   * Reviewer parameters
-   */
-  if (reviewer) {
-    if (reviewer === '<current_user>') {
-      const user = await fetchCurrentUser(repositoryRoot);
-      reviewer = user.username;
-    }
-    search.append('reviewer_username', reviewer);
-  }
-
-  /**
-   * Search in parameters
-   */
-  if (searchIn) {
-    if (searchIn === 'all') {
-      searchIn = 'title,description';
-    }
-    search.append('in', searchIn);
-  }
-
-  /**
-   * Handle WIP/Draft for merge_request config.type
-   */
-  if (config.type === 'merge_requests' && wip) {
-    search.append('wip', wip);
-  }
-
-  /**
-   * Query parameters related to issues
-   */
-  let issueQueryParams: Record<string, QueryValue> = {};
-  if (config.type === 'issues') {
-    issueQueryParams = {
-      confidential: params.confidential,
-      'not[labels]': params.excludeLabels,
-      'not[milestone]': params.excludeMilestone,
-      'not[author_username]': params.excludeAuthor,
-      'not[assignee_username]': params.excludeAssignee,
-      'not[search]': params.excludeSearch,
-      'not[in]': params.excludeSearchIn,
-    };
-  }
-
-  /**
-   * Miscellaneous parameters
-   */
-  const queryParams: Record<string, QueryValue> = {
-    labels: params.labels,
-    milestone: params.milestone,
-    search: params.search,
-    created_before: params.createdBefore,
-    created_after: params.createdAfter,
-    updated_before: params.updatedBefore,
-    updated_after: params.updatedAfter,
-    order_by: params.orderBy,
-    sort: params.sort,
-    per_page: params.maxResults,
-    report_type: params.reportTypes,
-    severity: params.severityLevels,
-    confidence: params.confidenceLevels,
-    ...issueQueryParams,
-  };
-  const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
-  usedQueryParamNames.forEach(name => search.append(name, `${queryParams[name]}`));
-
-  const { response } = await fetch(repositoryRoot, `${path}?${search.toString()}`);
-  issuable = response;
-  return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
 }
 
 export async function fetchJobsForPipeline(
