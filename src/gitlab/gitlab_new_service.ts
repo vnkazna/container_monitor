@@ -45,7 +45,7 @@ import {
 } from './graphql/get_project';
 import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_diff_comment';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
-import { handleError, logError } from '../log';
+import { logError } from '../log';
 import { isMr } from '../utils/is_mr';
 import { ifVersionGte } from './if_version_gte';
 import {
@@ -83,7 +83,7 @@ interface RestNote {
   body: string;
 }
 
-type QueryValue = string | boolean | string[] | number | undefined;
+type QueryValue = string | boolean | string[] | number | undefined | null;
 
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
@@ -93,12 +93,12 @@ export async function fetchJson<T>(
   label: string,
   url: string,
   options: RequestInit,
-  query: Record<string, string | null | undefined> = {},
+  query: Record<string, QueryValue> = {},
 ): Promise<T> {
   const q = new URLSearchParams();
   Object.entries(query).forEach(([name, value]) => {
     if (typeof value !== 'undefined' && value !== null) {
-      q.set(name, value);
+      q.set(name, `${value}`);
     }
   });
 
@@ -108,6 +108,22 @@ export async function fetchJson<T>(
   }
   return result.json() as Promise<T>;
 }
+
+const normalizeAvatarUrl =
+  (instanceUrl: string) =>
+  (issuable: RestIssuable): RestIssuable => {
+    const { author } = issuable;
+    if (!author.avatar_url) {
+      return issuable;
+    }
+    return {
+      ...issuable,
+      author: {
+        ...author,
+        avatar_url: ensureAbsoluteAvatarUrl(instanceUrl, author.avatar_url),
+      },
+    };
+  };
 
 // TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const discussionSetResolved = gql`
@@ -617,15 +633,14 @@ export class GitLabNewService {
     return fetchJson('users', usersUrl, this.fetchOptions);
   }
 
-  async fetchIssuables(params: CustomQuery, project: GitLabProject) {
+  async getIssuables(params: CustomQuery, project: GitLabProject) {
     const { type, scope, state, author, assignee, wip } = params;
-    let { searchIn, pipelineId, reviewer } = params;
+    let { searchIn, reviewer } = params;
     const config = {
       type: type || 'merge_requests',
       scope: scope || 'all',
       state: state || 'opened',
     };
-    let issuable = null;
 
     const version = await this.getVersion();
 
@@ -648,8 +663,8 @@ export class GitLabNewService {
     }
 
     let path = '';
-    const search = new URLSearchParams();
-    search.append('state', config.state);
+    const search = new Map<string, string>();
+    search.set('state', config.state);
 
     /**
      * Set path based on config.type
@@ -657,7 +672,7 @@ export class GitLabNewService {
     if (config.type === 'epics') {
       if (project.groupRestId) {
         path = `/groups/${project.groupRestId}/${config.type}`;
-        search.append('include_ancestor_groups', 'true');
+        search.set('include_ancestor_groups', 'true');
       } else {
         return [];
       }
@@ -665,7 +680,7 @@ export class GitLabNewService {
       const searchKind =
         config.type === CustomQueryType.VULNERABILITY ? 'vulnerability_findings' : config.type;
       path = `/projects/${project.restId}/${searchKind}`;
-      search.append('scope', config.scope);
+      search.set('scope', config.scope);
     }
 
     /**
@@ -673,23 +688,23 @@ export class GitLabNewService {
      */
     if (config.type === 'issues') {
       if (author) {
-        search.append('author_username', author);
+        search.set('author_username', author);
       }
     } else if (author) {
       const authorUser = await this.getFirstUserByUsername(author);
-      if (authorUser) search.append('author_id', String(authorUser.id));
+      if (authorUser) search.set('author_id', String(authorUser.id));
     }
 
     /**
      * Assignee parameters
      */
     if (assignee === 'Any' || assignee === 'None') {
-      search.append('assignee_id', assignee);
+      search.set('assignee_id', assignee);
     } else if (assignee && config.type === 'issues') {
-      search.append('assignee_username', assignee);
+      search.set('assignee_username', assignee);
     } else if (assignee) {
       const assigneeUser = await this.getFirstUserByUsername(assignee);
-      if (assigneeUser) search.append('author_id', String(assigneeUser.id));
+      if (assigneeUser) search.set('author_id', String(assigneeUser.id));
     }
 
     /**
@@ -700,7 +715,7 @@ export class GitLabNewService {
         const user = await this.getCurrentUser();
         reviewer = user.username;
       }
-      search.append('reviewer_username', reviewer);
+      search.set('reviewer_username', reviewer);
     }
 
     /**
@@ -710,14 +725,14 @@ export class GitLabNewService {
       if (searchIn === 'all') {
         searchIn = 'title,description';
       }
-      search.append('in', searchIn);
+      search.set('in', searchIn);
     }
 
     /**
      * Handle WIP/Draft for merge_request config.type
      */
     if (config.type === 'merge_requests' && wip) {
-      search.append('wip', wip);
+      search.set('wip', wip);
     }
 
     /**
@@ -734,19 +749,6 @@ export class GitLabNewService {
         'not[search]': params.excludeSearch,
         'not[in]': params.excludeSearchIn,
       };
-    }
-
-    /**
-     * Pipeline parameters
-     */
-    // FIXME: this 'branch' or actual numerical ID most likely doesn't make sense from user perspective
-    //        Also, the logic allows for `pipeline_id=branch` query which doesn't make sense
-    //        Issue to deprecate this filter: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/311
-    if (pipelineId) {
-      if (pipelineId === 'branch') {
-        pipelineId = (await fetchLastPipelineForCurrentBranch(repositoryRoot))?.id;
-      }
-      search.append('pipeline_id', `${pipelineId}`);
     }
 
     /**
@@ -768,11 +770,13 @@ export class GitLabNewService {
       confidence: params.confidenceLevels,
       ...issueQueryParams,
     };
-    const usedQueryParamNames = Object.keys(queryParams).filter(k => queryParams[k]);
-    usedQueryParamNames.forEach(name => search.append(name, `${queryParams[name]}`));
 
-    const { response } = await fetch(repositoryRoot, `${path}?${search.toString()}`);
-    issuable = response;
-    return issuable.map(normalizeAvatarUrl(await getInstanceUrl(repositoryRoot)));
+    const issuables = (await fetchJson(
+      'issuables',
+      `${this.instanceUrl}/api/v4${path}`,
+      this.fetchOptions,
+      { ...Object.fromEntries(search), ...queryParams },
+    )) as RestIssuable[];
+    return issuables.map(normalizeAvatarUrl(this.instanceUrl));
   }
 }

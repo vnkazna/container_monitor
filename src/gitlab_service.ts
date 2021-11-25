@@ -5,7 +5,6 @@ import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
 import { handleError, logError } from './log';
 import { getUserAgentHeader } from './utils/get_user_agent_header';
-import { ensureAbsoluteAvatarUrl } from './utils/ensure_absolute_avatar_url';
 import { getHttpAgentOptions } from './utils/get_http_agent_options';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { GitLabProject } from './gitlab/gitlab_project';
@@ -13,22 +12,6 @@ import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { getExtensionConfiguration } from './utils/extension_configuration';
 import { README_SECTIONS } from './constants';
 import { HelpError } from './errors/help_error';
-
-const normalizeAvatarUrl =
-  (instanceUrl: string) =>
-  (issuable: RestIssuable): RestIssuable => {
-    const { author } = issuable;
-    if (!author.avatar_url) {
-      return issuable;
-    }
-    return {
-      ...issuable,
-      author: {
-        ...author,
-        avatar_url: ensureAbsoluteAvatarUrl(instanceUrl, author.avatar_url),
-      },
-    };
-  };
 
 async function fetch(
   repositoryRoot: string,
