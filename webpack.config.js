@@ -41,9 +41,11 @@ const webExtensionConfig = {
       http: require.resolve('stream-http'),
       https: require.resolve('https-browserify'),
       // https: false,
+      path: require.resolve('path-browserify'),
       fs: false,
       net: false,
       tls: false,
+      crypto: false,
     },
   },
   module: {

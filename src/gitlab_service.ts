@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import request from 'request-promise';
 import { tokenService } from './services/token_service';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { ApiError } from './errors/api_error';
@@ -18,7 +17,7 @@ async function fetch(
   path: string,
   method = 'GET',
   data: Record<string, unknown> | undefined = undefined,
-) {
+): Promise<any> {
   const instanceUrl = await getInstanceUrl(repositoryRoot);
   const apiRoot = `${instanceUrl}/api/v4`;
   const glToken = tokenService.getToken(instanceUrl);
@@ -37,39 +36,40 @@ async function fetch(
 
     throw new HelpError(err, { section: README_SECTIONS.SETUP });
   }
+  throw new Error('disabled because of `promise-request` dependency.');
 
-  const config: request.RequestPromiseOptions = {
-    method,
-    headers: {
-      'PRIVATE-TOKEN': glToken,
-      ...getUserAgentHeader(),
-    },
-    ...getHttpAgentOptions(),
-  };
+  // const config: request.RequestPromiseOptions = {
+  //   method,
+  //   headers: {
+  //     'PRIVATE-TOKEN': glToken,
+  //     ...getUserAgentHeader(),
+  //   },
+  //   ...getHttpAgentOptions(),
+  // };
 
-  if (data) {
-    config.formData = data;
-  }
+  // if (data) {
+  //   config.formData = data;
+  // }
 
-  config.transform = (body, response) => {
-    try {
-      return {
-        response: JSON.parse(body),
-        headers: response.headers,
-      };
-    } catch (e) {
-      handleError(
-        new UserFriendlyError(
-          'Failed to parse GitLab API response',
-          e,
-          `Response body: ${body}\nRequest URL: ${apiRoot}${path}`,
-        ),
-      );
-      return { error: e };
-    }
-  };
+  // config.transform = (body, response) => {
+  //   try {
+  //     return {
+  //       response: JSON.parse(body),
+  //       headers: response.headers,
+  //     };
+  //   } catch (e) {
+  //     handleError(
+  //       new UserFriendlyError(
+  //         'Failed to parse GitLab API response',
+  //         e,
+  //         `Response body: ${body}\nRequest URL: ${apiRoot}${path}`,
+  //       ),
+  //     );
+  //     return { error: e };
+  //   }
+  // };
 
-  return request(`${apiRoot}${path}`, config);
+  // return request(`${apiRoot}${path}`, config);
 }
 
 async function fetchCurrentProject(repositoryRoot: string): Promise<GitLabProject | null> {

@@ -16,6 +16,7 @@ import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { GitLabRemoteFileSystem, GitLabRemotePath } from '../remotefs/gitlab_remote_file_system';
+import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 
 class VirtualRepository {
   //FIXME create united interface with WrappedRepository
@@ -89,7 +90,9 @@ class VirtualRepository {
   }
 
   get instanceUrl(): string {
-    return GitLabRemoteFileSystem.parseUri(this.virtualWorkspace.uri).instance.toString();
+    return removeTrailingSlash(
+      GitLabRemoteFileSystem.parseUri(this.virtualWorkspace.uri).instance.toString(),
+    );
   }
 
   getGitLabService(): GitLabNewService {
