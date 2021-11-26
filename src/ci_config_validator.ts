@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { doNotAwait } from './utils/do_not_await';
+import { ProjectCommand } from './commands/run_with_valid_project';
 
-export async function validate(): Promise<void> {
+export const validate: ProjectCommand = async repository => {
   const editor = vscode.window.activeTextEditor;
 
   if (!editor) {
@@ -12,8 +12,6 @@ export async function validate(): Promise<void> {
   }
 
   const content = editor.document.getText();
-  const repository = gitExtensionWrapper.getActiveRepository();
-  assert(repository);
   const project = await repository.getProject();
   assert(project, "Current folder doesn't contain a GitLab project");
   const { valid, errors } = await repository.getGitLabService().validateCIConfig(project, content);
@@ -28,4 +26,4 @@ export async function validate(): Promise<void> {
   if (errors[0]) {
     doNotAwait(vscode.window.showErrorMessage(errors[0]));
   }
-}
+};
