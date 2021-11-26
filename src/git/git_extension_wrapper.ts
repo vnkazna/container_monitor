@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
@@ -8,9 +9,127 @@ import * as vscode from 'vscode';
 import { API, GitExtension, Repository } from '../api/git';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
-import { WrappedRepository } from './wrapped_repository';
+import { CachedMr, WrappedRepository } from './wrapped_repository';
 import { handleError, log } from '../log';
+import { REMOTE_URI_SCHEME } from '../constants';
+import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabProject } from '../gitlab/gitlab_project';
+import { GitRemote, parseGitRemote } from './git_remote_parser';
+import { GitLabRemoteFileSystem, GitLabRemotePath } from '../remotefs/gitlab_remote_file_system';
 
+class VirtualRepository {
+  //FIXME create united interface with WrappedRepository
+  virtualWorkspace: vscode.WorkspaceFolder;
+
+  parsedRemoteFsUri: GitLabRemotePath;
+  private mrCache: Record<number, CachedMr> = {};
+
+  constructor(workspace: vscode.WorkspaceFolder) {
+    assert.strictEqual(workspace.uri.scheme, REMOTE_URI_SCHEME);
+    this.virtualWorkspace = workspace;
+    this.parsedRemoteFsUri = GitLabRemoteFileSystem.parseUri(workspace.uri);
+  }
+
+  private cachedProject?: GitLabProject;
+
+  get remoteNames(): string[] {
+    return ['virtual-workspace'];
+  }
+
+  async fetch(): Promise<void> {
+    return;
+  }
+
+  checkout(branchName: string): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  getRemoteByName(remoteName: string): GitRemote {
+    throw new Error('Method not implemented.');
+  }
+
+  async getProject(): Promise<GitLabProject | undefined> {
+    if (this.cachedProject) return this.cachedProject;
+    this.cachedProject = await this.getGitLabService().getRestProject(
+      this.parsedRemoteFsUri.project,
+    );
+    return this.cachedProject;
+  }
+
+  get containsGitLabProject(): boolean {
+    // return Boolean(this.cachedProject);
+    return true;
+  }
+
+  get branch(): string | undefined {
+    return this.parsedRemoteFsUri.ref; // FIXME this might not be a branch
+  }
+
+  async reloadMr(mr: RestMr): Promise<CachedMr> {
+    const mrVersion = await this.getGitLabService().getMrDiff(mr);
+    const cachedMr = {
+      mr,
+      mrVersion,
+    };
+    this.mrCache[mr.id] = cachedMr;
+    return cachedMr;
+  }
+
+  getMr(id: number): CachedMr | undefined {
+    return this.mrCache[id];
+  }
+
+  get remote(): GitRemote | undefined {
+    return (
+      (this.cachedProject && parseGitRemote(this.cachedProject.sshUrlToRepo)) || ({} as GitRemote)
+    );
+  }
+
+  get lastCommitSha(): string | undefined {
+    throw new Error('Method not implemented.');
+  }
+
+  get instanceUrl(): string {
+    return GitLabRemoteFileSystem.parseUri(this.virtualWorkspace.uri).instance.toString();
+  }
+
+  getGitLabService(): GitLabNewService {
+    return new GitLabNewService(this.instanceUrl);
+  }
+
+  get name(): string {
+    return 'test name';
+  }
+
+  get rootFsPath(): string {
+    return this.virtualWorkspace.uri.toString();
+  }
+
+  async getFileContent(path: string, sha: string): Promise<string | null> {
+    return null;
+  }
+  diff(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  apply(patchPath: string): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  getTrackingBranchName(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  hasSameRootAs(repository: Repository): boolean {
+    throw new Error('Method not implemented.');
+  }
+  getVersion(): Promise<string | undefined> {
+    throw new Error('Method not implemented.');
+  }
+  private get rawRepository(): Repository {
+    throw new Error('Method not implemented.');
+  }
+
+  get remoteName(): string | undefined {
+    return 'virtual-workspace';
+  }
+}
 export class GitExtensionWrapper implements vscode.Disposable {
   apiListeners: vscode.Disposable[] = [];
 
@@ -45,15 +164,18 @@ export class GitExtensionWrapper implements vscode.Disposable {
   }
 
   get repositories(): WrappedRepository[] {
-    return this.wrappedRepositories;
+    const remoteWorkspaces =
+      vscode.workspace.workspaceFolders?.filter(wf => wf.uri.scheme === REMOTE_URI_SCHEME) ?? [];
+    return [
+      ...this.wrappedRepositories,
+      ...remoteWorkspaces.map(w => new VirtualRepository(w) as unknown as WrappedRepository),
+    ];
   }
 
   getRepository(repositoryRoot: string): WrappedRepository {
-    const rawRepository = this.gitApi?.getRepository(vscode.Uri.file(repositoryRoot));
-    assert(rawRepository, `Git Extension doesn't have repository with root ${repositoryRoot}`);
-    const result = this.repositories.find(r => r.hasSameRootAs(rawRepository));
-    assert(result, `GitExtensionWrapper is missing repository for ${repositoryRoot}`);
-    return result;
+    const repository = this.repositories.find(r => r.rootFsPath === repositoryRoot);
+    if (!repository) throw new Error(`repository with root ${repositoryRoot} not found.`);
+    return repository;
   }
 
   private register() {
@@ -138,6 +260,15 @@ export class GitExtensionWrapper implements vscode.Disposable {
 
     if (this.repositories.length === 1) {
       return this.repositories[0];
+    }
+
+    if (vscode.window.activeTextEditor?.document.uri.scheme === REMOTE_URI_SCHEME) {
+      const workspace = vscode.workspace.getWorkspaceFolder(
+        vscode.window.activeTextEditor.document.uri,
+      );
+      if (workspace) {
+        return new VirtualRepository(workspace) as unknown as WrappedRepository;
+      }
     }
 
     return undefined;

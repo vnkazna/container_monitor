@@ -51,7 +51,7 @@ async function nullIf40x<T>(p: Promise<T>) {
   }
 }
 
-interface GitLabRemotePath {
+export interface GitLabRemotePath {
   instance: vscode.Uri;
   project: string;
   ref: string;

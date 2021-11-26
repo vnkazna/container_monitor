@@ -227,6 +227,17 @@ export class GitLabNewService {
     return result.project && new GitLabProject(result.project);
   }
 
+  async getRestProject(projectId: string): Promise<GitLabProject | undefined> {
+    const encodedProject = encodeURIComponent(projectId);
+    const projectUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}`;
+    const fileResult = await crossFetch(projectUrl, this.fetchOptions);
+    if (!fileResult.ok) {
+      throw new FetchError(`Fetching project from ${projectUrl} failed`, fileResult);
+    }
+    const restProject = await fileResult.json();
+    return this.getProject(restProject.path_with_namespace);
+  }
+
   async getProjects(options: GetProjectsOptions): Promise<GitLabProject[]> {
     const results = await this.client.request<GqlProjectsResult>(queryGetProjects, options);
     return results.projects?.nodes?.map(project => new GitLabProject(project)) || [];
