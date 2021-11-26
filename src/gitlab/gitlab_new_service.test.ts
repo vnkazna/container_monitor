@@ -247,6 +247,35 @@ describe('gitlab_new_service', () => {
       });
     });
 
+    describe('assignee parameters', () => {
+      it('sets assignee_username parameter', async () => {
+        await gitLabService.getIssuables(
+          { ...defaultParams, type: CustomQueryType.ISSUE, assignee: 'testuser' },
+          project,
+        );
+        expect(getFetchedParams().get('assignee_username')).toEqual('testuser');
+        expect(getFetchedParams().get('assignee_id')).toBeNull();
+      });
+
+      it('sets assignee_id parameter if assignee is found', async () => {
+        gitLabService.getFirstUserByUsername = async () => ({ id: 1 } as RestUser);
+        await gitLabService.getIssuables(
+          { ...defaultParams, type: CustomQueryType.MR, assignee: 'testuser' },
+          project,
+        );
+        expect(getFetchedParams().get('assignee_username')).toBeNull();
+        expect(getFetchedParams().get('assignee_id')).toEqual('1');
+      });
+
+      it.each(['Any', 'None'])('Uses %s directly', async param => {
+        await gitLabService.getIssuables(
+          { ...defaultParams, type: CustomQueryType.MR, assignee: param },
+          project,
+        );
+        expect(getFetchedParams().get('assignee_id')).toEqual(param);
+      });
+    });
+
     it('sets reviewer parameter', async () => {
       await gitLabService.getIssuables(
         { ...defaultParams, type: CustomQueryType.ISSUE, reviewer: 'reviewer' },
@@ -290,10 +319,10 @@ describe('gitlab_new_service', () => {
             labels: ['label1', 'label2'],
             milestone: 'milestone',
             search: 'search',
-            createdBefore: 'createdBefore',
-            createdAfter: 'createdAfter',
-            updatedBefore: 'updatedBefore',
-            updatedAfter: 'updatedAfter',
+            createdBefore: '2020-10-11T03:45:40Z',
+            createdAfter: '2018-11-01T03:45:40Z',
+            updatedBefore: '2020-10-30T03:45:40Z',
+            updatedAfter: '2018-11-01T03:45:40Z',
             orderBy: 'orderBy',
             sort: 'sort',
             maxResults: 20,
@@ -315,10 +344,10 @@ describe('gitlab_new_service', () => {
         expect(params.get('labels')).toEqual('label1,label2');
         expect(params.get('milestone')).toEqual('milestone');
         expect(params.get('search')).toEqual('search');
-        expect(params.get('created_before')).toEqual('createdBefore');
-        expect(params.get('created_after')).toEqual('createdAfter');
-        expect(params.get('updated_before')).toEqual('updatedBefore');
-        expect(params.get('updated_after')).toEqual('updatedAfter');
+        expect(params.get('created_before')).toEqual('2020-10-11T03:45:40Z');
+        expect(params.get('created_after')).toEqual('2018-11-01T03:45:40Z');
+        expect(params.get('updated_before')).toEqual('2020-10-30T03:45:40Z');
+        expect(params.get('updated_after')).toEqual('2018-11-01T03:45:40Z');
         expect(params.get('order_by')).toEqual('orderBy');
         expect(params.get('sort')).toEqual('sort');
         expect(params.get('per_page')).toEqual('20');

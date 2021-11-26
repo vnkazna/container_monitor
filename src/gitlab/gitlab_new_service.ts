@@ -694,7 +694,7 @@ export class GitLabNewService {
       search.set('assignee_username', assignee);
     } else if (assignee) {
       const assigneeUser = await this.getFirstUserByUsername(assignee);
-      if (assigneeUser) search.set('author_id', String(assigneeUser.id));
+      if (assigneeUser) search.set('assignee_id', String(assigneeUser.id));
     }
 
     /**
