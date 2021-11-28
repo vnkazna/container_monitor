@@ -886,7 +886,7 @@
     "@typescript-eslint/parser": "^5.4.0",
     "conventional-changelog-cli": "^2.1.1",
     "eslint": "^8.3.0",
-    "esbuild": "^0.13.13",
+    "esbuild": "^0.14.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
