@@ -8,6 +8,8 @@ import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from '../utils/get_user_agent_header';
 import { ensureAbsoluteAvatarUrl } from '../utils/ensure_absolute_avatar_url';
+import { CustomQueryType } from './custom_query_type';
+import { CustomQuery } from './custom_query';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
 import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
@@ -81,6 +83,8 @@ interface RestNote {
   body: string;
 }
 
+type QueryValue = string | boolean | string[] | number | undefined | null;
+
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
@@ -89,12 +93,12 @@ export async function fetchJson<T>(
   label: string,
   url: string,
   options: RequestInit,
-  query: Record<string, string | null | undefined> = {},
+  query: Record<string, QueryValue> = {},
 ): Promise<T> {
   const q = new URLSearchParams();
   Object.entries(query).forEach(([name, value]) => {
     if (typeof value !== 'undefined' && value !== null) {
-      q.set(name, value);
+      q.set(name, `${value}`);
     }
   });
 
@@ -104,6 +108,22 @@ export async function fetchJson<T>(
   }
   return result.json() as Promise<T>;
 }
+
+const normalizeAvatarUrl =
+  (instanceUrl: string) =>
+  (issuable: RestIssuable): RestIssuable => {
+    const { author } = issuable;
+    if (!author.avatar_url) {
+      return issuable;
+    }
+    return {
+      ...issuable,
+      author: {
+        ...author,
+        avatar_url: ensureAbsoluteAvatarUrl(instanceUrl, author.avatar_url),
+      },
+    };
+  };
 
 // TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
 const discussionSetResolved = gql`
@@ -600,5 +620,153 @@ export class GitLabNewService {
         throw new UnsupportedVersionError(featureName, currentVersion!, requiredVersion);
       },
     );
+  }
+
+  async getFirstUserByUsername(username: string): Promise<RestUser | undefined> {
+    const usersUrl = `${this.instanceUrl}/api/v4/users`;
+    const users = await fetchJson('users', usersUrl, this.fetchOptions, { username });
+    return (users as RestUser[])[0];
+  }
+
+  async getCurrentUser(): Promise<RestUser> {
+    const usersUrl = `${this.instanceUrl}/api/v4/user`;
+    return fetchJson('users', usersUrl, this.fetchOptions);
+  }
+
+  async getIssuables(params: CustomQuery, project: GitLabProject) {
+    const { type, scope, state, author, assignee, wip } = params;
+    let { searchIn, reviewer } = params;
+    const config = {
+      type: type || 'merge_requests',
+      scope: scope || 'all',
+      state: state || 'opened',
+    };
+
+    if (config.type === 'vulnerabilities' && config.scope !== 'dismissed') {
+      config.scope = 'all';
+    } else if (
+      (config.type === 'issues' || config.type === 'merge_requests') &&
+      config.scope !== 'assigned_to_me' &&
+      config.scope !== 'created_by_me'
+    ) {
+      config.scope = 'all';
+    }
+
+    let path = '';
+    const search = new Map<string, string>();
+    search.set('state', config.state);
+
+    /**
+     * Set path based on config.type
+     */
+    if (config.type === 'epics') {
+      if (project.groupRestId) {
+        path = `/groups/${project.groupRestId}/${config.type}`;
+        search.set('include_ancestor_groups', 'true');
+      } else {
+        return [];
+      }
+    } else {
+      const searchKind =
+        config.type === CustomQueryType.VULNERABILITY ? 'vulnerability_findings' : config.type;
+      path = `/projects/${project.restId}/${searchKind}`;
+      search.set('scope', config.scope);
+    }
+
+    /**
+     * Author parameters
+     */
+    if (config.type === 'issues') {
+      if (author) {
+        search.set('author_username', author);
+      }
+    } else if (author) {
+      const authorUser = await this.getFirstUserByUsername(author);
+      if (authorUser) search.set('author_id', String(authorUser.id));
+    }
+
+    /**
+     * Assignee parameters
+     */
+    if (assignee === 'Any' || assignee === 'None') {
+      search.set('assignee_id', assignee);
+    } else if (assignee && config.type === 'issues') {
+      search.set('assignee_username', assignee);
+    } else if (assignee) {
+      const assigneeUser = await this.getFirstUserByUsername(assignee);
+      if (assigneeUser) search.set('assignee_id', String(assigneeUser.id));
+    }
+
+    /**
+     * Reviewer parameters
+     */
+    if (reviewer) {
+      if (reviewer === '<current_user>') {
+        const user = await this.getCurrentUser();
+        reviewer = user.username;
+      }
+      search.set('reviewer_username', reviewer);
+    }
+
+    /**
+     * Search in parameters
+     */
+    if (searchIn) {
+      if (searchIn === 'all') {
+        searchIn = 'title,description';
+      }
+      search.set('in', searchIn);
+    }
+
+    /**
+     * Handle WIP/Draft for merge_request config.type
+     */
+    if (config.type === 'merge_requests' && wip) {
+      search.set('wip', wip);
+    }
+
+    /**
+     * Query parameters related to issues
+     */
+    let issueQueryParams: Record<string, QueryValue> = {};
+    if (config.type === 'issues') {
+      issueQueryParams = {
+        confidential: params.confidential,
+        'not[labels]': params.excludeLabels,
+        'not[milestone]': params.excludeMilestone,
+        'not[author_username]': params.excludeAuthor,
+        'not[assignee_username]': params.excludeAssignee,
+        'not[search]': params.excludeSearch,
+        'not[in]': params.excludeSearchIn,
+      };
+    }
+
+    /**
+     * Miscellaneous parameters
+     */
+    const queryParams: Record<string, QueryValue> = {
+      labels: params.labels,
+      milestone: params.milestone,
+      search: params.search,
+      created_before: params.createdBefore,
+      created_after: params.createdAfter,
+      updated_before: params.updatedBefore,
+      updated_after: params.updatedAfter,
+      order_by: params.orderBy,
+      sort: params.sort,
+      per_page: params.maxResults,
+      report_type: params.reportTypes,
+      severity: params.severityLevels,
+      confidence: params.confidenceLevels,
+      ...issueQueryParams,
+    };
+
+    const issuables = (await fetchJson(
+      'issuables',
+      `${this.instanceUrl}/api/v4${path}`,
+      this.fetchOptions,
+      { ...Object.fromEntries(search), ...queryParams },
+    )) as RestIssuable[];
+    return issuables.map(normalizeAvatarUrl(this.instanceUrl));
   }
 }
