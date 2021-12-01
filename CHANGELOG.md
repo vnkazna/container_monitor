@@ -1,3 +1,14 @@
+## [3.38.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.38.1...v3.38.2) (2021-12-01)
+
+
+### Bug Fixes
+
+* remove pipeline ID from custom query parameters ([1fe2e96](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/1fe2e9685d72c2937e386ecf3db13bb49628bd6a))
+* remove support for GitLab 10 and lower ([adef152](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/adef1525946ca5ad4f301c620ebecdc65a10f7ad))
+* validating CI conig fails when there are multiple remtoes ([1bbac0d](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/1bbac0d0a34c034e91fbdcddd0e0ab9f7d07ca0d))
+
+
+
 ## [3.38.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.38.0...v3.38.1) (2021-11-22)
 
 
