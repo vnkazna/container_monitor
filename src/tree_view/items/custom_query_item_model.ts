@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
-import * as gitLabService from '../../gitlab_service';
 import { handleError } from '../../log';
 import { ErrorItem } from './error_item';
 import { MrItemModel } from './mr_item_model';
@@ -34,8 +33,10 @@ export class CustomQueryItemModel extends ItemModel {
     return item;
   }
 
-  private async getProjectIssues(): Promise<vscode.TreeItem[]> {
-    const issues = await gitLabService.fetchIssuables(this.customQuery, this.repository.rootFsPath);
+  private async getProjectIssues(): Promise<vscode.TreeItem[] | ItemModel[]> {
+    const issues = await this.repository
+      .getGitLabService()
+      .getIssuables(this.customQuery, (await this.repository.getProject())!); // FIXME use GitLabRepository instead of WrappedRepository
     if (issues.length === 0) {
       const noItemText = this.customQuery.noItemText || 'No items found.';
       return [new vscode.TreeItem(noItemText)];
@@ -44,20 +45,24 @@ export class CustomQueryItemModel extends ItemModel {
     const { MR, ISSUE, SNIPPET, EPIC, VULNERABILITY } = CustomQueryType;
     switch (this.customQuery.type) {
       case MR: {
-        const mrModels = issues.map((mr: RestMr) => new MrItemModel(mr, this.repository));
+        const mrModels = issues.map(
+          (mr: RestIssuable) => new MrItemModel(mr as RestMr, this.repository),
+        );
         this.setDisposableChildren(mrModels);
         return mrModels;
       }
       case ISSUE:
-        return issues.map((issue: RestMr) => new IssueItem(issue, this.repository.rootFsPath));
+        return issues.map(
+          (issue: RestIssuable) => new IssueItem(issue, this.repository.rootFsPath),
+        );
       case SNIPPET:
         return issues.map(
-          (snippet: RestMr) =>
+          (snippet: RestIssuable) =>
             new ExternalUrlItem(`$${snippet.id} · ${snippet.title}`, snippet.web_url),
         );
       case EPIC:
         return issues.map(
-          (epic: RestMr) => new ExternalUrlItem(`&${epic.iid} · ${epic.title}`, epic.web_url),
+          (epic: RestIssuable) => new ExternalUrlItem(`&${epic.iid} · ${epic.title}`, epic.web_url),
         );
       case VULNERABILITY:
         return issues.map((v: RestVulnerability) => new VulnerabilityItem(v));
@@ -66,7 +71,7 @@ export class CustomQueryItemModel extends ItemModel {
     }
   }
 
-  async getChildren(): Promise<vscode.TreeItem[]> {
+  async getChildren(): Promise<vscode.TreeItem[] | ItemModel[]> {
     try {
       return await this.getProjectIssues();
     } catch (e) {

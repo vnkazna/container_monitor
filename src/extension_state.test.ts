@@ -18,6 +18,10 @@ describe('extension_state', () => {
     extensionState = new ExtensionState();
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it.each`
     scenario                             | instancesWithTokens       | repositories        | validState | noToken  | noRepository
     ${'is invalid'}                      | ${[]}                     | ${[]}               | ${false}   | ${true}  | ${true}
