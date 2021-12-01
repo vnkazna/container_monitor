@@ -17,6 +17,7 @@ interface RestIssuable {
   };
   severity: string;
   name: string;
+  description: string;
 }
 
 interface RestMr extends RestIssuable {

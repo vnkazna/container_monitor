@@ -20,7 +20,7 @@ function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   );
 }
 
-function heuristicInstanceUrl(gitRemoteHosts: string[]) {
+export function heuristicInstanceUrl(gitRemoteHosts: string[]) {
   // if the intersection of git remotes and configured PATs exists and is exactly
   // one hostname, use it
   const intersection = intersectionOfInstanceAndTokenUrls(gitRemoteHosts);

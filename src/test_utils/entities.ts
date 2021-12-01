@@ -20,6 +20,7 @@ export const issue: RestIssuable = {
   },
   severity: 'severityLevel1',
   name: 'Issuable Name',
+  description: 'issuable description',
 };
 
 export const mr: RestMr = {

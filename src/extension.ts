@@ -46,6 +46,10 @@ import {
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
+import { parseGitRemote } from './git/git_remote_parser';
+import { GitLabNewService } from './gitlab/gitlab_new_service';
+import { heuristicInstanceUrl } from './git/wrapped_repository';
+import { parse } from 'path';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -136,6 +140,20 @@ const registerCiCompletion = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(subscription);
 };
 
+function getWordAt(str: string, pos: number) {
+  // Search for the word's beginning and end.
+  const left = str.slice(0, pos + 1).search(/\S+$/);
+  const right = str.slice(pos).search(/\s/);
+
+  // The last word in the string is a special case.
+  if (right < 0) {
+    return str.slice(left);
+  }
+
+  // Return the word, using the located bounds to extract it from the string.
+  return str.slice(left, right + pos);
+}
+
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -159,6 +177,29 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(statusBar);
   currentBranchRefresher.init(statusBar, currentBranchDataProvider);
   context.subscriptions.push(currentBranchRefresher);
+  vscode.languages.registerHoverProvider('*', {
+    provideHover: async (document, position, token) => {
+      log(`${document},${position}`);
+      const line = document.getText(
+        new vscode.Range(
+          new vscode.Position(position.line, 0),
+          new vscode.Position(position.line, 10000),
+        ),
+      );
+      const symbol = getWordAt(line, position.character);
+      if (!symbol.match(/\/-\/issues\//)) return;
+      const [projectUrl, issueId] = symbol.split('/-/issues/');
+      const parsedRemote = parseGitRemote(projectUrl);
+      if (!parsedRemote) return;
+      const instanceUrl = heuristicInstanceUrl([parsedRemote.host]);
+      if (!instanceUrl) return;
+      const service = new GitLabNewService(instanceUrl);
+      const project = await service.getProject(`${parsedRemote.namespace}/${parsedRemote.project}`);
+      if (!project) return;
+      const issue = await service.getRestIssue(Number(issueId), project.restId);
+      return new vscode.Hover(`## ${issue.title} (#${issue.iid})\n${issue.description}`);
+    },
+  });
 
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
