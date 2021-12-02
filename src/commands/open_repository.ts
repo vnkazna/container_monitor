@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import { REMOTE_URI_SCHEME } from '../constants';
 import { GitLabRemoteFileSystem } from '../remotefs/gitlab_remote_file_system';
 import { pickInstance } from '../gitlab/pick_instance';

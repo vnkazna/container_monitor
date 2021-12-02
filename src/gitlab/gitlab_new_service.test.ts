@@ -31,7 +31,7 @@ describe('gitlab_new_service', () => {
       ${'https://test.com/gitlab'}  | ${'https://test.com/gitlab/api/graphql'}
       ${'https://test.com/gitlab/'} | ${'https://test.com/gitlab/api/graphql'}
     `('creates endpoint url from $instanceUrl', ({ instanceUrl, endpointUrl }) => {
-      const service = new GitLabNewService(instanceUrl);
+      new GitLabNewService(instanceUrl); // eslint-disable-line no-new
 
       expect(GraphQLClient).toHaveBeenCalledWith(endpointUrl, expect.anything());
     });

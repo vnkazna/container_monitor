@@ -13,10 +13,10 @@
     },
     {
       "type": "npm",
-      "script": "eslint",
+      "script": "lint",
       "problemMatcher": ["$eslint-stylish"],
-      "label": "npm: eslint",
-      "detail": "eslint --ext .js --ext .ts ."
+      "label": "npm: lint",
+      "detail": "eslint --ext .js --ext .ts . && prettier --check '**/*.{js,ts,vue,json}' && cd src/webview && npm run lint"
     }
   ]
 }

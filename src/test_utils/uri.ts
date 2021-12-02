@@ -50,7 +50,7 @@ export class Uri implements vscode.Uri {
     });
   }
 
-  toString(skipEncoding?: boolean): string {
+  toString(): string {
     // eslint-disable-next-line prefer-const
     let { scheme, authority, path, query, fragment } = this;
     if (query.length > 0) query = `?${query}`;

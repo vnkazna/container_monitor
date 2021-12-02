@@ -3,7 +3,6 @@ import { GitContentProvider } from './git_content_provider';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { ApiContentProvider } from './api_content_provider';
 import { toReviewUri } from './review_uri';
-import { Repository } from '../api/git';
 import { WrappedRepository } from '../git/wrapped_repository';
 
 jest.mock('../git/git_extension_wrapper');
@@ -32,7 +31,6 @@ describe('GitContentProvider', () => {
 
     const result = await gitContentProvider.provideTextDocumentContent(
       toReviewUri(reviewUriParams),
-      null as any,
     );
     expect(result).toBe('Test text');
   });
@@ -46,7 +44,6 @@ describe('GitContentProvider', () => {
 
     const result = await gitContentProvider.provideTextDocumentContent(
       toReviewUri(reviewUriParams),
-      null as any,
     );
     expect(result).toBe('Api content');
   });

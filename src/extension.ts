@@ -10,7 +10,7 @@ import * as ciConfigValidator from './ci_config_validator';
 import { webviewController } from './webview_controller';
 import { issuableDataProvider } from './tree_view/issuable_data_provider';
 import { currentBranchDataProvider } from './tree_view/current_branch_data_provider';
-import { initializeLogging, handleError, log } from './log';
+import { initializeLogging, handleError } from './log';
 import { GitContentProvider } from './review/git_content_provider';
 import { REVIEW_URI_SCHEME, REMOTE_URI_SCHEME } from './constants';
 import { USER_COMMANDS, PROGRAMMATIC_COMMANDS } from './command_names';

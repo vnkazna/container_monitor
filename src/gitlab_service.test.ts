@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-import assert from 'assert';
+export {}; // making this file a module by using export
 
 let extensionConfiguration = {};
 

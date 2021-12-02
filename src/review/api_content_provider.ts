@@ -5,10 +5,7 @@ import { createGitLabNewService } from '../service_factory';
 
 export class ApiContentProvider implements vscode.TextDocumentContentProvider {
   // eslint-disable-next-line class-methods-use-this
-  async provideTextDocumentContent(
-    uri: vscode.Uri,
-    token: vscode.CancellationToken,
-  ): Promise<string> {
+  async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     const params = fromReviewUri(uri);
     if (!params.path || !params.commit) return '';
 
