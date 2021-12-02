@@ -18,12 +18,12 @@ export const logError = (e: Error | IDetailedError): void =>
   isDetailedError(e) ? globalLog(e.details) : globalLog(`${e.message}\n${e.stack}`);
 
 export const handleError = (e: Error | IDetailedError): { onlyForTesting: Promise<void> } => {
+  logError(e);
+
   // This is probably the only place where we want to ignore a floating promise.
   // We don't want to block the app and wait for user click on the "Show Logs"
   // button or close the message However, for testing this method, we need to
   // keep the promise.
-
-  logError(e);
   if (HelpError.isHelpError(e)) {
     return { onlyForTesting: Help.showError(e, HelpMessageSeverity.Error) };
   }
