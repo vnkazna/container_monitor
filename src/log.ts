@@ -1,16 +1,8 @@
 import * as vscode from 'vscode';
 import { USER_COMMANDS } from './command_names';
-import { IDetailedError } from './errors/common';
+import { IDetailedError, isDetailedError } from './errors/common';
 import { HelpError } from './errors/help_error';
 import { Help, HelpMessageSeverity } from './utils/help';
-
-function isDetailedError(object: any): object is IDetailedError {
-  return Boolean(object.details);
-}
-
-function isHelpError(object: any): object is HelpError {
-  return object instanceof HelpError;
-}
 
 type logFunction = (line: string) => void;
 
@@ -32,7 +24,7 @@ export const handleError = (e: Error | IDetailedError): { onlyForTesting: Promis
   // keep the promise.
 
   logError(e);
-  if (isHelpError(e)) {
+  if (HelpError.isHelpError(e)) {
     return { onlyForTesting: Help.showError(e, HelpMessageSeverity.Error) };
   }
   const showErrorMessage = async () => {
