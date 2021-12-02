@@ -20,10 +20,12 @@ export const initializeLogging = (logLine: logFunction): void => {
   globalLog = logLine;
 };
 
-const getLogLinePrefix = (level: LogLevel) => `[${level}]: `;
+export const log = (line: string, level: LogLevel): void => {
+  const prefix = `[${level}]: `;
+  const padNextLines = (text: string) => text.replace(/\n/g, `\n${' '.repeat(prefix.length)}`);
 
-export const log = (line: string, level: LogLevel): void =>
-  globalLog(`${getLogLinePrefix(level)}${line}`);
+  globalLog(`${prefix}${padNextLines(line)}`);
+};
 
 export const logError = (e: Error | IDetailedError): void =>
   isDetailedError(e)
