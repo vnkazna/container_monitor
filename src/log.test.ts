@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { IDetailedError } from './errors/common';
-import { handleError, initializeLogging, log, logError } from './log';
+import { handleError, initializeLogging, log, logError, LOG_LEVEL } from './log';
 import { USER_COMMANDS } from './command_names';
 
 describe('logging', () => {
@@ -18,9 +18,9 @@ describe('logging', () => {
   describe('log', () => {
     it('passes the argument to the handler', () => {
       const message = 'A very bad error occured';
-      log(message);
+      log(message, LOG_LEVEL.INFO);
       expect(logFunction).toBeCalledTimes(1);
-      expect(logFunction).toBeCalledWith(message);
+      expect(logFunction).toBeCalledWith(`[info]: ${message}`);
     });
 
     it.each(['error', 'warning', 'info'] as const)('it handles log level "%s"', logLevel => {

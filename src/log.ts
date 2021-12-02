@@ -20,9 +20,9 @@ export const initializeLogging = (logLine: logFunction): void => {
   globalLog = logLine;
 };
 
-const getLogLinePrefix = (level?: LogLevel) => (level ? `[${level}]: ` : '');
+const getLogLinePrefix = (level: LogLevel) => `[${level}]: `;
 
-export const log = (line: string, level?: LogLevel): void =>
+export const log = (line: string, level: LogLevel): void =>
   globalLog(`${getLogLinePrefix(level)}${line}`);
 
 export const logError = (e: Error | IDetailedError): void =>
