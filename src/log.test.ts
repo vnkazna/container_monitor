@@ -22,6 +22,12 @@ describe('logging', () => {
       expect(logFunction).toBeCalledTimes(1);
       expect(logFunction).toBeCalledWith(message);
     });
+
+    it.each(['error', 'warning', 'info'] as const)('it handles log level "%s"', logLevel => {
+      log('message', logLevel);
+      expect(logFunction).toBeCalledTimes(1);
+      expect(logFunction).toBeCalledWith(`[${logLevel}]: message`);
+    });
   });
 
   describe('logError', () => {
@@ -31,7 +37,7 @@ describe('logging', () => {
         const error = new Error(message);
         logError(error);
         expect(logFunction).toBeCalledTimes(1);
-        expect(logFunction).toBeCalledWith(`${message}\n${error.stack}`);
+        expect(logFunction).toBeCalledWith(`[error]: ${message}\n${error.stack}`);
       });
     });
 
@@ -42,7 +48,7 @@ describe('logging', () => {
           details,
         } as IDetailedError);
         expect(logFunction).toBeCalledTimes(1);
-        expect(logFunction).toBeCalledWith(details);
+        expect(logFunction).toBeCalledWith(`[error]: ${details}`);
       });
     });
   });
@@ -57,7 +63,7 @@ describe('logging', () => {
       handleError(error);
 
       expect(logFunction).toBeCalledTimes(1);
-      expect(logFunction).toBeCalledWith(`${message}\n${error.stack}`);
+      expect(logFunction).toBeCalledWith(`[error]: ${message}\n${error.stack}`);
     });
 
     it('prompts the user to show the logs', () => {
