@@ -2,7 +2,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as gitLabService from './gitlab_service';
 import { VS_COMMANDS } from './command_names';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import {
   GitLabRepository,
   GitLabRepositoryAndFile,

@@ -76,7 +76,7 @@ describe('MrItemModel', () => {
       'gitlab-mr-gitlab-org/gitlab!2000',
       'Issuable Title',
     );
-    const [_, range] = createCommentThreadMock.mock.calls[0];
+    const [, range] = createCommentThreadMock.mock.calls[0];
     expect(range.start.line).toBe(47);
     expect(commentThread.comments.length).toBe(1);
     const firstComment = commentThread.comments[0];
