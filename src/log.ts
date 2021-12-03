@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
 import { USER_COMMANDS } from './command_names';
-import { IDetailedError } from './errors/common';
+import { IDetailedError, isDetailedError } from './errors/common';
 import { HelpError } from './errors/help_error';
 import { Help, HelpMessageSeverity } from './utils/help';
 
-function isDetailedError(object: any): object is IDetailedError {
-  return Boolean(object.details);
-}
+export const LOG_LEVEL = {
+  INFO: 'info',
+  WARNING: 'warning',
+  ERROR: 'error',
+} as const;
 
-function isHelpError(object: any): object is HelpError {
-  return object instanceof HelpError;
-}
+export type LogLevel = typeof LOG_LEVEL[keyof typeof LOG_LEVEL];
 
 type logFunction = (line: string) => void;
 
@@ -20,19 +20,26 @@ export const initializeLogging = (logLine: logFunction): void => {
   globalLog = logLine;
 };
 
-export const log = (line: string): void => globalLog(line);
+export const log = (line: string, level: LogLevel): void => {
+  const prefix = `[${level}]: `;
+  const padNextLines = (text: string) => text.replace(/\n/g, `\n${' '.repeat(prefix.length)}`);
+
+  globalLog(`${prefix}${padNextLines(line)}`);
+};
 
 export const logError = (e: Error | IDetailedError): void =>
-  isDetailedError(e) ? globalLog(e.details) : globalLog(`${e.message}\n${e.stack}`);
+  isDetailedError(e)
+    ? log(e.details, LOG_LEVEL.ERROR)
+    : log(`${e.message}\n${e.stack}`, LOG_LEVEL.ERROR);
 
 export const handleError = (e: Error | IDetailedError): { onlyForTesting: Promise<void> } => {
+  logError(e);
+
   // This is probably the only place where we want to ignore a floating promise.
   // We don't want to block the app and wait for user click on the "Show Logs"
   // button or close the message However, for testing this method, we need to
   // keep the promise.
-
-  logError(e);
-  if (isHelpError(e)) {
+  if (HelpError.isHelpError(e)) {
     return { onlyForTesting: Help.showError(e, HelpMessageSeverity.Error) };
   }
   const showErrorMessage = async () => {

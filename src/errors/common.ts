@@ -4,3 +4,7 @@ export const stackToArray = (stack: string | undefined): string[] => (stack ?? '
 export interface IDetailedError extends Error {
   readonly details: string;
 }
+
+export function isDetailedError(object: any): object is IDetailedError {
+  return Boolean(object.details);
+}

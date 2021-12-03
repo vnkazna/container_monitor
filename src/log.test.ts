@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { IDetailedError } from './errors/common';
-import { handleError, initializeLogging, log, logError } from './log';
+import { handleError, initializeLogging, log, logError, LOG_LEVEL } from './log';
 import { USER_COMMANDS } from './command_names';
+import { asMock } from './test_utils/as_mock';
 
 describe('logging', () => {
   afterEach(() => {
@@ -15,23 +16,39 @@ describe('logging', () => {
     initializeLogging(logFunction);
   });
 
+  const getLoggedMessage = () => asMock(logFunction).mock.calls[0][0];
+
   describe('log', () => {
     it('passes the argument to the handler', () => {
-      const message = 'A very bad error occured';
-      log(message);
+      const message = 'A very bad error occurred';
+      log(message, LOG_LEVEL.INFO);
       expect(logFunction).toBeCalledTimes(1);
-      expect(logFunction).toBeCalledWith(message);
+      expect(logFunction).toBeCalledWith(`[info]: ${message}`);
+    });
+
+    it.each(['error', 'warning', 'info'] as const)('it handles log level "%s"', logLevel => {
+      log('message', logLevel);
+      expect(logFunction).toBeCalledWith(`[${logLevel}]: message`);
+    });
+
+    it('indents multiline messages', () => {
+      log('error happened\nand the next line\nexplains why', LOG_LEVEL.ERROR);
+      expect(logFunction).toHaveBeenCalledWith(
+        `[error]: error happened\n         and the next line\n         explains why`,
+      );
     });
   });
 
   describe('logError', () => {
     describe('for normal errors', () => {
       it('passes the argument to the handler', () => {
-        const message = 'A very bad error occured';
-        const error = new Error(message);
-        logError(error);
-        expect(logFunction).toBeCalledTimes(1);
-        expect(logFunction).toBeCalledWith(`${message}\n${error.stack}`);
+        const message = 'A very bad error occurred';
+        const error = {
+          message,
+          stack: 'stack',
+        };
+        logError(error as Error);
+        expect(getLoggedMessage()).toMatch(/\[error\]: A very bad error occurred\s+stack/m);
       });
     });
 
@@ -41,8 +58,7 @@ describe('logging', () => {
         logError({
           details,
         } as IDetailedError);
-        expect(logFunction).toBeCalledTimes(1);
-        expect(logFunction).toBeCalledWith(details);
+        expect(logFunction).toBeCalledWith(`[error]: ${details}`);
       });
     });
   });
@@ -56,14 +72,12 @@ describe('logging', () => {
 
       handleError(error);
 
-      expect(logFunction).toBeCalledTimes(1);
-      expect(logFunction).toBeCalledWith(`${message}\n${error.stack}`);
+      expect(getLoggedMessage()).toContain(message);
     });
 
     it('prompts the user to show the logs', () => {
       handleError(new Error(message));
 
-      expect(showErrorMessage).toBeCalledTimes(1);
       expect(showErrorMessage).toBeCalledWith(message, 'Show Logs');
     });
 

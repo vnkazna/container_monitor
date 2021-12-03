@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { coerce, gte, valid } from 'semver';
-import { log } from '../log';
+import { log, LOG_LEVEL } from '../log';
 
 export function ifVersionGte<T>(
   current: string | undefined,
@@ -13,7 +13,10 @@ export function ifVersionGte<T>(
     `minimumRequiredVersion argument ${minimumRequiredVersion} isn't valid`,
   );
   if (!coerce(current)) {
-    log(`Could not parse version from "${current}", running logic for the latest GitLab version`);
+    log(
+      `Could not parse version from "${current}", running logic for the latest GitLab version`,
+      LOG_LEVEL.WARNING,
+    );
     return then();
   }
   if (gte(coerce(current)!, minimumRequiredVersion)) return then();
