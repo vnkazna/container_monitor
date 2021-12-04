@@ -3,7 +3,7 @@ import assert = require('assert');
 import * as openers from './openers';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { logError } from './log';
-import { USER_COMMANDS } from './command_names';
+import { PROGRAMMATIC_COMMANDS, USER_COMMANDS } from './command_names';
 import { BranchState } from './current_branch_refresher';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
@@ -53,10 +53,10 @@ const createStatusBarItem = (text: string, command?: string | vscode.Command) =>
   return statusBarItem;
 };
 
-const openIssuableOnTheWebCommand = (issuable: RestIssuable): vscode.Command => ({
-  title: '', // the title is not used for StatusBarItem commands
-  command: 'vscode.open',
-  arguments: [vscode.Uri.parse(issuable.web_url)],
+const openIssuableInWebview = (issuable: RestIssuable, rootFsPath: string): vscode.Command => ({
+  title: '',
+  command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
+  arguments: [issuable, rootFsPath],
 });
 
 const sortAndDeduplicate = (jobs: RestJob[]): RestJob[] => {
@@ -83,9 +83,10 @@ export class StatusBar {
 
   async refresh(state: BranchState) {
     if (state.valid) {
-      await this.updatePipelineItem(state.pipeline, state.jobs, state.repository.rootFsPath);
-      this.updateMrItem(state.mr);
-      this.fetchMrClosingIssue(state.mr, state.issues);
+      const { rootFsPath } = state.repository;
+      await this.updatePipelineItem(state.pipeline, state.jobs, rootFsPath);
+      this.updateMrItem(state.mr, rootFsPath);
+      this.fetchMrClosingIssue(state.mr, state.issues, rootFsPath);
     } else {
       this.hideAllItems();
     }
@@ -144,7 +145,11 @@ export class StatusBar {
     this.firstRun = false;
   }
 
-  fetchMrClosingIssue(mr: RestMr | undefined, closingIssues: RestIssuable[]): void {
+  fetchMrClosingIssue(
+    mr: RestMr | undefined,
+    closingIssues: RestIssuable[],
+    rootFsPath: string,
+  ): void {
     if (!this.mrIssueStatusBarItem) return;
     if (mr) {
       let text = `$(code) GitLab: No issue.`;
@@ -153,7 +158,7 @@ export class StatusBar {
       const firstIssue = closingIssues[0];
       if (firstIssue) {
         text = `$(code) GitLab: Issue #${firstIssue.iid}`;
-        command = openIssuableOnTheWebCommand(firstIssue);
+        command = openIssuableInWebview(firstIssue, rootFsPath);
       }
 
       this.mrIssueStatusBarItem.text = text;
@@ -163,11 +168,11 @@ export class StatusBar {
     }
   }
 
-  updateMrItem(mr: RestMr | undefined): void {
+  updateMrItem(mr: RestMr | undefined, rootFsPath: string): void {
     if (!this.mrStatusBarItem) return;
     this.mrStatusBarItem.show();
     this.mrStatusBarItem.command = mr
-      ? openIssuableOnTheWebCommand(mr)
+      ? openIssuableInWebview(mr, rootFsPath)
       : USER_COMMANDS.OPEN_CREATE_NEW_MR;
     this.mrStatusBarItem.text = mr
       ? `$(git-pull-request) GitLab: MR !${mr.iid}`
