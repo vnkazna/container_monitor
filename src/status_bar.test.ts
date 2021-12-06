@@ -165,8 +165,8 @@ describe('status_bar', () => {
       expect(getMrItem().hide).not.toHaveBeenCalled();
       expect(getMrItem().text).toBe('$(git-pull-request) GitLab: MR !2000');
       const command = getMrItem().command as vscode.Command;
-      expect(command.command).toBe('vscode.open');
-      expect(command.arguments?.[0]).toEqual(vscode.Uri.parse(mr.web_url));
+      expect(command.command).toBe('gl.showRichContent');
+      expect(command.arguments?.[0]).toEqual(mr);
     });
 
     it('shows create MR text when there is no MR', async () => {
@@ -183,8 +183,8 @@ describe('status_bar', () => {
       expect(getClosingIssueItem().hide).not.toHaveBeenCalled();
       expect(getClosingIssueItem().text).toBe('$(code) GitLab: Issue #1000');
       const command = getClosingIssueItem().command as vscode.Command;
-      expect(command.command).toBe('vscode.open');
-      expect(command.arguments?.[0]).toEqual(vscode.Uri.parse(issue.web_url));
+      expect(command.command).toBe('gl.showRichContent');
+      expect(command.arguments?.[0]).toEqual(issue);
     });
 
     it('shows no issue when there is not a closing issue', async () => {
