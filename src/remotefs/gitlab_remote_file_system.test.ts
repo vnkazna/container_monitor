@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { FetchError } from '../errors/fetch_error';
-import { HelpError } from '../errors/help_error';
 import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { tokenService } from '../services/token_service';
 import { GitLabRemoteFileSystem } from './gitlab_remote_file_system';
@@ -217,25 +216,6 @@ describe('GitLabRemoteFileSystem', () => {
   });
 
   describe('stat', () => {
-    it('throws a HelpError if the token is expired', async () => {
-      const err = newFetchError('https://example.com', 401, 'unauthorized', {
-        error: 'invalid_token',
-      });
-      (GitLabNewService as jest.Mock).mockImplementation(() => ({
-        async getTree(): Promise<never> {
-          throw err;
-        },
-        async getFile(): Promise<never> {
-          throw err;
-        },
-      }));
-
-      projectInfo = testProjectWithTree;
-
-      const p = GitLabRemoteFileSystem.stat(testProjectFooURI);
-      await expect(p).rejects.toThrowError(HelpError);
-    });
-
     it('returns directory info for a tree', async () => {
       projectInfo = testProjectWithTree;
 

@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import crossFetch from 'cross-fetch';
-import { fetchJson, GitLabNewService } from './gitlab_new_service';
+import { GitLabNewService } from './gitlab_new_service';
 import { testSnippet1 } from '../../test/integration/fixtures/graphql/snippets.js';
 import { DEFAULT_FETCH_RESPONSE } from '../__mocks__/cross-fetch';
 import { CustomQueryType } from './custom_query_type';
@@ -9,6 +9,7 @@ import { asMock } from '../test_utils/as_mock';
 import { project } from '../test_utils/entities';
 import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { getHttpAgentOptions } from '../utils/get_http_agent_options';
+import { HelpError } from '../errors/help_error';
 
 jest.mock('graphql-request');
 jest.mock('../services/token_service');
@@ -357,35 +358,63 @@ describe('gitlab_new_service', () => {
       });
     });
   });
-});
 
-describe('fetchJson', () => {
-  beforeEach(() => {
-    asMock(crossFetch).mockResolvedValue(crossFetchResponse());
-  });
+  describe('fetchJson', () => {
+    let service: GitLabNewService;
 
-  it('handles an empty query', async () => {
-    await fetchJson('', 'https://example.com', {});
-    expect(crossFetch).toHaveBeenCalledWith('https://example.com?', expect.anything());
-  });
+    beforeEach(() => {
+      asMock(crossFetch).mockResolvedValue(crossFetchResponse());
+      service = new GitLabNewService('https://example.com');
+    });
 
-  it('handles a non-empty query', async () => {
-    await fetchJson('', 'https://example.com', {}, { foo: 'bar' });
-    expect(crossFetch).toHaveBeenCalledWith('https://example.com?foo=bar', expect.anything());
-  });
+    it('handles an empty query', async () => {
+      await service.fetch('/project');
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://example.com/api/v4/project?',
+        expect.anything(),
+      );
+    });
 
-  it('ignores an undefined query value', async () => {
-    await fetchJson('', 'https://example.com', {}, { foo: undefined });
-    expect(crossFetch).toHaveBeenCalledWith('https://example.com?', expect.anything());
-  });
+    it('handles a non-empty query', async () => {
+      await service.fetch('/project', { foo: 'bar' });
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://example.com/api/v4/project?foo=bar',
+        expect.anything(),
+      );
+    });
 
-  it('ignores a null query value', async () => {
-    await fetchJson('', 'https://example.com', {}, { foo: null });
-    expect(crossFetch).toHaveBeenCalledWith('https://example.com?', expect.anything());
-  });
+    it('ignores an undefined query value', async () => {
+      await service.fetch('/project', { foo: undefined });
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://example.com/api/v4/project?',
+        expect.anything(),
+      );
+    });
 
-  it('does not ignore a falsy value', async () => {
-    await fetchJson('', 'https://example.com', {}, { foo: '' });
-    expect(crossFetch).toHaveBeenCalledWith('https://example.com?foo=', expect.anything());
+    it('ignores a null query value', async () => {
+      await service.fetch('/project', { foo: null });
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://example.com/api/v4/project?',
+        expect.anything(),
+      );
+    });
+
+    it('does not ignore a falsy value', async () => {
+      await service.fetch('/project', { foo: '' });
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://example.com/api/v4/project?foo=',
+        expect.anything(),
+      );
+    });
+
+    it('throws a HelpError if the token is expired', async () => {
+      const url = '/project';
+      asMock(crossFetch).mockResolvedValue({
+        ok: false,
+        url,
+        json: async () => ({ error: 'invalid_token' }),
+      });
+      await expect(service.fetch(url)).rejects.toThrowError(HelpError);
+    });
   });
 });

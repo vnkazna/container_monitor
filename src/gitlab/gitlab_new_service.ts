@@ -54,9 +54,10 @@ import {
   GqlContentSnippet,
 } from './graphql/get_snippet_content';
 import { UnsupportedVersionError } from '../errors/unsupported_version_error';
-import { REQUIRED_VERSIONS } from '../constants';
+import { README_SECTIONS, REQUIRED_VERSIONS } from '../constants';
 import { makeMarkdownLinksAbsolute } from '../utils/make_markdown_links_absolute';
 import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
+import { HelpError } from '../errors/help_error';
 
 interface CreateNoteResult {
   createNote: {
@@ -87,26 +88,6 @@ type QueryValue = string | boolean | string[] | number | undefined | null;
 
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
-}
-
-export async function fetchJson<T>(
-  label: string,
-  url: string,
-  options: RequestInit,
-  query: Record<string, QueryValue> = {},
-): Promise<T> {
-  const q = new URLSearchParams();
-  Object.entries(query).forEach(([name, value]) => {
-    if (typeof value !== 'undefined' && value !== null) {
-      q.set(name, `${value}`);
-    }
-  });
-
-  const result = await crossFetch(`${url}?${q}`, options);
-  if (!result.ok) {
-    throw new FetchError(`Fetching ${label} from ${url} failed`, result);
-  }
-  return result.json() as Promise<T>;
 }
 
 const normalizeAvatarUrl =
@@ -208,10 +189,41 @@ export class GitLabNewService {
     };
   }
 
+  async fetch<T>(
+    apiResourcePath: string,
+    query: Record<string, QueryValue> = {},
+    resourceName = 'resource',
+  ): Promise<T> {
+    const q = new URLSearchParams();
+    Object.entries(query).forEach(([name, value]) => {
+      if (typeof value !== 'undefined' && value !== null) {
+        q.set(name, `${value}`);
+      }
+    });
+
+    const url = `${this.instanceUrl}/api/v4${apiResourcePath}?${q}`;
+    const result = await crossFetch(url, this.fetchOptions);
+    if (!result.ok) {
+      // Check if the response body is a GitLab invalid token error. Skip this
+      // check if the URL is undefined. This avoids unnecessary complications
+      // for testing.
+      const body = await result.json().catch(() => undefined);
+      if (body?.error === 'invalid_token') {
+        const { hostname } = new URL(url);
+        throw new HelpError(
+          `Failed to access a remote repository on ${hostname} due to an expired or revoked access token. You must create a new token.`,
+          { section: README_SECTIONS.SETUP },
+        );
+      }
+      throw new FetchError(`Fetching ${resourceName} from ${url} failed`, result);
+    }
+    return result.json() as Promise<T>;
+  }
+
   async getVersion(): Promise<string | undefined> {
     try {
-      const result = await crossFetch(`${this.instanceUrl}/api/v4/version`, this.fetchOptions);
-      return (await result.json())?.version;
+      const result = await this.fetch<{ version: string }>('/version', {}, 'instance version');
+      return result.version;
     } catch (e) {
       logError(e);
       return undefined;
@@ -301,19 +313,11 @@ export class GitLabNewService {
 
   // This method has to use REST API till https://gitlab.com/gitlab-org/gitlab/-/issues/280803 gets done
   async getMrDiff(mr: RestMr): Promise<RestMrVersion> {
-    const versionsUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions`;
-    const versionsResult = await crossFetch(versionsUrl, this.fetchOptions);
-    if (!versionsResult.ok) {
-      throw new FetchError(`Fetching versions from ${versionsUrl} failed`, versionsResult);
-    }
-    const versions = await versionsResult.json();
+    const versionsPath = `/projects/${mr.project_id}/merge_requests/${mr.iid}/versions`;
+    const versions = await this.fetch<RestMrVersion[]>(versionsPath, {}, 'MR versions');
     const lastVersion = versions[0];
-    const lastVersionUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/versions/${lastVersion.id}`;
-    const diffResult = await crossFetch(lastVersionUrl, this.fetchOptions);
-    if (!diffResult.ok) {
-      throw new FetchError(`Fetching MR diff from ${lastVersionUrl} failed`, diffResult);
-    }
-    return diffResult.json();
+    const lastVersionPath = `/projects/${mr.project_id}/merge_requests/${mr.iid}/versions/${lastVersion.id}`;
+    return this.fetch(lastVersionPath, {}, 'MR diff');
   }
 
   async getFileContent(path: string, ref: string, projectId: number | string): Promise<string> {
@@ -336,12 +340,8 @@ export class GitLabNewService {
     const encodedPath = encodeURIComponent(removeLeadingSlash(path));
     const encodedRef = encodeURIComponent(ref);
     const encodedProject = encodeURIComponent(projectId);
-    const fileUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/files/${encodedPath}?ref=${encodedRef}`;
-    const fileResult = await crossFetch(fileUrl, this.fetchOptions);
-    if (!fileResult.ok) {
-      throw new FetchError(`Fetching file from ${fileUrl} failed`, fileResult);
-    }
-    return fileResult.json();
+    const fileApiPath = `/projects/${encodedProject}/repository/files/${encodedPath}`;
+    return this.fetch(fileApiPath, { ref: encodedRef }, 'file');
   }
 
   async getTree(
@@ -352,24 +352,20 @@ export class GitLabNewService {
     const encodedPath = encodeURIComponent(removeLeadingSlash(path));
     const encodedRef = encodeURIComponent(ref);
     const encodedProject = encodeURIComponent(projectId);
-    const treeUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/tree?ref=${encodedRef}&path=${encodedPath}`;
-    const treeResult = await crossFetch(treeUrl, this.fetchOptions);
-    if (!treeResult.ok) {
-      throw new FetchError(`Fetching tree from ${treeUrl} failed`, treeResult);
-    }
-    return treeResult.json();
+    const treePath = `/projects/${encodedProject}/repository/tree`;
+    return this.fetch(treePath, { ref: encodedRef, path: encodedPath }, 'repository tree');
   }
 
   getBranches(project: number | string, search?: string): Promise<RestBranch[]> {
     const encodedProject = encodeURIComponent(project);
-    const branchUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/branches`;
-    return fetchJson('branches', branchUrl, this.fetchOptions, { search });
+    const projectBranchesPath = `/projects/${encodedProject}/repository/branches`;
+    return this.fetch(projectBranchesPath, { search }, 'branches');
   }
 
   getTags(project: number | string, search?: string): Promise<RestTag[]> {
     const encodedProject = encodeURIComponent(project);
-    const tagUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/tags`;
-    return fetchJson('tags', tagUrl, this.fetchOptions, { search });
+    const projectTagsPath = `/projects/${encodedProject}/repository/tags`;
+    return this.fetch(projectTagsPath, { search }, 'tags');
   }
 
   /*
@@ -459,12 +455,8 @@ export class GitLabNewService {
 
   private async getLabelEvents(issuable: RestIssuable): Promise<RestLabelEvent[]> {
     const type = isMr(issuable) ? 'merge_requests' : 'issues';
-    const labelEventsUrl = `${this.instanceUrl}/api/v4/projects/${issuable.project_id}/${type}/${issuable.iid}/resource_label_events?sort=asc&per_page=100`;
-    const result = await crossFetch(labelEventsUrl, this.fetchOptions);
-    if (!result.ok) {
-      throw new FetchError(`Fetching file from ${labelEventsUrl} failed`, result);
-    }
-    return result.json();
+    const labelEventsPath = `/projects/${issuable.project_id}/${type}/${issuable.iid}/resource_label_events`;
+    return this.fetch(labelEventsPath, { sort: 'asc', per_page: 100 }, 'label events');
   }
 
   async getDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<Note[]> {
@@ -526,12 +518,8 @@ export class GitLabNewService {
    */
   private async getMrNote(mr: RestMr, noteId: number): Promise<RestNote> {
     await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
-    const noteUrl = `${this.instanceUrl}/api/v4/projects/${mr.project_id}/merge_requests/${mr.iid}/notes/${noteId}`;
-    const result = await crossFetch(noteUrl, this.fetchOptions);
-    if (!result.ok) {
-      throw new FetchError(`Fetching the latest note from ${noteUrl} failed`, result);
-    }
-    return result.json();
+    const notePath = `/projects/${mr.project_id}/merge_requests/${mr.iid}/notes/${noteId}`;
+    return this.fetch(notePath, {}, 'latest note');
   }
 
   async updateNoteBody(
@@ -623,14 +611,12 @@ export class GitLabNewService {
   }
 
   async getFirstUserByUsername(username: string): Promise<RestUser | undefined> {
-    const usersUrl = `${this.instanceUrl}/api/v4/users`;
-    const users = await fetchJson('users', usersUrl, this.fetchOptions, { username });
+    const users = await this.fetch('/users', { username }, 'users');
     return (users as RestUser[])[0];
   }
 
   async getCurrentUser(): Promise<RestUser> {
-    const usersUrl = `${this.instanceUrl}/api/v4/user`;
-    return fetchJson('users', usersUrl, this.fetchOptions);
+    return this.fetch('/user', {}, 'current user');
   }
 
   async getIssuables(params: CustomQuery, project: GitLabProject) {
@@ -761,11 +747,10 @@ export class GitLabNewService {
       ...issueQueryParams,
     };
 
-    const issuables = (await fetchJson(
-      'issuables',
-      `${this.instanceUrl}/api/v4${path}`,
-      this.fetchOptions,
+    const issuables = (await this.fetch(
+      path,
       { ...Object.fromEntries(search), ...queryParams },
+      'issuables',
     )) as RestIssuable[];
     return issuables.map(normalizeAvatarUrl(this.instanceUrl));
   }
