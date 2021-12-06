@@ -163,6 +163,7 @@ export class StatusBar {
 
       this.mrIssueStatusBarItem.text = text;
       this.mrIssueStatusBarItem.command = command;
+      this.mrIssueStatusBarItem.show();
     } else {
       this.mrIssueStatusBarItem.hide();
     }
