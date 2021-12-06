@@ -27,6 +27,7 @@ interface RestMr extends RestIssuable {
 }
 
 interface RestMrVersion {
+  id: number;
   head_commit_sha: string;
   base_commit_sha: string;
   start_commit_sha: string;
