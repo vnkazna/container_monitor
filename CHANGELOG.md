@@ -11,6 +11,7 @@
 
 * introduce log level to logging ([c40ab03](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/c40ab038bc0b98e423b184ac74652010fac29d8a))
 * open status bar MR link in webview ([56415fb](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/56415fb6502dcfe3a53f252e2329eb5361e0def9))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !416](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/416) 👍
 
 
 
