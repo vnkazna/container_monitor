@@ -1,3 +1,19 @@
+# [3.39.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.38.2...v3.39.0) (2021-12-07)
+
+
+### Bug Fixes
+
+* extension ignores expired token and fails in the wrong place ([4661365](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/4661365ada85c7b0af49fd5fb9ec205ff73498ea))
+* show closing issue status bar item ([ef16e08](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/ef16e08b8f6bd5bd6b941902384c3363d6a4eb6d))
+
+
+### Features
+
+* introduce log level to logging ([c40ab03](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/c40ab038bc0b98e423b184ac74652010fac29d8a))
+* open status bar MR link in webview ([56415fb](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/56415fb6502dcfe3a53f252e2329eb5361e0def9))
+
+
+
 ## [3.38.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.38.1...v3.38.2) (2021-12-01)
 
 
