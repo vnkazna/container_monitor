@@ -29,4 +29,107 @@ describe('GitLabComment', () => {
       expect(comment.contextValue).not.toMatch('canAdmin');
     });
   });
+
+  describe('suggestion in the comment', () => {
+    const suggestion = `
+\`\`\`suggestion:-1+0
+function containingFunctionABC(): void{
+    function subFunctionDEF(): void{
+\`\`\`
+`;
+
+    const renderedSuggestion = `
+---
+
+Suggestion:
+
+\`\`\`diff
++ function containingFunctionABC(): void{
++     function subFunctionDEF(): void{
+\`\`\`
+
+*[open suggestion on the web](https://gitlab.com/viktomas/test-project/-/merge_requests/7#note_754841236)*
+
+---
+
+
+`;
+
+    const multipleSuggestions = `Adding a line1
+
+\`\`\`suggestion:-1+0
+function containingFunctionABC(): void{
+    function subFunctionDEF(): void{
+\`\`\`
+\`\`\`suggestion:-0+0
+    function subFunctionAloha(): void{
+\`\`\`
+
+And here`;
+
+    const renderedMultipleSuggestions = `Adding a line1
+
+---
+
+Suggestion:
+
+\`\`\`diff
++ function containingFunctionABC(): void{
++     function subFunctionDEF(): void{
+\`\`\`
+
+*[open suggestion on the web](https://gitlab.com/viktomas/test-project/-/merge_requests/7#note_754841236)*
+
+---
+
+
+---
+
+Suggestion:
+
+\`\`\`diff
++     function subFunctionAloha(): void{
+\`\`\`
+
+*[open suggestion on the web](https://gitlab.com/viktomas/test-project/-/merge_requests/7#note_754841236)*
+
+---
+
+
+
+And here`;
+
+    it('renders suggestion into markdown', () => {
+      createGitLabComment({
+        ...(noteOnDiff as GqlTextDiffNote),
+        body: suggestion,
+      });
+      expect(comment.body).toEqual(renderedSuggestion);
+    });
+
+    it('renders multiple suggestions into markdown', () => {
+      createGitLabComment({
+        ...(noteOnDiff as GqlTextDiffNote),
+        body: multipleSuggestions,
+      });
+      expect(comment.body).toEqual(renderedMultipleSuggestions);
+    });
+
+    it('editing comment sets the comment body into original markdown', () => {
+      createGitLabComment({
+        ...(noteOnDiff as GqlTextDiffNote),
+        body: suggestion,
+      });
+      expect(comment.setOriginalBody().body).toEqual(suggestion);
+    });
+
+    it('submitting edit will again render the suggestion', () => {
+      createGitLabComment({
+        ...(noteOnDiff as GqlTextDiffNote),
+        body: suggestion,
+      });
+      comment.body = `${comment.body}\nabc`;
+      expect(comment.markBodyAsSubmitted().body).toEqual(`${renderedSuggestion}\nabc`);
+    });
+  });
 });

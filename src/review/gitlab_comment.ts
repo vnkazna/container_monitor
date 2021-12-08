@@ -9,6 +9,16 @@ interface CommentOptions {
   note?: GqlTextDiffNote;
 }
 
+const renderSuggestions = (body: string, noteUrl: string): string =>
+  body.replace(
+    /```suggestion:-\d+\+\d+\n((?:\n|.)*?)\n```/g,
+    (_, p1) =>
+      `---\n\nSuggestion:\n\n\`\`\`diff\n+ ${p1.replace(
+        /\n/,
+        '\n+ ',
+      )}\n\`\`\`\n\n*[open suggestion on the web](${noteUrl})*\n\n---\n\n`,
+  );
+
 export class GitLabComment implements vscode.Comment {
   protected constructor(
     readonly gqlNote: GqlTextDiffNote,
@@ -35,7 +45,11 @@ export class GitLabComment implements vscode.Comment {
     };
   }
 
-  resetBody(): GitLabComment {
+  renderBody(): GitLabComment {
+    return this.copyWith({ body: renderSuggestions(this.gqlNote.body, this.gqlNote.url) });
+  }
+
+  setOriginalBody(): GitLabComment {
     return this.copyWith({ body: this.gqlNote.body });
   }
 
@@ -45,7 +59,7 @@ export class GitLabComment implements vscode.Comment {
         ...this.gqlNote,
         body: this.body, // this synchronizes the API response with the latest body
       },
-    });
+    }).renderBody();
   }
 
   withMode(mode: vscode.CommentMode): GitLabComment {
@@ -62,6 +76,11 @@ export class GitLabComment implements vscode.Comment {
   }
 
   static fromGqlNote(gqlNote: GqlTextDiffNote, thread: GitLabCommentThread): GitLabComment {
-    return new GitLabComment(gqlNote, vscode.CommentMode.Preview, thread, gqlNote.body);
+    return new GitLabComment(
+      gqlNote,
+      vscode.CommentMode.Preview,
+      thread,
+      renderSuggestions(gqlNote.body, gqlNote.url),
+    );
   }
 }

@@ -58,11 +58,13 @@ export class GitLabCommentThread {
   }
 
   startEdit(comment: GitLabComment): void {
-    this.changeOneComment(comment.id, c => c.withMode(vscode.CommentMode.Editing));
+    this.changeOneComment(comment.id, c =>
+      c.withMode(vscode.CommentMode.Editing).setOriginalBody(),
+    );
   }
 
   cancelEdit(comment: GitLabComment): void {
-    this.changeOneComment(comment.id, c => c.withMode(vscode.CommentMode.Preview).resetBody());
+    this.changeOneComment(comment.id, c => c.withMode(vscode.CommentMode.Preview).renderBody());
   }
 
   async submitEdit(comment: GitLabComment): Promise<void> {

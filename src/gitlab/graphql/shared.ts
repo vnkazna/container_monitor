@@ -49,6 +49,7 @@ export const noteDetailsFragment = gql`
     }
     body
     bodyHtml
+    url
     userPermissions {
       resolveNote
       adminNote
@@ -157,6 +158,7 @@ export interface GqlGenericNote<T extends GqlBasePosition | null> {
   system: boolean;
   body: string; // TODO: remove this once the SystemNote.vue doesn't require plain text body
   bodyHtml: string;
+  url: string;
   userPermissions: GqlNotePermissions;
   position: T;
 }
