@@ -34,6 +34,16 @@ describe('CI Status Metadata', () => {
       expect(result.icon.id).toBe('clock');
       expect(result.name).toBe('Delayed');
     });
+
+    it('returns "Manual" for a manual job', () => {
+      const result = getJobMetadata({
+        ...job,
+        status: 'manual',
+      } as unknown as RestJob);
+
+      expect(result.icon.id).toBe('gear');
+      expect(result.name).toBe('Manual');
+    });
   });
 
   describe('getPipelineMetadata', () => {
