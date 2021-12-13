@@ -3,13 +3,14 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "test-compile",
+      "script": "watch-compile",
+      "isBackground": true,
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": [],
-      "label": "npm: test-compile"
+      "problemMatcher": ["$esbuild-watch"],
+      "label": "npm: watch-compile"
     },
     {
       "type": "npm",
