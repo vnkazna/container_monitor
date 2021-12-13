@@ -99,6 +99,7 @@ const noteOnDiff = {
   body: 'This is the core improvement. `NoteBody` sends the `note.body` to our `/api/v4/markdown` endpoint to render HTML. For labels, we can easily render the HTML ourselves, saving all the API requests and complexity.',
   bodyHtml:
     '<p data-sourcepos="1:1-1:210" dir="auto">This is the core improvement. <code>NoteBody</code> sends the <code>note.body</code> to our <code>/api/v4/markdown</code> endpoint to render HTML. For labels, we can easily render the HTML ourselves, saving all the API requests and complexity.</p>',
+  url: 'https://gitlab.com/viktomas/test-project/-/merge_requests/7#note_754841236',
   position: {
     diffRefs: {
       baseSha: '18307069cfc96892bbe93a15249bd91babfa1064',
