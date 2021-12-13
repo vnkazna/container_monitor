@@ -115,6 +115,41 @@ const noteOnDiff = {
   },
 };
 
+const noteOnDiffWithSuggestion = {
+  id: 'gid://gitlab/DiffNote/771043162',
+  createdAt: '2021-12-13T13:13:06Z',
+  system: false,
+  author: {
+    avatarUrl:
+      'https://secure.gravatar.com/avatar/6042a9152ada74d9fb6a0cdce895337e?s=80&d=identicon',
+    name: 'Tomas Vik',
+    username: 'viktomas',
+    webUrl: 'https://gitlab.com/viktomas',
+  },
+  body: '```suggestion:-0+0\nfunction anotherFunction1(): void{\n```\n\n```suggestion:-0+0\nfunction anotherFunction2(): void{\n```',
+  bodyHtml:
+    '<pre data-sourcepos="1:1-3:3" class="code highlight js-syntax-highlight language-suggestion" lang="suggestion" data-lang-params="-0+0" v-pre="true"><code class="js-render-suggestion"><span id="LC1" class="line" lang="suggestion">function anotherFunction1(): void{</span></code></pre>&#x000A;<pre data-sourcepos="5:1-7:3" class="code highlight js-syntax-highlight language-suggestion" lang="suggestion" data-lang-params="-0+0" v-pre="true"><code class="js-render-suggestion"><span id="LC1" class="line" lang="suggestion">function anotherFunction2(): void{</span></code></pre>',
+  url: 'https://gitlab.com/viktomas/test-project/-/merge_requests/7#note_771043162',
+  userPermissions: {
+    resolveNote: true,
+    adminNote: true,
+    createNote: true,
+  },
+  position: {
+    diffRefs: {
+      baseSha: '5e6dffa282c5129aa67cd227a0429be21bfdaf80',
+      headSha: 'f9ce7e16e56c162edbc9e480108041cf6b0291fe',
+      startSha: '5e6dffa282c5129aa67cd227a0429be21bfdaf80',
+    },
+    filePath: 'test.ts',
+    positionType: 'text',
+    newLine: 24,
+    oldLine: null,
+    newPath: 'test.ts',
+    oldPath: 'test.js',
+  },
+};
+
 const noteOnDiffTextSnippet =
   'For labels, we can easily render the HTML ourselves, saving all the API requests';
 
@@ -199,6 +234,7 @@ module.exports = {
   note2TextSnippet,
   noteOnDiff,
   noteOnDiffTextSnippet,
+  noteOnDiffWithSuggestion,
   singleNote,
   multipleNotes,
   discussionOnDiff,

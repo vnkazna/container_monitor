@@ -23,6 +23,29 @@ export default {
       return this.noteable.author;
     },
   },
+  mounted() {
+    this.initializeSuggestions();
+  },
+  methods: {
+    initializeSuggestions() {
+      const suggestions = this.$el.querySelectorAll('pre.language-suggestion');
+      suggestions.forEach(suggestionEl => {
+        const initializedSuggestionHtml = `
+          <div class="suggestion">
+            <div class="header">
+              <strong>Suggested change:</strong>
+              <emphasis><a href="${this.noteable.url}">open on the web</a></emphasis>
+            </div>
+            ${suggestionEl.outerHTML}
+          </div>
+          `;
+        const initializedSuggestionEl = document.createElement('div');
+        initializedSuggestionEl.innerHTML = initializedSuggestionHtml;
+        suggestionEl.parentNode.insertBefore(initializedSuggestionEl, suggestionEl);
+        suggestionEl.remove();
+      });
+    },
+  },
 };
 </script>
 
@@ -54,19 +77,13 @@ export default {
   margin: 16px 0;
   box-sizing: border-box;
   display: block;
-  position: relative;
 
   .timeline-entry-inner {
-    position: relative;
-  }
-
-  .timelineIcon {
-    float: left;
-    position: relative;
+    display: flex;
   }
 
   .timelineContent {
-    position: relative;
+    width: 100%;
   }
 
   .note-header {
@@ -118,6 +135,33 @@ export default {
     text-size-adjust: 100%;
     vertical-align: middle;
     box-sizing: border-box;
+  }
+
+  .suggestion {
+    border: 1px solid;
+    border-radius: 4px;
+    border-color: var(--vscode-panel-border);
+    margin-top: 1em;
+    margin-bottom: 1em;
+    .header {
+      padding: 16px;
+      background-color: var(--vscode-input-background);
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+
+  pre.language-suggestion {
+    margin: 0;
+    padding: 16px;
+    code {
+      display: flex;
+      flex-direction: column;
+      color: var(--vscode-gitDecoration-addedResourceForeground);
+    }
+    .line::before {
+      content: '+ ';
+    }
   }
 }
 </style>
