@@ -1,3 +1,18 @@
+# [3.40.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.39.0...v3.40.0) (2021-12-14)
+
+
+### Bug Fixes
+
+* manual job has unknown status in sidebar tree ([fd44ec9](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fd44ec99295411cffd09a671536fceba130d4511))
+
+
+### Features
+
+* render suggestions in MR reviews ([3178746](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/31787465c3e2659e4b56b3c80ddf46b69b8209b4))
+* render suggestions in MR webview ([beeefcf](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/beeefcf1255df3ac5df854bcf2b9431919ce5c5e))
+
+
+
 # [3.39.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.38.2...v3.39.0) (2021-12-07)
 
 
