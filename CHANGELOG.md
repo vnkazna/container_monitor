@@ -4,6 +4,7 @@
 ### Bug Fixes
 
 * manual job has unknown status in sidebar tree ([fd44ec9](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fd44ec99295411cffd09a671536fceba130d4511))
+  * Implemented by [@KevSlashNull](https://gitlab.com/KevSlashNull) with [MR !415](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/415) 👍
 
 
 ### Features
