@@ -30,6 +30,7 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--disable-extensions",
+        "--disable-workspace-trust",
         "--extensionDevelopmentPath=${workspaceRoot}",
         "--extensionTestsPath=${workspaceRoot}/out/test/integration/",
         "<run `npm run create-test-workspace` to generate a test folder>"
