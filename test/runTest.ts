@@ -13,7 +13,7 @@ async function go() {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: ['--disable-extensions', temporaryWorkspace],
+      launchArgs: ['--disable-extensions', '--disable-workspace-trust', temporaryWorkspace],
     });
   } catch (err) {
     console.error('Failed to run tests', err);
