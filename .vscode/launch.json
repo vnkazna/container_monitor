@@ -35,7 +35,7 @@
         "--extensionTestsPath=${workspaceRoot}/out/test/integration/",
         "<run `npm run create-test-workspace` to generate a test folder>"
       ],
-      "preLaunchTask": "${defaultBuildTask}",
+      "preLaunchTask": "npm: compile",
       "stopOnEntry": false
     }
   ]
