@@ -52,14 +52,15 @@ async function lintMr() {
 
   if (!mr.squash || commits.length === 1) {
     console.log(
-      'INFO: MR is not set to squash and/or there is only one commit. Every commit message needs to conform to conventional commit standard.\n',
+      "INFO: Either the merge request isn't set to squash commits, or contains only one commit. Every commit message must use conventional commits.\n" +
+        'INFO: For help, read https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/developer/commits.md',
     );
     return Promise.all(commits.map(isConventional));
   }
 
   console.log(
-    'INFO: MR is set to squash. GitLab is going to use the MR title.\n' +
-      "INFO: If the MR title isn't correct, you can fix it and rerun this CI Job.\n",
+    'INFO: The merge request is set to both squash commits and use the merge request title for the squash commit.\n' +
+      'INFO: If the merge request title is incorrect, fix the title and rerun this CI/CD job.\n',
   );
   return isConventional(mr.title).then(Array.of);
 }
