@@ -4,8 +4,6 @@ import { job, pipeline, repository } from '../../test_utils/entities';
 import { PipelineItemModel } from './pipeline_item_model';
 import { VS_COMMANDS } from '../../command_names';
 
-jest.mock('../../gitlab_service');
-
 const fourYearsAgo = dayjs().subtract(4, 'year');
 
 describe('PipelineItemModel', () => {

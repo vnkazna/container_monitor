@@ -3,12 +3,12 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import assert from 'assert';
-import * as gitLabService from './gitlab_service';
 import { createGitLabNewService } from './service_factory';
 import { handleError, logError } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { isMr } from './utils/is_mr';
 import { makeHtmlLinksAbsolute } from './utils/make_html_links_absolute';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 const webviewResourcePaths = {
   appScriptUri: 'src/webview/dist/js/app.js',
@@ -105,7 +105,10 @@ class WebviewController {
     async (message: any) => {
       const instanceUrl = await getInstanceUrl(repositoryRoot);
       if (message.command === 'renderMarkdown') {
-        let rendered = await gitLabService.renderMarkdown(message.markdown, repositoryRoot);
+        const repository = gitExtensionWrapper.getRepository(repositoryRoot);
+        let rendered = await repository
+          .getGitLabService()
+          .renderMarkdown(message.markdown, (await repository.getProject())!);
         rendered = makeHtmlLinksAbsolute(rendered || '', instanceUrl);
 
         await panel.webview.postMessage({

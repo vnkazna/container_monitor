@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
-import * as gitLabService from '../gitlab_service';
 import * as openers from '../openers';
 import { VISIBILITY_OPTIONS } from './create_snippet';
 import { PATCH_FILE_SUFFIX, PATCH_TITLE_PREFIX } from '../constants';
@@ -43,7 +42,6 @@ export const createSnippetPatch: ProjectCommand = async repository => {
   const project = await repository.getProject();
   const patchFileName = `${name}${PATCH_FILE_SUFFIX}`;
   const data = {
-    id: project.restId,
     title: `${PATCH_TITLE_PREFIX}${name}`,
     description: getSnippetPatchDescription(
       await repository.getTrackingBranchName(),
@@ -55,7 +53,7 @@ export const createSnippetPatch: ProjectCommand = async repository => {
     content: patch,
   };
 
-  const snippet = await gitLabService.createSnippet(repository.rootFsPath, data);
+  const snippet = await repository.getGitLabService().createSnippet(project, data);
 
   await openers.openUrl(snippet.web_url);
 };

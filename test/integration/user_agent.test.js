@@ -1,13 +1,11 @@
 const vscode = require('vscode');
 const { setupServer } = require('msw/node');
-const { rest, graphql } = require('msw');
+const { graphql } = require('msw');
 const assert = require('assert');
-const { API_URL_PREFIX, GITLAB_URL } = require('./test_infrastructure/constants');
-const gitLabService = require('../../src/gitlab_service');
+const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { GitLabNewService } = require('../../src/gitlab/gitlab_new_service');
 const { snippetsResponse } = require('./fixtures/graphql/snippets');
 const packageJson = require('../../package.json');
-const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 
 const validateUserAgent = req => {
   const userAgent = req.headers.get('User-Agent');
@@ -25,10 +23,6 @@ describe('User-Agent header', () => {
 
   before(async () => {
     server = setupServer(
-      rest.get(`${API_URL_PREFIX}/user`, (req, res, ctx) => {
-        capturedRequest = req;
-        return res(ctx.status(200), ctx.json({}));
-      }),
       graphql.query('GetSnippets', (req, res, ctx) => {
         capturedRequest = req;
         return res(ctx.data(snippetsResponse));
@@ -44,11 +38,6 @@ describe('User-Agent header', () => {
 
   after(async () => {
     server.close();
-  });
-
-  it('is sent with requests from GitLabService', async () => {
-    await gitLabService.fetchCurrentUser(getRepositoryRoot());
-    validateUserAgent(capturedRequest);
   });
 
   it('is sent with requests from GitLabNewService', async () => {

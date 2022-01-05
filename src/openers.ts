@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as gitLabService from './gitlab_service';
 import { VS_COMMANDS } from './command_names';
 import {
   GitLabRepository,
@@ -8,6 +7,7 @@ import {
   ProjectCommand,
   ProjectFileCommand,
 } from './commands/run_with_valid_project';
+import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
@@ -27,7 +27,7 @@ export const openUrl = async (url: string): Promise<void> =>
  * @param {GitLabRepository} repository with valid gitlab project
  */
 async function getLink(linkTemplate: string, repository: GitLabRepository) {
-  const user = await gitLabService.fetchCurrentUser(repository.rootFsPath);
+  const user = await repository.getGitLabService().getCurrentUser();
   const project = await repository.getProject();
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
@@ -75,7 +75,12 @@ export const copyLinkToActiveFile: ProjectFileCommand = async repositoryWithProj
 };
 
 export const openCurrentMergeRequest: ProjectCommand = async gitlabRepository => {
-  const mr = await gitLabService.fetchOpenMergeRequestForCurrentBranch(gitlabRepository.rootFsPath);
+  const mr = await gitlabRepository
+    .getGitLabService()
+    .getOpenMergeRequestForCurrentBranch(
+      await gitlabRepository.getProject(),
+      await gitlabRepository.getTrackingBranchName(),
+    );
 
   if (mr) {
     await openUrl(mr.web_url);
@@ -101,8 +106,15 @@ export const openProjectPage: ProjectCommand = async gitlabRepository => {
   await openTemplatedLink('$projectUrl', gitlabRepository);
 };
 
+// FIXME pass in GitLabRepository instead of the root
 export async function openCurrentPipeline(repositoryRoot: string): Promise<void> {
-  const { pipeline } = await gitLabService.fetchPipelineAndMrForCurrentBranch(repositoryRoot);
+  const repository = gitExtensionWrapper.getRepository(repositoryRoot);
+  const { pipeline } = await repository
+    .getGitLabService()
+    .getPipelineAndMrForCurrentBranch(
+      (await repository.getProject())!,
+      await repository.getTrackingBranchName(),
+    );
 
   if (pipeline) {
     await openUrl(pipeline.web_url);

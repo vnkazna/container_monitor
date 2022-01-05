@@ -370,7 +370,7 @@ describe('gitlab_new_service', () => {
     it('handles an empty query', async () => {
       await service.fetch('/project');
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project?',
+        'https://example.com/api/v4/project',
         expect.anything(),
       );
     });
@@ -386,7 +386,7 @@ describe('gitlab_new_service', () => {
     it('ignores an undefined query value', async () => {
       await service.fetch('/project', { foo: undefined });
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project?',
+        'https://example.com/api/v4/project',
         expect.anything(),
       );
     });
@@ -394,7 +394,7 @@ describe('gitlab_new_service', () => {
     it('ignores a null query value', async () => {
       await service.fetch('/project', { foo: null });
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project?',
+        'https://example.com/api/v4/project',
         expect.anything(),
       );
     });
@@ -411,7 +411,7 @@ describe('gitlab_new_service', () => {
       const url = '/project';
       asMock(crossFetch).mockResolvedValue({
         ok: false,
-        url,
+        url: 'https://example.com/api/v4/project',
         json: async () => ({ error: 'invalid_token' }),
       });
       await expect(service.fetch(url)).rejects.toThrowError(HelpError);

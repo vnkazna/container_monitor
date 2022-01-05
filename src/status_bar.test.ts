@@ -1,11 +1,9 @@
 import * as vscode from 'vscode';
-import * as gitLabService from './gitlab_service';
 import { pipeline, mr, issue, job, repository } from './test_utils/entities';
 import { USER_COMMANDS } from './command_names';
 import { asMock } from './test_utils/as_mock';
 import { ValidBranchState } from './current_branch_refresher';
 
-jest.mock('./gitlab_service');
 jest.mock('./git/git_extension_wrapper');
 jest.mock('./extension_state');
 
@@ -66,12 +64,7 @@ describe('status_bar', () => {
   });
 
   describe('pipeline item', () => {
-    beforeEach(() => {
-      asMock(gitLabService.fetchJobsForPipeline).mockReset();
-    });
-
     it('initializes the pipeline item with success', async () => {
-      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({ pipeline });
       await statusBar.refresh(createBranchInfo({ pipeline }));
       expect(getPipelineItem().show).toHaveBeenCalled();
       expect(getPipelineItem().hide).not.toHaveBeenCalled();
@@ -147,12 +140,6 @@ describe('status_bar', () => {
       ${'canceled'} | ${'$(circle-slash) GitLab: Pipeline canceled'}
       ${'skipped'}  | ${'$(diff-renamed) GitLab: Pipeline skipped'}
     `('shows $itemText for pipeline with status $status', async ({ status, itemText }) => {
-      asMock(gitLabService.fetchPipelineAndMrForCurrentBranch).mockResolvedValue({
-        pipeline: {
-          ...pipeline,
-          status,
-        },
-      });
       await statusBar.refresh(createBranchInfo({ pipeline: { ...pipeline, status } }));
       expect(getPipelineItem().text).toBe(itemText);
     });
