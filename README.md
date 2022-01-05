@@ -113,13 +113,19 @@ The token configured in an environment variable is overridden if you configure a
 
 If you want to use multiple GitLab instances you may want to configure each workspace separately. See the `gitlab.instanceUrl` configuration option in [Extension settings](#extension-settings) section.
 
-### Self-Signed Certificate Authority (CA)
+### Self-signed certificate authority
 
-If your GitLab uses Self-Signed CA, please see [the SSL setup guide](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/ssl.md).
+If your GitLab uses a self-signed CA (certificate authority), please read
+[the SSL setup guide](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/ssl.md)
+and the [settings for self-signed certificates](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/troubleshooting.md#settings-for-self-signed-certificates)
 
 ## Extension settings
 
 To learn how to change the VS Code Settings, read the official [Settings documentation](https://code.visualstudio.com/docs/getstarted/settings).
+
+If you use self-signed certificates to connect to your GitLab instance, read the
+community-contributed
+[settings for self-signed certificates](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/troubleshooting.md#settings-for-self-signed-certificates).
 
 **`gitlab.instanceUrl`** _(required: false, default: "https://gitlab.com")_
 
@@ -146,28 +152,6 @@ The name of the Git remote name corresponding to the GitLab repository with your
 **`gitlab.customQueries`** _(required: false)_
 
 Defines the search queries that retrieves the items shown on the GitLab Panel. See [Custom Queries documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/custom-queries.md) for more details.
-
-### Self-signed certificates
-
-To use self-signed certificates to connect to your GitLab instance, configure them using the following settings. These are community contributed because the GitLab team uses a public CA.
-
-These settings don't work with [`http.proxy` setting for VS Code](https://code.visualstudio.com/docs/setup/network#_legacy-proxy-server-support) (see [open issue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/314)).
-
-**`gitlab.ca`** _(required: false, default: null)_
-
-*Deprecated. Please see [the SSL setup guide](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/ssl.md) for more information on how to set up your self-signed CA.*
-
-**`gitlab.cert`** _(required: false, default: null)_
-
-**Unsupported** - See [&6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). *If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate file. Please also see `gitlab.certKey` option.*
-
-**`gitlab.certKey`** _(required: false, default: null)_
-
-**Unsupported** - See [&6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). *If your self-managed GitLab instance requires a custom cert/key pair you would probably need to set this option in to point your certificate key file. Please also see `gitlab.cert` option.*
-
-**`gitlab.ignoreCertificateErrors`** _(required: false, default: false)_
-
-**Unsupported** - See [&6244](https://gitlab.com/groups/gitlab-org/-/epics/6244). *If you are using a self-managed GitLab instance with no SSL certificate or having certificate issues and unable to use the extension you may want to set this option to `true` to ignore certificate errors.*
 
 ## Features in-depth
 
