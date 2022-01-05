@@ -2,13 +2,22 @@
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
 
-This extension integrates GitLab to VS Code. It helps you:
+This extension integrates GitLab into Visual Studio Code. After you [set up the extension](#setup),
+the extension helps you:
 
-- View issues.
-- Create and review merge requests.
-- Validate your GitLab CI configuration.
-- View the status of your pipeline.
-- Create and paste snippets to, and from, your editor.
+- [**View GitLab issues and merge requests**](#issue-and-merge-request-details-and-comments-in-vs-code).
+  View issues, comments, merge requests, and changed files [in the sidebar](#sidebar---details),
+  or build a [custom search](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/custom-queries.md)
+  to meet your needs.
+- [**Create and review merge requests**](#merge-request-reviews).
+- [**Validate your GitLab CI configuration**](#validate-gitlab-ci-configuration) locally with a [command](#commands).
+- [**Manage your pipelines**](#pipeline-actions). View your [pipeline status](#status-bar---details)
+  and open the related merge request. With [advanced pipeline actions](#pipeline-actions),
+  you can create, retry, or cancel a pipeline.
+- **Manage snippets**. [Create](#create-snippet) and [insert](#insert-snippet)
+  snippets, and apply [snippet patches](#create-and-apply-snippet-patch).
+- [**Browse a GitLab repository directly**](#browse-a-repository-without-cloning)
+  in Visual Studio Code without cloning it.
 
 ## Minimum supported version
 
@@ -33,10 +42,6 @@ Advanced pipeline actions allow you to view pipeline on GitLab, create a new pip
 
 ![status_bar.gif](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/d0589878829338b64657e592f3451f1dace41cdf/docs/assets/status-bar.gif)
 
-### Browse a remote repository
-
-Browse a GitLab repository directly in Visual Studio Code without cloning it. [Read more](#browse-a-repository-without-cloning).
-
 ### Commands
 
 You can use [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette) to run the commands.
@@ -57,7 +62,7 @@ You can use [Command Palette](https://code.visualstudio.com/docs/getstarted/user
 - `GitLab: Create new merge request on current project` - Open the merge request page to create a merge request.
 - `GitLab: Open Remote Repository` - Browse a remote GitLab repository. [Read more](#browse-a-repository-without-cloning).
 
-Commands this extension extends/integrates with:
+Commands this extension extends or integrates with:
 
 - `Git: Clone` - Search for and clone projects for every GitLab instance you set up. [Read more](#git-extension-integration), [Official Documentation](https://code.visualstudio.com/docs/editor/versioncontrol#_cloning-a-repository)
 - `Git: Add Remote...` - Add existing projects as remote from every GitLab instance you set up.
@@ -104,8 +109,8 @@ You can start using this extension right away. If your project has a pipeline fo
 
 If you often delete your VS Code storage (such as in Gitpod containers) you can create environment variables before starting VS Code. If you set the token in an environment variable you don't have to set the personal access token every time you delete your VS Code storage.
 
- - `GITLAB_WORKFLOW_INSTANCE_URL`: GitLab instance URL (e.g. https://gitlab.com).
- - `GITLAB_WORKFLOW_TOKEN`: personal access token, which you created [in a previous step](#step-1-create-your-personal-access-token).
+- `GITLAB_WORKFLOW_INSTANCE_URL`: GitLab instance URL (e.g. https://gitlab.com).
+- `GITLAB_WORKFLOW_TOKEN`: personal access token, which you created [in a previous step](#step-1-create-your-personal-access-token).
 
 The token configured in an environment variable is overridden if you configure a token for the same GitLab instance in the extension.
 
@@ -227,12 +232,12 @@ It can become more powerful by allowing you to filter issues/MRs by author, assi
 | author    | Username of the author without `@`.                                                                                                     | `author: fatihacet`                                                |
 | assignee  | Username of the assignee without `@`.                                                                                                   | `assignee: timzallmann`                                            |
 
-**Examples**
+##### Examples
 
 - `title: new merge request widget author: fatihacet assignee: jschatz1 labels: frontend, performance milestone: 10.5`
 - `title: multiple group page author: annabeldunstone assignee: timzallmann label: frontend`
 
-**Important notes**
+##### Important notes
 
 - `:` after the token name is necessary. `label :` is not a valid token name and may return parsing error. Hence `label:` should be used. However, space after the token name is optional. Both `label: frontend` and `label:frontend` is valid. This rule is valid for all tokens above.
 - You don't need to add quotes around multiple words for `title` token. `title:"new merge request widget"` may return parsing error. `title: new merge request widget` should be used.
