@@ -912,8 +912,6 @@
     "graphql": "^16.2.0",
     "graphql-request": "^3.7.0",
     "https-proxy-agent": "^5.0.0",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.6",
     "semver": "^7.3.5",
     "temp": "^0.9.4",
     "url": "^0.11.0"

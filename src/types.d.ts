@@ -52,6 +52,8 @@ interface RestVulnerability {
   name: string;
 }
 
+type SnippetVisibility = 'private' | 'public';
+
 interface RestPipeline {
   status:
     | 'running'

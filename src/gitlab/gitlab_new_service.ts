@@ -151,11 +151,36 @@ const getIssuableGqlId = (issuable: RestIssuable) =>
   `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
 const getMrGqlId = (id: number) => `gid://gitlab/MergeRequest/${id}`;
 
+const handleFetchError = async (response: Response, resourceName: string) => {
+  if (!response.ok) {
+    // Check if the response body is a GitLab invalid token error. Skip this
+    // check if the URL is undefined. This avoids unnecessary complications
+    // for testing.
+    const body = await response.json().catch(() => undefined);
+    if (body?.error === 'invalid_token') {
+      const { hostname } = new URL(response.url);
+      throw new HelpError(
+        `Failed to access a remote repository on ${hostname} due to an expired or revoked access token. You must create a new token.`,
+        { section: README_SECTIONS.SETUP },
+      );
+    }
+    throw new FetchError(`Fetching ${resourceName} from ${response.url} failed`, response);
+  }
+};
+
 interface ValidationResponse {
   valid?: boolean;
   errors: string[];
 }
 
+// This has to be type, because interface isn't compatible with Record<string,unknown> https://github.com/microsoft/TypeScript/issues/15300#issuecomment-332366024
+type CreateSnippetOptions = {
+  title: string;
+  description?: string;
+  file_name: string;
+  visibility: SnippetVisibility;
+  content: string;
+};
 export class GitLabNewService {
   client: GraphQLClient;
 
@@ -200,24 +225,25 @@ export class GitLabNewService {
         q.set(name, `${value}`);
       }
     });
-
-    const url = `${this.instanceUrl}/api/v4${apiResourcePath}?${q}`;
+    const url = `${this.instanceUrl}/api/v4${apiResourcePath}${q.toString() && `?${q}`}`;
     const result = await crossFetch(url, this.fetchOptions);
-    if (!result.ok) {
-      // Check if the response body is a GitLab invalid token error. Skip this
-      // check if the URL is undefined. This avoids unnecessary complications
-      // for testing.
-      const body = await result.json().catch(() => undefined);
-      if (body?.error === 'invalid_token') {
-        const { hostname } = new URL(url);
-        throw new HelpError(
-          `Failed to access a remote repository on ${hostname} due to an expired or revoked access token. You must create a new token.`,
-          { section: README_SECTIONS.SETUP },
-        );
-      }
-      throw new FetchError(`Fetching ${resourceName} from ${url} failed`, result);
-    }
+    await handleFetchError(result, resourceName);
     return result.json() as Promise<T>;
+  }
+
+  async postFetch<T>(
+    apiResourcePath: string,
+    resourceName = 'resource',
+    body?: unknown,
+  ): Promise<T> {
+    const response = await crossFetch(`${this.instanceUrl}/api/v4${apiResourcePath}`, {
+      ...this.fetchOptions,
+      headers: { ...this.fetchOptions.headers, 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    await handleFetchError(response, resourceName);
+    return response.json() as Promise<T>;
   }
 
   async getVersion(): Promise<string | undefined> {
@@ -283,9 +309,7 @@ export class GitLabNewService {
     const branch = getBranch(blob.rawPath);
     const url = `${this.instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/${branch}/${blob.path}/raw`;
     const result = await crossFetch(url, this.fetchOptions);
-    if (!result.ok) {
-      throw new FetchError(`Fetching snippet from ${url} failed`, result);
-    }
+    await handleFetchError(result, 'snippet');
     return result.text();
   }
 
@@ -326,9 +350,7 @@ export class GitLabNewService {
     const encodedProject = encodeURIComponent(projectId);
     const fileUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/files/${encodedPath}/raw?ref=${encodedRef}`;
     const fileResult = await crossFetch(fileUrl, this.fetchOptions);
-    if (!fileResult.ok) {
-      throw new FetchError(`Fetching file from ${fileUrl} failed`, fileResult);
-    }
+    await handleFetchError(fileResult, 'file');
     return fileResult.text();
   }
 
@@ -585,17 +607,23 @@ export class GitLabNewService {
 
   async validateCIConfig(project: GitLabProject, content: string): Promise<ValidationResponse> {
     await this.validateVersion('CI config validation', REQUIRED_VERSIONS.CI_CONFIG_VALIDATIONS);
-    const response = await crossFetch(
-      `${this.instanceUrl}/api/v4/projects/${project.restId}/ci/lint`,
-      {
-        ...this.fetchOptions,
-        headers: { ...this.fetchOptions.headers, 'Content-Type': 'application/json' },
-        method: 'POST',
-        body: JSON.stringify({ content }),
-      },
-    );
-    if (!response.ok) throw new FetchError(`Request to validate the CI config failed`, response);
-    return response.json();
+    return this.postFetch(`/projects/${project.restId}/ci/lint`, 'CI validation', { content });
+  }
+
+  async renderMarkdown(markdown: string, project: GitLabProject) {
+    const responseBody = await this.postFetch<{ html: string }>('/markdown', 'rendered markdown', {
+      text: markdown,
+      project: project.fullPath,
+      gfm: 'true', // True needs to be a string for the API
+    });
+    return responseBody.html;
+  }
+
+  async createSnippet(
+    project: GitLabProject,
+    data: CreateSnippetOptions,
+  ): Promise<{ web_url: string }> {
+    return this.postFetch(`/projects/${project.restId}/snippets`, 'create snippet', data);
   }
 
   async validateVersion(featureName: string, requiredVersion: string) {
@@ -753,5 +781,105 @@ export class GitLabNewService {
       'issuables',
     )) as RestIssuable[];
     return issuables.map(normalizeAvatarUrl(this.instanceUrl));
+  }
+
+  async getMrClosingIssues(project: GitLabProject, mrId: number): Promise<RestIssuable[]> {
+    try {
+      return await this.fetch(
+        `/projects/${project.restId}/merge_requests/${mrId}/closes_issues`,
+        {},
+        'MR closing issues',
+      );
+    } catch (e) {
+      logError(e);
+      return [];
+    }
+  }
+
+  async getJobsForPipeline(pipeline: RestPipeline): Promise<RestJob[]> {
+    return this.fetch(
+      `/projects/${pipeline.project_id}/pipelines/${pipeline.id}/jobs`,
+      {},
+      'jobs for pipeline',
+    );
+  }
+
+  async getLastPipelineForMr(mr: RestMr): Promise<RestPipeline | undefined> {
+    const pipelines = await this.fetch<RestPipeline[]>(
+      `/projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`,
+      {},
+      'pipelines for MR',
+    );
+    return pipelines[0];
+  }
+
+  async getOpenMergeRequestForCurrentBranch(
+    project: GitLabProject,
+    trackingBranchName: string,
+  ): Promise<RestMr | undefined> {
+    const path = `/projects/${project.restId}/merge_requests`;
+    const mrs = await this.fetch<RestMr[]>(
+      path,
+      { state: 'opened', source_branch: encodeURIComponent(trackingBranchName) },
+      'open MRs for current branch',
+    );
+    return mrs[0];
+  }
+
+  async getLastPipelineForCurrentBranch(
+    project: GitLabProject,
+    trackingBranchName: string,
+  ): Promise<RestPipeline | undefined> {
+    const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
+    const pipelines = await this.fetch<RestPipeline[]>(`${pipelinesRootPath}`, {
+      ref: encodeURIComponent(trackingBranchName),
+    });
+    return pipelines[0];
+  }
+
+  async getPipelineAndMrForCurrentBranch(
+    project: GitLabProject,
+    trackingBranchName: string,
+  ): Promise<{
+    pipeline?: RestPipeline;
+    mr?: RestMr;
+  }> {
+    // TODO: implement more granular approach to errors (deciding between expected and critical)
+    // This can be done when we migrate the code to gitlab_new_service.ts
+    const turnErrorToUndefined: <T>(p: Promise<T>) => Promise<T | undefined> = p =>
+      p.catch(e => {
+        logError(e);
+        return undefined;
+      });
+
+    const mr = await turnErrorToUndefined(
+      this.getOpenMergeRequestForCurrentBranch(project, trackingBranchName),
+    );
+    if (mr) {
+      const pipeline = await turnErrorToUndefined(this.getLastPipelineForMr(mr));
+      if (pipeline) return { mr, pipeline };
+    }
+    const pipeline = await turnErrorToUndefined(
+      this.getLastPipelineForCurrentBranch(project, trackingBranchName),
+    );
+    return { mr, pipeline };
+  }
+
+  async cancelOrRetryPipeline(
+    action: 'cancel' | 'retry',
+    project: GitLabProject,
+    pipeline: RestPipeline,
+  ) {
+    return this.postFetch(
+      `/projects/${project.restId}/pipelines/${pipeline.id}/${action}`,
+      'cancel or retry pipeline',
+    );
+  }
+
+  async createPipeline(branchName: string, project: GitLabProject) {
+    return this.postFetch(
+      `/projects/${project.restId}/pipeline?ref=${encodeURIComponent(branchName)}`,
+      'create pipeline',
+    );
   }
 }

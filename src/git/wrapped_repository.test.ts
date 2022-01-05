@@ -7,19 +7,21 @@ import {
 } from '../utils/extension_configuration';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
-import { mr, mrVersion, project } from '../test_utils/entities';
+import { gqlProject, mr, mrVersion, project } from '../test_utils/entities';
 import { createWrappedRepository } from '../test_utils/create_wrapped_repository';
 import { asMock } from '../test_utils/as_mock';
+import { GitLabProject } from '../gitlab/gitlab_project';
 
 jest.mock('../utils/extension_configuration');
 
 describe('WrappedRepository', () => {
   let wrappedRepository: WrappedRepository;
+  let repositories: Repositories;
 
   beforeEach(() => {
     jest.resetAllMocks();
     wrappedRepository = createWrappedRepository();
-    const repositories: Repositories = {
+    repositories = {
       [wrappedRepository.rootFsPath]: { preferredRemoteName: 'first' },
     };
     (getExtensionConfiguration as jest.Mock).mockReturnValue({
@@ -164,6 +166,41 @@ describe('WrappedRepository', () => {
       await wrappedRepository.reloadMr(mr);
 
       expect(wrappedRepository.getMr(mr.id)).toEqual({ mr, mrVersion });
+    });
+  });
+
+  describe('pipeline project', () => {
+    const firstRemote: [string, string] = ['first', 'git@test.gitlab.com:gitlab-org/first.git'];
+    const secondRemote: [string, string] = ['second', 'git@test.gitlab.com:gitlab-org/second.git'];
+
+    beforeEach(() => {
+      wrappedRepository = createWrappedRepository({
+        gitLabService: {
+          getProject: (fullPath: string) =>
+            Promise.resolve(new GitLabProject({ ...gqlProject, fullPath })),
+        },
+        remotes: [firstRemote, secondRemote],
+      });
+    });
+
+    it('should use the pipeline configuration', async () => {
+      asMock(getExtensionConfiguration).mockReturnValue({
+        repositories,
+        pipelineGitRemoteName: 'second',
+      });
+      const result = await wrappedRepository.getPipelineProject();
+      expect(result?.fullPath).toBe('gitlab-org/second');
+    });
+
+    it('falls back to normal project if the pipeline remote is not configured', async () => {
+      asMock(getExtensionConfiguration).mockReturnValue({
+        repositories,
+      });
+      asMock(getRepositorySettings).mockReturnValue({
+        preferredRemoteName: 'first',
+      });
+      const result = await wrappedRepository.getPipelineProject();
+      expect(result?.fullPath).toBe('gitlab-org/first');
     });
   });
 });

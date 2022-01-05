@@ -128,7 +128,7 @@ export class WrappedRepository {
 
   getRemoteByName(remoteName: string): GitRemote {
     const remoteUrl = this.rawRepository.state.remotes.find(r => r.name === remoteName)?.fetchUrl;
-    assert(remoteUrl, `could not find any URL for git remote with name '${this.remoteName}'`);
+    assert(remoteUrl, `could not find any URL for git remote with name '${remoteName}'`);
     const parsedRemote = parseGitRemote(remoteUrl, this.instanceUrl);
     assert(parsedRemote, `git remote "${remoteUrl}" could not be parsed`);
     return parsedRemote;
@@ -141,6 +141,13 @@ export class WrappedRepository {
       this.cachedProject = await this.getGitLabService().getProject(`${namespace}/${project}`);
     }
     return this.cachedProject;
+  }
+
+  async getPipelineProject(): Promise<GitLabProject | undefined> {
+    const { pipelineGitRemoteName } = getExtensionConfiguration();
+    if (!pipelineGitRemoteName) return this.getProject();
+    const { namespace, project } = this.getRemoteByName(pipelineGitRemoteName);
+    return this.getGitLabService().getProject(`${namespace}/${project}`);
   }
 
   get containsGitLabProject(): boolean {

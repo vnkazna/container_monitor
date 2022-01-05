@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
 import dayjs from 'dayjs';
-import * as gitLabService from './gitlab_service';
 import { logError } from './log';
 import { extensionState } from './extension_state';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
@@ -35,7 +34,7 @@ const getJobs = async (
 ): Promise<RestJob[]> => {
   if (!pipeline) return [];
   try {
-    return await gitLabService.fetchJobsForPipeline(repository.rootFsPath, pipeline);
+    return await repository.getGitLabService().getJobsForPipeline(pipeline);
   } catch (e) {
     logError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
     return [];
@@ -109,11 +108,13 @@ export class CurrentBranchRefresher {
     const gitlabProject = await repository.getProject();
     if (!gitlabProject) return INVALID_STATE;
     try {
-      const { pipeline, mr } = await gitLabService.fetchPipelineAndMrForCurrentBranch(
-        repository.rootFsPath,
-      );
+      const { pipeline, mr } = await repository
+        .getGitLabService()
+        .getPipelineAndMrForCurrentBranch(gitlabProject, await repository.getTrackingBranchName());
       const jobs = await getJobs(repository, pipeline);
-      const issues = mr ? await gitLabService.fetchMRIssues(mr.iid, repository.rootFsPath) : [];
+      const issues = mr
+        ? await repository.getGitLabService().getMrClosingIssues(gitlabProject, mr.iid)
+        : [];
       return { valid: true, repository, pipeline, mr, jobs, issues, userInitiated };
     } catch (e) {
       logError(e);

@@ -11,7 +11,6 @@ import { GitLabNewService } from '../gitlab/gitlab_new_service';
 import { GitLabRepository } from './run_with_valid_project';
 
 jest.mock('../git/git_extension_wrapper');
-jest.mock('../gitlab_service');
 
 const DIFF_OUTPUT = 'diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml';
 

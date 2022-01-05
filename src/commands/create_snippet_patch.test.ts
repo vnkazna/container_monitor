@@ -2,12 +2,12 @@ import * as vscode from 'vscode';
 import { createSnippetPatch } from './create_snippet_patch';
 import { project } from '../test_utils/entities';
 import { asMock } from '../test_utils/as_mock';
-import { createSnippet } from '../gitlab_service';
 import { openUrl } from '../openers';
 import { GitLabRepository } from './run_with_valid_project';
+import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabProject } from '../gitlab/gitlab_project';
 
 jest.mock('../git/git_extension_wrapper');
-jest.mock('../gitlab_service');
 jest.mock('../openers');
 
 const SNIPPET_URL = 'https://gitlab.com/test-group/test-project/-/snippets/2146265';
@@ -15,13 +15,16 @@ const DIFF_OUTPUT = 'diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml';
 
 describe('create snippet patch', () => {
   let wrappedRepository: GitLabRepository;
+  let createSnippet: jest.Mock;
 
   beforeEach(() => {
+    createSnippet = jest.fn();
     const mockRepository: Partial<GitLabRepository> = {
       lastCommitSha: 'abcd1234567',
       getTrackingBranchName: async () => 'tracking-branch-name',
       getProject: async () => project,
       diff: async () => DIFF_OUTPUT,
+      getGitLabService: () => ({ createSnippet } as unknown as GitLabNewService),
     };
     wrappedRepository = mockRepository as GitLabRepository;
     asMock(vscode.window.showInputBox).mockResolvedValue('snippet_name');
@@ -44,9 +47,14 @@ describe('create snippet patch', () => {
 
   describe('populating the create snippet request', () => {
     let formData: Record<string, string>;
+    let projectArgument: GitLabProject;
     beforeEach(async () => {
       await createSnippetPatch(wrappedRepository);
-      [[, formData]] = asMock(createSnippet).mock.calls;
+      [[projectArgument, formData]] = asMock(createSnippet).mock.calls;
+    });
+
+    it('creates snippet for the right project', () => {
+      expect(projectArgument).toBe(project);
     });
 
     it('prepends "patch: " to the user input to create snippet title', () => {

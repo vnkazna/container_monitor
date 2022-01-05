@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 import * as openers from '../openers';
-import * as gitLabService from '../gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
-import { ProjectCommand } from './run_with_valid_project';
+import { GitLabRepository, ProjectCommand } from './run_with_valid_project';
 
-type VisibilityItem = vscode.QuickPickItem & { type: string };
+type VisibilityItem = vscode.QuickPickItem & { type: SnippetVisibility };
 
 const PRIVATE_VISIBILITY_ITEM: VisibilityItem = {
   label: '$(lock) Private',
@@ -34,9 +33,9 @@ const contextOptions = [
 async function uploadSnippet(
   project: GitLabProject,
   editor: vscode.TextEditor,
-  visibility: string,
+  visibility: SnippetVisibility,
   context: string,
-  repositoryRoot: string,
+  repository: GitLabRepository,
 ) {
   let content = '';
   const fileName = editor.document.fileName.split('/').reverse()[0];
@@ -53,14 +52,13 @@ async function uploadSnippet(
   }
 
   const data = {
-    id: project.restId,
     title: fileName,
     file_name: fileName,
     visibility,
     content,
   };
 
-  const snippet = await gitLabService.createSnippet(repositoryRoot, data);
+  const snippet = await repository.getGitLabService().createSnippet(project, data);
 
   await openers.openUrl(snippet.web_url);
 }
@@ -80,5 +78,5 @@ export const createSnippet: ProjectCommand = async repository => {
   const context = await vscode.window.showQuickPick(contextOptions);
   if (!context) return;
 
-  await uploadSnippet(project, editor, visibility.type, context.type, repository.rootFsPath);
+  await uploadSnippet(project, editor, visibility.type, context.type, repository);
 };
