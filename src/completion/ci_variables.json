@@ -196,6 +196,14 @@
     "description": "A RS256 JSON web token to authenticate with third party systems that support JWT authentication, for example [HashiCorp's Vault](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../secrets/index.md)."
   },
   {
+    "name": "CI_JOB_JWT_V1",
+    "description": "The same value as `CI_JOB_JWT`."
+  },
+  {
+    "name": "CI_JOB_JWT_V2",
+    "description": "[**alpha:**](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) A newly formatted RS256 JSON web token to increase compatibility. Similar to `CI_JOB_JWT`, except the issuer (`iss`) claim is changed from `gitlab.com` to `https://gitlab.com`, `sub` has changed from `job_id` to a string that contains the project path, and an `aud` claim is added. Format is subject to change."
+  },
+  {
     "name": "CI_JOB_MANUAL",
     "description": "`true` if a job was started manually."
   },
@@ -345,7 +353,7 @@
   },
   {
     "name": "CI_PIPELINE_SOURCE",
-    "description": "How the pipeline was triggered. Can be `push`, `web`, `schedule`, `api`, `external`, `chat`, `webide`, `merge_request_event`, `external_pull_request_event`, `parent_pipeline`, [`trigger`, or `pipeline`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/index.md#authentication-tokens)."
+    "description": "How the pipeline was triggered. Can be `push`, `web`, `schedule`, `api`, `external`, `chat`, `webide`, `merge_request_event`, `external_pull_request_event`, `parent_pipeline`, [`trigger`, or `pipeline`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/index.md#configure-cicd-jobs-to-run-in-triggered-pipelines)."
   },
   {
     "name": "CI_PIPELINE_TRIGGERED",
@@ -529,6 +537,6 @@
   },
   {
     "name": "TRIGGER_PAYLOAD",
-    "description": "The webhook payload. Only available when a pipeline is [triggered with a webhook](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/index.md#using-webhook-payload-in-the-triggered-pipeline)."
+    "description": "The webhook payload. Only available when a pipeline is [triggered with a webhook](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../triggers/index.md#use-a-webhook-payload)."
   }
 ]
