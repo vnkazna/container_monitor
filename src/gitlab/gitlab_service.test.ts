@@ -267,6 +267,25 @@ describe('gitlab_service', () => {
       });
     });
 
+    describe('current user', () => {
+      it('replaces <current_user> with the current user name', async () => {
+        service.getCurrentUser = async () => ({ username: 'testuser' } as RestUser);
+        await service.getIssuables(
+          {
+            ...defaultParams,
+            type: CustomQueryType.ISSUE,
+            excludeAuthor: '<current_user>',
+            excludeAssignee: '<current_user>',
+            reviewer: '<current_user>',
+          },
+          project,
+        );
+        expect(getFetchedParams().get('not[author_username]')).toEqual('testuser');
+        expect(getFetchedParams().get('not[assignee_username]')).toEqual('testuser');
+        expect(getFetchedParams().get('reviewer_username')).toEqual('testuser');
+      });
+    });
+
     describe('assignee parameters', () => {
       it('sets assignee_username parameter', async () => {
         await service.getIssuables(

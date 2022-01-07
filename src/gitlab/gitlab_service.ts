@@ -671,13 +671,22 @@ export class GitLabService {
     return (users as RestUser[])[0];
   }
 
+  async handleCurrentUser<S extends string | undefined>(username: S): Promise<S> {
+    if (username === '<current_user>') {
+      const user = await this.getCurrentUser();
+      return user.username as S;
+    }
+
+    return username;
+  }
+
   async getCurrentUser(): Promise<RestUser> {
     return this.fetch('/user', {}, 'current user');
   }
 
   async getIssuables(params: CustomQuery, project: GitLabProject) {
-    const { type, scope, state, author, assignee, wip } = params;
-    let { searchIn, reviewer } = params;
+    const { type, scope, state, author, assignee, wip, reviewer } = params;
+    let { searchIn } = params;
     const config = {
       type: type || 'merge_requests',
       scope: scope || 'all',
@@ -743,11 +752,7 @@ export class GitLabService {
      * Reviewer parameters
      */
     if (reviewer) {
-      if (reviewer === '<current_user>') {
-        const user = await this.getCurrentUser();
-        reviewer = user.username;
-      }
-      search.set('reviewer_username', reviewer);
+      search.set('reviewer_username', await this.handleCurrentUser(reviewer));
     }
 
     /**
@@ -776,8 +781,8 @@ export class GitLabService {
         confidential: params.confidential,
         'not[labels]': params.excludeLabels,
         'not[milestone]': params.excludeMilestone,
-        'not[author_username]': params.excludeAuthor,
-        'not[assignee_username]': params.excludeAssignee,
+        'not[author_username]': await this.handleCurrentUser(params.excludeAuthor),
+        'not[assignee_username]': await this.handleCurrentUser(params.excludeAssignee),
         'not[search]': params.excludeSearch,
         'not[in]': params.excludeSearchIn,
       };
