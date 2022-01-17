@@ -168,6 +168,12 @@ const handleFetchError = async (response: Response, resourceName: string) => {
   }
 };
 
+const getTotalPages = (response: Response): number =>
+  parseInt(response.headers.get('x-total-pages') || '1', 10);
+
+const getCurrentPage = (query: Record<string, QueryValue>): number =>
+  query.page && typeof query.page === 'number' ? query.page : 1;
+
 interface ValidationResponse {
   valid?: boolean;
   errors: string[];
@@ -228,6 +234,16 @@ export class GitLabService {
     const url = `${this.instanceUrl}/api/v4${apiResourcePath}${q.toString() && `?${q}`}`;
     const result = await crossFetch(url, this.fetchOptions);
     await handleFetchError(result, resourceName);
+    // pagination
+    if (getTotalPages(result) > getCurrentPage(query))
+      return [
+        ...(await result.json()),
+        ...(await this.fetch<unknown[]>(
+          apiResourcePath,
+          { ...query, page: getCurrentPage(query) + 1 },
+          resourceName,
+        )),
+      ] as unknown as T;
     return result.json() as Promise<T>;
   }
 
