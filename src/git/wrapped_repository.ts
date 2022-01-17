@@ -8,7 +8,7 @@ import { tokenService } from '../services/token_service';
 import { log, LOG_LEVEL } from '../log';
 import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { getExtensionConfiguration, getRepositorySettings } from '../utils/extension_configuration';
-import { GitLabNewService } from '../gitlab/gitlab_service';
+import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 
@@ -188,8 +188,8 @@ export class WrappedRepository {
     return getInstanceUrlFromRemotes(remoteUrls);
   }
 
-  getGitLabService(): GitLabNewService {
-    return new GitLabNewService(this.instanceUrl);
+  getGitLabService(): GitLabService {
+    return new GitLabService(this.instanceUrl);
   }
 
   get name(): string {

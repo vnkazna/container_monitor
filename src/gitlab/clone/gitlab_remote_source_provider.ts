@@ -1,5 +1,5 @@
 import { RemoteSource, RemoteSourceProvider } from '../../api/git';
-import { GitLabNewService } from '../gitlab_service';
+import { GitLabService } from '../gitlab_service';
 import { GitLabProject } from '../gitlab_project';
 
 const SEARCH_LIMIT = 30;
@@ -38,11 +38,11 @@ export class GitLabRemoteSourceProvider implements RemoteSourceProvider {
 
   readonly supportsQuery = true;
 
-  private gitlabService: GitLabNewService;
+  private gitlabService: GitLabService;
 
   constructor(private url: string) {
     this.name = `GitLab (${url})`;
-    this.gitlabService = new GitLabNewService(this.url);
+    this.gitlabService = new GitLabService(this.url);
   }
 
   async lookupByPath(path: string): Promise<GitLabRemote | undefined> {

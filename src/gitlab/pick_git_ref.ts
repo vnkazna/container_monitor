@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { pickWithQuery } from '../utils/pick_with_query';
-import { GitLabNewService } from './gitlab_service';
+import { GitLabService } from './gitlab_service';
 
 type BranchRef = RestBranch & vscode.QuickPickItem & { refType: 'branch' };
 type TagRef = RestTag & vscode.QuickPickItem & { refType: 'tag' };
@@ -9,7 +9,7 @@ export async function pickGitRef(
   instanceUrl: string,
   project: string | number,
 ): Promise<BranchRef | TagRef | undefined> {
-  const service = new GitLabNewService(instanceUrl);
+  const service = new GitLabService(instanceUrl);
   const { picked } = await pickWithQuery(
     {
       ignoreFocusOut: true,

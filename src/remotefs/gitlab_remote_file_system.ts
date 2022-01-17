@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { README_SECTIONS, REMOTE_URI_SCHEME } from '../constants';
 import { FetchError } from '../errors/fetch_error';
-import { GitLabNewService } from '../gitlab/gitlab_service';
+import { GitLabService } from '../gitlab/gitlab_service';
 import { handleError } from '../log';
 import { tokenService } from '../services/token_service';
 import { HelpError } from '../errors/help_error';
@@ -10,8 +10,8 @@ import { ReadOnlyFileSystem } from './readonly_file_system';
 
 const encoder = new TextEncoder();
 
-export function newGitLabService(instance: vscode.Uri): GitLabNewService {
-  return new GitLabNewService(removeTrailingSlash(instance.toString()));
+export function newGitLabService(instance: vscode.Uri): GitLabService {
+  return new GitLabService(removeTrailingSlash(instance.toString()));
 }
 
 /**
@@ -19,7 +19,7 @@ export function newGitLabService(instance: vscode.Uri): GitLabNewService {
  * callers to convert 40x into a FileNotFound error while simplifying handling
  * of unexpected errors.
  * @param p The initial promise - this is expected to be the return from a call
- * to GitLabNewService.
+ * to GitLabService.
  * @returns A new promise that does not throw 40x fetch errors.
  */
 async function nullIf40x<T>(p: Promise<T>) {

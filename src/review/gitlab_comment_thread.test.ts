@@ -5,7 +5,7 @@ import {
   noteOnDiff,
 } from '../../test/integration/fixtures/graphql/discussions.js';
 import { GitLabComment } from './gitlab_comment';
-import { GitLabNewService } from '../gitlab/gitlab_service';
+import { GitLabService } from '../gitlab/gitlab_service';
 import { mr } from '../test_utils/entities';
 import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';
@@ -14,7 +14,7 @@ import { cancelFailedComment, CommentWithThread } from '../commands/mr_discussio
 describe('GitLabCommentThread', () => {
   let gitlabCommentThread: GitLabCommentThread;
   let vsCommentThread: vscode.CommentThread;
-  let gitlabService: GitLabNewService;
+  let gitlabService: GitLabService;
 
   const twoNotes = [
     {
@@ -53,7 +53,7 @@ describe('GitLabCommentThread', () => {
       deleteNote: jest.fn(),
       updateNoteBody: jest.fn(),
       createNote: jest.fn(),
-    } as unknown as GitLabNewService;
+    } as unknown as GitLabService;
     gitlabCommentThread = new GitLabCommentThread(vsCommentThread, discussion, gitlabService, mr);
   };
 

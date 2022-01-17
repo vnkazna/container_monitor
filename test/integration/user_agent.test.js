@@ -3,7 +3,7 @@ const { setupServer } = require('msw/node');
 const { graphql } = require('msw');
 const assert = require('assert');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
-const { GitLabNewService } = require('../../src/gitlab/gitlab_service');
+const { GitLabService } = require('../../src/gitlab/gitlab_service');
 const { snippetsResponse } = require('./fixtures/graphql/snippets');
 const packageJson = require('../../package.json');
 
@@ -40,8 +40,8 @@ describe('User-Agent header', () => {
     server.close();
   });
 
-  it('is sent with requests from GitLabNewService', async () => {
-    const subject = new GitLabNewService(GITLAB_URL);
+  it('is sent with requests from GitLabService', async () => {
+    const subject = new GitLabService(GITLAB_URL);
     await subject.getSnippets('gitlab-org/gitlab');
     validateUserAgent(capturedRequest);
   });

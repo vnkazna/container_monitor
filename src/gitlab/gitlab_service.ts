@@ -181,7 +181,7 @@ type CreateSnippetOptions = {
   visibility: SnippetVisibility;
   content: string;
 };
-export class GitLabNewService {
+export class GitLabService {
   client: GraphQLClient;
 
   constructor(readonly instanceUrl: string, readonly pipelineInstanceUrl?: string) {
