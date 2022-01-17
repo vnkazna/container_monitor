@@ -1,4 +1,4 @@
-import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
+import { getRestIdFromGraphQLId } from './get_rest_id_from_graphql_id';
 import { GqlProject } from './graphql/shared';
 
 export class GitLabProject {

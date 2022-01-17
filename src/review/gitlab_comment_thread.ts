@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabComment } from './gitlab_comment';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';
 import { GqlNote, GqlTextDiffNote } from '../gitlab/graphql/shared';
@@ -21,7 +21,7 @@ export class GitLabCommentThread {
   constructor(
     private vsThread: vscode.CommentThread,
     private gqlDiscussion: GqlTextDiffDiscussion,
-    private gitlabService: GitLabNewService,
+    private gitlabService: GitLabService,
     private mr: RestMr,
   ) {
     // SIDE-EFFECT

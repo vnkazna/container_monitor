@@ -1,5 +1,5 @@
 import { WrappedRepository } from '../git/wrapped_repository';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabService } from '../gitlab/gitlab_service';
 import {
   createFakeRepository,
   fakeRepositoryOptions,
@@ -7,7 +7,7 @@ import {
 } from './fake_git_extension';
 
 export interface CreateWrappedRepositoryOptions extends FakeRepositoryOptions {
-  gitLabService: Partial<GitLabNewService>;
+  gitLabService: Partial<GitLabService>;
 }
 
 const defaultOptions = {

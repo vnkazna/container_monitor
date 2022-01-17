@@ -4,7 +4,7 @@ import { project } from '../test_utils/entities';
 import { asMock } from '../test_utils/as_mock';
 import { openUrl } from '../openers';
 import { GitLabRepository } from './run_with_valid_project';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 
 jest.mock('../git/git_extension_wrapper');
@@ -24,7 +24,7 @@ describe('create snippet patch', () => {
       getTrackingBranchName: async () => 'tracking-branch-name',
       getProject: async () => project,
       diff: async () => DIFF_OUTPUT,
-      getGitLabService: () => ({ createSnippet } as unknown as GitLabNewService),
+      getGitLabService: () => ({ createSnippet } as unknown as GitLabService),
     };
     wrappedRepository = mockRepository as GitLabRepository;
     asMock(vscode.window.showInputBox).mockResolvedValue('snippet_name');

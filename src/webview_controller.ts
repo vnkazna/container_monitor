@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import assert from 'assert';
-import { createGitLabNewService } from './service_factory';
+import { createGitLabService } from './service_factory';
 import { handleError, logError } from './log';
 import { getInstanceUrl } from './utils/get_instance_url';
 import { isMr } from './utils/is_mr';
@@ -35,13 +35,13 @@ async function initPanelIfActive(
     });
   });
 
-  const gitlabNewService = await createGitLabNewService(repositoryRoot);
-  const discussionsAndLabels = await gitlabNewService
-    .getDiscussionsAndLabelEvents(issuable)
-    .catch(e => {
+  const GitLabService = await createGitLabService(repositoryRoot);
+  const discussionsAndLabels = await GitLabService.getDiscussionsAndLabelEvents(issuable).catch(
+    e => {
       handleError(e);
       return [];
-    });
+    },
+  );
   await appReadyPromise;
   await panel.webview.postMessage({
     type: 'issuableFetch',
@@ -120,12 +120,10 @@ class WebviewController {
       }
 
       if (message.command === 'saveNote') {
-        const gitlabNewService = await createGitLabNewService(repositoryRoot);
+        const GitLabService = await createGitLabService(repositoryRoot);
         try {
-          await gitlabNewService.createNote(issuable, message.note, message.replyId);
-          const discussionsAndLabels = await gitlabNewService.getDiscussionsAndLabelEvents(
-            issuable,
-          );
+          await GitLabService.createNote(issuable, message.note, message.replyId);
+          const discussionsAndLabels = await GitLabService.getDiscussionsAndLabelEvents(issuable);
           await panel.webview.postMessage({
             type: 'issuableFetch',
             issuable,

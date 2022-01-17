@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import crossFetch from 'cross-fetch';
-import { GitLabNewService } from './gitlab_new_service';
+import { GitLabService } from './gitlab_service';
 import { testSnippet1 } from '../../test/integration/fixtures/graphql/snippets.js';
 import { DEFAULT_FETCH_RESPONSE } from '../__mocks__/cross-fetch';
 import { CustomQueryType } from './custom_query_type';
@@ -8,18 +8,18 @@ import { CustomQuery } from './custom_query';
 import { asMock } from '../test_utils/as_mock';
 import { project } from '../test_utils/entities';
 import { getExtensionConfiguration } from '../utils/extension_configuration';
-import { getHttpAgentOptions } from '../utils/get_http_agent_options';
+import { getHttpAgentOptions } from './http/get_http_agent_options';
 import { HelpError } from '../errors/help_error';
 
 jest.mock('graphql-request');
 jest.mock('../services/token_service');
 jest.mock('cross-fetch');
 jest.mock('../utils/extension_configuration');
-jest.mock('../utils/get_http_agent_options');
+jest.mock('./http/get_http_agent_options');
 
 const crossFetchCallArgument = () => (crossFetch as jest.Mock).mock.calls[0][0];
 const crossFetchResponse = (response?: unknown) => ({ ok: true, json: async () => response });
-describe('gitlab_new_service', () => {
+describe('gitlab_service', () => {
   beforeEach(() => {
     asMock(getHttpAgentOptions).mockReturnValue({});
   });
@@ -32,7 +32,7 @@ describe('gitlab_new_service', () => {
       ${'https://test.com/gitlab'}  | ${'https://test.com/gitlab/api/graphql'}
       ${'https://test.com/gitlab/'} | ${'https://test.com/gitlab/api/graphql'}
     `('creates endpoint url from $instanceUrl', ({ instanceUrl, endpointUrl }) => {
-      new GitLabNewService(instanceUrl); // eslint-disable-line no-new
+      new GitLabService(instanceUrl); // eslint-disable-line no-new
 
       expect(GraphQLClient).toHaveBeenCalledWith(endpointUrl, expect.anything());
     });
@@ -45,7 +45,7 @@ describe('gitlab_new_service', () => {
       ${'/gitlab-org/gitlab-vscode-extension/-/snippets/111/raw/main/okr.md'}                           | ${'main'}
       ${'/gitlab-org/security/gitlab-vscode-extension/-/snippets/222/raw/customBranch/folder/test1.js'} | ${'customBranch'}
     `('parses the repository branch from blob rawPath', async ({ rawPath, branch }) => {
-      const service = new GitLabNewService('https://example.com');
+      const service = new GitLabService('https://example.com');
       service.getVersion = async () => '14.0.0';
       const snippet = testSnippet1;
       const blob = snippet.blobs.nodes[0];
@@ -67,7 +67,7 @@ describe('gitlab_new_service', () => {
       `('makes a request and escapes ref $ref', async ({ ref, encodedRef }) => {
         const baseUrl =
           'https://gitlab.example.com/api/v4/projects/12345/repository/files/README.md/raw?ref=';
-        const service = new GitLabNewService('https://gitlab.example.com');
+        const service = new GitLabService('https://gitlab.example.com');
         const result = await service.getFileContent('README.md', ref, EXAMPLE_PROJECT_ID);
 
         expect(crossFetch).toHaveBeenCalledWith(`${baseUrl}${encodedRef}`, expect.anything());
@@ -82,7 +82,7 @@ describe('gitlab_new_service', () => {
         ${'.settings/Production Settings/windows.ini'} | ${'.settings%2FProduction%20Settings%2Fwindows.ini'}
       `('makes a request and escapes file $file', async ({ file, encodedFile }) => {
         const url = `https://gitlab.example.com/api/v4/projects/12345/repository/files/${encodedFile}/raw?ref=main`;
-        const service = new GitLabNewService('https://gitlab.example.com');
+        const service = new GitLabService('https://gitlab.example.com');
         const result = await service.getFileContent(file, 'main', EXAMPLE_PROJECT_ID);
 
         expect(crossFetch).toBeCalledTimes(1);
@@ -93,7 +93,7 @@ describe('gitlab_new_service', () => {
     });
 
     it('encodes the project path', async () => {
-      const service = new GitLabNewService('https://gitlab.example.com');
+      const service = new GitLabService('https://gitlab.example.com');
       await service.getFileContent('foo', 'bar', 'baz/bat');
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/files/foo/raw?ref=bar',
@@ -104,7 +104,7 @@ describe('gitlab_new_service', () => {
 
   describe('getFile', () => {
     it('constructs the correct URL', async () => {
-      const service = new GitLabNewService('https://gitlab.example.com');
+      const service = new GitLabService('https://gitlab.example.com');
       await service.getFile('foo', 'bar', 12345);
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/12345/repository/files/foo?ref=bar',
@@ -113,7 +113,7 @@ describe('gitlab_new_service', () => {
     });
 
     it('encodes the project path', async () => {
-      const service = new GitLabNewService('https://gitlab.example.com');
+      const service = new GitLabService('https://gitlab.example.com');
       await service.getFile('foo', 'bar', 'baz/bat');
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/files/foo?ref=bar',
@@ -124,7 +124,7 @@ describe('gitlab_new_service', () => {
 
   describe('getTree', () => {
     it('constructs the correct URL', async () => {
-      const service = new GitLabNewService('https://gitlab.example.com');
+      const service = new GitLabService('https://gitlab.example.com');
       await service.getTree('foo', 'bar', 12345);
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/12345/repository/tree?ref=bar&path=foo',
@@ -133,7 +133,7 @@ describe('gitlab_new_service', () => {
     });
 
     it('encodes the project path', async () => {
-      const service = new GitLabNewService('https://gitlab.example.com');
+      const service = new GitLabService('https://gitlab.example.com');
       await service.getTree('foo', 'bar', 'baz/bat');
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/tree?ref=bar&path=foo',
@@ -142,10 +142,10 @@ describe('gitlab_new_service', () => {
     });
   });
   describe('fetchIssueables', () => {
-    let gitLabService: GitLabNewService;
+    let gitLabService: GitLabService;
 
     beforeEach(() => {
-      gitLabService = new GitLabNewService(`http://gitlab.example.com`);
+      gitLabService = new GitLabService(`http://gitlab.example.com`);
       asMock(crossFetch).mockResolvedValue(crossFetchResponse([]));
       asMock(getExtensionConfiguration).mockReturnValue({});
     });
@@ -360,11 +360,11 @@ describe('gitlab_new_service', () => {
   });
 
   describe('fetchJson', () => {
-    let service: GitLabNewService;
+    let service: GitLabService;
 
     beforeEach(() => {
       asMock(crossFetch).mockResolvedValue(crossFetchResponse());
-      service = new GitLabNewService('https://example.com');
+      service = new GitLabService('https://example.com');
     });
 
     it('handles an empty query', async () => {

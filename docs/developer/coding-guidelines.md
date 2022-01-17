@@ -16,7 +16,7 @@ Each file in `utils` folder must contain only one function. The file name uses s
 Example:
 | file | function | purpose |
 | -- | -- | -- |
-| [`get_instance_url.ts`](../src/utils/get_instance_url.ts) | `getInstanceUrl()` | takes a workspace folder and returns GitLab instance URL. this is a good util function used across the whole codebase. |
-| [`ensure_absolute_avatar_url.ts`](../src/utils/ensure_absolute_avatar_url.ts) | `ensureAbsoluteAvatarUrl()` | If the `avatarUrl` is relative, it prepends GitLab `instanceUrl` to it. It's used in multiple places, but once we fully migrate to `gitlab_new_service.ts` we'll be able to remove this function from utils. |
+| [`get_instance_url.ts`](../src/utils/get_instance_url.ts) | `getInstanceUrl()` | Takes a workspace folder and returns GitLab instance URL. this is a good util function used across the whole codebase. |
+| [`find_file_in_diffs.ts`](../src/utils/find_file_in_diffs.ts) | `findFileInDiffs()` | Iterates through the GitLab API MR diff (versions) response and finds diff for a file based on a path. This is used multiple places responsible for rendering MR Reviews. |
 
 [^1]: [Discussion on the MR that introduced TypeScript](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/108#note_423512996)
