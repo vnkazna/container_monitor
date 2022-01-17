@@ -8,14 +8,14 @@ import { CustomQuery } from './custom_query';
 import { asMock } from '../test_utils/as_mock';
 import { project } from '../test_utils/entities';
 import { getExtensionConfiguration } from '../utils/extension_configuration';
-import { getHttpAgentOptions } from '../utils/get_http_agent_options';
+import { getHttpAgentOptions } from './http/get_http_agent_options';
 import { HelpError } from '../errors/help_error';
 
 jest.mock('graphql-request');
 jest.mock('../services/token_service');
 jest.mock('cross-fetch');
 jest.mock('../utils/extension_configuration');
-jest.mock('../utils/get_http_agent_options');
+jest.mock('./http/get_http_agent_options');
 
 const crossFetchCallArgument = () => (crossFetch as jest.Mock).mock.calls[0][0];
 const crossFetchResponse = (response?: unknown) => ({ ok: true, json: async () => response });

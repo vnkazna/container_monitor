@@ -6,13 +6,13 @@ import createHttpProxyAgent from 'https-proxy-agent';
 import assert from 'assert';
 import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
-import { getUserAgentHeader } from '../utils/get_user_agent_header';
-import { ensureAbsoluteAvatarUrl } from '../utils/ensure_absolute_avatar_url';
+import { getUserAgentHeader } from './http/get_user_agent_header';
+import { ensureAbsoluteAvatarUrl } from './ensure_absolute_avatar_url';
 import { CustomQueryType } from './custom_query_type';
 import { CustomQuery } from './custom_query';
-import { getHttpAgentOptions } from '../utils/get_http_agent_options';
+import { getHttpAgentOptions } from './http/get_http_agent_options';
 import { GitLabProject } from './gitlab_project';
-import { getRestIdFromGraphQLId } from '../utils/get_rest_id_from_graphql_id';
+import { getRestIdFromGraphQLId } from './get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
 import {
