@@ -95,7 +95,7 @@ Example: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension/-/merge_
 1. Push the patch tag to the [Extension Repo]
 1. Merge the [Security Repo] `main` branch with the [Extension Repo] `main` and push to [Extension Repo]
 
-[GitLab.com]: https://gitlab.com/
-[Security Repo]: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension
+[gitlab.com]: https://gitlab.com/
+[security repo]: https://gitlab.com/gitlab-org/security/gitlab-vscode-extension
 [`gitlab-org/gitlab` security release process]: https://gitlab.com/gitlab-org/release/docs/-/blob/master/general/security/developer.md
-[Extension Repo]: https://gitlab.com/gitlab-org/gitlab-vscode-extension
+[extension repo]: https://gitlab.com/gitlab-org/gitlab-vscode-extension

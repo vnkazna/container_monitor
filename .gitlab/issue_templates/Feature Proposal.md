@@ -13,7 +13,6 @@ and verify the issue you're about to submit isn't a duplicate.
 
 <!-- What problem do we solve? Try to define the who/what/why of the opportunity as a user story. For example, "As a (who), I want (what), so I can (why/value)." -->
 
-
 ### Proposal
 
 <!-- How are we going to solve the problem? -->
@@ -24,4 +23,4 @@ and verify the issue you're about to submit isn't a duplicate.
 
 ### Links / references
 
-/label ~"type::feature" ~"devops::create"  ~"group::code review"  ~"Category:Editor Extension" ~"VS Code"
+/label ~"type::feature" ~"devops::create" ~"group::code review" ~"Category:Editor Extension" ~"VS Code"

@@ -4,7 +4,7 @@ This document will give you a high-level overview of the main components of the 
 
 ## What does the extension do?
 
-The extension is providing a "glue" layer between the [VS Code Extension API](https://code.visualstudio.com/api/references/vscode-api) and the GitLab instance API ([REST], [GraphQL]). The extension code aims to connect VS Code editor with GitLab functionality as efficiently as possible. The less code and abstractions, the better.
+The extension is providing a "glue" layer between the [VS Code Extension API](https://code.visualstudio.com/api/references/vscode-api) and the GitLab instance API ([REST](https://docs.gitlab.com/ee/api/api_resources.html), [GraphQL](https://docs.gitlab.com/ee/api/graphql/)). The extension code aims to connect VS Code editor with GitLab functionality as efficiently as possible. The less code and abstractions, the better.
 
 ## The key concept
 
@@ -30,7 +30,7 @@ The extension uses [`git_extension_wrapper.ts`](../src/git/git_extension_wrapper
 
 We've got two modules that connect to the GitLab API:
 
-- [`gitlab_service.ts`](../src/gitlab/gitlab_service.ts) - New features get implemented here. We try to use predominantly [GraphQL], but some features are not available in [GraphQL], and then we use `node-fetch` to connect to the [REST] API. `gitlab_service.ts` is not dependent on `git`. You should place the code that combines `git` with GitLab API one level higher (in commands or other code).
+- [`gitlab_service.ts`](../src/gitlab/gitlab_service.ts) - New features get implemented here. We try to use predominantly [GraphQL](https://docs.gitlab.com/ee/api/graphql/), but some features are not available in GraphQL, and then we use `node-fetch` to connect to the [REST](https://docs.gitlab.com/ee/api/api_resources.html) API. `gitlab_new_service.ts` is not dependent on `git`. You should place the code that combines `git` with GitLab API one level higher (in commands or other code).
 
 ## Building blocks of the extension
 
@@ -82,7 +82,4 @@ We authenticate to GitLab API using [personal access tokens](https://docs.gitlab
 
 Introducing this document was motivated by a blog article from Aleksey Kladov: [ARCHITECTURE.md](https://matklad.github.io//2021/02/06/ARCHITECTURE.md.html).
 
-[REST]: https://docs.gitlab.com/ee/api/api_resources.html
-[GraphQL]: https://docs.gitlab.com/ee/api/graphql/
-
-[^1]:  This will help keep the `git` information between VS Code and the GitLab extension in sync. The status bar will benefit the most because it currently [gets out of sync when the user switches to a different branch](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/21).
+[^1]: This will help keep the `git` information between VS Code and the GitLab extension in sync. The status bar will benefit the most because it currently [gets out of sync when the user switches to a different branch](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/21).

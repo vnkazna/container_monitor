@@ -7,6 +7,7 @@ These examples use version `3.0.0`:
    are only verifying there is no complete failure of the extension.
 1. Update the package version in `npm version 3.0.0`. This automatically generates a changelog entry.
 1. If there have been community contributions:
+
    1. Manually add attribution to the `CHANGELOG.md` and `CONTRIBUTORS.md`. For example:
 
       ```plaintext
@@ -14,13 +15,14 @@ These examples use version `3.0.0`:
       ```
 
    1. Add the contributor's entry to `CONTRIBUTORS.md`, if it doesn't exist.
+
 1. `git push origin main` and `git push --tags`
 1. Trigger the **Publish** step on the tag pipeline.
 1. When the extension updates in your VS Code, do another quick check.
 
 ## Access tokens for Marketplaces
 
-*This section applies once a year when the Microsoft VS Code Marketplace token automatically expires.*
+_This section applies once a year when the Microsoft VS Code Marketplace token automatically expires._
 
 Our [CI jobs](https://gitlab.com/gitlab-org/gitlab-vscode-extension/blob/e80e5798dbac5944ebaa52dc0dc2cb861509588e/.gitlab-ci.yml#L110-124) use the access tokens for publishing packaged extension to market places.
 

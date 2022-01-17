@@ -18,7 +18,7 @@ The requirements are in order of importance:
 1. Verify the new code is working
 1. Enable easy refactoring
 
-(*See [Sarah Mei - Five Factor Testing](https://madeintandem.com/blog/five-factor-testing/) for more details on test requirements.*)
+(_See [Sarah Mei - Five Factor Testing](https://madeintandem.com/blog/five-factor-testing/) for more details on test requirements._)
 
 ## What does testing look like in VS Code
 
@@ -87,7 +87,7 @@ E(Extension function results)
 end
 ```
 
-*Legend: Round corners mean that the test doesn't match production use exactly.*
+_Legend: Round corners mean that the test doesn't match production use exactly._
 
 ##### Temporary git repository and workspace files
 

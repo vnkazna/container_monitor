@@ -14,6 +14,6 @@ This document describes how we make changes to the extension. For contributing g
 
 Only [project maintainers] can tag a release. Follow the [release process](release-process.md).
 
-[FE]: https://about.gitlab.com/handbook/engineering/development/dev/create-code-review-fe/
-[BE]: https://about.gitlab.com/handbook/engineering/development/dev/create-code-review-be/
+[fe]: https://about.gitlab.com/handbook/engineering/development/dev/create-code-review-fe/
+[be]: https://about.gitlab.com/handbook/engineering/development/dev/create-code-review-be/
 [project maintainers]: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/project_members?sort=access_level_desc

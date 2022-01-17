@@ -8,4 +8,3 @@ This document is for new extension maintainers.
 - Access to "VS Code Extension" 1Password vault
 
 With this access you should be able to [release the extension](release-process.md).
-
