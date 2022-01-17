@@ -845,7 +845,7 @@ export class GitLabNewService {
     mr?: RestMr;
   }> {
     // TODO: implement more granular approach to errors (deciding between expected and critical)
-    // This can be done when we migrate the code to gitlab_new_service.ts
+    // This can be done when we migrate the code to gitlab_service.ts
     const turnErrorToUndefined: <T>(p: Promise<T>) => Promise<T | undefined> = p =>
       p.catch(e => {
         logError(e);

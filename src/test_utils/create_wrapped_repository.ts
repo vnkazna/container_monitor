@@ -1,5 +1,5 @@
 import { WrappedRepository } from '../git/wrapped_repository';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabNewService } from '../gitlab/gitlab_service';
 import {
   createFakeRepository,
   fakeRepositoryOptions,

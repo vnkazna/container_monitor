@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { FetchError } from '../errors/fetch_error';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabNewService } from '../gitlab/gitlab_service';
 import { tokenService } from '../services/token_service';
 import { GitLabRemoteFileSystem } from './gitlab_remote_file_system';
 
 jest.mock('../services/token_service');
-jest.mock('../gitlab/gitlab_new_service');
+jest.mock('../gitlab/gitlab_service');
 
 const encoder = new TextEncoder();
 

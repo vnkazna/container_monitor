@@ -8,7 +8,7 @@ import { tokenService } from '../services/token_service';
 import { log, LOG_LEVEL } from '../log';
 import { GitRemote, parseGitRemote } from './git_remote_parser';
 import { getExtensionConfiguration, getRepositorySettings } from '../utils/extension_configuration';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabNewService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 

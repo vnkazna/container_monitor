@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { README_SECTIONS, REMOTE_URI_SCHEME } from '../constants';
 import { FetchError } from '../errors/fetch_error';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabNewService } from '../gitlab/gitlab_service';
 import { handleError } from '../log';
 import { tokenService } from '../services/token_service';
 import { HelpError } from '../errors/help_error';

@@ -57,7 +57,7 @@ it('throws an error when it cannot find GitLab project', async () => {
 
 We use [`msw`](https://mswjs.io/docs/) to intercept any requests and return prepared mock responses. When you want to add a new mocked response, do it in the following steps:
 
-1. Use a debugger to inspect what request you send out from `gitlab_new_service.ts` or `gitlab_service.ts`.
+1. Use a debugger to inspect what request you send out from `gitlab_service.ts`.
 1. Run your tests and note down the logged request that the functionality under test makes.
 1. Mock the request in the `before` or `beforeEach` method in your test.
 

@@ -30,10 +30,7 @@ The extension uses [`git_extension_wrapper.ts`](../src/git/git_extension_wrapper
 
 We've got two modules that connect to the GitLab API:
 
-- [`gitlab_service.ts`](../src/gitlab_service.ts) - The legacy logic, uses deprecated `request-promise` library to connect to the GitLab [REST] API. It also often calls to the `git_service.ts`, which makes the code more complex by hiding the side effect of interacting with the Git repository.
-- [`gitlab_new_service.ts`](../src/gitlab/gitlab_new_service.ts) - New features get implemented here. We try to use predominantly [GraphQL], but some features are not available in [GraphQL], and then we use `node-fetch` to connect to the [REST] API. `gitlab_new_service.ts` is not dependent on `git`. You should place the code that combines `git` with GitLab API one level higher (in commands or other code).
-
-- [ ] Decouple `gitlab_service.ts` from `git` and migrate its contents to `gitlab_new_service.ts`, using GraphQL when possible.
+- [`gitlab_service.ts`](../src/gitlab/gitlab_service.ts) - New features get implemented here. We try to use predominantly [GraphQL], but some features are not available in [GraphQL], and then we use `node-fetch` to connect to the [REST] API. `gitlab_service.ts` is not dependent on `git`. You should place the code that combines `git` with GitLab API one level higher (in commands or other code).
 
 ## Building blocks of the extension
 

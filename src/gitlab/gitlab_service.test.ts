@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import crossFetch from 'cross-fetch';
-import { GitLabNewService } from './gitlab_new_service';
+import { GitLabNewService } from './gitlab_service';
 import { testSnippet1 } from '../../test/integration/fixtures/graphql/snippets.js';
 import { DEFAULT_FETCH_RESPONSE } from '../__mocks__/cross-fetch';
 import { CustomQueryType } from './custom_query_type';
@@ -19,7 +19,7 @@ jest.mock('../utils/get_http_agent_options');
 
 const crossFetchCallArgument = () => (crossFetch as jest.Mock).mock.calls[0][0];
 const crossFetchResponse = (response?: unknown) => ({ ok: true, json: async () => response });
-describe('gitlab_new_service', () => {
+describe('gitlab_service', () => {
   beforeEach(() => {
     asMock(getHttpAgentOptions).mockReturnValue({});
   });

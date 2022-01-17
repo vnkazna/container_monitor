@@ -5,7 +5,7 @@ import {
   noteOnDiff,
 } from '../../test/integration/fixtures/graphql/discussions.js';
 import { GitLabComment } from './gitlab_comment';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabNewService } from '../gitlab/gitlab_service';
 import { mr } from '../test_utils/entities';
 import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GqlTextDiffDiscussion } from '../gitlab/graphql/get_discussions';

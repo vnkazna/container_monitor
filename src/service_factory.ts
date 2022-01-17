@@ -1,4 +1,4 @@
-import { GitLabNewService } from './gitlab/gitlab_new_service';
+import { GitLabNewService } from './gitlab/gitlab_service';
 import { getInstanceUrl } from './utils/get_instance_url';
 
 export async function createGitLabNewService(repositoryRoot: string): Promise<GitLabNewService> {

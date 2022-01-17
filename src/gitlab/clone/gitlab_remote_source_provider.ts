@@ -1,5 +1,5 @@
 import { RemoteSource, RemoteSourceProvider } from '../../api/git';
-import { GitLabNewService } from '../gitlab_new_service';
+import { GitLabNewService } from '../gitlab_service';
 import { GitLabProject } from '../gitlab_project';
 
 const SEARCH_LIMIT = 30;

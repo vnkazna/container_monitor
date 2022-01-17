@@ -4,7 +4,7 @@ import { project } from '../test_utils/entities';
 import { asMock } from '../test_utils/as_mock';
 import { openUrl } from '../openers';
 import { GitLabRepository } from './run_with_valid_project';
-import { GitLabNewService } from '../gitlab/gitlab_new_service';
+import { GitLabNewService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 
 jest.mock('../git/git_extension_wrapper');

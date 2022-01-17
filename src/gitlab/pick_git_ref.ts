@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { pickWithQuery } from '../utils/pick_with_query';
-import { GitLabNewService } from './gitlab_new_service';
+import { GitLabNewService } from './gitlab_service';
 
 type BranchRef = RestBranch & vscode.QuickPickItem & { refType: 'branch' };
 type TagRef = RestTag & vscode.QuickPickItem & { refType: 'tag' };
