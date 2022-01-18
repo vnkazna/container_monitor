@@ -168,6 +168,22 @@ const handleFetchError = async (response: Response, resourceName: string) => {
   }
 };
 
+const createQueryString = (query: Record<string, QueryValue>): string => {
+  const q = new URLSearchParams();
+  Object.entries(query).forEach(([name, value]) => {
+    if (typeof value !== 'undefined' && value !== null) {
+      q.set(name, `${value}`);
+    }
+  });
+  return q.toString() && `?${q}`;
+};
+
+const getTotalPages = (response: Response): number =>
+  parseInt(response.headers.get('x-total-pages') || '1', 10);
+
+const getCurrentPage = (query: Record<string, QueryValue>): number =>
+  query.page && typeof query.page === 'number' ? query.page : 1;
+
 interface ValidationResponse {
   valid?: boolean;
   errors: string[];
@@ -214,18 +230,33 @@ export class GitLabService {
     };
   }
 
+  async fetchAllPages<T>(
+    apiResourcePath: string,
+    query: Record<string, QueryValue> = {},
+    resourceName = 'resource',
+  ): Promise<T[]> {
+    const url = `${this.instanceUrl}/api/v4${apiResourcePath}${createQueryString(query)}`;
+    const result = await crossFetch(url, this.fetchOptions);
+    await handleFetchError(result, resourceName);
+    // pagination
+    if (getTotalPages(result) > getCurrentPage(query))
+      return [
+        ...(await result.json()),
+        ...(await this.fetchAllPages<T>(
+          apiResourcePath,
+          { ...query, page: getCurrentPage(query) + 1 },
+          resourceName,
+        )),
+      ];
+    return result.json() as Promise<T[]>;
+  }
+
   async fetch<T>(
     apiResourcePath: string,
     query: Record<string, QueryValue> = {},
     resourceName = 'resource',
   ): Promise<T> {
-    const q = new URLSearchParams();
-    Object.entries(query).forEach(([name, value]) => {
-      if (typeof value !== 'undefined' && value !== null) {
-        q.set(name, `${value}`);
-      }
-    });
-    const url = `${this.instanceUrl}/api/v4${apiResourcePath}${q.toString() && `?${q}`}`;
+    const url = `${this.instanceUrl}/api/v4${apiResourcePath}${createQueryString(query)}`;
     const result = await crossFetch(url, this.fetchOptions);
     await handleFetchError(result, resourceName);
     return result.json() as Promise<T>;
@@ -372,7 +403,7 @@ export class GitLabService {
   ): Promise<RestRepositoryTreeEntry[]> {
     const encodedProject = encodeURIComponent(projectId);
     const treePath = `/projects/${encodedProject}/repository/tree`;
-    return this.fetch(treePath, { ref, path: removeLeadingSlash(path) }, 'repository tree');
+    return this.fetchAllPages(treePath, { ref, path: removeLeadingSlash(path) }, 'repository tree');
   }
 
   getBranches(project: number | string, search?: string): Promise<RestBranch[]> {
@@ -475,7 +506,7 @@ export class GitLabService {
   private async getLabelEvents(issuable: RestIssuable): Promise<RestLabelEvent[]> {
     const type = isMr(issuable) ? 'merge_requests' : 'issues';
     const labelEventsPath = `/projects/${issuable.project_id}/${type}/${issuable.iid}/resource_label_events`;
-    return this.fetch(labelEventsPath, { sort: 'asc', per_page: 100 }, 'label events');
+    return this.fetchAllPages(labelEventsPath, { sort: 'asc' }, 'label events');
   }
 
   async getDiscussionsAndLabelEvents(issuable: RestIssuable): Promise<Note[]> {

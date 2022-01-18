@@ -18,7 +18,11 @@ jest.mock('../utils/extension_configuration');
 jest.mock('./http/get_http_agent_options');
 
 const crossFetchCallArgument = () => (crossFetch as jest.Mock).mock.calls[0][0];
-const crossFetchResponse = (response?: unknown) => ({ ok: true, json: async () => response });
+const crossFetchResponse = (response?: unknown, headers?: Record<string, unknown>) => ({
+  ok: true,
+  headers: new Map(Object.entries(headers ?? {})),
+  json: async () => response,
+});
 describe('gitlab_service', () => {
   let service: GitLabService;
 
@@ -142,6 +146,9 @@ describe('gitlab_service', () => {
   });
 
   describe('getTree', () => {
+    beforeEach(() => {
+      asMock(crossFetch).mockResolvedValue(crossFetchResponse([]));
+    });
     it('constructs the correct URL', async () => {
       await service.getTree('foo', 'bar', 12345);
       expect(crossFetch).toHaveBeenCalledWith(
@@ -371,7 +378,7 @@ describe('gitlab_service', () => {
     });
   });
 
-  describe('fetchJson', () => {
+  describe('fetch', () => {
     beforeEach(() => {
       asMock(crossFetch).mockResolvedValue(crossFetchResponse());
     });
@@ -432,6 +439,38 @@ describe('gitlab_service', () => {
         json: async () => ({ error: 'invalid_token' }),
       });
       await expect(service.fetch(url)).rejects.toThrowError(HelpError);
+    });
+  });
+
+  describe('fetchAllPages', () => {
+    it('handles a non-empty query', async () => {
+      asMock(crossFetch).mockResolvedValue(crossFetchResponse());
+      await service.fetchAllPages('/project', { foo: 'bar' });
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/project?foo=bar',
+        expect.anything(),
+      );
+    });
+
+    it('handles pagination', async () => {
+      asMock(crossFetch).mockImplementation(url => {
+        if (url === 'https://gitlab.example.com/api/v4/project')
+          return crossFetchResponse(['a', 'b'], { 'x-total-pages': 2 });
+        if (url === 'https://gitlab.example.com/api/v4/project?page=2')
+          return crossFetchResponse(['c', 'd'], { 'x-total-pages': 2 });
+        throw new Error(`unexpected URL: ${url}`);
+      });
+      await expect(service.fetchAllPages('/project')).resolves.toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('throws a HelpError if the token is expired', async () => {
+      const url = '/project';
+      asMock(crossFetch).mockResolvedValue({
+        ok: false,
+        url: 'https://example.com/api/v4/project',
+        json: async () => ({ error: 'invalid_token' }),
+      });
+      await expect(service.fetchAllPages(url)).rejects.toThrowError(HelpError);
     });
   });
 });
