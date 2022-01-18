@@ -1,3 +1,13 @@
+## [3.40.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.40.1...v3.40.2) (2022-01-18)
+
+
+### Bug Fixes
+
+* fetch all pages from API ([d7da635](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/d7da63560fb8aac7db48161c6b7ec6934e0cf0f5))
+* incorrect branch encoding ([9e394ec](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/9e394ec44c9069d540a6bec1af9c3c1794598e92))
+
+
+
 ## [3.40.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.40.0...v3.40.1) (2022-01-06)
 
 - Improved README (https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/436, https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/434)
