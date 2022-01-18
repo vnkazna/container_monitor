@@ -378,7 +378,7 @@ describe('gitlab_service', () => {
     });
   });
 
-  describe('fetchJson', () => {
+  describe('fetch', () => {
     beforeEach(() => {
       asMock(crossFetch).mockResolvedValue(crossFetchResponse());
     });
@@ -431,15 +431,36 @@ describe('gitlab_service', () => {
       );
     });
 
+    it('throws a HelpError if the token is expired', async () => {
+      const url = '/project';
+      asMock(crossFetch).mockResolvedValue({
+        ok: false,
+        url: 'https://example.com/api/v4/project',
+        json: async () => ({ error: 'invalid_token' }),
+      });
+      await expect(service.fetch(url)).rejects.toThrowError(HelpError);
+    });
+  });
+
+  describe('fetchAllPages', () => {
+    it('handles a non-empty query', async () => {
+      asMock(crossFetch).mockResolvedValue(crossFetchResponse());
+      await service.fetchAllPages('/project', { foo: 'bar' });
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/project?foo=bar',
+        expect.anything(),
+      );
+    });
+
     it('handles pagination', async () => {
       asMock(crossFetch).mockImplementation(url => {
-        if (url === 'https://example.com/api/v4/project')
+        if (url === 'https://gitlab.example.com/api/v4/project')
           return crossFetchResponse(['a', 'b'], { 'x-total-pages': 2 });
-        if (url === 'https://example.com/api/v4/project?page=2')
+        if (url === 'https://gitlab.example.com/api/v4/project?page=2')
           return crossFetchResponse(['c', 'd'], { 'x-total-pages': 2 });
         throw new Error(`unexpected URL: ${url}`);
       });
-      await expect(service.fetch('/project')).resolves.toEqual(['a', 'b', 'c', 'd']);
+      await expect(service.fetchAllPages('/project')).resolves.toEqual(['a', 'b', 'c', 'd']);
     });
 
     it('throws a HelpError if the token is expired', async () => {
@@ -449,7 +470,7 @@ describe('gitlab_service', () => {
         url: 'https://example.com/api/v4/project',
         json: async () => ({ error: 'invalid_token' }),
       });
-      await expect(service.fetch(url)).rejects.toThrowError(HelpError);
+      await expect(service.fetchAllPages(url)).rejects.toThrowError(HelpError);
     });
   });
 });
