@@ -20,9 +20,13 @@ jest.mock('./http/get_http_agent_options');
 const crossFetchCallArgument = () => (crossFetch as jest.Mock).mock.calls[0][0];
 const crossFetchResponse = (response?: unknown) => ({ ok: true, json: async () => response });
 describe('gitlab_service', () => {
+  let service: GitLabService;
+
   beforeEach(() => {
     asMock(getHttpAgentOptions).mockReturnValue({});
+    service = new GitLabService('https://gitlab.example.com');
   });
+
   const EXAMPLE_PROJECT_ID = 12345;
 
   describe('GraphQL client initialization', () => {
@@ -45,7 +49,6 @@ describe('gitlab_service', () => {
       ${'/gitlab-org/gitlab-vscode-extension/-/snippets/111/raw/main/okr.md'}                           | ${'main'}
       ${'/gitlab-org/security/gitlab-vscode-extension/-/snippets/222/raw/customBranch/folder/test1.js'} | ${'customBranch'}
     `('parses the repository branch from blob rawPath', async ({ rawPath, branch }) => {
-      const service = new GitLabService('https://example.com');
       service.getVersion = async () => '14.0.0';
       const snippet = testSnippet1;
       const blob = snippet.blobs.nodes[0];
@@ -82,7 +85,6 @@ describe('gitlab_service', () => {
         ${'.settings/Production Settings/windows.ini'} | ${'.settings%2FProduction%20Settings%2Fwindows.ini'}
       `('makes a request and escapes file $file', async ({ file, encodedFile }) => {
         const url = `https://gitlab.example.com/api/v4/projects/12345/repository/files/${encodedFile}/raw?ref=main`;
-        const service = new GitLabService('https://gitlab.example.com');
         const result = await service.getFileContent(file, 'main', EXAMPLE_PROJECT_ID);
 
         expect(crossFetch).toBeCalledTimes(1);
@@ -93,7 +95,6 @@ describe('gitlab_service', () => {
     });
 
     it('encodes the project path', async () => {
-      const service = new GitLabService('https://gitlab.example.com');
       await service.getFileContent('foo', 'bar', 'baz/bat');
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/files/foo/raw?ref=bar',
@@ -102,9 +103,28 @@ describe('gitlab_service', () => {
     });
   });
 
+  describe('getOpenMergeRequestForCurrentBranch', () => {
+    it('constructs URL and encodes the source branch', async () => {
+      await service.getOpenMergeRequestForCurrentBranch(project, 'feature/123');
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/projects/5261717/merge_requests?state=opened&source_branch=feature%2F123',
+        expect.anything(),
+      );
+    });
+  });
+
+  describe('getLastPipelineForCurrentBranch', () => {
+    it('constructs URL and encodes the source branch', async () => {
+      await service.getLastPipelineForCurrentBranch(project, 'feature/123');
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/projects/5261717/pipelines?ref=feature%2F123',
+        expect.anything(),
+      );
+    });
+  });
+
   describe('getFile', () => {
     it('constructs the correct URL', async () => {
-      const service = new GitLabService('https://gitlab.example.com');
       await service.getFile('foo', 'bar', 12345);
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/12345/repository/files/foo?ref=bar',
@@ -112,11 +132,10 @@ describe('gitlab_service', () => {
       );
     });
 
-    it('encodes the project path', async () => {
-      const service = new GitLabService('https://gitlab.example.com');
-      await service.getFile('foo', 'bar', 'baz/bat');
+    it('encodes the project, path, and ref', async () => {
+      await service.getFile('path/to/file', 'feat/123', 'group/project');
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/files/foo?ref=bar',
+        'https://gitlab.example.com/api/v4/projects/group%2Fproject/repository/files/path%2Fto%2Ffile?ref=feat%2F123',
         expect.anything(),
       );
     });
@@ -124,7 +143,6 @@ describe('gitlab_service', () => {
 
   describe('getTree', () => {
     it('constructs the correct URL', async () => {
-      const service = new GitLabService('https://gitlab.example.com');
       await service.getTree('foo', 'bar', 12345);
       expect(crossFetch).toHaveBeenCalledWith(
         'https://gitlab.example.com/api/v4/projects/12345/repository/tree?ref=bar&path=foo',
@@ -132,20 +150,17 @@ describe('gitlab_service', () => {
       );
     });
 
-    it('encodes the project path', async () => {
-      const service = new GitLabService('https://gitlab.example.com');
-      await service.getTree('foo', 'bar', 'baz/bat');
+    it('encodes the project, path, and ref', async () => {
+      await service.getTree('path/to/file', 'feat/123', 'group/project');
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://gitlab.example.com/api/v4/projects/baz%2Fbat/repository/tree?ref=bar&path=foo',
+        'https://gitlab.example.com/api/v4/projects/group%2Fproject/repository/tree?ref=feat%2F123&path=path%2Fto%2Ffile',
         expect.anything(),
       );
     });
   });
-  describe('fetchIssueables', () => {
-    let gitLabService: GitLabService;
 
+  describe('fetchIssueables', () => {
     beforeEach(() => {
-      gitLabService = new GitLabService(`http://gitlab.example.com`);
       asMock(crossFetch).mockResolvedValue(crossFetchResponse([]));
       asMock(getExtensionConfiguration).mockReturnValue({});
     });
@@ -199,7 +214,7 @@ describe('gitlab_service', () => {
         ${CustomQueryType.MR}            | ${'assigned_to_me'} | ${'assigned_to_me'}
         ${CustomQueryType.MR}            | ${'created_by_me'}  | ${'created_by_me'}
       `('sets scope based on type: $type', async ({ type, scope, expectation }) => {
-        await gitLabService.getIssuables({ ...defaultParams, scope, type }, project);
+        await service.getIssuables({ ...defaultParams, scope, type }, project);
         expect(getFetchedUrl()).toContain(expectation);
       });
 
@@ -209,7 +224,7 @@ describe('gitlab_service', () => {
         ${CustomQueryType.VULNERABILITY} | ${'all'} | ${{ scope: 'all' }}                    | ${'/projects/5261717/vulnerability_findings'}
         ${CustomQueryType.MR}            | ${'all'} | ${{ scope: 'all' }}                    | ${'/projects/5261717/merge_requests'}
       `('sets path based on type: $type', async ({ type, scope, queries, path }) => {
-        await gitLabService.getIssuables({ ...defaultParams, scope, type }, project);
+        await service.getIssuables({ ...defaultParams, scope, type }, project);
         const url = getFetchedUrl();
         expect(url).toContain(path);
         Object.entries(queries).forEach(([key, query]) => {
@@ -220,16 +235,13 @@ describe('gitlab_service', () => {
 
     describe('author parameters', () => {
       it('sets no author parameter', async () => {
-        await gitLabService.getIssuables(
-          { ...defaultParams, type: CustomQueryType.ISSUE },
-          project,
-        );
+        await service.getIssuables({ ...defaultParams, type: CustomQueryType.ISSUE }, project);
         expect(getFetchedParams().get('author_username')).toBeNull();
         expect(getFetchedParams().get('author_id')).toBeNull();
       });
 
       it('sets author_username parameter', async () => {
-        await gitLabService.getIssuables(
+        await service.getIssuables(
           { ...defaultParams, type: CustomQueryType.ISSUE, author: 'testuser' },
           project,
         );
@@ -238,8 +250,8 @@ describe('gitlab_service', () => {
       });
 
       it('sets author_id parameter if author is found', async () => {
-        gitLabService.getFirstUserByUsername = async () => ({ id: 1 } as RestUser);
-        await gitLabService.getIssuables(
+        service.getFirstUserByUsername = async () => ({ id: 1 } as RestUser);
+        await service.getIssuables(
           { ...defaultParams, type: CustomQueryType.MR, author: 'testuser' },
           project,
         );
@@ -250,7 +262,7 @@ describe('gitlab_service', () => {
 
     describe('assignee parameters', () => {
       it('sets assignee_username parameter', async () => {
-        await gitLabService.getIssuables(
+        await service.getIssuables(
           { ...defaultParams, type: CustomQueryType.ISSUE, assignee: 'testuser' },
           project,
         );
@@ -259,8 +271,8 @@ describe('gitlab_service', () => {
       });
 
       it('sets assignee_id parameter if assignee is found', async () => {
-        gitLabService.getFirstUserByUsername = async () => ({ id: 1 } as RestUser);
-        await gitLabService.getIssuables(
+        service.getFirstUserByUsername = async () => ({ id: 1 } as RestUser);
+        await service.getIssuables(
           { ...defaultParams, type: CustomQueryType.MR, assignee: 'testuser' },
           project,
         );
@@ -269,7 +281,7 @@ describe('gitlab_service', () => {
       });
 
       it.each(['Any', 'None'])('Uses %s directly', async param => {
-        await gitLabService.getIssuables(
+        await service.getIssuables(
           { ...defaultParams, type: CustomQueryType.MR, assignee: param },
           project,
         );
@@ -278,7 +290,7 @@ describe('gitlab_service', () => {
     });
 
     it('sets reviewer parameter', async () => {
-      await gitLabService.getIssuables(
+      await service.getIssuables(
         { ...defaultParams, type: CustomQueryType.ISSUE, reviewer: 'reviewer' },
         project,
       );
@@ -287,26 +299,26 @@ describe('gitlab_service', () => {
 
     describe('searchIn parameters', () => {
       it('sets "all" parameter', async () => {
-        await gitLabService.getIssuables({ ...defaultParams, searchIn: 'all' }, project);
+        await service.getIssuables({ ...defaultParams, searchIn: 'all' }, project);
         expect(getFetchedParams().get('in')).toEqual('title,description');
       });
 
       it('sets "in" parameter', async () => {
-        await gitLabService.getIssuables({ ...defaultParams, searchIn: 'title' }, project);
+        await service.getIssuables({ ...defaultParams, searchIn: 'title' }, project);
         expect(getFetchedParams().get('in')).toEqual('title');
       });
     });
 
     describe('WIP/Draft', () => {
       it('sets wip parameter', async () => {
-        await gitLabService.getIssuables({ ...defaultParams, wip: 'true' }, project);
+        await service.getIssuables({ ...defaultParams, wip: 'true' }, project);
         expect(getFetchedParams().get('wip')).toEqual('true');
       });
     });
 
     describe('misc query parameters', () => {
       it('sets query parameters', async () => {
-        await gitLabService.getIssuables(
+        await service.getIssuables(
           {
             ...defaultParams,
             type: CustomQueryType.ISSUE,
@@ -360,17 +372,14 @@ describe('gitlab_service', () => {
   });
 
   describe('fetchJson', () => {
-    let service: GitLabService;
-
     beforeEach(() => {
       asMock(crossFetch).mockResolvedValue(crossFetchResponse());
-      service = new GitLabService('https://example.com');
     });
 
     it('handles an empty query', async () => {
       await service.fetch('/project');
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project',
+        'https://gitlab.example.com/api/v4/project',
         expect.anything(),
       );
     });
@@ -378,7 +387,15 @@ describe('gitlab_service', () => {
     it('handles a non-empty query', async () => {
       await service.fetch('/project', { foo: 'bar' });
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project?foo=bar',
+        'https://gitlab.example.com/api/v4/project?foo=bar',
+        expect.anything(),
+      );
+    });
+
+    it('escapes query parameters', async () => {
+      await service.fetch('/project', { foo: 'bar/123' });
+      expect(crossFetch).toHaveBeenCalledWith(
+        'https://gitlab.example.com/api/v4/project?foo=bar%2F123',
         expect.anything(),
       );
     });
@@ -386,7 +403,7 @@ describe('gitlab_service', () => {
     it('ignores an undefined query value', async () => {
       await service.fetch('/project', { foo: undefined });
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project',
+        'https://gitlab.example.com/api/v4/project',
         expect.anything(),
       );
     });
@@ -394,7 +411,7 @@ describe('gitlab_service', () => {
     it('ignores a null query value', async () => {
       await service.fetch('/project', { foo: null });
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project',
+        'https://gitlab.example.com/api/v4/project',
         expect.anything(),
       );
     });
@@ -402,7 +419,7 @@ describe('gitlab_service', () => {
     it('does not ignore a falsy value', async () => {
       await service.fetch('/project', { foo: '' });
       expect(crossFetch).toHaveBeenCalledWith(
-        'https://example.com/api/v4/project?foo=',
+        'https://gitlab.example.com/api/v4/project?foo=',
         expect.anything(),
       );
     });

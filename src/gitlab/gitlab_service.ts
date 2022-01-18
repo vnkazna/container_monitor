@@ -360,10 +360,9 @@ export class GitLabService {
     projectId: number | string,
   ): Promise<RestRepositoryFile> {
     const encodedPath = encodeURIComponent(removeLeadingSlash(path));
-    const encodedRef = encodeURIComponent(ref);
     const encodedProject = encodeURIComponent(projectId);
     const fileApiPath = `/projects/${encodedProject}/repository/files/${encodedPath}`;
-    return this.fetch(fileApiPath, { ref: encodedRef }, 'file');
+    return this.fetch(fileApiPath, { ref }, 'file');
   }
 
   async getTree(
@@ -371,11 +370,9 @@ export class GitLabService {
     ref: string,
     projectId: number | string,
   ): Promise<RestRepositoryTreeEntry[]> {
-    const encodedPath = encodeURIComponent(removeLeadingSlash(path));
-    const encodedRef = encodeURIComponent(ref);
     const encodedProject = encodeURIComponent(projectId);
     const treePath = `/projects/${encodedProject}/repository/tree`;
-    return this.fetch(treePath, { ref: encodedRef, path: encodedPath }, 'repository tree');
+    return this.fetch(treePath, { ref, path: removeLeadingSlash(path) }, 'repository tree');
   }
 
   getBranches(project: number | string, search?: string): Promise<RestBranch[]> {
@@ -820,7 +817,7 @@ export class GitLabService {
     const path = `/projects/${project.restId}/merge_requests`;
     const mrs = await this.fetch<RestMr[]>(
       path,
-      { state: 'opened', source_branch: encodeURIComponent(trackingBranchName) },
+      { state: 'opened', source_branch: trackingBranchName },
       'open MRs for current branch',
     );
     return mrs[0];
@@ -832,7 +829,7 @@ export class GitLabService {
   ): Promise<RestPipeline | undefined> {
     const pipelinesRootPath = `/projects/${project.restId}/pipelines`;
     const pipelines = await this.fetch<RestPipeline[]>(`${pipelinesRootPath}`, {
-      ref: encodeURIComponent(trackingBranchName),
+      ref: trackingBranchName,
     });
     return pipelines[0];
   }
