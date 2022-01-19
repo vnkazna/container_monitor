@@ -7,7 +7,7 @@ This document provides technical details about our automated tests. Please see [
 - **Unit Tests**: TypeScript and [Jest](https://jestjs.io/)[^1]
 - **Integration tests**: JavaScript and [`mocha`](https://mochajs.org/) as a test runner, [`assert`](https://nodejs.org/docs/latest-v12.x/api/assert.html) for assertions, and [`vscode-test`](https://code.visualstudio.com/api/working-with-extensions/testing-extension#the-test-script) to run integration tests in VS Code instance
 
-*We choose JavaScript for integration tests because `@types/jest` and `@types/mocha` are not compatible and often cause conflicts. The integration tests are written against much more stable VS Code Extension API and so some of the TS benefits are not as pronounced.*
+_We choose JavaScript for integration tests because `@types/jest` and `@types/mocha` are not compatible and often cause conflicts. The integration tests are written against much more stable VS Code Extension API and so some of the TS benefits are not as pronounced._
 
 ## Unit tests `npm run test-unit`
 
@@ -16,7 +16,7 @@ Place unit tests for a module in the same folder as the production code. The nam
 - `src/git/git_remote_parser.ts` - production file
 - `src/git/git_remote_parser.test.ts` - test file
 
-You can debug unit tests by running the "Unit Tests" [Launch configuration].
+You can debug unit tests by running the "Unit Tests" [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
 
 ## Integration tests `npm run test-integration`
 
@@ -26,9 +26,9 @@ A temporary workspace for integration tests is created once before running the t
 
 ### Debugging integration tests
 
-For debugging the integration tests, we first need to create a test workspace. We can do that by running ```npm run create-test-workspace``` script. This script generates a new workspace and inserts its path into `.vscode/launch.json`.
+For debugging the integration tests, we first need to create a test workspace. We can do that by running `npm run create-test-workspace` script. This script generates a new workspace and inserts its path into `.vscode/launch.json`.
 
-Then we can debug the by running the "Integration Tests" [Launch configuration].
+Then we can debug the by running the "Integration Tests" [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
 
 ### Create a new integration test
 
@@ -36,7 +36,7 @@ When creating a new integration test, you need to know how the tested functional
 
 #### Prepare VS Code dependency
 
-We are now not mocking any part of VS Code. You should be able to set the extension up by calling the [VS Code extension API](https://code.visualstudio.com/api). You might be able to use some of our services directly to set up the extension. Example is setting up the test token by running ```tokenService.setToken('https://gitlab.com', 'abcd-secret');```
+We are now not mocking any part of VS Code. You should be able to set the extension up by calling the [VS Code extension API](https://code.visualstudio.com/api). You might be able to use some of our services directly to set up the extension. Example is setting up the test token by running `tokenService.setToken('https://gitlab.com', 'abcd-secret');`
 
 #### Prepare Filesystem dependency
 
@@ -60,7 +60,5 @@ We use [`msw`](https://mswjs.io/docs/) to intercept any requests and return prep
 1. Use a debugger to inspect what request you send out from `gitlab_service.ts`.
 1. Run your tests and note down the logged request that the functionality under test makes.
 1. Mock the request in the `before` or `beforeEach` method in your test.
-
-[Launch configuration]: https://code.visualstudio.com/docs/editor/debugging#_launch-configurations
 
 [^1]: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/87

@@ -325,7 +325,7 @@ Prerequisite:
 To open and browse a repository, either:
 
 - Run the **GitLab: Open Remote Repository** command
-- Select *Choose Project* option.
+- Select _Choose Project_ option.
 - Select GitLab instance, project and branch/tag that you would like to browse
 
 Alternatively, run the **GitLab: Open Remote Repository** command and select "Enter gitlab-remote URL" option or manually add a `gitlab-remote` URL to your [workspace file](https://code.visualstudio.com/docs/editor/multi-root-workspaces#_workspace-file). For information about how to create GitLab remote URL, please see [GitLab remote URL format documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/remote-fs-url-format.md)

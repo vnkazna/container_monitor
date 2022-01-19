@@ -58,25 +58,25 @@ We're assuming that you already have [Visual Studio Code](https://code.visualstu
 with [GitLab Workflow](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) installed
 and configured, if not, do that first! If already done, proceed ahead.
 
-*  [Git](https://git-scm.com/)
-*  [NodeJS](https://nodejs.org/en/)
-   *  Version is specified in [`.tool-versions`](.tool-versions))
-   *  We use the same major node version as VS Code
-   *  Please use [`asdf`](https://asdf-vm.com/#/) with the [`nodejs` plugin](https://github.com/asdf-vm/asdf-nodejs) to manage your node version
-*  [Npm](https://www.npmjs.com/get-npm) (installed automatically by the `asdf` `nodejs` plugin)
+- [Git](https://git-scm.com/)
+- [NodeJS](https://nodejs.org/en/)
+  - Version is specified in [`.tool-versions`](.tool-versions))
+  - We use the same major node version as VS Code
+  - Please use [`asdf`](https://asdf-vm.com/#/) with the [`nodejs` plugin](https://github.com/asdf-vm/asdf-nodejs) to manage your node version
+- [Npm](https://www.npmjs.com/get-npm) (installed automatically by the `asdf` `nodejs` plugin)
 
 #### Step - 2 : Fork and Clone
 
-*  Use your GitLab account to [fork](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/forks/new) this project
-    *  Don't know how forking works? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/fork-project.html#doc-nav).
-    *  Don't have GitLab account? [Create one](https://gitlab.com/users/sign_up)! It is free and it is awesome!
-*  Visit your forked project (usually URL is `https://gitlab.com/<your user name>/gitlab-vscode-extension`).
-*  Set up pull mirroring to keep your fork up to date.
-   *  [How do I mirror repositories?](https://docs.gitlab.com/ee/user/project/repository/repository_mirroring.html#pulling-from-a-remote-repository)
-   *  Use `https://gitlab.com/gitlab-org/gitlab-vscode-extension.git` as the **Git repository URL**.
-   *  Mirroring the main repository is important to avoid false negatives of the commit linting, which is caused by an outdated `main` branch in forks. [#288](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/288) tracks the progress to resolve that bug.
-*  Go to your project overview and copy the SSH or HTTPS URL to clone the project into your system.
-    *  Don't know how to clone a project? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/command-line-commands.html#clone-your-project).
+- Use your GitLab account to [fork](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/forks/new) this project
+  - Don't know how forking works? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/fork-project.html#doc-nav).
+  - Don't have GitLab account? [Create one](https://gitlab.com/users/sign_up)! It is free and it is awesome!
+- Visit your forked project (usually URL is `https://gitlab.com/<your user name>/gitlab-vscode-extension`).
+- Set up pull mirroring to keep your fork up to date.
+  - [How do I mirror repositories?](https://docs.gitlab.com/ee/user/project/repository/repository_mirroring.html#pulling-from-a-remote-repository)
+  - Use `https://gitlab.com/gitlab-org/gitlab-vscode-extension.git` as the **Git repository URL**.
+  - Mirroring the main repository is important to avoid false negatives of the commit linting, which is caused by an outdated `main` branch in forks. [#288](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/288) tracks the progress to resolve that bug.
+- Go to your project overview and copy the SSH or HTTPS URL to clone the project into your system.
+  - Don't know how to clone a project? Refer to [this guide](https://docs.gitlab.com/ee/gitlab-basics/command-line-commands.html#clone-your-project).
 
 #### Step - 3 : Install dependencies
 

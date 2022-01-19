@@ -20,7 +20,7 @@ If your GitLab instance uses a certificate signed with a self-signed certificate
 
 ### Windows
 
-*These instructions were tested on Windows 10 and VS Code `1.60.0`.*
+_These instructions were tested on Windows 10 and VS Code `1.60.0`._
 
 Make sure you can see your self-signed CA in the Certificate store:
 
@@ -30,7 +30,7 @@ Make sure you can see your self-signed CA in the Certificate store:
 
 ### Linux
 
-*These instructions were tested on Arch Linux `5.14.3-arch1-1`, VS Code `1.60.0`.*
+_These instructions were tested on Arch Linux `5.14.3-arch1-1`, VS Code `1.60.0`._
 
 1. Use the tools for your operating system to make sure you can add our self-signed CA to your system:
    - `update-ca-trust` (Fedora, RHEL, CentOS) or
@@ -40,7 +40,7 @@ Make sure you can see your self-signed CA in the Certificate store:
 
 ### MacOS
 
-*These instructions are untested, but are highly likely working. If you can validate this setup, leave us a note or create an issue to update this page.*
+_These instructions are untested, but are highly likely working. If you can validate this setup, leave us a note or create an issue to update this page._
 
 Make sure you see the self-signed CA in your Keychain:
 
