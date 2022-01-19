@@ -16,7 +16,7 @@ Place unit tests for a module in the same folder as the production code. The nam
 - `src/git/git_remote_parser.ts` - production file
 - `src/git/git_remote_parser.test.ts` - test file
 
-You can debug unit tests by running the "Unit Tests" [Launch configuration].
+You can debug unit tests by running the "Unit Tests" [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
 
 ## Integration tests `npm run test-integration`
 
@@ -28,7 +28,7 @@ A temporary workspace for integration tests is created once before running the t
 
 For debugging the integration tests, we first need to create a test workspace. We can do that by running `npm run create-test-workspace` script. This script generates a new workspace and inserts its path into `.vscode/launch.json`.
 
-Then we can debug the by running the "Integration Tests" [Launch configuration].
+Then we can debug the by running the "Integration Tests" [Launch configuration](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations).
 
 ### Create a new integration test
 
@@ -60,7 +60,5 @@ We use [`msw`](https://mswjs.io/docs/) to intercept any requests and return prep
 1. Use a debugger to inspect what request you send out from `gitlab_service.ts`.
 1. Run your tests and note down the logged request that the functionality under test makes.
 1. Mock the request in the `before` or `beforeEach` method in your test.
-
-[launch configuration]: https://code.visualstudio.com/docs/editor/debugging#_launch-configurations
 
 [^1]: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/87
