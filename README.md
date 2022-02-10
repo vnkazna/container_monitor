@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Code Review
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # <img src="https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/5b10b8c151a1ed3000135f54d2564af385d60105/src/assets/logo.png" width="64" align="center" /> [GitLab VS Code Extension](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
@@ -77,33 +83,20 @@ You can use [autocompletion of GitLab CI variables](#ci-variable-autocompletion)
 
 ## Setup
 
-To use this extension, you need to create a GitLab Personal Access Token and give it to the extension.
+This extension requires you to create a GitLab personal access token, and assign it to the extension:
 
-### Step 1: Create your Personal Access Token
+1. [Install the extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#commands) from the Visual Studio Marketplace, and enable the extension.
+1. Create a personal access token with the `api` and `read_user` scopes:
+   - If you use GitLab.com, go to the [personal access tokens](https://gitlab.com/-/profile/personal_access_tokens) page.
+   - If you use a self-managed GitLab instance, follow the instructions [in the GitLab documentation](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token).
+1. Copy the token. _For security reasons, this value is never displayed again, so you must copy this value now._
+1. Open Visual Studio Code, then open the command palette by pressing <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>.
+1. In the command palette, search for **GitLab: Set GitLab Personal Access Token** and press <kbd>Enter<kbd>.
+1. In the **URL to GitLab instance**, paste the full URL to your GitLab instance, including the `http://` or `https://`. Press <kbd>Enter</kbd> to confirm.
+1. Paste in your GitLab personal access token and press <kbd>Enter</kbd>. The token is not displayed, nor is it accessible to others.
+1. Optional. To connect to GitLab hosted on a custom domain, you must set a value for `gitlab.instanceUrl` in your user or workspace settings, or the extension attempts to connect to `gitlab.com`. For more information, read [Extension settings](#extension-settings).
 
-- If you are using
-  - GitLab.com [click to open Personal Access Tokens page](https://gitlab.com/-/profile/personal_access_tokens).
-  - Self-managed GitLab instance go to **Settings** and select **Access Tokens** on the left navigation menu
-- On **Add a personal access token** form:
-  - Give a name to your token.
-  - Select an expiry date.
-  - Select `api` and `read_user` permissions.
-  - Select **Create personal access token**.
-- Copy the token. _Remember you won't be able to see the value of this token ever again for security reasons._
-
-### Step 2: Add token to GitLab Workflow Extension
-
-- Open up Command Palette by pressing `Cmd+Shift+P`.
-- Search for "GitLab: Set GitLab Personal Access Token" and hit Enter.
-- Enter the URL to the GitLab instance the PAT should apply to and hit Enter.
-- Extension will ask for your PAT. Paste your PAT and hit Enter. _It won't be visible and accessible to others._
-- If you want to connect to GitLab hosted on a custom domain, additionally set
-  `gitlab.instanceUrl` in your user or workspace settings, otherwise the extension
-  will try to connect to gitlab.com. See [Extension settings](#extension-settings) for more information.
-
-That's it. 🏁
-
-You can start using this extension right away. If your project has a pipeline for last commit and a MR from your current branch, you should see them on VS Code status bar. 🎉
+The extension is ready to use. If your project has a pipeline for the last commit, and a merge request from your current branch, information about both is displayed in the Visual Studio Code status bar.
 
 ### Set token with environment variables
 
