@@ -8,15 +8,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Installs](https://vsmarketplacebadge.apphb.com/installs/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) [![Rating](https://vsmarketplacebadge.apphb.com/rating/GitLab.gitlab-workflow.svg)](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
 
-This extension integrates GitLab into Visual Studio Code. After you [set up the extension](#setup),
-the extension helps you:
+This extension integrates GitLab into Visual Studio Code. After you [set up the extension](#setup), you can:
 
 - [**View GitLab issues and merge requests**](#issue-and-merge-request-details-and-comments-in-vs-code).
   View issues, comments, merge requests, and changed files [in the sidebar](#sidebar---details),
   or build a [custom search](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/custom-queries.md)
   to meet your needs.
 - [**Create and review merge requests**](#merge-request-reviews).
-- [**Validate your GitLab CI configuration**](#validate-gitlab-ci-configuration) locally with a [command](#commands).
+- [**Validate your GitLab CI/CD configuration**](#validate-gitlab-ci-configuration) locally with a [command](#commands).
 - [**Manage your pipelines**](#pipeline-actions). View your [pipeline status](#status-bar---details)
   and open the related merge request. With [advanced pipeline actions](#pipeline-actions),
   you can create, retry, or cancel a pipeline.
@@ -24,6 +23,9 @@ the extension helps you:
   snippets, and apply [snippet patches](#create-and-apply-snippet-patch).
 - [**Browse a GitLab repository directly**](#browse-a-repository-without-cloning)
   in Visual Studio Code without cloning it.
+- [**Auto-complete GitLab CI/CD variables**](#ci-variable-autocompletion) in your `.gitlab-ci.yml` pipeline file, and any file beginning with `.gitlab-ci` and ending with `.yml` or `.yaml`, like `.gitlab-ci.production.yml`.
+
+Supports [multiple GitLab instances](#multiple-gitlab-instances).
 
 ## Minimum supported version
 
@@ -73,19 +75,11 @@ Commands this extension extends or integrates with:
 - `Git: Clone` - Search for and clone projects for every GitLab instance you set up. [Read more](#git-extension-integration), [Official Documentation](https://code.visualstudio.com/docs/editor/versioncontrol#_cloning-a-repository)
 - `Git: Add Remote...` - Add existing projects as remote from every GitLab instance you set up.
 
-### Other features
-
-Supports multiple GitLab instances [Read more](#multiple-gitlab-instances).
-
-Published also on [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
-
-You can use [autocompletion of GitLab CI variables](#ci-variable-autocompletion) in your `.gitlab-ci.yml` pipeline file. If you have additional pipeline files you would like to use autocomplete with, it matches on any file beginning with `.gitlab-ci` and ending with `.yml` or `.yaml`. For example: `.gitlab-ci.production.yml`.
-
 ## Setup
 
 This extension requires you to create a GitLab personal access token, and assign it to the extension:
 
-1. [Install the extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#commands) from the Visual Studio Marketplace, and enable the extension.
+1. [Install the extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) from the Visual Studio Marketplace and enable it. If you use an unofficial version of VS Code, install the extension from the [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
 1. Create a personal access token with the `api` and `read_user` scopes:
    - If you use GitLab.com, go to the [personal access tokens](https://gitlab.com/-/profile/personal_access_tokens) page.
    - If you use a self-managed GitLab instance, follow the instructions [in the GitLab documentation](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token).
@@ -98,6 +92,8 @@ This extension requires you to create a GitLab personal access token, and assign
 
 The extension is ready to use. If your project has a pipeline for the last commit, and a merge request from your current branch, information about both is displayed in the Visual Studio Code status bar.
 
+If you use multiple GitLab instances, you may want to configure each workspace separately. Refer to the `gitlab.instanceUrl` configuration option in the [Extension settings](#extension-settings) section.
+
 ### Set token with environment variables
 
 If you often delete your VS Code storage (such as in Gitpod containers) you can create environment variables before starting VS Code. If you set the token in an environment variable you don't have to set the personal access token every time you delete your VS Code storage.
@@ -106,10 +102,6 @@ If you often delete your VS Code storage (such as in Gitpod containers) you can 
 - `GITLAB_WORKFLOW_TOKEN`: personal access token, which you created [in a previous step](#step-1-create-your-personal-access-token).
 
 The token configured in an environment variable is overridden if you configure a token for the same GitLab instance in the extension.
-
-### Multiple GitLab instances
-
-If you want to use multiple GitLab instances you may want to configure each workspace separately. See the `gitlab.instanceUrl` configuration option in [Extension settings](#extension-settings) section.
 
 ### Self-signed certificate authority
 
