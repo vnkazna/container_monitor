@@ -1,17 +1,7 @@
 import vscode from 'vscode';
 import { GITLAB_COM_URL } from './constants';
 import { tokenService } from './services/token_service';
-
-export const validateInstanceUrl = (input: string): string | undefined => {
-  if (!/^https?:\/\/.*$/.test(input)) return 'Must begin with http:// or https://';
-  try {
-    // eslint-disable-next-line no-new
-    new URL(input);
-  } catch (e) {
-    return 'Must be a valid URL';
-  }
-  return undefined;
-};
+import { validateInstanceUrl } from './utils/validate_instance_url';
 
 export async function showInput() {
   const instance = await vscode.window.showInputBox({
