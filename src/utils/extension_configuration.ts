@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
-import { CONFIG_NAMESPACE } from '../constants';
+import { CONFIG_NAMESPACE, GITLAB_COM_URL } from '../constants';
 import { CustomQuery } from '../gitlab/custom_query';
+import { log, LOG_LEVEL } from '../log';
+import { validateInstanceUrl } from './validate_instance_url';
 
 type MutableConfigName = 'repositories';
 
@@ -21,10 +23,25 @@ interface ExtensionConfiguration {
 // VS Code returns a value or `null` but undefined is better for using default function arguments
 const turnNullToUndefined = <T>(val: T | null | undefined): T | undefined => val ?? undefined;
 
+const ignoreInvalidUrl = (url: string): string | undefined => {
+  const error = validateInstanceUrl(url);
+  if (error) {
+    log(
+      `'gitlab.instanceUrl' (${url}) from settings.json is not valid: ${error}. ` +
+        `The extension will use the default value ${GITLAB_COM_URL}. ` +
+        `Fix the 'gitlab.instanceUrl' setting to use your GitLab instance.`,
+      LOG_LEVEL.WARNING,
+    );
+    return undefined;
+  }
+  return url;
+};
+
 export function getExtensionConfiguration(): ExtensionConfiguration {
   const workspaceConfig = vscode.workspace.getConfiguration(CONFIG_NAMESPACE);
+  const instanceUrlSetting = turnNullToUndefined(workspaceConfig.instanceUrl as string | null);
   return {
-    instanceUrl: turnNullToUndefined(workspaceConfig.instanceUrl),
+    instanceUrl: instanceUrlSetting && ignoreInvalidUrl(instanceUrlSetting),
     remoteName: turnNullToUndefined(workspaceConfig.remoteName),
     pipelineGitRemoteName: turnNullToUndefined(workspaceConfig.pipelineGitRemoteName),
     featureFlags: turnNullToUndefined(workspaceConfig.featureFlags),

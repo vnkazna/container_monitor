@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { asMock } from '../test_utils/as_mock';
-import { setPreferredRemote } from './extension_configuration';
+import { setPreferredRemote, getExtensionConfiguration } from './extension_configuration';
 
 class FakeConfig {
   get(key: string) {
@@ -19,6 +19,23 @@ describe('extension configuration', () => {
   beforeEach(() => {
     workspaceConfig = new FakeConfig();
     asMock(vscode.workspace.getConfiguration).mockReturnValue(workspaceConfig);
+  });
+
+  describe('instanceUrl', () => {
+    it('translates null to undefined', () => {
+      workspaceConfig.update('instanceUrl', null);
+      expect(getExtensionConfiguration().instanceUrl).toBeUndefined;
+    });
+
+    it('returns a valid URL', () => {
+      workspaceConfig.update('instanceUrl', 'https://dev.gitlab.com');
+      expect(getExtensionConfiguration().instanceUrl).toBe('https://dev.gitlab.com');
+    });
+
+    it('ignores invalid URL', () => {
+      workspaceConfig.update('instanceUrl', 'htt://gitlab.com');
+      expect(getExtensionConfiguration().instanceUrl).toBeUndefined;
+    });
   });
 
   describe('setPreferredRemote', () => {
