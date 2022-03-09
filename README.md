@@ -1,8 +1,12 @@
+<!--
+
 ---
 stage: Create
 group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
+
+-->
 
 # <img src="https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/5b10b8c151a1ed3000135f54d2564af385d60105/src/assets/logo.png" width="64" align="center" /> [GitLab VS Code Extension](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
 
