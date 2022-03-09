@@ -13,5 +13,12 @@ We keep a local copy of all supported GitLab CI variables in [`ci_variables.json
    ```md
    This MR is the result of running the script to update the CI variable definition. There is no manual editing in this commit. The content of `ci_variables.json` is scraped from the official GitLab documentation.
 
-   Documentation: https://gitlab.com/gitlab-org/gitlab-vscode-extension/blob/5adb82a3cc7f4d8b65b2e4886c26a1c6d09a7ae3/docs/ci-variables.md#L10
+   Documentation: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/developer/ci-variables.md
+
+   A script generated this code change, so this MR will merge without a second review.
+
+   /label ~"devops::create" ~"group::code review" ~"VS Code" ~"Category:Editor Extension" ~"section::dev" ~"type::maintenance"
    ```
+
+1. Perform a quick review of the change.
+1. Merge the MR without assigning an additional reviewer. ([Explanation of the review process exception](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/481))
