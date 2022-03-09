@@ -4,6 +4,7 @@
 ### Features
 
 * support <current_user> in more "user" filters ([e73d7d6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/e73d7d6b2f020a5343308e293dbb88fd86183942))
+  * Implemented by [Mathieu Rochette](https://gitlab.com/mathroc) with [MR !441](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/441) 👍
 * validate GitLab instanceUrl setting ([d3e740f](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/d3e740f49d90a885f29f483d213db0924a31e442))
 * validate instance URL for new token ([54ed3e1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/54ed3e1331044039676d2f0233392f5bf3f181a8))
 
