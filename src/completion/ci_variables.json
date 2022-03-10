@@ -29,7 +29,7 @@
   },
   {
     "name": "CI_COMMIT_BEFORE_SHA",
-    "description": "The previous latest commit present on a branch. Is always `0000000000000000000000000000000000000000` in pipelines for merge requests."
+    "description": "The previous latest commit present on a branch. Is always `0000000000000000000000000000000000000000` in merge request pipelines."
   },
   {
     "name": "CI_COMMIT_BRANCH",
@@ -201,7 +201,7 @@
   },
   {
     "name": "CI_JOB_JWT_V2",
-    "description": "[**alpha:**](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) A newly formatted RS256 JSON web token to increase compatibility. Similar to `CI_JOB_JWT`, except the issuer (`iss`) claim is changed from `gitlab.com` to `https://gitlab.com`, `sub` has changed from `job_id` to a string that contains the project path, and an `aud` claim is added. Format is subject to change. Be aware, the `aud` field is a constant value. Trusting JWTs in multiple relying parties can lead to [one RP sending a JWT to another one and acting maliciously as a job](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/72555#note_769112331)."
+    "description": "[**alpha:**](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../../policy/alpha-beta-support.md#alpha-features) A newly formatted RS256 JSON web token to increase compatibility. Similar to `CI_JOB_JWT`, except the issuer (`iss`) claim is changed from `gitlab.com` to `https://gitlab.com`, `sub` has changed from `job_id` to a string that contains the project path, and an `aud` claim is added. Format is subject to change. Be aware, the `aud` field is a constant value. Trusting JWTs in multiple relying parties can lead to [one RP sending a JWT to another one and acting maliciously as a job](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/72555#note_769112331)."
   },
   {
     "name": "CI_JOB_MANUAL",
@@ -293,7 +293,7 @@
   },
   {
     "name": "CI_MERGE_REQUEST_SOURCE_BRANCH_SHA",
-    "description": "The HEAD SHA of the source branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../pipelines/pipelines_for_merged_results.md). **(PREMIUM)**"
+    "description": "The HEAD SHA of the source branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../pipelines/merged_results_pipelines.md)."
   },
   {
     "name": "CI_MERGE_REQUEST_SOURCE_PROJECT_ID",
@@ -313,7 +313,7 @@
   },
   {
     "name": "CI_MERGE_REQUEST_TARGET_BRANCH_SHA",
-    "description": "The HEAD SHA of the target branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../pipelines/pipelines_for_merged_results.md). **(PREMIUM)**"
+    "description": "The HEAD SHA of the target branch of the merge request. The variable is empty in merge request pipelines. The SHA is present only in [merged results pipelines](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/ci/variables/../pipelines/merged_results_pipelines.md)."
   },
   {
     "name": "CI_MERGE_REQUEST_TITLE",
