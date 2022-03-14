@@ -26,5 +26,5 @@ export const README_SECTIONS = {
 export const REQUIRED_VERSIONS = {
   // NOTE: This needs to _always_ be a 3 digits
   CI_CONFIG_VALIDATIONS: '13.6.0',
-  MR_DISCUSSIONS: '13.5.0',
+  MR_DISCUSSIONS: '13.9.0',
 };
