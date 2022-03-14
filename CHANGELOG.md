@@ -1,3 +1,12 @@
+## [3.41.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.41.1...v3.41.2) (2022-03-14)
+
+
+### Bug Fixes
+
+* getting MR discussions can only work on GitLab 13.9.0 or later ([79cad6a](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/79cad6af5d439ffc477bbe95c70a3f0df76a8ec7))
+
+
+
 ## [3.41.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.41.0...v3.41.1) (2022-03-09)
 
 
