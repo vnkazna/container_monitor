@@ -11,7 +11,6 @@ async function go() {
     const temporaryWorkspace = await createTmpWorkspace(!isWin); // don't cleanup the temp files on windows, it caused failure in the CI runner
     console.log(temporaryWorkspace);
     await runTests({
-      version: '1.63.2',
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs: ['--disable-extensions', '--disable-workspace-trust', temporaryWorkspace],
