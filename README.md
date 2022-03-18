@@ -211,15 +211,15 @@ It allows users to search issues/MRs against their title and description fields.
 
 It can become more powerful by allowing you to filter issues/MRs by author, assignee, milestone, title etc. Below is the full list of supported filter tokens
 
-| Token     | Description                                                                                                                             | Example                                                            |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| title     | Search issues/MRs against their title and description. You don't need to add quotes around multiple words. See Important notes section. | discussions refactor                                               |
-| labels    | Comma separated label list for multiple labels.                                                                                         | `labels: frontend, Discussion, performance`                        |
-| label     | To search with a single label. You can also have multiple `label` tokens.                                                               | `label: frontend` or `label:frontend label: Discussion`            |
-| milestone | Milestone title without `%`.                                                                                                            | `milestone: 9.5`                                                   |
-| scope     | Searches issues/MRs for the given scope. Values can be `created-by-me`, `assigned-to-me` or `all`. Defaults to `created-by-me`.         | `scope: created-by-me` or `scope: assigned-to-me` or `scope: all`. |
-| author    | Username of the author without `@`.                                                                                                     | `author: fatihacet`                                                |
-| assignee  | Username of the assignee without `@`.                                                                                                   | `assignee: timzallmann`                                            |
+| Token     | Description                                                                                                                                                 | Example                                                            |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| title     | Search issues/MRs against their title and description. You don't need to add quotes around multiple words. See [Important notes](#important-notes) section. | discussions refactor                                               |
+| labels    | Comma separated label list for multiple labels.                                                                                                             | `labels: frontend, Discussion, performance`                        |
+| label     | To search with a single label. You can also have multiple `label` tokens.                                                                                   | `label: frontend` or `label:frontend label: Discussion`            |
+| milestone | Milestone title without `%`.                                                                                                                                | `milestone: 9.5`                                                   |
+| scope     | Searches issues/MRs for the given scope. Values can be `created-by-me`, `assigned-to-me` or `all`. Defaults to `created-by-me`.                             | `scope: created-by-me` or `scope: assigned-to-me` or `scope: all`. |
+| author    | Username of the author without `@`.                                                                                                                         | `author: fatihacet`                                                |
+| assignee  | Username of the assignee without `@`.                                                                                                                       | `assignee: timzallmann`                                            |
 
 ##### Examples
 
@@ -299,7 +299,7 @@ This extension integrates with the built-in Git Extension and allows you to sear
 
 ![Demonstration of cloning a project from gitlab.com](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/raw/d0589878829338b64657e592f3451f1dace41cdf/docs/assets/git-clone.gif)
 
-> Note: Using the access-token for cloning with HTTPS does not work with VS Code version 1.53.x (See [discussion](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/172#note_513068345))
+> **NOTE:** Using the access-token for cloning with HTTPS does not work with VS Code version 1.53.x (See [discussion](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/172#note_513068345))
 
 ### Browse a repository without cloning
 
