@@ -46,6 +46,7 @@ import {
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
+import { authenticate, GitLabAuthProvider } from './authentication/authenticate';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -72,6 +73,7 @@ const registerCommands = (
       openers.showMergeRequests,
     ),
     [USER_COMMANDS.SET_TOKEN]: tokenInput.showInput,
+    [USER_COMMANDS.AUTHENTICATE]: authenticate,
     [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
     [USER_COMMANDS.OPEN_ACTIVE_FILE]: runWithValidProjectFile(openers.openActiveFile),
     [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: runWithValidProjectFile(openers.copyLinkToActiveFile),
@@ -160,6 +162,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
   currentBranchRefresher.init(statusBar, currentBranchDataProvider);
   context.subscriptions.push(currentBranchRefresher);
 
+  context.subscriptions.push(
+    vscode.authentication.registerAuthenticationProvider(
+      'gitlab',
+      'GitLab',
+      new GitLabAuthProvider(),
+    ),
+  );
+  vscode.window.registerUriHandler();
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
   // we don't want to hold the extension startup by waiting on VS Code and GitLab API

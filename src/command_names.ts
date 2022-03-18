@@ -4,6 +4,7 @@
 */
 export const USER_COMMANDS = {
   SET_TOKEN: 'gl.setToken',
+  AUTHENTICATE: 'gl.authenticate',
   REMOVE_TOKEN: 'gl.removeToken',
   SHOW_ISSUES_ASSIGNED_TO_ME: 'gl.showIssuesAssignedToMe',
   SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME: 'gl.showMergeRequestsAssignedToMe',

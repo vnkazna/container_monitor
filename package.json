@@ -10,7 +10,7 @@
     "url": "https://gitlab.com/gitlab-org/gitlab-vscode-extension"
   },
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.54.0"
   },
   "categories": [
     "Other"
@@ -47,6 +47,10 @@
       {
         "command": "gl.setToken",
         "title": "GitLab: Set GitLab Personal Access Token"
+      },
+      {
+        "command": "gl.authenticate",
+        "title": "GitLab: Authenticate to GitLab.com"
       },
       {
         "command": "gl.removeToken",
@@ -884,7 +888,7 @@
     "@types/semver": "^7.3.8",
     "@types/sinon": "^10.0.11",
     "@types/temp": "^0.9.0",
-    "@types/vscode": "^1.52.0",
+    "@types/vscode": "^1.54.0",
     "@typescript-eslint/eslint-plugin": "^5.15.0",
     "@typescript-eslint/parser": "^5.15.0",
     "conventional-changelog-cli": "^2.1.1",
