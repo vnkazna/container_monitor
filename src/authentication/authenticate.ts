@@ -118,11 +118,12 @@ export class GitLabAuthProvider implements vscode.AuthenticationProvider {
     state => async (uri, resolve, reject) => {
       if (uri.path !== '/authentication') return;
       const searchParams = new URLSearchParams(uri.query);
-      const state = searchParams.get('state');
-      if (!state) {
+      const urlState = searchParams.get('state');
+      if (!urlState) {
         reject(new Error(`Authentication URL ${uri} didn't contain 'state' query param.`));
         return;
       }
+      if (state !== urlState) return;
       const codeVerifier = this.#requestsInProgress[state];
       if (!codeVerifier) return;
       const code = searchParams.get('code');
