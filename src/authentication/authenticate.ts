@@ -5,6 +5,7 @@ import { openUrl } from '../openers';
 import { PromiseAdapter, promiseFromEvent } from '../utils/promise_from_event';
 import { uriHandler } from '../services/uri_handler';
 import fetch from 'cross-fetch';
+import { tokenService } from '../services/token_service';
 
 const CLIENT_ID = '89975480e8bdd858e5267784b6db81db98f8f27662c757b2f0589e7e3e1f2503';
 const REDIRECT_URI = `${vscode.env.uriScheme}://gitlab.gitlab-workflow/authentication`;
@@ -87,12 +88,17 @@ export class GitLabAuthProvider implements vscode.AuthenticationProvider {
   async createSession(scopes: readonly string[]): Promise<vscode.AuthenticationSession> {
     const { url, state, codeVerifier } = createLoginUrl(scopes);
     this.#requestsInProgress[state] = codeVerifier;
-    const { promise } = promiseFromEvent(uriHandler.event, this.exchangeCodeForToken(state));
+    const { promise, cancel } = promiseFromEvent(
+      uriHandler.event,
+      this.exchangeCodeForToken(state),
+    );
     await openUrl(url);
     const token = await Promise.race([
       promise,
       new Promise<string>((_, reject) => setTimeout(() => reject(new Error('timeout')), 30000)),
-    ]);
+    ]).finally(() => {
+      cancel.fire();
+    });
     return { accessToken: token, account: { id: 'abc', label: 'account' }, id: 'abc', scopes };
   }
 
@@ -144,5 +150,8 @@ export class GitLabAuthProvider implements vscode.AuthenticationProvider {
 export const gitlabAuthenticationProvider = new GitLabAuthProvider();
 
 export const authenticate = async () => {
-  await vscode.authentication.getSession('gitlab', ['api', 'read_user'], { createIfNone: true });
+  const session = await vscode.authentication.getSession('gitlab', ['api', 'read_user'], {
+    createIfNone: true,
+  });
+  tokenService.setToken('https://gitlab.com', session.accessToken);
 };
