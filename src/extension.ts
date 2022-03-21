@@ -46,7 +46,8 @@ import {
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
-import { authenticate, GitLabAuthProvider, GitLabUriHandler } from './authentication/authenticate';
+import { authenticate, gitlabAuthenticationProvider } from './authentication/authenticate';
+import { uriHandler } from './services/uri_handler';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -166,10 +167,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.authentication.registerAuthenticationProvider(
       'gitlab',
       'GitLab',
-      new GitLabAuthProvider(),
+      gitlabAuthenticationProvider,
     ),
   );
-  vscode.window.registerUriHandler(new GitLabUriHandler());
+  vscode.window.registerUriHandler(uriHandler);
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
   // we don't want to hold the extension startup by waiting on VS Code and GitLab API
