@@ -106,14 +106,6 @@ export class GitLabAuthProvider implements vscode.AuthenticationProvider {
     throw new Error('Method not implemented. 3');
   }
 
-  finishAuthentication(state: string, code: string) {
-    const codeVerifier = this.#requestsInProgress[state];
-    if (!codeVerifier)
-      throw new Error(
-        `Can't finish authentication with state $state. This VS Code instance hasn't started this authentication`,
-      );
-  }
-
   exchangeCodeForToken: (state: string) => PromiseAdapter<vscode.Uri, string> =
     state => async (uri, resolve, reject) => {
       if (uri.path !== '/authentication') return;
