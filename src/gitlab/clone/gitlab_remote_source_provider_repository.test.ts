@@ -14,6 +14,7 @@ describe('GitLabRemoteSourceProviderRepository', () => {
     (tokenService as any).onDidChange = (listener: () => unknown, bindThis: unknown) => {
       tokenChangeListener = () => listener.call(bindThis);
     };
+    tokenService.getToken = () => 'token';
   });
 
   it('remote source provider created for new token', async () => {

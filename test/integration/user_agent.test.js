@@ -41,7 +41,7 @@ describe('User-Agent header', () => {
   });
 
   it('is sent with requests from GitLabService', async () => {
-    const subject = new GitLabService(GITLAB_URL);
+    const subject = new GitLabService({ instanceUrl: GITLAB_URL, token: 'token' });
     await subject.getSnippets('gitlab-org/gitlab');
     validateUserAgent(capturedRequest);
   });

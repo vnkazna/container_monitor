@@ -4,7 +4,6 @@ import crossFetch from 'cross-fetch';
 import { URL, URLSearchParams } from 'url';
 import createHttpProxyAgent from 'https-proxy-agent';
 import assert from 'assert';
-import { tokenService } from '../services/token_service';
 import { FetchError } from '../errors/fetch_error';
 import { getUserAgentHeader } from './http/get_user_agent_header';
 import { ensureAbsoluteAvatarUrl } from './ensure_absolute_avatar_url';
@@ -58,6 +57,7 @@ import { README_SECTIONS, REQUIRED_VERSIONS } from '../constants';
 import { makeMarkdownLinksAbsolute } from '../utils/make_markdown_links_absolute';
 import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
 import { HelpError } from '../errors/help_error';
+import { Credentials } from '../services/token_service';
 
 interface CreateNoteResult {
   createNote: {
@@ -200,8 +200,14 @@ type CreateSnippetOptions = {
 export class GitLabService {
   client: GraphQLClient;
 
-  constructor(readonly instanceUrl: string, readonly pipelineInstanceUrl?: string) {
+  private instanceUrl: string;
+
+  #token: string;
+
+  constructor({ instanceUrl, token }: Credentials) {
     const ensureEndsWithSlash = (url: string) => url.replace(/\/?$/, '/');
+    this.instanceUrl = instanceUrl;
+    this.#token = token;
 
     const endpoint = new URL('./api/graphql', ensureEndsWithSlash(this.instanceUrl)).href; // supports GitLab instances that are on a custom path, e.g. "https://example.com/gitlab"
 
@@ -220,10 +226,9 @@ export class GitLabService {
   }
 
   private get fetchOptions() {
-    const token = tokenService.getToken(this.instanceUrl);
     return {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${this.#token}`,
         ...getUserAgentHeader(),
       },
       agent: this.httpAgent,
