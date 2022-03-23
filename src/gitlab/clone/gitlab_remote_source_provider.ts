@@ -1,8 +1,7 @@
-import assert from 'assert';
 import { RemoteSource, RemoteSourceProvider } from '../../api/git';
 import { GitLabService } from '../gitlab_service';
 import { GitLabProject } from '../gitlab_project';
-import { tokenService } from '../../services/token_service';
+import { Credentials } from '../../services/token_service';
 
 const SEARCH_LIMIT = 30;
 const getProjectQueryAttributes = {
@@ -42,12 +41,9 @@ export class GitLabRemoteSourceProvider implements RemoteSourceProvider {
 
   private gitlabService: GitLabService;
 
-  // FIXME: add token to constructor
-  constructor(private instanceUrl: string) {
-    this.name = `GitLab (${instanceUrl})`;
-    const token = tokenService.getToken(instanceUrl);
-    assert(token, `There is no token for ${instanceUrl}`);
-    this.gitlabService = new GitLabService({ instanceUrl, token });
+  constructor(credentials: Credentials) {
+    this.name = `GitLab (${credentials.instanceUrl})`;
+    this.gitlabService = new GitLabService(credentials);
   }
 
   async lookupByPath(path: string): Promise<GitLabRemote | undefined> {

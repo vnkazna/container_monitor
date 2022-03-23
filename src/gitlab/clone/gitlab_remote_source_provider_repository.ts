@@ -20,18 +20,19 @@ export class GitLabRemoteSourceProviderRepository implements Disposable {
   }
 
   update(): void {
-    const urls = tokenService.getInstanceUrls();
+    const credentials = tokenService.getAllCredentials();
     // create provider(s) for the missing url(s)
-    urls.forEach(url => {
-      if (!this.remoteSourceProviders.has(url)) {
-        const provider = new GitLabRemoteSourceProvider(url);
+    credentials.forEach(c => {
+      if (!this.remoteSourceProviders.has(c.instanceUrl)) {
+        const provider = new GitLabRemoteSourceProvider(c);
         const disposable = this.gitAPI.registerRemoteSourceProvider(provider);
-        this.remoteSourceProviders.set(url, { provider, disposable });
+        this.remoteSourceProviders.set(c.instanceUrl, { provider, disposable });
       }
     });
     // delete provider(s) for removed url(s)
+    const instanceUrls = credentials.map(c => c.instanceUrl);
     this.remoteSourceProviders.forEach((provider, providerUrl) => {
-      if (urls.indexOf(providerUrl) === -1) {
+      if (instanceUrls.indexOf(providerUrl) === -1) {
         this.remoteSourceProviders.delete(providerUrl);
         provider.disposable.dispose();
       }

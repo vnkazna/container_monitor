@@ -1,26 +1,26 @@
 import * as vscode from 'vscode';
-import { tokenService } from '../services/token_service';
+import { Credentials, tokenService } from '../services/token_service';
 
-export async function pickInstance(): Promise<string | undefined> {
-  const instanceUrls = tokenService.getInstanceUrls();
-  const instanceItems = instanceUrls.map(u => ({
-    label: `$(cloud) ${u}`,
-    instance: u,
+export async function pickInstance(): Promise<Credentials | undefined> {
+  const credentials = tokenService.getAllCredentials();
+  const instanceItems = credentials.map(c => ({
+    label: `$(cloud) ${c.instanceUrl}`,
+    credentials: c,
   }));
   if (instanceItems.length === 0) {
     throw new Error('no GitLab instance found');
   }
-  let selectedInstanceUrl;
+  let selectedCredentials;
   if (instanceItems.length === 1) {
-    [selectedInstanceUrl] = instanceItems;
+    [selectedCredentials] = instanceItems;
   } else {
-    selectedInstanceUrl = await vscode.window.showQuickPick(instanceItems, {
+    selectedCredentials = await vscode.window.showQuickPick(instanceItems, {
       ignoreFocusOut: true,
       placeHolder: 'Select GitLab instance',
     });
   }
-  if (!selectedInstanceUrl) {
+  if (!selectedCredentials) {
     return undefined;
   }
-  return selectedInstanceUrl.instance;
+  return selectedCredentials.credentials;
 }

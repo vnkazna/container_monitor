@@ -27,6 +27,8 @@ const validateRemoteSource = remoteSources => {
 describe('GitLab Remote Source provider', () => {
   let server;
 
+  const credentials = { instanceUrl: GITLAB_URL, token: 'token' };
+
   before(async () => {
     server = getServer([
       graphql.query('GetProjects', (req, res, ctx) => {
@@ -42,7 +44,7 @@ describe('GitLab Remote Source provider', () => {
   });
 
   it('projects are fetched with full search', async () => {
-    const sourceProvider = new GitLabRemoteSourceProvider(GITLAB_URL);
+    const sourceProvider = new GitLabRemoteSourceProvider(credentials);
 
     const remoteSources = await sourceProvider.getRemoteSources();
 
@@ -50,7 +52,7 @@ describe('GitLab Remote Source provider', () => {
   });
 
   it('project search returns one result', async () => {
-    const sourceProvider = new GitLabRemoteSourceProvider(GITLAB_URL);
+    const sourceProvider = new GitLabRemoteSourceProvider(credentials);
 
     const remoteSources = await sourceProvider.getRemoteSources('GitLab');
 
@@ -58,7 +60,7 @@ describe('GitLab Remote Source provider', () => {
   });
 
   it('projects search with nonexistent project returns no result', async () => {
-    const sourceProvider = new GitLabRemoteSourceProvider(GITLAB_URL);
+    const sourceProvider = new GitLabRemoteSourceProvider(credentials);
 
     assert.deepStrictEqual(
       await sourceProvider.getRemoteSources('nonexistent'),

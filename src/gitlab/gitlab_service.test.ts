@@ -10,7 +10,7 @@ import { project } from '../test_utils/entities';
 import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { getHttpAgentOptions } from './http/get_http_agent_options';
 import { HelpError } from '../errors/help_error';
-import { Credentials } from '../services/token_service';
+import { testCredentials } from '../test_utils/test_credentials';
 
 jest.mock('graphql-request');
 jest.mock('../services/token_service');
@@ -23,11 +23,6 @@ const crossFetchResponse = (response?: unknown, headers?: Record<string, unknown
   ok: true,
   headers: new Map(Object.entries(headers ?? {})),
   json: async () => response,
-});
-
-export const testCredentials = (instanceUrl = 'https://gitlab.example.com'): Credentials => ({
-  instanceUrl,
-  token: 'token',
 });
 
 describe('gitlab_service', () => {

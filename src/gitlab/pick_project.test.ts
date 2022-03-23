@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { tokenService } from '../services/token_service';
+import { testCredentials } from '../test_utils/test_credentials';
 import { showQuickPick } from '../utils/show_quickpick';
 import { GitLabRemoteSourceProvider } from './clone/gitlab_remote_source_provider';
 import { pickProject } from './pick_project';
@@ -9,7 +10,7 @@ jest.mock('../services/token_service');
 jest.mock('./clone/gitlab_remote_source_provider');
 
 describe('pickProject', () => {
-  const instanceUrls = ['https://gitlab.com'];
+  const credentials = testCredentials('https://gitlab.com');
   const projects = [
     { name: 'foo', label: 'foo' },
     { name: 'bar', label: 'bar' },
@@ -33,7 +34,7 @@ describe('pickProject', () => {
   };
 
   beforeEach(() => {
-    tokenService.getInstanceUrls = () => instanceUrls;
+    tokenService.getAllCredentials = () => [credentials];
 
     (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => ({
       onDidChangeValue: jest.fn(),
@@ -54,13 +55,13 @@ describe('pickProject', () => {
 
   it('returns undefined when the picker is canceled', async () => {
     alwaysPickOptionN(-1);
-    const r = await pickProject('https://gitlab.com');
+    const r = await pickProject(credentials);
     expect(r).toBeUndefined();
   });
 
   it('returns the selected item', async () => {
     alwaysPickOptionN(1);
-    const r = await pickProject('https://gitlab.com');
+    const r = await pickProject(credentials);
     expect(r).toStrictEqual(projects[0]);
   });
 
@@ -69,7 +70,7 @@ describe('pickProject', () => {
 
     it('resolves the user-provided value', async () => {
       alwaysInput(projects[2].name);
-      const r = await pickProject('https://gitlab.com');
+      const r = await pickProject(credentials);
       expect(r).toStrictEqual(projects[2]);
     });
 
@@ -77,7 +78,7 @@ describe('pickProject', () => {
       beforeEach(() => alwaysPickOptionN(0, projects[2].name));
 
       it('does not show an input box', async () => {
-        await pickProject('https://gitlab.com');
+        await pickProject(credentials);
         expect(vscode.window.showInputBox).toHaveBeenCalledTimes(0);
       });
     });
@@ -86,12 +87,12 @@ describe('pickProject', () => {
       beforeEach(() => alwaysInput(undefined));
 
       it('shows an input box', async () => {
-        await pickProject('https://gitlab.com');
+        await pickProject(credentials);
         expect(vscode.window.showInputBox).toHaveBeenCalledTimes(1);
       });
 
       it('returns undefined when the input box is canceled', async () => {
-        const r = await pickProject('https://gitlab.com');
+        const r = await pickProject(credentials);
         expect(vscode.window.showInputBox).toHaveBeenCalledTimes(1);
         expect(r).toStrictEqual(undefined);
       });

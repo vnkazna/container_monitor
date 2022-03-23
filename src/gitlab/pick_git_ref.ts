@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import assert from 'assert';
-import { tokenService } from '../services/token_service';
+import { Credentials } from '../services/token_service';
 import { pickWithQuery } from '../utils/pick_with_query';
 import { GitLabService } from './gitlab_service';
 
@@ -8,12 +7,10 @@ type BranchRef = RestBranch & vscode.QuickPickItem & { refType: 'branch' };
 type TagRef = RestTag & vscode.QuickPickItem & { refType: 'tag' };
 
 export async function pickGitRef(
-  instanceUrl: string,
+  credentials: Credentials,
   project: string | number,
 ): Promise<BranchRef | TagRef | undefined> {
-  const token = tokenService.getToken(instanceUrl);
-  assert(token, `There is no token for ${instanceUrl}`);
-  const service = new GitLabService({ instanceUrl, token });
+  const service = new GitLabService(credentials);
   const { picked } = await pickWithQuery(
     {
       ignoreFocusOut: true,
