@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import assert from 'assert';
 import { README_SECTIONS, REMOTE_URI_SCHEME } from '../constants';
 import { FetchError } from '../errors/fetch_error';
 import { GitLabService } from '../gitlab/gitlab_service';
@@ -11,7 +12,10 @@ import { ReadOnlyFileSystem } from './readonly_file_system';
 const encoder = new TextEncoder();
 
 export function newGitLabService(instance: vscode.Uri): GitLabService {
-  return new GitLabService(removeTrailingSlash(instance.toString()));
+  const instanceUrl = removeTrailingSlash(instance.toString());
+  const token = tokenService.getToken(instanceUrl);
+  assert(token, `There is no token for ${instanceUrl}`);
+  return new GitLabService({ instanceUrl, token });
 }
 
 /**

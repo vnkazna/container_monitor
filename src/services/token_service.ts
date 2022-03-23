@@ -3,6 +3,11 @@ import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 
+export interface Credentials {
+  instanceUrl: string;
+  token: string;
+}
+
 const getEnvironmentVariables = () => {
   const { GITLAB_WORKFLOW_INSTANCE_URL, GITLAB_WORKFLOW_TOKEN } = process.env;
   if (!GITLAB_WORKFLOW_INSTANCE_URL || !GITLAB_WORKFLOW_TOKEN) return undefined;

@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import assert from 'assert';
+import { tokenService } from '../services/token_service';
 import { pickWithQuery } from '../utils/pick_with_query';
 import { GitLabService } from './gitlab_service';
 
@@ -9,7 +11,9 @@ export async function pickGitRef(
   instanceUrl: string,
   project: string | number,
 ): Promise<BranchRef | TagRef | undefined> {
-  const service = new GitLabService(instanceUrl);
+  const token = tokenService.getToken(instanceUrl);
+  assert(token, `There is no token for ${instanceUrl}`);
+  const service = new GitLabService({ instanceUrl, token });
   const { picked } = await pickWithQuery(
     {
       ignoreFocusOut: true,

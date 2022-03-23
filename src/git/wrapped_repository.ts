@@ -189,7 +189,9 @@ export class WrappedRepository {
   }
 
   getGitLabService(): GitLabService {
-    return new GitLabService(this.instanceUrl);
+    const token = tokenService.getToken(this.instanceUrl);
+    assert(token, `There is no token for ${this.instanceUrl}`);
+    return new GitLabService({ instanceUrl: this.instanceUrl, token });
   }
 
   get name(): string {

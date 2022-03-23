@@ -88,6 +88,7 @@ describe('GitLabRemoteFileSystem', () => {
     projectInfo = null;
 
     tokenService.getInstanceUrls = () => instanceUrls;
+    tokenService.getToken = () => 'token';
 
     (GitLabService as jest.Mock).mockImplementation(() => ({
       async getTree(

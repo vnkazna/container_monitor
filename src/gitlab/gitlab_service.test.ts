@@ -10,6 +10,7 @@ import { project } from '../test_utils/entities';
 import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { getHttpAgentOptions } from './http/get_http_agent_options';
 import { HelpError } from '../errors/help_error';
+import { Credentials } from '../services/token_service';
 
 jest.mock('graphql-request');
 jest.mock('../services/token_service');
@@ -23,12 +24,18 @@ const crossFetchResponse = (response?: unknown, headers?: Record<string, unknown
   headers: new Map(Object.entries(headers ?? {})),
   json: async () => response,
 });
+
+export const testCredentials = (instanceUrl = 'https://gitlab.example.com'): Credentials => ({
+  instanceUrl,
+  token: 'token',
+});
+
 describe('gitlab_service', () => {
   let service: GitLabService;
 
   beforeEach(() => {
     asMock(getHttpAgentOptions).mockReturnValue({});
-    service = new GitLabService('https://gitlab.example.com');
+    service = new GitLabService(testCredentials());
   });
 
   const EXAMPLE_PROJECT_ID = 12345;
@@ -40,7 +47,7 @@ describe('gitlab_service', () => {
       ${'https://test.com/gitlab'}  | ${'https://test.com/gitlab/api/graphql'}
       ${'https://test.com/gitlab/'} | ${'https://test.com/gitlab/api/graphql'}
     `('creates endpoint url from $instanceUrl', ({ instanceUrl, endpointUrl }) => {
-      new GitLabService(instanceUrl); // eslint-disable-line no-new
+      new GitLabService(testCredentials(instanceUrl)); // eslint-disable-line no-new
 
       expect(GraphQLClient).toHaveBeenCalledWith(endpointUrl, expect.anything());
     });
@@ -74,7 +81,7 @@ describe('gitlab_service', () => {
       `('makes a request and escapes ref $ref', async ({ ref, encodedRef }) => {
         const baseUrl =
           'https://gitlab.example.com/api/v4/projects/12345/repository/files/README.md/raw?ref=';
-        const service = new GitLabService('https://gitlab.example.com');
+        const service = new GitLabService(testCredentials());
         const result = await service.getFileContent('README.md', ref, EXAMPLE_PROJECT_ID);
 
         expect(crossFetch).toHaveBeenCalledWith(`${baseUrl}${encodedRef}`, expect.anything());
