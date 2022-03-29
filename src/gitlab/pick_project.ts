@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
+import { Credentials } from '../services/token_service';
 import { pickWithQuery } from '../utils/pick_with_query';
 import { GitLabRemote, GitLabRemoteSourceProvider } from './clone/gitlab_remote_source_provider';
 
-export async function pickProject(instanceUrl: string): Promise<GitLabRemote | undefined> {
-  const provider = new GitLabRemoteSourceProvider(instanceUrl);
+export async function pickProject(credentials: Credentials): Promise<GitLabRemote | undefined> {
+  const provider = new GitLabRemoteSourceProvider(credentials);
   const other = {
     label: '$(globe) Other',
     description: 'Enter the path of a public project',

@@ -7,6 +7,7 @@ import { pickGitRef } from '../gitlab/pick_git_ref';
 import { pickInstance } from '../gitlab/pick_instance';
 import { pickProject } from '../gitlab/pick_project';
 import { tokenService } from '../services/token_service';
+import { testCredentials } from '../test_utils/test_credentials';
 import { openRepository } from './open_repository';
 
 jest.mock('../services/token_service');
@@ -15,7 +16,10 @@ jest.mock('../gitlab/pick_project');
 jest.mock('../gitlab/pick_git_ref');
 
 describe('openRepository', () => {
-  const instanceUrls = ['https://gitlab.com', 'https://example.com'];
+  const credentials = [
+    testCredentials('https://gitlab.com'),
+    testCredentials('https://example.com'),
+  ];
 
   const cancelOnce = () =>
     (vscode.window.showQuickPick as jest.Mock).mockImplementationOnce(() => undefined);
@@ -31,7 +35,8 @@ describe('openRepository', () => {
     (vscode.window.showInputBox as jest.Mock).mockImplementation(() => url);
 
   beforeEach(() => {
-    tokenService.getInstanceUrls = () => instanceUrls;
+    tokenService.getAllCredentials = () => credentials;
+    tokenService.getInstanceUrls = () => credentials.map(c => c.instanceUrl);
 
     (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => ({
       onDidChangeValue: jest.fn(),
@@ -98,7 +103,7 @@ describe('openRepository', () => {
     };
 
     it('constructs and opens the correct URL', async () => {
-      (pickInstance as jest.Mock).mockImplementation(() => 'https://example.com');
+      (pickInstance as jest.Mock).mockImplementation(() => testCredentials('https://example.com'));
       (pickProject as jest.Mock).mockImplementation(() => remote);
       (pickGitRef as jest.Mock).mockImplementation(() => branch);
       alwaysInput('FooBar');

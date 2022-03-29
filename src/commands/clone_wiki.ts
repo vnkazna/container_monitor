@@ -4,12 +4,12 @@ import { pickInstance } from '../gitlab/pick_instance';
 import { pickProject } from '../gitlab/pick_project';
 
 export async function cloneWiki(): Promise<void> {
-  const instance = await pickInstance();
-  if (!instance) {
+  const credentials = await pickInstance();
+  if (!credentials) {
     return;
   }
 
-  const selectedSource = await pickProject(instance);
+  const selectedSource = await pickProject(credentials);
   if (!selectedSource) {
     return;
   }

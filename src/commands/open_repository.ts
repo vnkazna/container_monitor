@@ -47,13 +47,13 @@ async function enterUrl(action: Action) {
 }
 
 async function chooseProject(action: Action) {
-  const instance = await pickInstance();
-  if (!instance) return;
+  const credentials = await pickInstance();
+  if (!credentials) return;
 
-  const remote = await pickProject(instance);
+  const remote = await pickProject(credentials);
   if (!remote) return;
 
-  const ref = await pickGitRef(instance, remote.project.restId);
+  const ref = await pickGitRef(credentials, remote.project.restId);
   if (!ref) return;
 
   const label = await vscode.window.showInputBox({
@@ -64,7 +64,7 @@ async function chooseProject(action: Action) {
   });
   if (!label) return;
 
-  const instanceUri = vscode.Uri.parse(instance);
+  const instanceUri = vscode.Uri.parse(credentials.instanceUrl);
   const remoteUri = vscode.Uri.joinPath(instanceUri, label).with({
     scheme: REMOTE_URI_SCHEME,
     query: `project=${remote.project.restId}&ref=${ref.name}`,

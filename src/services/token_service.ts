@@ -59,6 +59,13 @@ export class TokenService {
     );
   }
 
+  getAllCredentials(): Credentials[] {
+    return this.getInstanceUrls().map(instanceUrl => ({
+      instanceUrl,
+      token: this.getToken(instanceUrl)!,
+    }));
+  }
+
   async setToken(instanceUrl: string, token: string | undefined): Promise<void> {
     assert(this.context);
     const tokenMap = this.glTokenMap;

@@ -1,19 +1,20 @@
 import * as vscode from 'vscode';
-import { tokenService } from '../services/token_service';
+import { Credentials, tokenService } from '../services/token_service';
+import { testCredentials } from '../test_utils/test_credentials';
 import { pickInstance } from './pick_instance';
 
 jest.mock('../services/token_service');
 
 describe('pickInstance', () => {
-  let instanceUrls: string[];
+  let credentials: Credentials[];
 
   beforeEach(() => {
     (vscode.window.showQuickPick as jest.Mock).mockImplementation(([option]) => option);
-    tokenService.getInstanceUrls = () => instanceUrls;
+    tokenService.getAllCredentials = () => credentials;
   });
 
   it('skips selection of instance if there is only one', async () => {
-    instanceUrls = ['https://gitlab.com'];
+    credentials = [testCredentials('https://gitlab.com')];
 
     await pickInstance();
 
@@ -21,7 +22,7 @@ describe('pickInstance', () => {
   });
 
   it('asks for instance if there are multiple', async () => {
-    instanceUrls = ['https://gitlab.com', 'https://example.com'];
+    credentials = [testCredentials('https://gitlab.com'), testCredentials('https://example.com')];
 
     await pickInstance();
 
