@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as openers from '../openers';
 import { GitLabProject } from '../gitlab/gitlab_project';
-import { GitLabRepository, ProjectCommand } from './run_with_valid_project';
+import { ProjectCommand } from './run_with_valid_project';
+import { GitLabRepository } from '../git/wrapped_repository';
 
 type VisibilityItem = vscode.QuickPickItem & { type: SnippetVisibility };
 

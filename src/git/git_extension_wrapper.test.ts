@@ -3,7 +3,7 @@ import { GitExtensionWrapper } from './git_extension_wrapper';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
 import { createFakeRepository, FakeGitExtension } from '../test_utils/fake_git_extension';
-import { WrappedRepository } from './wrapped_repository';
+import { WrappedRepositoryImpl } from './wrapped_repository';
 
 jest.mock('../gitlab/clone/gitlab_credentials_provider');
 jest.mock('../gitlab/clone/gitlab_remote_source_provider_repository');
@@ -57,7 +57,7 @@ describe('GitExtensionWrapper', () => {
 
       await wrapper.init();
 
-      expect(wrapper.repositories).toEqual([new WrappedRepository(fakeRepository)]);
+      expect(wrapper.repositories).toEqual([new WrappedRepositoryImpl(fakeRepository)]);
     });
 
     describe('reacts to changes to repository count', () => {
