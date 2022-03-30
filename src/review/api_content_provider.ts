@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { fromReviewUri } from './review_uri';
 import { logError } from '../log';
-import { createGitLabService } from '../service_factory';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
 export class ApiContentProvider implements vscode.TextDocumentContentProvider {
   // eslint-disable-next-line class-methods-use-this
@@ -9,7 +9,8 @@ export class ApiContentProvider implements vscode.TextDocumentContentProvider {
     const params = fromReviewUri(uri);
     if (!params.path || !params.commit) return '';
 
-    const service = await createGitLabService(params.repositoryRoot);
+    const repository = gitExtensionWrapper.getRepository(params.repositoryRoot);
+    const service = repository.getGitLabService();
     try {
       return await service.getFileContent(params.path, params.commit, params.projectId);
     } catch (e) {
