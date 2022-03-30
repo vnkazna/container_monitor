@@ -1,4 +1,4 @@
-import { WrappedRepository } from '../git/wrapped_repository';
+import { WrappedRepository, WrappedRepositoryImpl } from '../git/wrapped_repository';
 import { GitLabService } from '../gitlab/gitlab_service';
 import {
   createFakeRepository,
@@ -18,7 +18,9 @@ const defaultOptions = {
 export const createWrappedRepository = (
   options: Partial<CreateWrappedRepositoryOptions> = {},
 ): WrappedRepository => {
-  const repository = new WrappedRepository(createFakeRepository({ ...defaultOptions, ...options }));
+  const repository = new WrappedRepositoryImpl(
+    createFakeRepository({ ...defaultOptions, ...options }),
+  );
   if (options.gitLabService) {
     repository.getGitLabService = () => options.gitLabService as any;
   }

@@ -2,12 +2,12 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { VS_COMMANDS } from './command_names';
 import {
-  GitLabRepository,
   GitLabRepositoryAndFile,
   ProjectCommand,
   ProjectFileCommand,
 } from './commands/run_with_valid_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { GitLabRepository } from './git/wrapped_repository';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));

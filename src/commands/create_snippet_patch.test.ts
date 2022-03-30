@@ -3,9 +3,9 @@ import { createSnippetPatch } from './create_snippet_patch';
 import { project } from '../test_utils/entities';
 import { asMock } from '../test_utils/as_mock';
 import { openUrl } from '../openers';
-import { GitLabRepository } from './run_with_valid_project';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
+import { GitLabRepository } from '../git/wrapped_repository';
 
 jest.mock('../git/git_extension_wrapper');
 jest.mock('../openers');

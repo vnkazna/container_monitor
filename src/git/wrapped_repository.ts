@@ -68,7 +68,37 @@ export interface CachedMr {
   mrVersion: RestMrVersion;
 }
 
-export class WrappedRepository {
+export interface WrappedRepository {
+  remoteNames: string[];
+  containsGitLabProject: boolean;
+  branch?: string;
+  remote?: GitRemote;
+  lastCommitSha?: string;
+  instanceUrl: string;
+  name: string;
+  rootFsPath: string;
+  fetch(): Promise<void>;
+  checkout(branchName: string): Promise<void>;
+  getRemoteByName(remoteName: string): GitRemote;
+  getProject(): Promise<GitLabProject | undefined>;
+  getPipelineProject(): Promise<GitLabProject | undefined>;
+  reloadMr(mr: RestMr): Promise<CachedMr>;
+  getMr(id: number): CachedMr | undefined;
+  getGitLabService(): GitLabService;
+  getFileContent(path: string, sha: string): Promise<string | null>;
+  diff(): Promise<string>;
+  apply(patchPath: string): Promise<void>;
+  getTrackingBranchName(): Promise<string>;
+  hasSameRootAs(repository: Repository): boolean;
+  getVersion(): Promise<string | undefined>;
+}
+
+export type GitLabRepository = Omit<WrappedRepository, 'getProject'> & {
+  remote: GitRemote;
+  getProject: () => Promise<GitLabProject>;
+};
+
+export class WrappedRepositoryImpl implements WrappedRepository {
   private readonly rawRepository: Repository;
 
   private cachedProject?: GitLabProject;

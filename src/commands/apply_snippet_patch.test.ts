@@ -8,7 +8,7 @@ import {
 } from '../../test/integration/fixtures/graphql/snippets.js';
 import { asMock } from '../test_utils/as_mock';
 import { GitLabService } from '../gitlab/gitlab_service';
-import { GitLabRepository } from './run_with_valid_project';
+import { GitLabRepository } from '../git/wrapped_repository';
 
 jest.mock('../git/git_extension_wrapper');
 

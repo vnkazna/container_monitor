@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { API, GitExtension, Repository } from '../api/git';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
-import { WrappedRepository } from './wrapped_repository';
+import { WrappedRepository, WrappedRepositoryImpl } from './wrapped_repository';
 import { handleError, log, LOG_LEVEL } from '../log';
 
 export class GitExtensionWrapper implements vscode.Disposable {
@@ -75,7 +75,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
     await Promise.all(repositories.map(r => r.status())); // make sure the repositories are initialized
     this.wrappedRepositories = [
       ...this.wrappedRepositories,
-      ...repositories.map(r => new WrappedRepository(r)),
+      ...repositories.map(r => new WrappedRepositoryImpl(r)),
     ];
     this.repositoryCountChangedEmitter.fire();
   }

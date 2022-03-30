@@ -1,16 +1,9 @@
 import * as vscode from 'vscode';
 import { USER_COMMANDS } from '../command_names';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
-import { GitRemote } from '../git/git_remote_parser';
-import { WrappedRepository } from '../git/wrapped_repository';
-import { GitLabProject } from '../gitlab/gitlab_project';
+import { GitLabRepository, WrappedRepository } from '../git/wrapped_repository';
 import { doNotAwait } from '../utils/do_not_await';
 import { setPreferredRemote } from '../utils/extension_configuration';
-
-export type GitLabRepository = Omit<WrappedRepository, 'getProject'> & {
-  remote: GitRemote;
-  getProject: () => Promise<GitLabProject>;
-};
 
 export interface GitLabRepositoryAndFile {
   repository: GitLabRepository;
