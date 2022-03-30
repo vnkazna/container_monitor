@@ -4,7 +4,6 @@ import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import assert from 'assert';
 import { handleError, logError } from './log';
-import { getInstanceUrl } from './utils/get_instance_url';
 import { isMr } from './utils/is_mr';
 import { makeHtmlLinksAbsolute } from './utils/make_html_links_absolute';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
@@ -103,12 +102,11 @@ class WebviewController {
   private createMessageHandler =
     (panel: vscode.WebviewPanel, issuable: RestIssuable, repository: GitLabRepository) =>
     async (message: any) => {
-      const instanceUrl = await getInstanceUrl(repository.rootFsPath);
       if (message.command === 'renderMarkdown') {
         let rendered = await repository
           .getGitLabService()
           .renderMarkdown(message.markdown, await repository.getProject());
-        rendered = makeHtmlLinksAbsolute(rendered || '', instanceUrl);
+        rendered = makeHtmlLinksAbsolute(rendered || '', repository.instanceUrl);
 
         await panel.webview.postMessage({
           type: 'markdownRendered',

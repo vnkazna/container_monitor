@@ -1,7 +1,6 @@
 const vscode = require('vscode');
 const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
 const openers = require('./openers');
-const { getInstanceUrl } = require('./utils/get_instance_url');
 
 const parseQuery = (query, noteableType) => {
   const params = {};
@@ -120,7 +119,7 @@ async function showProjectAdvancedSearchInput() {
     'Project Advanced Search. (Check extension page for Advanced Search)',
   );
   const queryString = await encodeURIComponent(query);
-  const instanceUrl = await getInstanceUrl(repository.rootFsPath);
+  const instanceUrl = await repository.instanceUrl;
 
   // Select issues tab by default for Advanced Search
   await openers.openUrl(
