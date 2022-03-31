@@ -115,10 +115,6 @@ export interface WrappedGitLabProject {
   lastCommitSha?: string;
 }
 
-export interface GitLabProjectRepository {
-  getWrappedProject(repository: WrappedRepository): Promise<WrappedGitLabProject | undefined>;
-}
-
 export class WrappedRepositoryImpl implements WrappedRepository {
   private readonly rawRepository: Repository;
 
@@ -302,10 +298,3 @@ export class WrappedRepositoryImpl implements WrappedRepository {
     return this;
   }
 }
-
-export const gitlabProjectRepository: GitLabProjectRepository = {
-  getWrappedProject: async repository => {
-    if (!repository.containsGitLabProject) return undefined;
-    return repository as WrappedGitLabProject;
-  },
-};
