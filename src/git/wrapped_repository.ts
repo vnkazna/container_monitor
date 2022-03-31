@@ -93,10 +93,24 @@ export interface WrappedRepository {
   getVersion(): Promise<string | undefined>;
 }
 
-export type GitLabRepository = Omit<WrappedRepository, 'getProject'> & {
+export interface GitLabRepository {
   remote: GitRemote;
   getProject: () => Promise<GitLabProject>;
-};
+
+  name: string;
+  instanceUrl: string;
+  getPipelineProject(): Promise<GitLabProject | undefined>;
+  reloadMr(mr: RestMr): Promise<CachedMr>;
+  getMr(id: number): CachedMr | undefined;
+  getGitLabService(): GitLabService;
+
+  // Repository related, refactor so clients don't use them
+  rootFsPath: string;
+  diff(): Promise<string>;
+  apply(patchPath: string): Promise<void>;
+  getTrackingBranchName(): Promise<string>;
+  lastCommitSha?: string;
+}
 
 export class WrappedRepositoryImpl implements WrappedRepository {
   private readonly rawRepository: Repository;
