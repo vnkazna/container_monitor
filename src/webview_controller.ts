@@ -3,12 +3,12 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import assert from 'assert';
-import { createGitLabService } from './service_factory';
 import { handleError, logError } from './log';
-import { getInstanceUrl } from './utils/get_instance_url';
 import { isMr } from './utils/is_mr';
 import { makeHtmlLinksAbsolute } from './utils/make_html_links_absolute';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
+import { GitLabService } from './gitlab/gitlab_service';
+import { GitLabRepository } from './git/wrapped_repository';
 
 const webviewResourcePaths = {
   appScriptUri: 'src/webview/dist/js/app.js',
@@ -22,7 +22,7 @@ type WebviewResources = Record<keyof typeof webviewResourcePaths, vscode.Uri>;
 async function initPanelIfActive(
   panel: vscode.WebviewPanel,
   issuable: RestIssuable,
-  repositoryRoot: string,
+  gitlabService: GitLabService,
 ) {
   if (!panel.active) return;
 
@@ -35,13 +35,12 @@ async function initPanelIfActive(
     });
   });
 
-  const GitLabService = await createGitLabService(repositoryRoot);
-  const discussionsAndLabels = await GitLabService.getDiscussionsAndLabelEvents(issuable).catch(
-    e => {
+  const discussionsAndLabels = await gitlabService
+    .getDiscussionsAndLabelEvents(issuable)
+    .catch(e => {
       handleError(e);
       return [];
-    },
-  );
+    });
   await appReadyPromise;
   await panel.webview.postMessage({
     type: 'issuableFetch',
@@ -101,15 +100,13 @@ class WebviewController {
 
   // eslint-disable-next-line class-methods-use-this
   private createMessageHandler =
-    (panel: vscode.WebviewPanel, issuable: RestIssuable, repositoryRoot: string) =>
+    (panel: vscode.WebviewPanel, issuable: RestIssuable, repository: GitLabRepository) =>
     async (message: any) => {
-      const instanceUrl = await getInstanceUrl(repositoryRoot);
       if (message.command === 'renderMarkdown') {
-        const repository = gitExtensionWrapper.getRepository(repositoryRoot);
         let rendered = await repository
           .getGitLabService()
-          .renderMarkdown(message.markdown, (await repository.getProject())!);
-        rendered = makeHtmlLinksAbsolute(rendered || '', instanceUrl);
+          .renderMarkdown(message.markdown, await repository.getProject());
+        rendered = makeHtmlLinksAbsolute(rendered || '', repository.instanceUrl);
 
         await panel.webview.postMessage({
           type: 'markdownRendered',
@@ -120,10 +117,10 @@ class WebviewController {
       }
 
       if (message.command === 'saveNote') {
-        const GitLabService = await createGitLabService(repositoryRoot);
         try {
-          await GitLabService.createNote(issuable, message.note, message.replyId);
-          const discussionsAndLabels = await GitLabService.getDiscussionsAndLabelEvents(issuable);
+          const gitlabService = repository.getGitLabService();
+          await gitlabService.createNote(issuable, message.note, message.replyId);
+          const discussionsAndLabels = await gitlabService.getDiscussionsAndLabelEvents(issuable);
           await panel.webview.postMessage({
             type: 'issuableFetch',
             issuable,
@@ -152,13 +149,20 @@ class WebviewController {
   }
 
   async open(issuable: RestIssuable, repositoryRoot: string) {
-    const panelKey = `${repositoryRoot}-${issuable.id}`;
+    const repository = gitExtensionWrapper.getRepository(repositoryRoot);
+    assert(
+      repository.containsGitLabProject,
+      `Repository ${repository.rootFsPath} doesn't contain GitLab project.`,
+    );
+    const gitlabRepository = repository as GitLabRepository;
+
+    const panelKey = `${repository.rootFsPath}-${issuable.id}`;
     const openedPanel = this.openedPanels[panelKey];
     if (openedPanel) {
       openedPanel.reveal();
       return openedPanel;
     }
-    const newPanel = await this.create(issuable, repositoryRoot);
+    const newPanel = await this.create(issuable, gitlabRepository);
     this.openedPanels[panelKey] = newPanel;
     newPanel.onDidDispose(() => {
       this.openedPanels[panelKey] = undefined;
@@ -166,19 +170,19 @@ class WebviewController {
     return newPanel;
   }
 
-  private async create(issuable: RestIssuable, repositoryRoot: string) {
+  private async create(issuable: RestIssuable, repository: GitLabRepository) {
     assert(this.context);
     const panel = this.createPanel(issuable);
     const html = this.replaceResources(panel);
     panel.webview.html = html;
     panel.iconPath = this.getIconPathForIssuable(issuable);
 
-    await initPanelIfActive(panel, issuable, repositoryRoot);
+    await initPanelIfActive(panel, issuable, repository.getGitLabService());
     panel.onDidChangeViewState(async () => {
-      await initPanelIfActive(panel, issuable, repositoryRoot);
+      await initPanelIfActive(panel, issuable, repository.getGitLabService());
     });
 
-    panel.webview.onDidReceiveMessage(this.createMessageHandler(panel, issuable, repositoryRoot));
+    panel.webview.onDidReceiveMessage(this.createMessageHandler(panel, issuable, repository));
     return panel;
   }
 }
