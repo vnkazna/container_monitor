@@ -91,6 +91,7 @@ export interface WrappedRepository {
   getTrackingBranchName(): Promise<string>;
   hasSameRootAs(repository: Repository): boolean;
   getVersion(): Promise<string | undefined>;
+  repository: WrappedRepository;
 }
 
 export interface WrappedGitLabProject {
@@ -104,12 +105,18 @@ export interface WrappedGitLabProject {
   getMr(id: number): CachedMr | undefined;
   getGitLabService(): GitLabService;
 
+  repository: WrappedRepository;
+
   // Repository related, refactor so clients don't use them
   rootFsPath: string;
   diff(): Promise<string>;
   apply(patchPath: string): Promise<void>;
   getTrackingBranchName(): Promise<string>;
   lastCommitSha?: string;
+}
+
+export interface GitLabProjectRepository {
+  getWrappedProject(repository: WrappedRepository): Promise<WrappedGitLabProject | undefined>;
 }
 
 export class WrappedRepositoryImpl implements WrappedRepository {
@@ -289,4 +296,16 @@ export class WrappedRepositoryImpl implements WrappedRepository {
   getVersion(): Promise<string | undefined> {
     return this.getGitLabService().getVersion();
   }
+
+  // TODO Remove this temporary attribute
+  get repository() {
+    return this;
+  }
 }
+
+export const gitlabProjectRepository: GitLabProjectRepository = {
+  getWrappedProject: async repository => {
+    if (!repository.containsGitLabProject) return undefined;
+    return repository as WrappedGitLabProject;
+  },
+};
