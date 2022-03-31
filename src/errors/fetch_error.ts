@@ -17,6 +17,10 @@ export class FetchError extends Error implements IDetailedError {
     };
   }
 
+  get status() {
+    return this.response.status;
+  }
+
   get details(): string {
     const { message, stack } = this;
     return prettyJson({

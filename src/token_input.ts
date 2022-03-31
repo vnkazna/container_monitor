@@ -1,10 +1,29 @@
 import vscode from 'vscode';
 import { GITLAB_COM_URL } from './constants';
-import { tokenService } from './services/token_service';
+import { FetchError } from './errors/fetch_error';
+import { UserFriendlyError } from './errors/user_friendly_error';
+import { GitLabService } from './gitlab/gitlab_service';
+import { Credentials, tokenService } from './services/token_service';
 import { validateInstanceUrl } from './utils/validate_instance_url';
 
+const validateCredentialsAndGetUser = async ({
+  instanceUrl,
+  token,
+}: Credentials): Promise<RestUser> => {
+  try {
+    return await new GitLabService({ instanceUrl, token }).getCurrentUser();
+  } catch (e) {
+    const message =
+      e instanceof FetchError && e.status === 401
+        ? `API Unauthorized: Can't add GitLab account for ${instanceUrl}. Is your token valid?`
+        : `Request failed: Can't add GitLab account for ${instanceUrl}. Check your instance URL and network connection.`;
+
+    throw new UserFriendlyError(message, e);
+  }
+};
+
 export async function showInput() {
-  const instance = await vscode.window.showInputBox({
+  const instanceUrl = await vscode.window.showInputBox({
     ignoreFocusOut: true,
     value: GITLAB_COM_URL,
     placeHolder: 'E.g. https://gitlab.com',
@@ -12,7 +31,7 @@ export async function showInput() {
     validateInput: validateInstanceUrl,
   });
 
-  if (!instance) return;
+  if (!instanceUrl) return;
 
   const token = await vscode.window.showInputBox({
     ignoreFocusOut: true,
@@ -21,8 +40,11 @@ export async function showInput() {
   });
 
   if (!token) return;
-
-  await tokenService.setToken(instance, token);
+  const user = await validateCredentialsAndGetUser({ instanceUrl, token });
+  await tokenService.setToken(instanceUrl, token);
+  await vscode.window.showInformationMessage(
+    `Added the GitLab account for user ${user.username} on ${instanceUrl}.`,
+  );
 }
 
 export async function removeTokenPicker() {
