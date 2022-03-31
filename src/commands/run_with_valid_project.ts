@@ -1,17 +1,17 @@
 import * as vscode from 'vscode';
 import { USER_COMMANDS } from '../command_names';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
-import { GitLabRepository, WrappedRepository } from '../git/wrapped_repository';
+import { WrappedGitLabProject, WrappedRepository } from '../git/wrapped_repository';
 import { doNotAwait } from '../utils/do_not_await';
 import { setPreferredRemote } from '../utils/extension_configuration';
 
 export interface GitLabRepositoryAndFile {
-  repository: GitLabRepository;
+  repository: WrappedGitLabProject;
   activeEditor: vscode.TextEditor;
 }
 
 /** Command that needs a valid GitLab project to run */
-export type ProjectCommand = (gitlabRepository: GitLabRepository) => Promise<void>;
+export type ProjectCommand = (gitlabRepository: WrappedGitLabProject) => Promise<void>;
 
 /** Command that needs to be executed on an open file from a valid GitLab project */
 export type ProjectFileCommand = (repositoryAndFile: GitLabRepositoryAndFile) => Promise<void>;
@@ -42,7 +42,7 @@ const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
 
 const ensureGitLabProject = async (
   repository: WrappedRepository,
-): Promise<GitLabRepository | undefined> => {
+): Promise<WrappedGitLabProject | undefined> => {
   const remote = await getRemoteOrSelectOne(repository);
   if (!remote) return undefined;
   const project = await repository.getProject();
@@ -52,7 +52,7 @@ const ensureGitLabProject = async (
       Make sure your git remote points to an existing GitLab project.`,
     );
 
-  return repository as GitLabRepository;
+  return repository as WrappedGitLabProject;
 };
 
 export const runWithValidProject =

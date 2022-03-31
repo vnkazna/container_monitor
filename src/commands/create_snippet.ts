@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as openers from '../openers';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { ProjectCommand } from './run_with_valid_project';
-import { GitLabRepository } from '../git/wrapped_repository';
+import { WrappedGitLabProject } from '../git/wrapped_repository';
 
 type VisibilityItem = vscode.QuickPickItem & { type: SnippetVisibility };
 
@@ -36,7 +36,7 @@ async function uploadSnippet(
   editor: vscode.TextEditor,
   visibility: SnippetVisibility,
   context: string,
-  repository: GitLabRepository,
+  repository: WrappedGitLabProject,
 ) {
   let content = '';
   const fileName = editor.document.fileName.split('/').reverse()[0];

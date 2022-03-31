@@ -8,14 +8,14 @@ import {
 } from '../../test/integration/fixtures/graphql/snippets.js';
 import { asMock } from '../test_utils/as_mock';
 import { GitLabService } from '../gitlab/gitlab_service';
-import { GitLabRepository } from '../git/wrapped_repository';
+import { WrappedGitLabProject } from '../git/wrapped_repository';
 
 jest.mock('../git/git_extension_wrapper');
 
 const DIFF_OUTPUT = 'diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml';
 
 describe('apply snippet patch', () => {
-  let wrappedRepository: GitLabRepository;
+  let wrappedRepository: WrappedGitLabProject;
   let gitlabService: Partial<GitLabService>;
 
   const getAppliedPatchContent = async () => {
@@ -26,7 +26,7 @@ describe('apply snippet patch', () => {
 
   beforeEach(() => {
     gitlabService = {};
-    const mockRepository: Partial<GitLabRepository> = {
+    const mockRepository: Partial<WrappedGitLabProject> = {
       remote: {
         host: 'gitlab.com',
         namespace: 'gitlab-org',
@@ -35,7 +35,7 @@ describe('apply snippet patch', () => {
       getGitLabService: () => gitlabService as GitLabService,
       apply: jest.fn(),
     };
-    wrappedRepository = mockRepository as GitLabRepository;
+    wrappedRepository = mockRepository as WrappedGitLabProject;
     asMock(vscode.window.withProgress).mockImplementation((_, task) => task());
     asMock(vscode.window.showQuickPick).mockImplementation(options => options[0]);
     fs.unlink = jest.fn();

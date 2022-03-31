@@ -8,7 +8,7 @@ import { isMr } from './utils/is_mr';
 import { makeHtmlLinksAbsolute } from './utils/make_html_links_absolute';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { GitLabService } from './gitlab/gitlab_service';
-import { GitLabRepository } from './git/wrapped_repository';
+import { WrappedGitLabProject } from './git/wrapped_repository';
 
 const webviewResourcePaths = {
   appScriptUri: 'src/webview/dist/js/app.js',
@@ -100,7 +100,7 @@ class WebviewController {
 
   // eslint-disable-next-line class-methods-use-this
   private createMessageHandler =
-    (panel: vscode.WebviewPanel, issuable: RestIssuable, repository: GitLabRepository) =>
+    (panel: vscode.WebviewPanel, issuable: RestIssuable, repository: WrappedGitLabProject) =>
     async (message: any) => {
       if (message.command === 'renderMarkdown') {
         let rendered = await repository
@@ -154,7 +154,7 @@ class WebviewController {
       repository.containsGitLabProject,
       `Repository ${repository.rootFsPath} doesn't contain GitLab project.`,
     );
-    const gitlabRepository = repository as GitLabRepository;
+    const gitlabRepository = repository as WrappedGitLabProject;
 
     const panelKey = `${repository.rootFsPath}-${issuable.id}`;
     const openedPanel = this.openedPanels[panelKey];
@@ -170,7 +170,7 @@ class WebviewController {
     return newPanel;
   }
 
-  private async create(issuable: RestIssuable, repository: GitLabRepository) {
+  private async create(issuable: RestIssuable, repository: WrappedGitLabProject) {
     assert(this.context);
     const panel = this.createPanel(issuable);
     const html = this.replaceResources(panel);

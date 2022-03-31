@@ -5,7 +5,7 @@ import { asMock } from '../test_utils/as_mock';
 import { openUrl } from '../openers';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
-import { GitLabRepository } from '../git/wrapped_repository';
+import { WrappedGitLabProject } from '../git/wrapped_repository';
 
 jest.mock('../git/git_extension_wrapper');
 jest.mock('../openers');
@@ -14,19 +14,19 @@ const SNIPPET_URL = 'https://gitlab.com/test-group/test-project/-/snippets/21462
 const DIFF_OUTPUT = 'diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml';
 
 describe('create snippet patch', () => {
-  let wrappedRepository: GitLabRepository;
+  let wrappedRepository: WrappedGitLabProject;
   let createSnippet: jest.Mock;
 
   beforeEach(() => {
     createSnippet = jest.fn();
-    const mockRepository: Partial<GitLabRepository> = {
+    const mockRepository: Partial<WrappedGitLabProject> = {
       lastCommitSha: 'abcd1234567',
       getTrackingBranchName: async () => 'tracking-branch-name',
       getProject: async () => project,
       diff: async () => DIFF_OUTPUT,
       getGitLabService: () => ({ createSnippet } as unknown as GitLabService),
     };
-    wrappedRepository = mockRepository as GitLabRepository;
+    wrappedRepository = mockRepository as WrappedGitLabProject;
     asMock(vscode.window.showInputBox).mockResolvedValue('snippet_name');
     asMock(vscode.window.showQuickPick).mockImplementation(options =>
       options.filter((o: any) => o.type === 'private').pop(),

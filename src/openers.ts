@@ -7,7 +7,7 @@ import {
   ProjectFileCommand,
 } from './commands/run_with_valid_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
-import { GitLabRepository } from './git/wrapped_repository';
+import { WrappedGitLabProject } from './git/wrapped_repository';
 
 export const openUrl = async (url: string): Promise<void> =>
   vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
@@ -24,15 +24,15 @@ export const openUrl = async (url: string): Promise<void> =>
  * `gitlab.com/gitlab-org/gitlab-ce/issues?assignee_id=502136`.
  *
  * @param {string} linkTemplate
- * @param {GitLabRepository} repository with valid gitlab project
+ * @param {WrappedGitLabProject} repository with valid gitlab project
  */
-async function getLink(linkTemplate: string, repository: GitLabRepository) {
+async function getLink(linkTemplate: string, repository: WrappedGitLabProject) {
   const user = await repository.getGitLabService().getCurrentUser();
   const project = await repository.getProject();
   return linkTemplate.replace('$userId', user.id.toString()).replace('$projectUrl', project.webUrl);
 }
 
-async function openTemplatedLink(linkTemplate: string, repository: GitLabRepository) {
+async function openTemplatedLink(linkTemplate: string, repository: WrappedGitLabProject) {
   await openUrl(await getLink(linkTemplate, repository));
 }
 

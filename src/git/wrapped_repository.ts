@@ -93,7 +93,7 @@ export interface WrappedRepository {
   getVersion(): Promise<string | undefined>;
 }
 
-export interface GitLabRepository {
+export interface WrappedGitLabProject {
   remote: GitRemote;
   getProject: () => Promise<GitLabProject>;
 
