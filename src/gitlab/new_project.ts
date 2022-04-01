@@ -1,14 +1,14 @@
-import { GitRemoteUrlEntry } from '../git/new_git';
+import { GitRemoteUrlPointer } from '../git/new_git';
 import { GitLabProject } from './gitlab_project';
 
 export interface ProjectWrapper {
-  remoteUrlEntry: GitRemoteUrlEntry;
+  pointer: GitRemoteUrlPointer;
   instanceUrl: string;
   project: GitLabProject;
 }
 
 export interface UserProvidedProjectBinding {
   remoteUrl: string;
-  groupName: string;
+  namespace: string;
   projectName: string;
 }

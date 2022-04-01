@@ -17,7 +17,15 @@ export interface GitRemote {
 export interface GitRepository {
   rootFsPath: string;
   remotes: GitRemote[];
+  // TODO: consider moving this into a separate module so we don't have cyclic dependency between GitRepository and GitRemoteUrlPointer
+  remoteUrlPointers: GitRemoteUrlPointer[];
   hasSameRootAs(repository: Repository): boolean;
+}
+
+export interface GitRemoteUrlPointer {
+  urlEntry: GitRemoteUrlEntry;
+  remote: GitRemote;
+  repository: GitRepository;
 }
 
 const getRemoteUrlEntries = (remote: Remote): NonEmptyArray<GitRemoteUrlEntry> => {
@@ -49,6 +57,12 @@ export class GitRepositoryImpl implements GitRepository {
       name: r.name,
       urls: getRemoteUrlEntries(r),
     }));
+  }
+
+  get remoteUrlPointers() {
+    return this.remotes.flatMap(remote =>
+      remote.urls.map(urlEntry => ({ repository: this, remote, urlEntry })),
+    );
   }
 
   /**
