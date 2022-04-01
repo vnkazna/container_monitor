@@ -10,6 +10,7 @@ import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_pr
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
 import { WrappedRepository, WrappedRepositoryImpl } from './wrapped_repository';
 import { handleError, log, LOG_LEVEL } from '../log';
+import { GitRepository, GitRepositoryImpl } from './new_git';
 
 export class GitExtensionWrapper implements vscode.Disposable {
   apiListeners: vscode.Disposable[] = [];
@@ -17,6 +18,8 @@ export class GitExtensionWrapper implements vscode.Disposable {
   private enablementListener?: vscode.Disposable;
 
   private wrappedRepositories: WrappedRepository[] = [];
+
+  #gitRepositories: GitRepository[] = [];
 
   private repositoryCountChangedEmitter = new vscode.EventEmitter<void>();
 
@@ -48,6 +51,10 @@ export class GitExtensionWrapper implements vscode.Disposable {
     return this.wrappedRepositories;
   }
 
+  get gitRepositories(): GitRepository[] {
+    return this.gitRepositories;
+  }
+
   getRepository(repositoryRoot: string): WrappedRepository {
     const rawRepository = this.gitApi?.getRepository(vscode.Uri.file(repositoryRoot));
     assert(rawRepository, `Git Extension doesn't have repository with root ${repositoryRoot}`);
@@ -77,11 +84,16 @@ export class GitExtensionWrapper implements vscode.Disposable {
       ...this.wrappedRepositories,
       ...repositories.map(r => new WrappedRepositoryImpl(r)),
     ];
+    this.#gitRepositories = [
+      ...this.#gitRepositories,
+      ...repositories.map(r => new GitRepositoryImpl(r)),
+    ];
     this.repositoryCountChangedEmitter.fire();
   }
 
   private removeRepository(repository: Repository) {
     this.wrappedRepositories = this.wrappedRepositories.filter(wr => !wr.hasSameRootAs(repository));
+    this.#gitRepositories = this.#gitRepositories.filter(gr => !gr.hasSameRootAs(repository));
     this.repositoryCountChangedEmitter.fire();
   }
 
