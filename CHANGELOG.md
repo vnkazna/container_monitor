@@ -1,3 +1,12 @@
+# [3.42.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.41.2...v3.42.0) (2022-04-01)
+
+
+### Features
+
+* validate token right after user added it ([bcea7aa](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bcea7aa734da5442dd151f9fe301bfea3b420d88))
+
+
+
 ## [3.41.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.41.1...v3.41.2) (2022-03-14)
 
 
