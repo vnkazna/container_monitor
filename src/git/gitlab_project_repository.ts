@@ -1,6 +1,6 @@
-import assert from 'assert';
-import { ProjectWrapper } from '../gitlab/new_project';
+import { InitializedProject, ParsedProject } from '../gitlab/new_project';
 import { tokenService, TokenService } from '../services/token_service';
+import { uniq } from '../utils/uniq';
 import { GitExtensionWrapper, gitExtensionWrapper } from './git_extension_wrapper';
 import { parseGitRemote } from './git_remote_parser';
 import { GitRemoteUrlPointer, GitRepository } from './new_git';
@@ -8,27 +8,42 @@ import { GitRemoteUrlPointer, GitRepository } from './new_git';
 export interface GitLabProjectRepository {
   // getWrappedProject(repository: WrappedRepository): Promise<WrappedGitLabProject | undefined>;
   // getActiveProject(): Promise<WrappedGitLabProject | undefined>;
-  getAllProjects(): ProjectWrapper[];
+  getAllProjects(): InitializedProject[];
 }
 
-const createProject = async (pointer: GitRemoteUrlPointer, tokenService: TokenService): Promise<ProjectWrapper | undefined> => {
-   const {host} = parseGitRemote(pointer.urlEntry.url) || {}
-   const matchingInstanceUrls  = tokenService.getInstanceUrls().filter(url => new URL(url).host === host)
-   if(matchingInstanceUrls.length === 0) return undefined;
-   if(matchingInstanceUrls.length > 1) throw new Error(`Remote ${pointer.urlEntry.url} is matched by multiple instanceUrls, this is not supported.`);
-   const [instanceUrl] = matchingInstanceUrls;
-   const parsedRemote = parseGitRemote(pointer.urlEntry.url, instanceUrl);
-   assert(parsedRemote);
-   const {project, namespace} = parsedRemote;
+const createParsedProject = (remoteUrl: string, instanceUrl: string): ParsedProject | undefined => {
+  const remote = parseGitRemote(remoteUrl, instanceUrl);
+  return (
+    remote && {
+      remoteUrl,
+      instanceUrl,
+      projectName: remote.project,
+      namespace: remote.namespace,
+    }
+  );
+};
 
-}
+const parseProjects = (remoteUrls: string[], instanceUrls: string[]): ParsedProject[] =>
+  remoteUrls
+    .flatMap(remoteUrl => {
+      const { host } = parseGitRemote(remoteUrl) || {};
+      const matchingInstanceUrls = instanceUrls.filter(
+        instanceUrl => new URL(instanceUrl).host === host,
+      );
+      return matchingInstanceUrls.map(instanceUrl => createParsedProject(remoteUrl, instanceUrl));
+    })
+    .filter((p): p is ParsedProject => Boolean(p));
+
+const createProject = async (
+  pointer: GitRemoteUrlPointer,
+  tokenService: TokenService,
+): Promise<InitializedProject | undefined> => {};
 export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
   #tokenService: TokenService;
 
   #gitExtensionWrapper: GitExtensionWrapper;
 
-  #projects: ProjectWrapper = [];
-
+  #projects: InitializedProject = [];
 
   constructor(ts = tokenService, gew = gitExtensionWrapper) {
     this.#tokenService = ts;
@@ -41,7 +56,10 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
   }
 
   async #updateProjects() {
-    this.#projects = gitExtensionWrapper.gitRepositories.flatMap(gr => gr.remoteUrlPointers).map(pointer => )
+    const pointers = gitExtensionWrapper.gitRepositories.flatMap(gr => gr.remoteUrlPointers);
+    const remoteUrls = uniq(pointers.map(p => p.urlEntry.url));
+    const instanceUrls = uniq(tokenService.getAllCredentials().map(c => c.instanceUrl));
+    const parsedProjects = parseProjects(remoteUrls, instanceUrls);
   }
 }
 
