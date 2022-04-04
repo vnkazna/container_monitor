@@ -46,6 +46,7 @@ import {
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
+import { gitLabProjectRepository } from './git/gitlab_project_repository';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -168,6 +169,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       setSidebarViewState(SidebarViewState.ListView),
       extensionState.init(tokenService),
       gitExtensionWrapper.init(),
+      gitLabProjectRepository.init(),
       currentBranchRefresher.refresh(),
     ]).catch(e => handleError(e)),
   );

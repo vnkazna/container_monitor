@@ -10,6 +10,7 @@ import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { RepositoryItemModel } from './items/repository_item_model';
 import { InvalidProjectItem } from './items/invalid_project_item';
 import { onSidebarViewStateChange } from './sidebar_view_state';
+import { gitLabProjectRepository } from '../git/gitlab_project_repository';
 
 async function getAllGitlabRepositories(): Promise<WrappedRepository[]> {
   const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
@@ -39,6 +40,9 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
     this.children = [];
     if (!extensionState.isValid()) {
       return [];
+    }
+    if (getExtensionConfiguration().featureFlags?.includes('model-refactor')) {
+      return gitLabProjectRepository.getAllProjects().map(p => new vscode.TreeItem(p.project.name));
     }
     let repositories: WrappedRepository[] = [];
     try {

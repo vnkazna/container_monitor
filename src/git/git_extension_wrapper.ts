@@ -52,7 +52,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
   }
 
   get gitRepositories(): GitRepository[] {
-    return this.gitRepositories;
+    return this.#gitRepositories;
   }
 
   getRepository(repositoryRoot: string): WrappedRepository {
