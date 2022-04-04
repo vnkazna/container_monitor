@@ -8,9 +8,18 @@ import {
 } from './commands/run_with_valid_project';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { GitLabRepository } from './git/wrapped_repository';
+import { ifVersionGte } from './utils/if_version_gte';
 
-export const openUrl = async (url: string): Promise<void> =>
-  vscode.commands.executeCommand(VS_COMMANDS.OPEN, vscode.Uri.parse(url));
+export const openUrl = async (url: string): Promise<void> => {
+  // workaround for a VS Code open command bug: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/44
+  const urlArgument = ifVersionGte<string | vscode.Uri>(
+    vscode.version,
+    '1.65.0',
+    () => url,
+    () => vscode.Uri.parse(url),
+  );
+  await vscode.commands.executeCommand(VS_COMMANDS.OPEN, urlArgument);
+};
 
 /**
  * Fetches user and project before opening a link.

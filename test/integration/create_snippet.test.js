@@ -46,7 +46,7 @@ describe('Create snippet', async () => {
       .mock(vscode.commands)
       .expects('executeCommand')
       .once()
-      .withArgs('vscode.open', vscode.Uri.parse(snippetUrl));
+      .withArgs('vscode.open', snippetUrl);
 
     await originalExecuteCommand(USER_COMMANDS.CREATE_SNIPPET);
     expectation.verify();
