@@ -111,7 +111,7 @@ describe('WrappedRepository', () => {
 
         const result = wrappedRepository.remote;
 
-        expect(result?.project).toBe(expectedRemoteProject);
+        expect(result?.projectPath).toBe(expectedRemoteProject);
       },
     );
   });

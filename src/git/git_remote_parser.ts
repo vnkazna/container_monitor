@@ -1,9 +1,22 @@
 import * as url from 'url';
 
-export interface GitRemote {
+/**
+ * GitLabRemote represents a parsed git remote URL that could potentially point to a GitLab project.
+ */
+export interface GitLabRemote {
   host: string;
+  /**
+   * Namespace is the group(s) or user to whom the project belongs: https://docs.gitlab.com/ee/api/projects.html#get-single-project
+   *
+   * e.g. `gitlab-org/security` in the `gitlab-org/security/gitlab-vscode-extension` project
+   */
   namespace: string;
-  project: string;
+  /**
+   * Path is the "project slug": https://docs.gitlab.com/ee/api/projects.html#get-single-project
+   *
+   * e.g. `gitlab-vscode-extension` in the `gitlab-org/gitlab-vscode-extension` project
+   */
+  projectPath: string;
 }
 
 // returns path without the trailing slash or empty string if there is no path
@@ -30,7 +43,7 @@ function normalizeSshRemote(remote: string): string {
   return remote;
 }
 
-export function parseGitRemote(remote: string, instanceUrl?: string): GitRemote | undefined {
+export function parseGitLabRemote(remote: string, instanceUrl?: string): GitLabRemote | undefined {
   const { host, pathname } = url.parse(normalizeSshRemote(remote));
 
   if (!host || !pathname) {
@@ -47,7 +60,7 @@ export function parseGitRemote(remote: string, instanceUrl?: string): GitRemote 
     return undefined;
   }
 
-  const [namespace, project] = match.slice(1, 3);
+  const [namespace, projectPath] = match.slice(1, 3);
 
-  return { host, namespace, project };
+  return { host, namespace, projectPath };
 }

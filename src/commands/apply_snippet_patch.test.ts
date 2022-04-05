@@ -30,7 +30,7 @@ describe('apply snippet patch', () => {
       remote: {
         host: 'gitlab.com',
         namespace: 'gitlab-org',
-        project: 'gitlab-vscode-extension',
+        projectPath: 'gitlab-vscode-extension',
       },
       getGitLabService: () => gitlabService as GitLabService,
       apply: jest.fn(),
