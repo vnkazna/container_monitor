@@ -65,6 +65,7 @@ describe('git_remote_parser', () => {
       host,
       namespace,
       projectPath,
+      namespaceWithPath: `${namespace}/${projectPath}`,
     });
   });
 
@@ -79,6 +80,7 @@ describe('git_remote_parser', () => {
       host: 'example.com',
       namespace: 'fatihacet',
       projectPath: 'gitlab-vscode-extension',
+      namespaceWithPath: 'fatihacet/gitlab-vscode-extension',
     });
   });
   // For more details see: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/103
@@ -92,6 +94,7 @@ describe('git_remote_parser', () => {
       host: 'example.com',
       namespace: 'fatihacet',
       projectPath: 'gitlab-vscode-extension',
+      namespaceWithPath: 'fatihacet/gitlab-vscode-extension',
     });
   });
   // For more details see: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/309
@@ -102,6 +105,7 @@ describe('git_remote_parser', () => {
       host: 'example.com',
       namespace: 'fatihacet',
       projectPath: 'gitlab-vscode-extension',
+      namespaceWithPath: 'fatihacet/gitlab-vscode-extension',
     });
   });
 

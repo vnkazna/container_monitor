@@ -146,7 +146,7 @@ const updateNoteBodyMutation = gql`
   }
 `;
 
-const getProjectPath = (issuable: RestIssuable) => issuable.references.full.split(/[#!]/)[0];
+const getNamespaceWithPath = (issuable: RestIssuable) => issuable.references.full.split(/[#!]/)[0];
 const getIssuableGqlId = (issuable: RestIssuable) =>
   `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
 const getMrGqlId = (id: number) => `gid://gitlab/MergeRequest/${id}`;
@@ -292,8 +292,8 @@ export class GitLabService {
     }
   }
 
-  async getProject(projectPath: string): Promise<GitLabProject | undefined> {
-    const options: GetProjectQueryOptions = { projectPath };
+  async getProject(namespaceWithPath: string): Promise<GitLabProject | undefined> {
+    const options: GetProjectQueryOptions = { namespaceWithPath };
     const result = await this.client.request<GetProjectQueryResult>(queryGetProject, options);
     return result.project && new GitLabProject(result.project);
   }
@@ -303,9 +303,9 @@ export class GitLabService {
     return results.projects?.nodes?.map(project => new GitLabProject(project)) || [];
   }
 
-  async getSnippets(projectPath: string, afterCursor?: string): Promise<GqlSnippet[]> {
+  async getSnippets(namespaceWithPath: string, afterCursor?: string): Promise<GqlSnippet[]> {
     const options: GetSnippetsQueryOptions = {
-      projectPath,
+      namespaceWithPath,
       afterCursor,
     };
     const result = await this.client.request<GetSnippetsQueryResult>(queryGetSnippets, options);
@@ -315,7 +315,7 @@ export class GitLabService {
     // https://gitlab.com/gitlab-org/gitlab/-/issues/270055
     if (!project) {
       throw new Error(
-        `Project ${projectPath} was not found. You might not have permissions to see it.`,
+        `Project ${namespaceWithPath} was not found. You might not have permissions to see it.`,
       );
     }
     const snippets = project.snippets.nodes;
@@ -327,7 +327,7 @@ export class GitLabService {
     return project.snippets.pageInfo?.hasNextPage
       ? [
           ...snippetsWithProject,
-          ...(await this.getSnippets(projectPath, project.snippets.pageInfo.endCursor)),
+          ...(await this.getSnippets(namespaceWithPath, project.snippets.pageInfo.endCursor)),
         ]
       : snippetsWithProject;
   }
@@ -427,12 +427,12 @@ export class GitLabService {
     The GraphQL endpoint sends us the note.htmlBody with links that start with `/`.
     This works well for the the GitLab webapp, but in VS Code we need to add the full host.
   */
-  private addHostToUrl(discussion: GqlDiscussion, projectPath: string): GqlDiscussion {
+  private addHostToUrl(discussion: GqlDiscussion, namespaceWithPath: string): GqlDiscussion {
     const prependHost: <T extends GqlBasePosition | null>(
       note: GqlGenericNote<T>,
     ) => GqlGenericNote<T> = note => ({
       ...note,
-      body: makeMarkdownLinksAbsolute(note.body, projectPath, this.instanceUrl),
+      body: makeMarkdownLinksAbsolute(note.body, namespaceWithPath, this.instanceUrl),
       bodyHtml: makeHtmlLinksAbsolute(note.bodyHtml, this.instanceUrl),
       author: {
         ...note.author,
@@ -451,15 +451,15 @@ export class GitLabService {
 
   async getDiscussions({ issuable, endCursor }: GetDiscussionsOptions): Promise<GqlDiscussion[]> {
     await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
-    const projectPath = getProjectPath(issuable);
+    const namespaceWithPath = getNamespaceWithPath(issuable);
     const query = isMr(issuable) ? getMrDiscussionsQuery : getIssueDiscussionsQuery;
     const options: GetDiscussionsQueryOptions = {
-      projectPath,
+      namespaceWithPath,
       iid: String(issuable.iid),
       afterCursor: endCursor,
     };
     const result = await this.client.request<GetDiscussionsQueryResult>(query, options);
-    assert(result.project, `Project ${projectPath} was not found.`);
+    assert(result.project, `Project ${namespaceWithPath} was not found.`);
     const discussions =
       result.project.issue?.discussions || result.project.mergeRequest?.discussions;
     assert(discussions, `Discussions for issuable ${issuable.references.full} were not found.`);
@@ -471,7 +471,7 @@ export class GitLabService {
       });
       return [...discussions.nodes, ...remainingPages];
     }
-    return discussions.nodes.map(n => this.addHostToUrl(n, projectPath));
+    return discussions.nodes.map(n => this.addHostToUrl(n, namespaceWithPath));
   }
 
   async canUserCommentOnMr(mr: RestMr): Promise<boolean> {
@@ -479,9 +479,9 @@ export class GitLabService {
       await this.getVersion(),
       REQUIRED_VERSIONS.MR_DISCUSSIONS,
       async () => {
-        const projectPath = getProjectPath(mr);
+        const namespaceWithPath = getNamespaceWithPath(mr);
         const queryOptions: MrPermissionsQueryOptions = {
-          projectPath,
+          namespaceWithPath,
           iid: String(mr.iid),
         };
         const result = await this.client.request(getMrPermissionsQuery, queryOptions);
@@ -646,7 +646,7 @@ export class GitLabService {
   async renderMarkdown(markdown: string, project: GitLabProject) {
     const responseBody = await this.postFetch<{ html: string }>('/markdown', 'rendered markdown', {
       text: markdown,
-      project: project.fullPath,
+      project: project.namespaceWithPath,
       gfm: 'true', // True needs to be a string for the API
     });
     return responseBody.html;

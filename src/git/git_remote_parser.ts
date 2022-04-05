@@ -17,6 +17,12 @@ export interface GitLabRemote {
    * e.g. `gitlab-vscode-extension` in the `gitlab-org/gitlab-vscode-extension` project
    */
   projectPath: string;
+  /**
+   * Namespace with path is the full project identifier: https://docs.gitlab.com/ee/api/projects.html#get-single-project
+   *
+   * e.g. `gitlab-org/gitlab-vscode-extension`
+   */
+  namespaceWithPath: string;
 }
 
 // returns path without the trailing slash or empty string if there is no path
@@ -61,6 +67,7 @@ export function parseGitLabRemote(remote: string, instanceUrl?: string): GitLabR
   }
 
   const [namespace, projectPath] = match.slice(1, 3);
+  const namespaceWithPath = `${namespace}/${projectPath}`;
 
-  return { host, namespace, projectPath };
+  return { host, namespace, projectPath, namespaceWithPath };
 }

@@ -56,7 +56,8 @@ const notFoundByDefault = rest.get(/.*/, (req, res, ctx) => {
 const getServer = (handlers = []) => {
   const server = setupServer(
     graphql.query('GetProject', (req, res, ctx) => {
-      if (req.variables.projectPath === 'gitlab-org/gitlab') return res(ctx.data(projectResponse));
+      if (req.variables.namespaceWithPath === 'gitlab-org/gitlab')
+        return res(ctx.data(projectResponse));
       return res(ctx.data({ project: null }));
     }),
     createJsonEndpoint('/version', versionResponse),

@@ -27,7 +27,7 @@ describe('GitLab webview', () => {
   before(async () => {
     server = getServer([
       graphql.query('GetIssueDiscussions', (req, res, ctx) => {
-        if (req.variables.projectPath === 'gitlab-org/gitlab')
+        if (req.variables.namespaceWithPath === 'gitlab-org/gitlab')
           return res(ctx.data(projectWithIssueDiscussions));
         return res(ctx.data({ project: null }));
       }),

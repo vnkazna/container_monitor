@@ -1,8 +1,8 @@
 import { gql } from 'graphql-request';
 
 export const getMrPermissionsQuery = gql`
-  query GetMrPermissions($projectPath: ID!, $iid: String!) {
-    project(fullPath: $projectPath) {
+  query GetMrPermissions($namespaceWithPath: ID!, $iid: String!) {
+    project(fullPath: $namespaceWithPath) {
       mergeRequest(iid: $iid) {
         userPermissions {
           createNote
@@ -13,6 +13,6 @@ export const getMrPermissionsQuery = gql`
 `;
 
 export interface MrPermissionsQueryOptions {
-  projectPath: string;
+  namespaceWithPath: string;
   iid: string;
 }

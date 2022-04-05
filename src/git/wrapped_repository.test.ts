@@ -189,7 +189,7 @@ describe('WrappedRepository', () => {
         pipelineGitRemoteName: 'second',
       });
       const result = await wrappedRepository.getPipelineProject();
-      expect(result?.fullPath).toBe('gitlab-org/second');
+      expect(result?.namespaceWithPath).toBe('gitlab-org/second');
     });
 
     it('falls back to normal project if the pipeline remote is not configured', async () => {
@@ -200,7 +200,7 @@ describe('WrappedRepository', () => {
         preferredRemoteName: 'first',
       });
       const result = await wrappedRepository.getPipelineProject();
-      expect(result?.fullPath).toBe('gitlab-org/first');
+      expect(result?.namespaceWithPath).toBe('gitlab-org/first');
     });
   });
 });

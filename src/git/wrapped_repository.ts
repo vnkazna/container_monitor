@@ -167,8 +167,7 @@ export class WrappedRepositoryImpl implements WrappedRepository {
   async getProject(): Promise<GitLabProject | undefined> {
     if (!this.remote) return undefined;
     if (!this.cachedProject) {
-      const { namespace, projectPath } = this.remote;
-      this.cachedProject = await this.getGitLabService().getProject(`${namespace}/${projectPath}`);
+      this.cachedProject = await this.getGitLabService().getProject(this.remote.namespaceWithPath);
     }
     return this.cachedProject;
   }
@@ -176,8 +175,8 @@ export class WrappedRepositoryImpl implements WrappedRepository {
   async getPipelineProject(): Promise<GitLabProject | undefined> {
     const { pipelineGitRemoteName } = getExtensionConfiguration();
     if (!pipelineGitRemoteName) return this.getProject();
-    const { namespace, projectPath } = this.getRemoteByName(pipelineGitRemoteName);
-    return this.getGitLabService().getProject(`${namespace}/${projectPath}`);
+    const { namespaceWithPath } = this.getRemoteByName(pipelineGitRemoteName);
+    return this.getGitLabService().getProject(namespaceWithPath);
   }
 
   get containsGitLabProject(): boolean {

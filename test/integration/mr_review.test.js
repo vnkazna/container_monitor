@@ -44,12 +44,18 @@ describe('MR Review', () => {
         '?ref=b6d6f6fd17b52b8cf4e961218c572805e9aa7463': 'New Version',
       }),
       graphql.query('GetMrDiscussions', (req, res, ctx) => {
-        if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
+        if (
+          req.variables.namespaceWithPath === 'gitlab-org/gitlab' &&
+          req.variables.iid === '33824'
+        )
           return res(ctx.data(projectWithMrDiscussions));
         return res(ctx.data({ project: null }));
       }),
       graphql.query('GetMrPermissions', (req, res, ctx) => {
-        if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
+        if (
+          req.variables.namespaceWithPath === 'gitlab-org/gitlab' &&
+          req.variables.iid === '33824'
+        )
           return res(ctx.data(mrPermissionsResponse));
         return res(ctx.data({ project: null }));
       }),

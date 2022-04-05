@@ -24,8 +24,8 @@ const discussionsFragment = gql`
 
 export const getMrDiscussionsQuery = gql`
   ${discussionsFragment}
-  query GetMrDiscussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
-    project(fullPath: $projectPath) {
+  query GetMrDiscussions($namespaceWithPath: ID!, $iid: String!, $afterCursor: String) {
+    project(fullPath: $namespaceWithPath) {
       id
       mergeRequest(iid: $iid) {
         discussions(after: $afterCursor) {
@@ -38,8 +38,8 @@ export const getMrDiscussionsQuery = gql`
 
 export const getIssueDiscussionsQuery = gql`
   ${discussionsFragment}
-  query GetIssueDiscussions($projectPath: ID!, $iid: String!, $afterCursor: String) {
-    project(fullPath: $projectPath) {
+  query GetIssueDiscussions($namespaceWithPath: ID!, $iid: String!, $afterCursor: String) {
+    project(fullPath: $namespaceWithPath) {
       id
       issue(iid: $iid) {
         discussions(after: $afterCursor) {
@@ -51,7 +51,7 @@ export const getIssueDiscussionsQuery = gql`
 `;
 
 export interface GetDiscussionsQueryOptions {
-  projectPath: string;
+  namespaceWithPath: string;
   iid: string;
   afterCursor?: string;
 }

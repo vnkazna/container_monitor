@@ -18,7 +18,7 @@ export const applySnippetPatch: ProjectCommand = async repository => {
   const { remote } = repository;
   const snippets = await vscode.window.withProgress(
     { location: vscode.ProgressLocation.Notification, title: FETCHING_PROJECT_SNIPPETS },
-    () => repository.getGitLabService().getSnippets(`${remote.namespace}/${remote.projectPath}`),
+    () => repository.getGitLabService().getSnippets(remote.namespaceWithPath),
   );
   const patchSnippets = snippets.filter(s => getFirstPatchBlob(s));
   if (patchSnippets.length === 0) {

@@ -28,7 +28,7 @@ export class GitLabProject {
     return this.gqlProject.sshUrlToRepo;
   }
 
-  get fullPath(): string {
+  get namespaceWithPath(): string {
     return this.gqlProject.fullPath;
   }
 

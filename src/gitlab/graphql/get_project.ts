@@ -3,15 +3,15 @@ import { fragmentProjectDetails, GqlProject, GqlProjectResult } from './shared';
 
 export const queryGetProject = gql`
   ${fragmentProjectDetails}
-  query GetProject($projectPath: ID!) {
-    project(fullPath: $projectPath) {
+  query GetProject($namespaceWithPath: ID!) {
+    project(fullPath: $namespaceWithPath) {
       ...projectDetails
     }
   }
 `;
 
 export interface GetProjectQueryOptions {
-  projectPath: string;
+  namespaceWithPath: string;
 }
 
 export type GetProjectQueryResult = GqlProjectResult<GqlProject>;
