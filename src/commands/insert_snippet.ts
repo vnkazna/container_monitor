@@ -27,9 +27,7 @@ export const insertSnippet: ProjectCommand = async gitlabRepository => {
     return;
   }
   const { remote } = gitlabRepository;
-  const snippets = await gitlabRepository
-    .getGitLabService()
-    .getSnippets(`${remote.namespace}/${remote.project}`);
+  const snippets = await gitlabRepository.getGitLabService().getSnippets(remote.namespaceWithPath);
   if (snippets.length === 0) {
     await vscode.window.showInformationMessage('There are no project snippets.');
     return;

@@ -6,7 +6,7 @@ import { Repository } from '../api/git';
 import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
 import { log, LOG_LEVEL } from '../log';
-import { GitRemote, parseGitRemote } from './git_remote_parser';
+import { GitLabRemote, parseGitLabRemote } from './git_remote_parser';
 import { getExtensionConfiguration, getRepositorySettings } from '../utils/extension_configuration';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
@@ -52,7 +52,7 @@ function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
 
   // try to determine the instance URL heuristically
   const gitRemoteHosts = gitRemoteUrls
-    .map((uri: string) => parseGitRemote(uri)?.host)
+    .map((uri: string) => parseGitLabRemote(uri)?.host)
     .filter(notNullOrUndefined);
   const heuristicUrl = heuristicInstanceUrl(gitRemoteHosts);
   if (heuristicUrl) {
@@ -72,14 +72,14 @@ export interface WrappedRepository {
   remoteNames: string[];
   containsGitLabProject: boolean;
   branch?: string;
-  remote?: GitRemote;
+  remote?: GitLabRemote;
   lastCommitSha?: string;
   instanceUrl: string;
   name: string;
   rootFsPath: string;
   fetch(): Promise<void>;
   checkout(branchName: string): Promise<void>;
-  getRemoteByName(remoteName: string): GitRemote;
+  getRemoteByName(remoteName: string): GitLabRemote;
   getProject(): Promise<GitLabProject | undefined>;
   getPipelineProject(): Promise<GitLabProject | undefined>;
   reloadMr(mr: RestMr): Promise<CachedMr>;
@@ -94,7 +94,7 @@ export interface WrappedRepository {
 }
 
 export type GitLabRepository = Omit<WrappedRepository, 'getProject'> & {
-  remote: GitRemote;
+  remote: GitLabRemote;
   getProject: () => Promise<GitLabProject>;
 };
 
@@ -156,10 +156,10 @@ export class WrappedRepositoryImpl implements WrappedRepository {
     );
   }
 
-  getRemoteByName(remoteName: string): GitRemote {
+  getRemoteByName(remoteName: string): GitLabRemote {
     const remoteUrl = this.rawRepository.state.remotes.find(r => r.name === remoteName)?.fetchUrl;
     assert(remoteUrl, `could not find any URL for git remote with name '${remoteName}'`);
-    const parsedRemote = parseGitRemote(remoteUrl, this.instanceUrl);
+    const parsedRemote = parseGitLabRemote(remoteUrl, this.instanceUrl);
     assert(parsedRemote, `git remote "${remoteUrl}" could not be parsed`);
     return parsedRemote;
   }
@@ -167,8 +167,7 @@ export class WrappedRepositoryImpl implements WrappedRepository {
   async getProject(): Promise<GitLabProject | undefined> {
     if (!this.remote) return undefined;
     if (!this.cachedProject) {
-      const { namespace, project } = this.remote;
-      this.cachedProject = await this.getGitLabService().getProject(`${namespace}/${project}`);
+      this.cachedProject = await this.getGitLabService().getProject(this.remote.namespaceWithPath);
     }
     return this.cachedProject;
   }
@@ -176,8 +175,8 @@ export class WrappedRepositoryImpl implements WrappedRepository {
   async getPipelineProject(): Promise<GitLabProject | undefined> {
     const { pipelineGitRemoteName } = getExtensionConfiguration();
     if (!pipelineGitRemoteName) return this.getProject();
-    const { namespace, project } = this.getRemoteByName(pipelineGitRemoteName);
-    return this.getGitLabService().getProject(`${namespace}/${project}`);
+    const { namespaceWithPath } = this.getRemoteByName(pipelineGitRemoteName);
+    return this.getGitLabService().getProject(namespaceWithPath);
   }
 
   get containsGitLabProject(): boolean {
@@ -202,7 +201,7 @@ export class WrappedRepositoryImpl implements WrappedRepository {
     return this.mrCache[id];
   }
 
-  get remote(): GitRemote | undefined {
+  get remote(): GitLabRemote | undefined {
     if (!this.remoteName) return undefined;
     return this.getRemoteByName(this.remoteName);
   }

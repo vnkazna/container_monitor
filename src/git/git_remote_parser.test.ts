@@ -1,4 +1,4 @@
-import { parseGitRemote } from './git_remote_parser';
+import { parseGitLabRemote } from './git_remote_parser';
 
 describe('git_remote_parser', () => {
   it.each([
@@ -60,46 +60,56 @@ describe('git_remote_parser', () => {
       ['gitlab.company.com:8443', 'fatihacet', 'gitlab-vscode-extension'],
     ],
   ])('should parse %s', (remote, parsed) => {
-    const [host, namespace, project] = parsed;
-    expect(parseGitRemote(remote, 'https://gitlab.com')).toEqual({
+    const [host, namespace, projectPath] = parsed;
+    expect(parseGitLabRemote(remote, 'https://gitlab.com')).toEqual({
       host,
       namespace,
-      project,
+      projectPath,
+      namespaceWithPath: `${namespace}/${projectPath}`,
     });
   });
 
   // For more details see https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/11
   it('should support self managed GitLab on a custom path', () => {
     expect(
-      parseGitRemote(
+      parseGitLabRemote(
         'https://example.com/gitlab/fatihacet/gitlab-vscode-extension',
         'https://example.com/gitlab',
       ),
     ).toEqual({
       host: 'example.com',
       namespace: 'fatihacet',
-      project: 'gitlab-vscode-extension',
+      projectPath: 'gitlab-vscode-extension',
+      namespaceWithPath: 'fatihacet/gitlab-vscode-extension',
     });
   });
   // For more details see: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/103
   it('should parse remote URLs without custom path even if the instance has custom path', () => {
     expect(
-      parseGitRemote(
+      parseGitLabRemote(
         'git@example.com:fatihacet/gitlab-vscode-extension.git',
         'https://example.com/gitlab',
       ),
     ).toEqual({
       host: 'example.com',
       namespace: 'fatihacet',
-      project: 'gitlab-vscode-extension',
+      projectPath: 'gitlab-vscode-extension',
+      namespaceWithPath: 'fatihacet/gitlab-vscode-extension',
     });
   });
   // For more details see: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/309
   it('should parse remote URLs with ssh and custom port', () => {
-    expect(parseGitRemote('[git@example.com:2222]:fatihacet/gitlab-vscode-extension.git')).toEqual({
+    expect(
+      parseGitLabRemote('[git@example.com:2222]:fatihacet/gitlab-vscode-extension.git'),
+    ).toEqual({
       host: 'example.com',
       namespace: 'fatihacet',
-      project: 'gitlab-vscode-extension',
+      projectPath: 'gitlab-vscode-extension',
+      namespaceWithPath: 'fatihacet/gitlab-vscode-extension',
     });
+  });
+
+  it('fails to parse remote URL without namespace', () => {
+    expect(parseGitLabRemote('git@host:no-namespace-repo.git')).toBeUndefined();
   });
 });

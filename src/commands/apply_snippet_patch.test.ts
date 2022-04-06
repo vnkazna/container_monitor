@@ -9,6 +9,7 @@ import {
 import { asMock } from '../test_utils/as_mock';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabRepository } from '../git/wrapped_repository';
+import { parseGitLabRemote } from '../git/git_remote_parser';
 
 jest.mock('../git/git_extension_wrapper');
 
@@ -27,11 +28,7 @@ describe('apply snippet patch', () => {
   beforeEach(() => {
     gitlabService = {};
     const mockRepository: Partial<GitLabRepository> = {
-      remote: {
-        host: 'gitlab.com',
-        namespace: 'gitlab-org',
-        project: 'gitlab-vscode-extension',
-      },
+      remote: parseGitLabRemote(`git@gitlab.com:gitlab-org/gitlab-vscode-extension.git`),
       getGitLabService: () => gitlabService as GitLabService,
       apply: jest.fn(),
     };

@@ -1,5 +1,6 @@
 export const makeMarkdownLinksAbsolute = (
   markdown: string,
-  projectPath: string,
+  namespaceWithPath: string,
   instanceUrl: string,
-): string => markdown.replace(/\]\(\/uploads\//gm, `](${instanceUrl}/${projectPath}/uploads/`);
+): string =>
+  markdown.replace(/\]\(\/uploads\//gm, `](${instanceUrl}/${namespaceWithPath}/uploads/`);

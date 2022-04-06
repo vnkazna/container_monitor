@@ -24,7 +24,7 @@ function remoteForProject(project: GitLabProject): GitLabRemote {
   const url = [project.sshUrlToRepo, project.httpUrlToRepo];
 
   return {
-    name: `$(repo) ${project.fullPath}`,
+    name: `$(repo) ${project.namespaceWithPath}`,
     description: project.description,
     url,
     wikiUrl: url.map(convertUrlToWikiUrl),

@@ -34,7 +34,7 @@ describe('Insert snippet', async () => {
         return res(ctx.data({ project: null }));
       }),
       graphql.query('GetSnippets', (req, res, ctx) => {
-        if (req.variables.projectPath === 'gitlab-org/gitlab')
+        if (req.variables.namespaceWithPath === 'gitlab-org/gitlab')
           return res(ctx.data(snippetsResponse));
         return res(ctx.data({ project: null }));
       }),

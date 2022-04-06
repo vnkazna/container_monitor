@@ -48,7 +48,7 @@ const ensureGitLabProject = async (
   const project = await repository.getProject();
   if (!project)
     throw new Error(
-      `Project "${remote.namespace}/${remote.project}" was not found on "${repository.instanceUrl}" GitLab instance.
+      `Project "${remote.namespaceWithPath}" was not found on "${repository.instanceUrl}" GitLab instance.
       Make sure your git remote points to an existing GitLab project.`,
     );
 

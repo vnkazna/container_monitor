@@ -2,8 +2,8 @@ import { gql } from 'graphql-request';
 import { GqlProjectResult, Node } from './shared';
 
 export const queryGetSnippets = gql`
-  query GetSnippets($projectPath: ID!, $afterCursor: String) {
-    project(fullPath: $projectPath) {
+  query GetSnippets($namespaceWithPath: ID!, $afterCursor: String) {
+    project(fullPath: $namespaceWithPath) {
       id
       snippets(after: $afterCursor) {
         pageInfo {
@@ -28,7 +28,7 @@ export const queryGetSnippets = gql`
 `;
 
 export interface GetSnippetsQueryOptions {
-  projectPath: string;
+  namespaceWithPath: string;
   afterCursor?: string;
 }
 

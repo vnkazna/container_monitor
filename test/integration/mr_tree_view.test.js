@@ -63,12 +63,12 @@ describe('MR in tree view', () => {
     createJsonEndpoint('/projects/278964/merge_requests/33824/versions', versionsResponse),
     createJsonEndpoint('/projects/278964/merge_requests/33824/versions/127919672', versionResponse),
     graphql.query('GetMrPermissions', (req, res, ctx) => {
-      if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
+      if (req.variables.namespaceWithPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
         return res(ctx.data(mrPermissionsResponse));
       return res(ctx.data({ project: null }));
     }),
     graphql.query('GetMrDiscussions', (req, res, ctx) => {
-      if (req.variables.projectPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
+      if (req.variables.namespaceWithPath === 'gitlab-org/gitlab' && req.variables.iid === '33824')
         return res(ctx.data(projectWithMrDiscussions));
       return res(ctx.data({ project: null }));
     }),
