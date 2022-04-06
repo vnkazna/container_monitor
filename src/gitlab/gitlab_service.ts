@@ -46,7 +46,7 @@ import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_d
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
 import { logError } from '../log';
 import { isMr } from '../utils/is_mr';
-import { ifVersionGte } from './if_version_gte';
+import { ifVersionGte } from '../utils/if_version_gte';
 import {
   getSnippetContentQuery,
   GetSnippetContentQueryOptions,
@@ -488,7 +488,7 @@ export class GitLabService {
         assert(result?.project?.mergeRequest, `MR ${mr.references.full} was not found.`);
         return Boolean(result.project.mergeRequest.userPermissions?.createNote);
       },
-      () => false,
+      async () => false,
     );
   }
 
