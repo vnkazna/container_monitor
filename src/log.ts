@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { USER_COMMANDS } from './command_names';
-import { IDetailedError, isDetailedError } from './errors/common';
+import { DetailedError, isDetailedError, prettyJson } from './errors/common';
 import { HelpError } from './errors/help_error';
 import { Help, HelpMessageSeverity } from './utils/help';
 
@@ -27,12 +27,12 @@ export const log = (line: string, level: LogLevel): void => {
   globalLog(`${prefix}${padNextLines(line)}`);
 };
 
-export const logError = (e: Error | IDetailedError): void =>
+export const logError = (e: Error | DetailedError): void =>
   isDetailedError(e)
-    ? log(e.details, LOG_LEVEL.ERROR)
+    ? log(prettyJson(e.details), LOG_LEVEL.ERROR)
     : log(`${e.message}\n${e.stack}`, LOG_LEVEL.ERROR);
 
-export const handleError = (e: Error | IDetailedError): { onlyForTesting: Promise<void> } => {
+export const handleError = (e: Error | DetailedError): { onlyForTesting: Promise<void> } => {
   logError(e);
 
   // This is probably the only place where we want to ignore a floating promise.

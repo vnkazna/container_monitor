@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { IDetailedError } from './errors/common';
+import { DetailedError } from './errors/common';
 import { handleError, initializeLogging, log, logError, LOG_LEVEL } from './log';
 import { USER_COMMANDS } from './command_names';
 import { asMock } from './test_utils/as_mock';
@@ -54,11 +54,13 @@ describe('logging', () => {
 
     describe('for detailed errors', () => {
       it('passes the details to the handler', () => {
-        const details = 'Could not fetch from GitLab: error 404';
+        const message = 'Could not fetch from GitLab: error 404';
         logError({
-          details,
-        } as IDetailedError);
-        expect(logFunction).toBeCalledWith(`[error]: ${details}`);
+          details: { message },
+        } as unknown as DetailedError);
+        const logFunctionArgument = logFunction.mock.calls[0][0];
+        expect(logFunctionArgument).toMatch(/\[error\]:/);
+        expect(logFunctionArgument).toMatch(message);
       });
     });
   });

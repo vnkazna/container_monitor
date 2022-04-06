@@ -457,7 +457,8 @@ describe('gitlab_service', () => {
       asMock(crossFetch).mockResolvedValue({
         ok: false,
         url: 'https://example.com/api/v4/project',
-        json: async () => ({ error: 'invalid_token' }),
+        status: 401,
+        text: async () => `{ "error": "invalid_token" }`,
       });
       await expect(service.fetch(url)).rejects.toThrowError(HelpError);
     });
@@ -489,7 +490,8 @@ describe('gitlab_service', () => {
       asMock(crossFetch).mockResolvedValue({
         ok: false,
         url: 'https://example.com/api/v4/project',
-        json: async () => ({ error: 'invalid_token' }),
+        status: 401,
+        text: async () => `{ "error": "invalid_token" }`,
       });
       await expect(service.fetchAllPages(url)).rejects.toThrowError(HelpError);
     });
