@@ -1,32 +1,30 @@
-import { prettyJson, stackToArray, IDetailedError } from './common';
+import { stackToArray, DetailedError } from './common';
 
-export class FetchError extends Error implements IDetailedError {
+export class FetchError extends Error implements DetailedError {
   response: Response;
 
-  constructor(message: string, response: Response) {
+  #body?: string;
+
+  constructor(message: string, response: Response, body?: string) {
     super(message);
     this.response = response;
-  }
-
-  private get requestDetails() {
-    return {
-      response: {
-        status: this.response.status,
-        headers: this.response.headers,
-      },
-    };
+    this.#body = body;
   }
 
   get status() {
     return this.response.status;
   }
 
-  get details(): string {
+  get details() {
     const { message, stack } = this;
-    return prettyJson({
+    return {
       message,
       stack: stackToArray(stack),
-      ...this.requestDetails,
-    });
+      response: {
+        status: this.response.status,
+        headers: this.response.headers,
+        body: this.#body,
+      },
+    };
   }
 }

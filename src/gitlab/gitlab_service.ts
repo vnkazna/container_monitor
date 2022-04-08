@@ -151,20 +151,26 @@ const getIssuableGqlId = (issuable: RestIssuable) =>
   `gid://gitlab/${isMr(issuable) ? 'MergeRequest' : 'Issue'}/${issuable.id}`;
 const getMrGqlId = (id: number) => `gid://gitlab/MergeRequest/${id}`;
 
+const safelyParseJson = (text: string): any | undefined => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
+
 const handleFetchError = async (response: Response, resourceName: string) => {
   if (!response.ok) {
-    // Check if the response body is a GitLab invalid token error. Skip this
-    // check if the URL is undefined. This avoids unnecessary complications
-    // for testing.
-    const body = await response.json().catch(() => undefined);
-    if (body?.error === 'invalid_token') {
+    const body = await response.text().catch(() => undefined);
+    // Check if the response is a GitLab invalid token error.
+    if (response.status === 401 && body && safelyParseJson(body)?.error === 'invalid_token') {
       const { hostname } = new URL(response.url);
       throw new HelpError(
         `Failed to access a remote repository on ${hostname} due to an expired or revoked access token. You must create a new token.`,
         { section: README_SECTIONS.SETUP },
       );
     }
-    throw new FetchError(`Fetching ${resourceName} from ${response.url} failed`, response);
+    throw new FetchError(`Fetching ${resourceName} from ${response.url} failed`, response, body);
   }
 };
 
