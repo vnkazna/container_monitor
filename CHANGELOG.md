@@ -1,3 +1,13 @@
+## [3.42.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.42.0...v3.42.1) (2022-04-12)
+
+
+### Bug Fixes
+
+* include response status and body in every fetch error ([c19a56e](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/c19a56e35bcc99584c941aa6996d3db6677d6cdd))
+* support branches with hash symbol in their name ([58cfecc](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/58cfecc621222827fdf98f402f2d5a7b66b7778b))
+
+
+
 # [3.42.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.41.2...v3.42.0) (2022-04-01)
 
 
