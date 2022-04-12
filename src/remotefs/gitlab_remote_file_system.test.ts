@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { FetchError } from '../errors/fetch_error';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { tokenService } from '../services/token_service';
+import { asMock } from '../test_utils/as_mock';
 import { GitLabRemoteFileSystem } from './gitlab_remote_file_system';
 
 jest.mock('../services/token_service');
@@ -90,7 +91,7 @@ describe('GitLabRemoteFileSystem', () => {
     tokenService.getInstanceUrls = () => instanceUrls;
     tokenService.getToken = () => 'token';
 
-    (GitLabService as jest.Mock).mockImplementation(() => ({
+    asMock(GitLabService).mockImplementation(() => ({
       async getTree(
         path: string,
         ref: string,

@@ -926,4 +926,11 @@ export class GitLabService {
       'create pipeline',
     );
   }
+
+  static async tryToGetProjectFromInstance(
+    credentials: Credentials,
+    namespaceWithPath: string,
+  ): Promise<GitLabProject | undefined> {
+    return new GitLabService(credentials).getProject(namespaceWithPath).catch(() => undefined);
+  }
 }
