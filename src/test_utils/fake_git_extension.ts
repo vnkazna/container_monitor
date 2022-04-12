@@ -7,7 +7,7 @@ const removeFromArray = (array: any[], element: any): any[] => array.filter(el =
 
 export interface FakeRepositoryOptions {
   rootUriPath: string;
-  remotes: [string, string][];
+  remotes: [string, string?, string?][];
   headRemoteName?: string;
 }
 
@@ -20,7 +20,7 @@ export const createFakeRepository = (options: Partial<FakeRepositoryOptions> = {
   return {
     rootUri: vscode.Uri.file(rootUriPath),
     state: {
-      remotes: remotes.map(([name, fetchUrl]) => ({ name, fetchUrl })),
+      remotes: remotes.map(([name, fetchUrl, pushUrl]) => ({ name, fetchUrl, pushUrl })),
       HEAD: { remote: headRemoteName },
     },
     status: async () => undefined,
