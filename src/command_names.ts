@@ -40,6 +40,7 @@ export const USER_COMMANDS = {
   APPLY_SNIPPET_PATCH: 'gl.applySnippetPatch',
   OPEN_MR_FILE: 'gl.openMrFile',
   OPEN_REPOSITORY: 'gl.openRepository',
+  SELECT_PROJECT_FOR_REPOSITORY: 'gl.selectProjectForRepository',
 };
 
 /*
@@ -49,6 +50,7 @@ export const PROGRAMMATIC_COMMANDS = {
   SHOW_RICH_CONTENT: 'gl.showRichContent',
   NO_IMAGE_REVIEW: 'gl.noImageReview',
   DIAGNOSE_REPOSITORY: 'gl.diagnoseRepository',
+  SELECT_PROJECT: 'gl.selectProject',
 };
 
 export const VS_COMMANDS = {
