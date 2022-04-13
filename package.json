@@ -10,7 +10,7 @@
     "url": "https://gitlab.com/gitlab-org/gitlab-vscode-extension"
   },
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.56.0"
   },
   "categories": [
     "Other"
@@ -214,10 +214,19 @@
         "command": "gl.openRepository",
         "title": "Open Remote Repository",
         "category": "GitLab"
+      },
+      {
+        "command": "gl.selectProjectForRepository",
+        "title": "Select Project for Repository",
+        "category": "GitLab"
       }
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "gl.selectProjectForRepository",
+          "when": "false"
+        },
         {
           "command": "gl.resolveThread",
           "when": "false"
@@ -884,12 +893,12 @@
     "@types/semver": "^7.3.8",
     "@types/sinon": "^10.0.11",
     "@types/temp": "^0.9.0",
-    "@types/vscode": "^1.52.0",
+    "@types/vscode": "^1.56.0",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "conventional-changelog-cli": "^2.1.1",
-    "eslint": "^8.12.0",
     "esbuild": "^0.14.0",
+    "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.4",
@@ -901,8 +910,8 @@
     "prettier": "^2.6.1",
     "simple-git": "^3.0.0",
     "sinon": "^13.0.1",
-    "ts-jest": "^27.1.4",
     "source-map-support": "^0.5.20",
+    "ts-jest": "^27.1.4",
     "typescript": "^4.4.3",
     "vsce": "^2.0.0",
     "vscode-test": "^1.6.1"

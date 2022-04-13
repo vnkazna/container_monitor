@@ -46,7 +46,8 @@ import {
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
-import { gitLabProjectRepository } from './gitlab/gitlab_project_repository';
+import { gitlabProjectRepository } from './gitlab/gitlab_project_repository';
+import { selectProject, selectProjectForRepository } from './gitlab/select_project';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -113,7 +114,9 @@ const registerCommands = (
       await currentBranchRefresher.refresh(true);
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
+    [USER_COMMANDS.SELECT_PROJECT_FOR_REPOSITORY]: selectProjectForRepository,
     [PROGRAMMATIC_COMMANDS.DIAGNOSE_REPOSITORY]: diagnoseRepository,
+    [PROGRAMMATIC_COMMANDS.SELECT_PROJECT]: selectProject,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };
@@ -169,7 +172,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       setSidebarViewState(SidebarViewState.ListView),
       extensionState.init(tokenService),
       gitExtensionWrapper.init(),
-      gitLabProjectRepository.init(),
+      gitlabProjectRepository.init(),
       currentBranchRefresher.refresh(),
     ]).catch(e => handleError(e)),
   );

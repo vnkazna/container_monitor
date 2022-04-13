@@ -1,5 +1,5 @@
 import { GitLabService } from './gitlab_service';
-import { ExistingProject, InitializedProject } from './new_project';
+import { ExistingProject, ProjectInRepository, SelectedProjectSetting } from './new_project';
 import { Credentials, tokenService, TokenService } from '../services/token_service';
 import { cartesianProduct } from '../utils/cartesian_product';
 import { hasPresentKey } from '../utils/has_present_key';
@@ -7,8 +7,14 @@ import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { uniq } from '../utils/uniq';
 import { GitExtensionWrapper, gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { parseGitLabRemote } from '../git/git_remote_parser';
-import { createRemoteUrlPointers } from '../git/new_git';
+import { createRemoteUrlPointers, GitRemoteUrlPointer } from '../git/new_git';
 import { groupBy } from '../utils/group_by';
+import {
+  convertProjectToSetting,
+  SelectedProjectStore,
+  selectedProjectStore,
+} from './selected_project_store';
+import { isEqual } from '../utils/is_equal';
 
 interface ParsedProject {
   namespaceWithPath: string;
@@ -17,8 +23,7 @@ interface ParsedProject {
 }
 
 export interface GitLabProjectRepository {
-  getAllProjects(): InitializedProject[];
-  detectProjects(): Promise<InitializedProject[]>;
+  getAllProjects(): ProjectInRepository[];
   init(): Promise<void>;
 }
 
@@ -34,7 +39,7 @@ const parseProjects = (remoteUrls: string[], instanceUrls: string[]): ParsedProj
     .map(([remoteUrl, instanceUrl]) => parseProject(remoteUrl, instanceUrl))
     .filter(notNullOrUndefined);
 
-export const detectProjects = async (
+const detectProjects = async (
   remoteUrls: string[],
   allCredentials: Credentials[],
   getProject = GitLabService.tryToGetProjectFromInstance,
@@ -55,43 +60,89 @@ export const detectProjects = async (
   return loadedProjects.filter(hasPresentKey('project'));
 };
 
+const assignProjectsToRepositories = async (
+  pointers: GitRemoteUrlPointer[],
+  existingProjects: ExistingProject[],
+) => {
+  const pointersByRemoteUrl = groupBy(pointers, p => p.urlEntry.url);
+  return existingProjects.flatMap(ep =>
+    pointersByRemoteUrl[ep.remoteUrl].map(pointer => ({
+      ...ep,
+      pointer,
+    })),
+  );
+};
+
+const addSelectedProjects = async (
+  selectedProjectSettings: SelectedProjectSetting[],
+  detectedProjects: ProjectInRepository[],
+): Promise<ProjectInRepository[]> => {
+  const settingsByRepository = groupBy(selectedProjectSettings, pc => pc.repositoryRootPath);
+  const isSelected = (pr: ProjectInRepository): boolean => {
+    const selectedProject = convertProjectToSetting(pr);
+    const selectedProjectForRepository =
+      settingsByRepository[pr.pointer.repository.rootFsPath] || [];
+    return selectedProjectForRepository.some(c => isEqual(c, selectedProject));
+  };
+  return detectedProjects.map(dp => ({
+    ...dp,
+    initializationType: isSelected(dp) ? 'selected' : undefined,
+  }));
+};
+
+export const initializeAllProjects = async (
+  allCredentials: Credentials[],
+  pointers: GitRemoteUrlPointer[],
+  selectedProjectSettings: SelectedProjectSetting[],
+  getProject = GitLabService.tryToGetProjectFromInstance,
+): Promise<ProjectInRepository[]> => {
+  const detectedProjects = await detectProjects(
+    uniq(pointers.map(p => p.urlEntry.url)),
+    allCredentials,
+    getProject,
+  );
+  const detectedProjectsInRepositories = await assignProjectsToRepositories(
+    pointers,
+    detectedProjects,
+  );
+  return addSelectedProjects(selectedProjectSettings, detectedProjectsInRepositories);
+};
+
 export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
   #tokenService: TokenService;
 
   #gitExtensionWrapper: GitExtensionWrapper;
 
-  #projects: InitializedProject[] = [];
+  #selectedProjectsStore: SelectedProjectStore;
 
-  constructor(ts = tokenService, gew = gitExtensionWrapper) {
+  #projects: ProjectInRepository[] = [];
+
+  constructor(ts = tokenService, gew = gitExtensionWrapper, sps = selectedProjectStore) {
     this.#tokenService = ts;
     this.#gitExtensionWrapper = gew;
+    this.#selectedProjectsStore = sps;
   }
 
   async init(): Promise<void> {
-    tokenService.onDidChange(this.#updateProjects, this);
-    gitExtensionWrapper.onRepositoryCountChanged(this.#updateProjects, this);
+    this.#tokenService.onDidChange(this.#updateProjects, this);
+    this.#gitExtensionWrapper.onRepositoryCountChanged(this.#updateProjects, this);
+    this.#selectedProjectsStore.onSelectedProjectsChange(this.#updateProjects, this);
+
     await this.#updateProjects();
   }
 
-  getAllProjects(): InitializedProject[] {
+  getAllProjects(): ProjectInRepository[] {
     return this.#projects;
   }
 
-  async detectProjects() {
-    const pointers = this.#gitExtensionWrapper.gitRepositories.flatMap(createRemoteUrlPointers);
-    const pointersByRemoteUrl = groupBy(pointers, p => p.urlEntry.url);
-    const existingProjects = await detectProjects(
-      Object.keys(pointersByRemoteUrl),
-      this.#tokenService.getAllCredentials(),
-    );
-    return existingProjects.flatMap(ep =>
-      pointersByRemoteUrl[ep.remoteUrl].map(pointer => ({ ...ep, pointer })),
-    );
-  }
-
   async #updateProjects() {
-    this.#projects = await this.detectProjects();
+    const pointers = this.#gitExtensionWrapper.gitRepositories.flatMap(createRemoteUrlPointers);
+    this.#projects = await initializeAllProjects(
+      this.#tokenService.getAllCredentials(),
+      pointers,
+      this.#selectedProjectsStore.selectedProjectSettings,
+    );
   }
 }
 
-export const gitLabProjectRepository: GitLabProjectRepository = new GitLabProjectRepositoryImpl();
+export const gitlabProjectRepository: GitLabProjectRepository = new GitLabProjectRepositoryImpl();

@@ -10,7 +10,9 @@ import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { RepositoryItemModel } from './items/repository_item_model';
 import { InvalidProjectItem } from './items/invalid_project_item';
 import { onSidebarViewStateChange } from './sidebar_view_state';
-import { gitLabProjectRepository } from '../gitlab/gitlab_project_repository';
+import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
+import { groupBy } from '../utils/group_by';
+import { MultipleProjectsItem } from './items/multiple_projects_item';
 
 async function getAllGitlabRepositories(): Promise<WrappedRepository[]> {
   const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
@@ -42,7 +44,7 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
       return [];
     }
     if (getExtensionConfiguration().featureFlags?.includes('model-refactor')) {
-      return gitLabProjectRepository.getAllProjects().map(p => new vscode.TreeItem(p.project.name));
+      return this.getNewChildren();
     }
     let repositories: WrappedRepository[] = [];
     try {
@@ -60,6 +62,29 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
     }
     this.children = repositories.map(r => new RepositoryItemModel(r, customQueries));
     return this.children;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async getNewChildren(): Promise<vscode.TreeItem[]> {
+    const projectsByRootPath = groupBy(
+      gitlabProjectRepository.getAllProjects(),
+      p => p.pointer.repository.rootFsPath,
+    );
+    return gitExtensionWrapper.gitRepositories.map(r => {
+      const projects = projectsByRootPath[r.rootFsPath] || [];
+      const [selected] = projects.filter(p => p.initializationType === 'selected');
+      if (selected || projects.length === 1) {
+        const item = new vscode.TreeItem((selected || projects[0]).project.name);
+        item.iconPath = new vscode.ThemeIcon('project');
+        return item;
+      }
+      if (projects.length > 1) {
+        return new MultipleProjectsItem(r);
+      }
+      const item = new vscode.TreeItem(r.rootFsPath);
+      item.iconPath = new vscode.ThemeIcon('error');
+      return item;
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this

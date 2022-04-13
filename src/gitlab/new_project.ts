@@ -14,13 +14,34 @@ export interface ExistingProject {
   credentials: Credentials;
 }
 
+export type InitializationType = 'selected';
+
 /**
- * Initialized project is ExistingProject that we associate with a concrete
+ * Project in repository is ExistingProject that we associate with a concrete
  * local Git repository and local Git remote (including URL). This relationship
  * is defined by the pointer.
  */
-export interface InitializedProject {
+export interface ProjectInRepository {
   pointer: GitRemoteUrlPointer;
   credentials: Credentials;
   project: GitLabProject;
+  initializationType?: InitializationType;
+}
+
+/**
+ * SelectedProjectSetting to use specific ProjectInRepository for local Git repository.
+ *
+ * This setting might be needed in two scenarios:
+ *
+ * - Local Git repository contains multiple Existing projects. This can happen, for example, when
+ *   user has upstream and fork remote.
+ * - The remoteUrl in the local GitRepository couldn't be correctly associated with
+ *   a set of credentials and the user had to manually define the relationship.
+ */
+export interface SelectedProjectSetting {
+  namespaceWithPath: string;
+  remoteUrl: string;
+  repositoryRootPath: string;
+  remoteName: string;
+  accountId: string;
 }
