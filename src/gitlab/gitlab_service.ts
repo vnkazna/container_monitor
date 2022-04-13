@@ -14,13 +14,7 @@ import { GitLabProject } from './gitlab_project';
 import { getRestIdFromGraphQLId } from './get_rest_id_from_graphql_id';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { getMrPermissionsQuery, MrPermissionsQueryOptions } from './graphql/mr_permission';
-import {
-  GqlBasePosition,
-  GqlGenericNote,
-  GqlNote,
-  Node,
-  noteDetailsFragment,
-} from './graphql/shared';
+import { GqlBasePosition, GqlGenericNote, GqlNote, Node } from './graphql/shared';
 import { GetProjectsOptions, GqlProjectsResult, queryGetProjects } from './graphql/get_projects';
 import {
   getIssueDiscussionsQuery,
@@ -58,6 +52,7 @@ import { makeMarkdownLinksAbsolute } from '../utils/make_markdown_links_absolute
 import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
 import { HelpError } from '../errors/help_error';
 import { Credentials } from '../services/token_service';
+import { newCreateNoteMutation, oldCreateNoteMutation } from './graphql/create_note';
 
 interface CreateNoteResult {
   createNote: {
@@ -111,19 +106,6 @@ const discussionSetResolved = gql`
   mutation DiscussionToggleResolve($replyId: DiscussionID!, $resolved: Boolean!) {
     discussionToggleResolve(input: { id: $replyId, resolve: $resolved }) {
       errors
-    }
-  }
-`;
-
-// TODO: extract the mutation into a separate file like src/gitlab/graphql/get_project.ts
-const createNoteMutation = gql`
-  ${noteDetailsFragment}
-  mutation CreateNote($issuableId: NoteableID!, $body: String!, $replyId: DiscussionID) {
-    createNote(input: { noteableId: $issuableId, body: $body, discussionId: $replyId }) {
-      errors
-      note {
-        ...noteDetails
-      }
     }
   }
 `;
@@ -539,10 +521,17 @@ export class GitLabService {
   async createNote(issuable: RestIssuable, body: string, replyId?: string): Promise<GqlNote> {
     await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
+      const createNoteMutation = ifVersionGte(
+        await this.getVersion(),
+        REQUIRED_VERSIONS.MR_MERGE_QUICK_ACTION,
+        () => newCreateNoteMutation,
+        () => oldCreateNoteMutation,
+      );
       const result = await this.client.request<CreateNoteResult>(createNoteMutation, {
         issuableId: getIssuableGqlId(issuable),
         body,
         replyId,
+        mergeRequestDiffHeadSha: isMr(issuable) ? issuable.sha : undefined,
       });
       if (result.createNote.errors.length > 0) {
         throw new Error(result.createNote.errors.join(','));
