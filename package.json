@@ -903,7 +903,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "jest": "^27.5.1",
-    "jest-junit": "^13.0.0",
+    "jest-junit": "^13.1.0",
     "mocha": "^9.2.2",
     "mocha-junit-reporter": "^2.0.2",
     "msw": "^0.38.0",
