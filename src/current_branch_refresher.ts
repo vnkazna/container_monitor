@@ -8,6 +8,7 @@ import { WrappedRepository } from './git/wrapped_repository';
 import { StatusBar } from './status_bar';
 import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
 import { UserFriendlyError } from './errors/user_friendly_error';
+import { notNullOrUndefined } from './utils/not_null_or_undefined';
 
 export interface ValidBranchState {
   valid: true;
@@ -107,14 +108,19 @@ export class CurrentBranchRefresher {
     if (!repository) return INVALID_STATE;
     const gitlabProject = await repository.getProject();
     if (!gitlabProject) return INVALID_STATE;
+    const gitLabService = repository.getGitLabService();
     try {
-      const { pipeline, mr } = await repository
-        .getGitLabService()
-        .getPipelineAndMrForCurrentBranch(gitlabProject, await repository.getTrackingBranchName());
+      const { pipeline, mr } = await gitLabService.getPipelineAndMrForCurrentBranch(
+        gitlabProject,
+        await repository.getTrackingBranchName(),
+      );
       const jobs = await getJobs(repository, pipeline);
-      const issues = mr
-        ? await repository.getGitLabService().getMrClosingIssues(gitlabProject, mr.iid)
-        : [];
+      const minimalIssues = mr ? await gitLabService.getMrClosingIssues(gitlabProject, mr.iid) : [];
+      const issues = (
+        await Promise.all(
+          minimalIssues.map(mi => gitLabService.getSingleProjectIssue(gitlabProject, mi.iid)),
+        )
+      ).filter(notNullOrUndefined);
       return { valid: true, repository, pipeline, mr, jobs, issues, userInitiated };
     } catch (e) {
       logError(e);

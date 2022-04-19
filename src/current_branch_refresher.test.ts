@@ -40,7 +40,8 @@ describe('CurrentBranchRefrehser', () => {
         getProject: async () => project,
         getTrackingBranchName: async () => 'branch',
         getGitLabService: () => ({
-          getMrClosingIssues: () => [issue],
+          getMrClosingIssues: () => [{ iid: 123 }],
+          getSingleProjectIssue: () => issue,
           getPipelineAndMrForCurrentBranch: () => ({ pipeline, mr }),
           getJobsForPipeline: () => [job],
         }),

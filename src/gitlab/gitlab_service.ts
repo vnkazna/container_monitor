@@ -827,7 +827,7 @@ export class GitLabService {
     return issuables.map(normalizeAvatarUrl(this.instanceUrl));
   }
 
-  async getMrClosingIssues(project: GitLabProject, mrId: number): Promise<RestIssuable[]> {
+  async getMrClosingIssues(project: GitLabProject, mrId: number): Promise<MinimalRestIssuable[]> {
     try {
       return await this.fetch(
         `/projects/${project.restId}/merge_requests/${mrId}/closes_issues`,
@@ -837,6 +837,18 @@ export class GitLabService {
     } catch (e) {
       logError(e);
       return [];
+    }
+  }
+
+  async getSingleProjectIssue(
+    project: GitLabProject,
+    issueIid: number,
+  ): Promise<RestIssuable | undefined> {
+    try {
+      return await this.fetch(`/projects/${project.restId}/issues/${issueIid}`, {}, 'Single Issue');
+    } catch (e) {
+      logError(e);
+      return undefined;
     }
   }
 
