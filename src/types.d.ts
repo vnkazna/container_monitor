@@ -1,17 +1,23 @@
 /**
+ * Slimmed-down version of the Issuable, returned for example by
+ * https://docs.gitlab.com/ee/api/merge_requests.html#list-issues-that-close-on-merge
+ */
+interface MinimalRestIssuable {
+  id: number;
+  iid: number;
+  title: string;
+  project_id: number;
+  author: { name: string; avatar_url: string | null };
+}
+/**
  * An issuable instance repesents one of these entities:
  *  - Merge Request
  *  - Issue
  *  - Epic
  *  - Snippet
  */
-interface RestIssuable {
-  id: number;
-  iid: number;
-  title: string;
-  project_id: number;
+interface RestIssuable extends MinimalRestIssuable {
   web_url: string;
-  author: { name: string; avatar_url: string | null };
   references: {
     full: string; // e.g. "gitlab-org/gitlab#219925"
   };
