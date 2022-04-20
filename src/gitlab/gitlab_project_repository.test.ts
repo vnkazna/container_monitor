@@ -1,39 +1,43 @@
+import { GitExtensionWrapper } from '../git/git_extension_wrapper';
 import { createRemoteUrlPointers, GitRepositoryImpl } from '../git/new_git';
-import { Credentials } from '../services/token_service';
+import { log } from '../log';
+import { Credentials, TokenService } from '../services/token_service';
+import { asMock } from '../test_utils/as_mock';
 import { createFakeRepository } from '../test_utils/fake_git_extension';
 import { GitLabProject } from './gitlab_project';
-import { initializeAllProjects } from './gitlab_project_repository';
+import { GitLabProjectRepositoryImpl, initializeAllProjects } from './gitlab_project_repository';
 import { GitLabService } from './gitlab_service';
 import { SelectedProjectSetting } from './new_project';
+import { SelectedProjectStore } from './selected_project_store';
+
+jest.mock('../log');
+jest.mock('./gitlab_service');
 
 describe('gitlab_project_repository', () => {
+  let projects: Record<string, string[]> = {};
+
+  const fakeGetProject: typeof GitLabService.tryToGetProjectFromInstance = async (
+    credentials,
+    namespaceWithPath,
+  ) => {
+    const namespacesWithPath = projects[`${credentials.instanceUrl}-${credentials.token}`];
+    return namespacesWithPath?.includes(namespaceWithPath)
+      ? ({
+          namespaceWithPath,
+        } as GitLabProject)
+      : undefined;
+  };
+  const createPointers = (remotes: [string, string, string?][]) => {
+    const repository = createFakeRepository({ remotes });
+    const gitRepository = new GitRepositoryImpl(repository);
+    return createRemoteUrlPointers(gitRepository);
+  };
+  beforeEach(() => {
+    projects = {};
+  });
   describe('initializeAllProjects', () => {
     const defaultCredentials = { instanceUrl: 'https://gitlab.com', token: 'abc' };
     const extensionRemoteUrl = 'git@gitlab.com/gitlab-org/gitlab-vscode-extension';
-
-    let projects: Record<string, string[]> = {};
-
-    const fakeGetProject: typeof GitLabService.tryToGetProjectFromInstance = async (
-      credentials,
-      namespaceWithPath,
-    ) => {
-      const namespacesWithPath = projects[`${credentials.instanceUrl}-${credentials.token}`];
-      return namespacesWithPath?.includes(namespaceWithPath)
-        ? ({
-            namespaceWithPath,
-          } as GitLabProject)
-        : undefined;
-    };
-
-    const createPointers = (remotes: [string, string, string?][]) => {
-      const repository = createFakeRepository({ remotes });
-      const gitRepository = new GitRepositoryImpl(repository);
-      return createRemoteUrlPointers(gitRepository);
-    };
-
-    beforeEach(() => {
-      projects = {};
-    });
 
     describe('with one project on the GitLab instance', () => {
       beforeEach(() => {
@@ -71,6 +75,26 @@ describe('gitlab_project_repository', () => {
           [defaultCredentials],
           pointers,
           [],
+          fakeGetProject,
+        );
+
+        expect(initializedProjects).toHaveLength(1);
+      });
+
+      it('can manually assign GitLab project to a remote URL', async () => {
+        const pointers = createPointers([['origin', 'remote:that-we-cannot-parse-automatically']]);
+        const selectedProjectSetting: SelectedProjectSetting = {
+          accountId: defaultCredentials.instanceUrl,
+          namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
+          remoteName: 'origin',
+          remoteUrl: 'remote:that-we-cannot-parse-automatically',
+          repositoryRootPath: pointers[0].repository.rootFsPath,
+        };
+
+        const initializedProjects = await initializeAllProjects(
+          [defaultCredentials],
+          pointers,
+          [selectedProjectSetting],
           fakeGetProject,
         );
 
@@ -125,6 +149,7 @@ describe('gitlab_project_repository', () => {
           fakeGetProject,
         );
 
+        expect(initializedProjects).toHaveLength(2);
         const [origin, security] = initializedProjects;
         expect(origin.initializationType).toBe('selected');
         expect(security.initializationType).toBeUndefined();
@@ -159,7 +184,8 @@ describe('gitlab_project_repository', () => {
       expect(example.project.namespaceWithPath).toBe('example/gitlab-vscode-extension');
     });
 
-    it('initializes multiple projects for multiple credentials', async () => {
+    // TODO enable this test once we have multi-account support https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/298
+    xit('initializes multiple projects for multiple credentials', async () => {
       const secondCredentials: Credentials = {
         instanceUrl: 'https://gitlab.com',
         token: 'def',
@@ -179,6 +205,98 @@ describe('gitlab_project_repository', () => {
       );
 
       expect(initializedProjects).toHaveLength(2);
+    });
+
+    describe('when the setting cannot be loaded into a project', () => {
+      const pointers = createPointers([['origin', extensionRemoteUrl]]);
+      const correctSetting: SelectedProjectSetting = {
+        accountId: defaultCredentials.instanceUrl,
+        namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
+        remoteName: 'origin',
+        remoteUrl: extensionRemoteUrl,
+        repositoryRootPath: pointers[0].repository.rootFsPath,
+      };
+
+      const initializeProjectsWithSetting = async (setting: Partial<SelectedProjectSetting>) =>
+        initializeAllProjects(
+          [defaultCredentials],
+          pointers,
+          [{ ...correctSetting, ...setting }],
+          fakeGetProject,
+        );
+
+      beforeEach(() => {
+        projects = {
+          'https://gitlab.com-abc': ['gitlab-org/gitlab-vscode-extension'],
+        };
+      });
+
+      it('falls back to detected project', async () => {
+        const initializedProjects = await initializeProjectsWithSetting({
+          namespaceWithPath: 'aa',
+        });
+        expect(initializedProjects[0]?.project.namespaceWithPath).toBe(
+          'gitlab-org/gitlab-vscode-extension',
+        );
+      });
+
+      it('logs an issue when the remote does not exist', async () => {
+        await initializeProjectsWithSetting({ remoteName: 'nonexistent' });
+
+        expect(asMock(log).mock.calls[0][0]).toMatch(/unable to find remote nonexistent/i);
+      });
+
+      it('logs an issue when credentials do not exist', async () => {
+        await initializeProjectsWithSetting({ accountId: 'nonexistent' });
+
+        expect(asMock(log).mock.calls[0][0]).toMatch(
+          /unable to find credentials for account nonexistent/i,
+        );
+      });
+
+      it('logs an issue when project cannot be fetched', async () => {
+        await initializeProjectsWithSetting({ namespaceWithPath: 'nonexistent' });
+
+        expect(asMock(log).mock.calls[0][0]).toMatch(
+          /unable to fetch selected project nonexistent/i,
+        );
+      });
+    });
+  });
+  describe('GitLabProjectRepositoryImpl', () => {
+    let repository: GitLabProjectRepositoryImpl;
+
+    beforeEach(async () => {
+      const fakeTokenService: Partial<TokenService> = {
+        getAllCredentials: () => [{ instanceUrl: 'https://gitlab.com', token: 'abc' }],
+        onDidChange: jest.fn(),
+      };
+
+      const [pointer] = createPointers([
+        ['origin', 'git@gitlab.com:gitlab-org/gitlab-vscode-extension'],
+      ]);
+      const fakeGitWrapper: Partial<GitExtensionWrapper> = {
+        gitRepositories: [pointer.repository],
+        onRepositoryCountChanged: jest.fn(),
+      };
+      const fakeSettingStore: Partial<SelectedProjectStore> = {
+        selectedProjectSettings: [],
+        onSelectedProjectsChange: jest.fn(),
+      };
+      asMock(GitLabService.tryToGetProjectFromInstance).mockImplementation(fakeGetProject);
+      projects = {
+        'https://gitlab.com-abc': ['gitlab-org/gitlab-vscode-extension'],
+      };
+      repository = new GitLabProjectRepositoryImpl(
+        fakeTokenService as TokenService,
+        fakeGitWrapper as GitExtensionWrapper,
+        fakeSettingStore as SelectedProjectStore,
+      );
+      await repository.init();
+    });
+
+    it('initializes projects', () => {
+      expect(repository.getAllProjects()).toHaveLength(1);
     });
   });
 });

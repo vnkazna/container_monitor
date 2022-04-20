@@ -1,5 +1,6 @@
 import { Uri } from 'vscode';
 import { REVIEW_URI_SCHEME } from '../constants';
+import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
 
 export interface ReviewParams {
   path?: string;
@@ -19,7 +20,7 @@ export function toReviewUri({
   const query = { commit, repositoryRoot, projectId, mrId };
   return Uri.file(path).with({
     scheme: REVIEW_URI_SCHEME,
-    query: JSON.stringify(query, Object.keys(query).sort()),
+    query: jsonStringifyWithSortedKeys(query),
   });
 }
 

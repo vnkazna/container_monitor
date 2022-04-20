@@ -14,7 +14,8 @@ import {
   SelectedProjectStore,
   selectedProjectStore,
 } from './selected_project_store';
-import { isEqual } from '../utils/is_equal';
+import { log, LOG_LEVEL } from '../log';
+import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
 
 interface ParsedProject {
   namespaceWithPath: string;
@@ -24,6 +25,8 @@ interface ParsedProject {
 
 export interface GitLabProjectRepository {
   getAllProjects(): ProjectInRepository[];
+  getSelectedOrDefaultForRepository(rootFsPath: string): ProjectInRepository | undefined;
+  repositoryHasAmbiguousProjects(rootFsPath: string): boolean;
   init(): Promise<void>;
 }
 
@@ -42,7 +45,7 @@ const parseProjects = (remoteUrls: string[], instanceUrls: string[]): ParsedProj
 const detectProjects = async (
   remoteUrls: string[],
   allCredentials: Credentials[],
-  getProject = GitLabService.tryToGetProjectFromInstance,
+  getProject: typeof GitLabService.tryToGetProjectFromInstance,
 ): Promise<ExistingProject[]> => {
   const uniqRemoteUrls = uniq(remoteUrls);
   const credentialsForInstance = groupBy(allCredentials, i => i.instanceUrl);
@@ -73,21 +76,81 @@ const assignProjectsToRepositories = async (
   );
 };
 
-const addSelectedProjects = async (
-  selectedProjectSettings: SelectedProjectSetting[],
+const loadProjectFromSettings = async (
+  settings: SelectedProjectSetting,
+  pointers: GitRemoteUrlPointer[],
+  allCredentials: Credentials[],
+  getProject: typeof GitLabService.tryToGetProjectFromInstance,
+): Promise<ProjectInRepository | undefined> => {
+  const [pointer] = pointers.filter(
+    p =>
+      p.remote.name === settings.remoteName &&
+      p.repository.rootFsPath === settings.repositoryRootPath &&
+      p.urlEntry.url === settings.remoteUrl,
+  );
+  if (!pointer) {
+    log(
+      `Unable to find remote ${settings.remoteName} (${settings.remoteUrl}) in repository ${settings.repositoryRootPath}. Ignoring selected project ${settings.namespaceWithPath}.`,
+      LOG_LEVEL.WARNING,
+    );
+    return undefined;
+  }
+  const [credentials] = allCredentials.filter(c => c.instanceUrl === settings.accountId);
+  if (!credentials) {
+    log(
+      `Unable to find credentials for account ${settings.accountId}. Ignoring selected project ${settings.namespaceWithPath}.`,
+      LOG_LEVEL.WARNING,
+    );
+    return undefined;
+  }
+  const project = await getProject(credentials, settings.namespaceWithPath);
+  if (!project) {
+    log(
+      `Unable to fetch selected project ${settings.namespaceWithPath} from ${credentials.instanceUrl}. Ignoring this selected project`,
+      LOG_LEVEL.WARNING,
+    );
+    return undefined;
+  }
+  return { credentials, pointer, project, initializationType: 'selected' };
+};
+
+const mergeSelectedAndDetected = (
+  selectedProjects: ProjectInRepository[],
   detectedProjects: ProjectInRepository[],
+): ProjectInRepository[] => {
+  const result = [...selectedProjects, ...detectedProjects].reduce<{
+    addedProjectIds: string[];
+    uniqueProjects: ProjectInRepository[];
+  }>(
+    (acc, project) => {
+      const id = jsonStringifyWithSortedKeys({ ...convertProjectToSetting(project) });
+      if (acc.addedProjectIds.includes(id)) return acc;
+      return {
+        addedProjectIds: [...acc.addedProjectIds, id],
+        uniqueProjects: [...acc.uniqueProjects, project],
+      };
+    },
+    { addedProjectIds: [], uniqueProjects: [] },
+  );
+  return result.uniqueProjects;
+};
+
+const loadSelectedProjects = async (
+  selectedProjectSettings: SelectedProjectSetting[],
+  allCredentials: Credentials[],
+  pointers: GitRemoteUrlPointer[],
+  getProject: typeof GitLabService.tryToGetProjectFromInstance,
 ): Promise<ProjectInRepository[]> => {
+  const allRepositoryPaths = uniq(pointers.map(p => p.repository.rootFsPath));
   const settingsByRepository = groupBy(selectedProjectSettings, pc => pc.repositoryRootPath);
-  const isSelected = (pr: ProjectInRepository): boolean => {
-    const selectedProject = convertProjectToSetting(pr);
-    const selectedProjectForRepository =
-      settingsByRepository[pr.pointer.repository.rootFsPath] || [];
-    return selectedProjectForRepository.some(c => isEqual(c, selectedProject));
-  };
-  return detectedProjects.map(dp => ({
-    ...dp,
-    initializationType: isSelected(dp) ? 'selected' : undefined,
-  }));
+  const relevantSettings = allRepositoryPaths.flatMap(path => settingsByRepository[path] ?? []);
+  return (
+    await Promise.all(
+      relevantSettings.map(async s =>
+        loadProjectFromSettings(s, pointers, allCredentials, getProject),
+      ),
+    )
+  ).filter(notNullOrUndefined);
 };
 
 export const initializeAllProjects = async (
@@ -105,7 +168,19 @@ export const initializeAllProjects = async (
     pointers,
     detectedProjects,
   );
-  return addSelectedProjects(selectedProjectSettings, detectedProjectsInRepositories);
+  const selectedProjectsInRepositories = await loadSelectedProjects(
+    selectedProjectSettings,
+    allCredentials,
+    pointers,
+    getProject,
+  );
+  return mergeSelectedAndDetected(selectedProjectsInRepositories, detectedProjectsInRepositories);
+};
+
+const getSelectedOrDefault = (projects: ProjectInRepository[]): ProjectInRepository | undefined => {
+  if (projects.length === 1) return projects[0];
+  const [selected] = projects.filter(p => p.initializationType === 'selected');
+  return selected;
 };
 
 export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
@@ -133,6 +208,20 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
 
   getAllProjects(): ProjectInRepository[] {
     return this.#projects;
+  }
+
+  #getProjectsForRepository(rootFsPath: string): ProjectInRepository[] {
+    return this.#projects.filter(p => p.pointer.repository.rootFsPath === rootFsPath);
+  }
+
+  getSelectedOrDefaultForRepository(rootFsPath: string): ProjectInRepository | undefined {
+    const projects = this.#getProjectsForRepository(rootFsPath);
+    return getSelectedOrDefault(projects);
+  }
+
+  repositoryHasAmbiguousProjects(rootFsPath: string): boolean {
+    const projects = this.#getProjectsForRepository(rootFsPath);
+    return projects.length > 1 && getSelectedOrDefault(projects) === undefined;
   }
 
   async #updateProjects() {
