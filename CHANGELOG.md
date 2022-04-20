@@ -1,3 +1,13 @@
+## [3.42.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.42.1...v3.42.2) (2022-04-20)
+
+
+### Bug Fixes
+
+* can't access issue detail from closing issue ([5fdaffa](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/5fdaffa03cc90aecc409acc2c6357a56335a4b6d))
+* MR /merge quick action ([b5d55b5](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b5d55b5f180c67c5abe32dbe152a50e0f49188e5))
+
+
+
 ## [3.42.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.42.0...v3.42.1) (2022-04-12)
 
 
