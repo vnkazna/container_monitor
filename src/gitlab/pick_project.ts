@@ -3,6 +3,7 @@ import { Credentials } from '../services/token_service';
 import { pickWithQuery } from '../utils/pick_with_query';
 import { GitLabRemote, GitLabRemoteSourceProvider } from './clone/gitlab_remote_source_provider';
 
+// FIXME: GitLabRemote is too similar name to Remote that we use in Git. We should rename GitLabRemote to GitLabCheckoutInfo
 export async function pickProject(credentials: Credentials): Promise<GitLabRemote | undefined> {
   const provider = new GitLabRemoteSourceProvider(credentials);
   const other = {

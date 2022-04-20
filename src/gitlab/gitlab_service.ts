@@ -931,6 +931,9 @@ export class GitLabService {
     credentials: Credentials,
     namespaceWithPath: string,
   ): Promise<GitLabProject | undefined> {
-    return new GitLabService(credentials).getProject(namespaceWithPath).catch(() => undefined);
+    return new GitLabService(credentials).getProject(namespaceWithPath).catch(e => {
+      logError(e);
+      return undefined;
+    });
   }
 }
