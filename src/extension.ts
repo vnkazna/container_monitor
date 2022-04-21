@@ -47,7 +47,12 @@ import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
 import { gitlabProjectRepository } from './gitlab/gitlab_project_repository';
-import { selectProject, selectProjectForRepository } from './gitlab/select_project';
+import {
+  assignProject,
+  clearSelectedProjects,
+  selectProjectCommand,
+  selectProjectForRepository,
+} from './gitlab/select_project';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -115,8 +120,10 @@ const registerCommands = (
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
     [USER_COMMANDS.SELECT_PROJECT_FOR_REPOSITORY]: selectProjectForRepository,
+    [USER_COMMANDS.SELECT_PROJECT]: selectProjectCommand,
+    [USER_COMMANDS.ASSIGN_PROJECT]: assignProject,
+    [USER_COMMANDS.CLEAR_SELECTED_PROJECT]: clearSelectedProjects,
     [PROGRAMMATIC_COMMANDS.DIAGNOSE_REPOSITORY]: diagnoseRepository,
-    [PROGRAMMATIC_COMMANDS.SELECT_PROJECT]: selectProject,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };

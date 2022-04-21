@@ -1,5 +1,5 @@
 /*
-  Commands that can be triggered from the command palette.
+  Commands that can be triggered from the command palette or context menus.
   These commands must be exactly the same as the contributed commands in package.json.
 */
 export const USER_COMMANDS = {
@@ -41,6 +41,9 @@ export const USER_COMMANDS = {
   OPEN_MR_FILE: 'gl.openMrFile',
   OPEN_REPOSITORY: 'gl.openRepository',
   SELECT_PROJECT_FOR_REPOSITORY: 'gl.selectProjectForRepository',
+  SELECT_PROJECT: 'gl.selectProject',
+  ASSIGN_PROJECT: 'gl.assignProject',
+  CLEAR_SELECTED_PROJECT: 'gl.clearSelectedProject',
 };
 
 /*
@@ -50,7 +53,6 @@ export const PROGRAMMATIC_COMMANDS = {
   SHOW_RICH_CONTENT: 'gl.showRichContent',
   NO_IMAGE_REVIEW: 'gl.noImageReview',
   DIAGNOSE_REPOSITORY: 'gl.diagnoseRepository',
-  SELECT_PROJECT: 'gl.selectProject',
 };
 
 export const VS_COMMANDS = {

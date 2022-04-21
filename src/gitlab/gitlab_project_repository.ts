@@ -1,3 +1,4 @@
+import vscode from 'vscode';
 import { GitLabService } from './gitlab_service';
 import { ExistingProject, ProjectInRepository, SelectedProjectSetting } from './new_project';
 import { Credentials, tokenService, TokenService } from '../services/token_service';
@@ -28,6 +29,7 @@ export interface GitLabProjectRepository {
   getSelectedOrDefaultForRepository(rootFsPath: string): ProjectInRepository | undefined;
   repositoryHasAmbiguousProjects(rootFsPath: string): boolean;
   init(): Promise<void>;
+  readonly onProjectChange: vscode.Event<readonly ProjectInRepository[]>;
 }
 
 const parseProject = (remoteUrl: string, instanceUrl: string): ParsedProject | undefined => {
@@ -184,6 +186,8 @@ const getSelectedOrDefault = (projects: ProjectInRepository[]): ProjectInReposit
 };
 
 export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
+  #emitter = new vscode.EventEmitter<ProjectInRepository[]>();
+
   #tokenService: TokenService;
 
   #gitExtensionWrapper: GitExtensionWrapper;
@@ -205,6 +209,8 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
 
     await this.#updateProjects();
   }
+
+  onProjectChange = this.#emitter.event;
 
   getAllProjects(): ProjectInRepository[] {
     return this.#projects;
@@ -231,6 +237,7 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
       pointers,
       this.#selectedProjectsStore.selectedProjectSettings,
     );
+    this.#emitter.fire(this.#projects);
   }
 }
 

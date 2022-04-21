@@ -23,7 +23,7 @@ describe('SelectedProjectStoreImpl', () => {
 
   it('can delete selected projects', () => {
     store.addSelectedProject(testSelectedProject);
-    store.deleteSelectedProjects('/path/to/repo');
+    store.clearSelectedProjects('/path/to/repo');
     expect(store.selectedProjectSettings).toHaveLength(0);
   });
 
@@ -34,7 +34,7 @@ describe('SelectedProjectStoreImpl', () => {
     store.addSelectedProject(testSelectedProject);
     expect(listener).toHaveBeenCalledWith([testSelectedProject]);
 
-    store.deleteSelectedProjects('/path/to/repo');
+    store.clearSelectedProjects('/path/to/repo');
     expect(listener).toHaveBeenCalledWith([]);
   });
 });

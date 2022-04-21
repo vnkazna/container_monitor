@@ -1,23 +1,23 @@
 import vscode from 'vscode';
-import { PROGRAMMATIC_COMMANDS } from '../command_names';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { createRemoteUrlPointers, GitRemoteUrlPointer, GitRepository } from '../git/new_git';
 import { Credentials, tokenService } from '../services/token_service';
+import { MultipleProjectsItem } from '../tree_view/items/multiple_projects_item';
+import { NoProjectItem } from '../tree_view/items/no_project_item';
+import { ProjectItem } from '../tree_view/items/project_item';
 import { gitlabProjectRepository } from './gitlab_project_repository';
 import { ProjectInRepository } from './new_project';
 import { pickProject } from './pick_project';
 import { convertProjectToSetting, selectedProjectStore } from './selected_project_store';
 
-export const selectRepositoryAndThenRun = async <T>(
-  commandName: string,
-): Promise<T | undefined> => {
+const selectRepository = async (): Promise<GitRepository | undefined> => {
   const options = gitExtensionWrapper.gitRepositories.map(repository => ({
     repository,
     label: repository.rootFsPath,
   }));
   const choice = await vscode.window.showQuickPick(options, { title: 'Select Git Repository' });
   if (!choice) return undefined;
-  return vscode.commands.executeCommand(commandName, choice.repository);
+  return choice.repository;
 };
 
 const pickCredentials = async (allCredentials: Credentials[]) => {
@@ -59,7 +59,7 @@ const manuallyAssignProject = async (repository: GitRepository) => {
   );
 };
 
-export const selectProject = async (repository: GitRepository) => {
+const selectProject = async (repository: GitRepository) => {
   const projects = gitlabProjectRepository
     .getAllProjects()
     .filter(p => p.pointer.repository.rootFsPath === repository.rootFsPath);
@@ -88,5 +88,19 @@ export const selectProject = async (repository: GitRepository) => {
   selectedProjectStore.addSelectedProject(convertProjectToSetting(selectedProject));
 };
 
-export const selectProjectForRepository = () =>
-  selectRepositoryAndThenRun(PROGRAMMATIC_COMMANDS.SELECT_PROJECT);
+export const assignProject = async (item: NoProjectItem) => manuallyAssignProject(item.repository);
+
+export const selectProjectCommand = async (item: MultipleProjectsItem | NoProjectItem) =>
+  selectProject(item.repository);
+
+export const selectProjectForRepository = async () => {
+  const repository = await selectRepository();
+  if (!repository) return;
+  await selectProject(repository);
+};
+
+export const clearSelectedProjects = async (item: ProjectItem) => {
+  selectedProjectStore.clearSelectedProjects(
+    item.projectInRepository.pointer.repository.rootFsPath,
+  );
+};
