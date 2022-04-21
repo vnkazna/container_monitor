@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import assert from 'assert';
-import { handleError, logError } from './log';
+import { handleError, log } from './log';
 import { isMr } from './utils/is_mr';
 import { makeHtmlLinksAbsolute } from './utils/make_html_links_absolute';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
@@ -128,7 +128,7 @@ class WebviewController {
           });
           await panel.webview.postMessage({ type: 'noteSaved' });
         } catch (e) {
-          logError(e);
+          log.error('Failed to submit note to the API.', e);
           await panel.webview.postMessage({ type: 'noteSaved', status: false });
         }
       }

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CONFIG_NAMESPACE, GITLAB_COM_URL } from '../constants';
 import { CustomQuery } from '../gitlab/custom_query';
-import { log, LOG_LEVEL } from '../log';
+import { log } from '../log';
 import { validateInstanceUrl } from './validate_instance_url';
 
 type MutableConfigName = 'repositories';
@@ -26,11 +26,10 @@ const turnNullToUndefined = <T>(val: T | null | undefined): T | undefined => val
 const ignoreInvalidUrl = (url: string): string | undefined => {
   const error = validateInstanceUrl(url);
   if (error) {
-    log(
+    log.warn(
       `'gitlab.instanceUrl' (${url}) from settings.json is not valid: ${error}. ` +
         `The extension will use the default value ${GITLAB_COM_URL}. ` +
         `Fix the 'gitlab.instanceUrl' setting to use your GitLab instance.`,
-      LOG_LEVEL.WARNING,
     );
     return undefined;
   }

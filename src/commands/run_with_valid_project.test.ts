@@ -11,7 +11,6 @@ import {
 } from '../utils/extension_configuration';
 import { project } from '../test_utils/entities';
 import { WrappedRepository } from '../git/wrapped_repository';
-import { log } from '../log';
 
 jest.mock('../git/git_extension_wrapper');
 jest.mock('../utils/extension_configuration');
@@ -21,7 +20,6 @@ describe('runWithValidProject', () => {
   let repository: WrappedRepository;
   beforeEach(() => {
     asMock(getExtensionConfiguration).mockReturnValue({ instanceUrl: 'https://gitlab.com' });
-    asMock(log).mockImplementation(m => console.log(m));
   });
 
   describe('with valid project', () => {

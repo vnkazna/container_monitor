@@ -9,7 +9,7 @@ import { API, GitExtension, Repository } from '../api/git';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
 import { WrappedRepository, WrappedRepositoryImpl } from './wrapped_repository';
-import { handleError, log, LOG_LEVEL } from '../log';
+import { handleError, log } from '../log';
 import { GitRepository, GitRepositoryImpl } from './new_git';
 
 export class GitExtensionWrapper implements vscode.Disposable {
@@ -112,7 +112,7 @@ export class GitExtensionWrapper implements vscode.Disposable {
     try {
       this.gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
       if (!this.gitExtension) {
-        log('Could not get Git Extension', LOG_LEVEL.ERROR);
+        log.error('Could not get Git Extension');
         return;
       }
       this.enablementListener = this.gitExtension.onDidChangeEnablement(
