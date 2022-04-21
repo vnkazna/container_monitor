@@ -12,6 +12,8 @@ import { InvalidProjectItem } from './items/invalid_project_item';
 import { onSidebarViewStateChange } from './sidebar_view_state';
 import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
 import { MultipleProjectsItem } from './items/multiple_projects_item';
+import { NoProjectItem } from './items/no_project_item';
+import { ProjectItem } from './items/project_item';
 
 async function getAllGitlabRepositories(): Promise<WrappedRepository[]> {
   const projectsWithUri = gitExtensionWrapper.repositories.map(async repository => {
@@ -22,6 +24,8 @@ async function getAllGitlabRepositories(): Promise<WrappedRepository[]> {
   return Promise.all(projectsWithUri);
 }
 
+const isModelRefactor = () => getExtensionConfiguration().featureFlags?.includes('model-refactor');
+
 export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel | vscode.TreeItem> {
   private eventEmitter = new vscode.EventEmitter<void>();
 
@@ -31,6 +35,9 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
 
   constructor() {
     extensionState.onDidChangeValid(this.refresh, this);
+    gitlabProjectRepository.onProjectChange(() => {
+      if (isModelRefactor()) this.refresh();
+    });
     onSidebarViewStateChange(this.refresh, this);
   }
 
@@ -42,7 +49,7 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
     if (!extensionState.isValid()) {
       return [];
     }
-    if (getExtensionConfiguration().featureFlags?.includes('model-refactor')) {
+    if (isModelRefactor()) {
       return this.getNewChildren();
     }
     let repositories: WrappedRepository[] = [];
@@ -68,16 +75,12 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
     return gitExtensionWrapper.gitRepositories.map(r => {
       const selected = gitlabProjectRepository.getSelectedOrDefaultForRepository(r.rootFsPath);
       if (selected) {
-        const item = new vscode.TreeItem(selected.project.name);
-        item.iconPath = new vscode.ThemeIcon('project');
-        return item;
+        return new ProjectItem(selected);
       }
       if (gitlabProjectRepository.repositoryHasAmbiguousProjects(r.rootFsPath)) {
         return new MultipleProjectsItem(r);
       }
-      const item = new vscode.TreeItem(r.rootFsPath);
-      item.iconPath = new vscode.ThemeIcon('error');
-      return item;
+      return new NoProjectItem(r);
     });
   }
 

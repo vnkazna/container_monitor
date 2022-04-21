@@ -15,7 +15,7 @@ export const convertProjectToSetting = ({
 
 export interface SelectedProjectStore {
   addSelectedProject(selectedProject: SelectedProjectSetting): void;
-  deleteSelectedProjects(rootFsPath: string): void;
+  clearSelectedProjects(rootFsPath: string): void;
   readonly onSelectedProjectsChange: vscode.Event<readonly SelectedProjectSetting[]>;
   readonly selectedProjectSettings: SelectedProjectSetting[];
 }
@@ -30,7 +30,7 @@ export class SelectedProjectStoreImpl implements SelectedProjectStore {
     this.#emitter.fire(this.#selectedProjectSettings);
   }
 
-  deleteSelectedProjects(rootFsPath: string): void {
+  clearSelectedProjects(rootFsPath: string): void {
     this.#selectedProjectSettings = this.#selectedProjectSettings.filter(
       pc => pc.repositoryRootPath !== rootFsPath,
     );

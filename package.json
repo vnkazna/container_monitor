@@ -219,6 +219,21 @@
         "command": "gl.selectProjectForRepository",
         "title": "Select Project for Repository",
         "category": "GitLab"
+      },
+      {
+        "command": "gl.selectProject",
+        "title": "Select GitLab project",
+        "category": "GitLab"
+      },
+      {
+        "command": "gl.assignProject",
+        "title": "Manually assign GitLab project",
+        "category": "GitLab"
+      },
+      {
+        "command": "gl.clearSelectedProject",
+        "title": "Clear selected project",
+        "category": "GitLab"
       }
     ],
     "menus": {
@@ -358,6 +373,18 @@
         {
           "command": "gl.applySnippetPatch",
           "when": "gitlab:validState"
+        },
+        {
+          "command": "gl.selectProject",
+          "when": "false"
+        },
+        {
+          "command": "gl.assignProject",
+          "when": "false"
+        },
+        {
+          "command": "gl.clearSelectedProject",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -381,6 +408,18 @@
         {
           "command": "gl.checkoutMrBranch",
           "when": "view =~ /issuesAndMrs/ && viewItem == mr-item-from-same-project"
+        },
+        {
+          "command": "gl.assignProject",
+          "when": "view =~ /issuesAndMrs/ && viewItem == no-project-detected"
+        },
+        {
+          "command": "gl.selectProject",
+          "when": "view =~ /issuesAndMrs/ && viewItem == multiple-projects-detected"
+        },
+        {
+          "command": "gl.clearSelectedProject",
+          "when": "view =~ /issuesAndMrs/ && viewItem == selected-project"
         }
       ],
       "comments/comment/title": [
