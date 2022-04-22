@@ -53,6 +53,7 @@ import {
   selectProjectCommand,
   selectProjectForRepository,
 } from './gitlab/select_project';
+import { selectedProjectStore } from './gitlab/selected_project_store';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -164,6 +165,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
   tokenService.init(context);
+  selectedProjectStore.init(context);
   registerCiCompletion(context);
   context.subscriptions.push(gitExtensionWrapper);
   statusBar.init();
