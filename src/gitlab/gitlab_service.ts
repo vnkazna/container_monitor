@@ -38,7 +38,7 @@ import {
 } from './graphql/get_project';
 import { createDiffNoteMutation, GqlDiffPositionInput } from './graphql/create_diff_comment';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
-import { logError } from '../log';
+import { log } from '../log';
 import { isMr } from '../utils/is_mr';
 import { ifVersionGte } from '../utils/if_version_gte';
 import {
@@ -275,7 +275,7 @@ export class GitLabService {
       const result = await this.fetch<{ version: string }>('/version', {}, 'instance version');
       return result.version;
     } catch (e) {
-      logError(e);
+      log.error(e);
       return undefined;
     }
   }
@@ -824,7 +824,7 @@ export class GitLabService {
         'MR closing issues',
       );
     } catch (e) {
-      logError(e);
+      log.error(e);
       return [];
     }
   }
@@ -836,7 +836,7 @@ export class GitLabService {
     try {
       return await this.fetch(`/projects/${project.restId}/issues/${issueIid}`, {}, 'Single Issue');
     } catch (e) {
-      logError(e);
+      log.error(e);
       return undefined;
     }
   }
@@ -893,7 +893,7 @@ export class GitLabService {
     // This can be done when we migrate the code to gitlab_service.ts
     const turnErrorToUndefined: <T>(p: Promise<T>) => Promise<T | undefined> = p =>
       p.catch(e => {
-        logError(e);
+        log.error(e);
         return undefined;
       });
 
@@ -933,7 +933,7 @@ export class GitLabService {
     namespaceWithPath: string,
   ): Promise<GitLabProject | undefined> {
     return new GitLabService(credentials).getProject(namespaceWithPath).catch(e => {
-      logError(e);
+      log.error(e);
       return undefined;
     });
   }

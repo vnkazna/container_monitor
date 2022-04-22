@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import assert = require('assert');
 import * as openers from './openers';
 import { UserFriendlyError } from './errors/user_friendly_error';
-import { logError } from './log';
+import { log } from './log';
 import { PROGRAMMATIC_COMMANDS, USER_COMMANDS } from './command_names';
 import { BranchState } from './current_branch_refresher';
 
@@ -118,7 +118,7 @@ export class StatusBar {
         const processedJobs = sortAndDeduplicate(jobs);
         statusText = createStatusTextFromJobs(processedJobs, status);
       } catch (e) {
-        logError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
+        log.error(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
       }
     }
 

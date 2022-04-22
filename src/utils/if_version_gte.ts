@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { coerce, gte, valid } from 'semver';
-import { log, LOG_LEVEL } from '../log';
+import { log } from '../log';
 
 /**
  * This method runs different code for different versions (VS Code, GitLab API, ...).
@@ -26,9 +26,8 @@ export function ifVersionGte<T>(
   );
   const parsedCurrent = coerce(current);
   if (!parsedCurrent) {
-    log(
+    log.warn(
       `Could not parse version from "${current}", running logic for the latest GitLab version`,
-      LOG_LEVEL.WARNING,
     );
     return then();
   }

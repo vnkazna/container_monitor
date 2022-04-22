@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
 import dayjs from 'dayjs';
-import { logError } from './log';
+import { log } from './log';
 import { extensionState } from './extension_state';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { WrappedRepository } from './git/wrapped_repository';
@@ -37,7 +37,7 @@ const getJobs = async (
   try {
     return await repository.getGitLabService().getJobsForPipeline(pipeline);
   } catch (e) {
-    logError(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
+    log.error(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
     return [];
   }
 };
@@ -123,7 +123,7 @@ export class CurrentBranchRefresher {
       ).filter(notNullOrUndefined);
       return { valid: true, repository, pipeline, mr, jobs, issues, userInitiated };
     } catch (e) {
-      logError(e);
+      log.error(e);
       return { valid: false, error: e };
     }
   }

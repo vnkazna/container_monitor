@@ -243,13 +243,13 @@ describe('gitlab_project_repository', () => {
       it('logs an issue when the remote does not exist', async () => {
         await initializeProjectsWithSetting({ remoteName: 'nonexistent' });
 
-        expect(asMock(log).mock.calls[0][0]).toMatch(/unable to find remote nonexistent/i);
+        expect(asMock(log.warn).mock.calls[0][0]).toMatch(/unable to find remote nonexistent/i);
       });
 
       it('logs an issue when credentials do not exist', async () => {
         await initializeProjectsWithSetting({ accountId: 'nonexistent' });
 
-        expect(asMock(log).mock.calls[0][0]).toMatch(
+        expect(asMock(log.warn).mock.calls[0][0]).toMatch(
           /unable to find credentials for account nonexistent/i,
         );
       });
@@ -257,7 +257,7 @@ describe('gitlab_project_repository', () => {
       it('logs an issue when project cannot be fetched', async () => {
         await initializeProjectsWithSetting({ namespaceWithPath: 'nonexistent' });
 
-        expect(asMock(log).mock.calls[0][0]).toMatch(
+        expect(asMock(log.warn).mock.calls[0][0]).toMatch(
           /unable to fetch selected project nonexistent/i,
         );
       });

@@ -15,7 +15,7 @@ import {
   SelectedProjectStore,
   selectedProjectStore,
 } from './selected_project_store';
-import { log, LOG_LEVEL } from '../log';
+import { log } from '../log';
 import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
 
 interface ParsedProject {
@@ -91,25 +91,22 @@ const loadProjectFromSettings = async (
       p.urlEntry.url === settings.remoteUrl,
   );
   if (!pointer) {
-    log(
+    log.warn(
       `Unable to find remote ${settings.remoteName} (${settings.remoteUrl}) in repository ${settings.repositoryRootPath}. Ignoring selected project ${settings.namespaceWithPath}.`,
-      LOG_LEVEL.WARNING,
     );
     return undefined;
   }
   const [credentials] = allCredentials.filter(c => c.instanceUrl === settings.accountId);
   if (!credentials) {
-    log(
+    log.warn(
       `Unable to find credentials for account ${settings.accountId}. Ignoring selected project ${settings.namespaceWithPath}.`,
-      LOG_LEVEL.WARNING,
     );
     return undefined;
   }
   const project = await getProject(credentials, settings.namespaceWithPath);
   if (!project) {
-    log(
+    log.warn(
       `Unable to fetch selected project ${settings.namespaceWithPath} from ${credentials.instanceUrl}. Ignoring this selected project`,
-      LOG_LEVEL.WARNING,
     );
     return undefined;
   }

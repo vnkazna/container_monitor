@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CustomQueryItemModel } from './items/custom_query_item_model';
 import { ItemModel } from './items/item_model';
-import { logError } from '../log';
+import { log } from '../log';
 import { ErrorItem } from './items/error_item';
 import { extensionState } from '../extension_state';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
@@ -56,7 +56,7 @@ export class IssuableDataProvider implements vscode.TreeDataProvider<ItemModel |
     try {
       repositories = await getAllGitlabRepositories();
     } catch (e) {
-      logError(e);
+      log.error(e);
       return [new ErrorItem('Fetching Issues and MRs failed')];
     }
     const { customQueries } = getExtensionConfiguration();

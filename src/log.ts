@@ -4,36 +4,57 @@ import { DetailedError, isDetailedError, prettyJson } from './errors/common';
 import { HelpError } from './errors/help_error';
 import { Help, HelpMessageSeverity } from './utils/help';
 
-export const LOG_LEVEL = {
-  INFO: 'info',
-  WARNING: 'warning',
-  ERROR: 'error',
-} as const;
-
-export type LogLevel = typeof LOG_LEVEL[keyof typeof LOG_LEVEL];
-
 type logFunction = (line: string) => void;
-
 let globalLog: logFunction = console.error;
 
 export const initializeLogging = (logLine: logFunction): void => {
   globalLog = logLine;
 };
 
-export const log = (line: string, level: LogLevel): void => {
+interface Log {
+  info(e: Error): void;
+  info(message: string, e?: Error): void;
+  warn(e: Error): void;
+  warn(message: string, e?: Error): void;
+  error(e: Error): void;
+  error(message: string, e?: Error): void;
+}
+
+const LOG_LEVEL = {
+  INFO: 'info',
+  WARNING: 'warning',
+  ERROR: 'error',
+} as const;
+
+type LogLevel = typeof LOG_LEVEL[keyof typeof LOG_LEVEL];
+
+const multilineLog = (line: string, level: LogLevel): void => {
   const prefix = `[${level}]: `;
   const padNextLines = (text: string) => text.replace(/\n/g, `\n${' '.repeat(prefix.length)}`);
 
   globalLog(`${prefix}${padNextLines(line)}`);
 };
 
-export const logError = (e: Error | DetailedError): void =>
-  isDetailedError(e)
-    ? log(prettyJson(e.details), LOG_LEVEL.ERROR)
-    : log(`${e.message}\n${e.stack}`, LOG_LEVEL.ERROR);
+const formatError = (e: Error): string =>
+  isDetailedError(e) ? prettyJson(e.details) : `${e.message}\n${e.stack}`;
+
+const logWithLevel = (level: LogLevel, a1: Error | string, a2?: Error) => {
+  if (typeof a1 === 'string') {
+    const errorText = a2 ? `\n${formatError(a2)}` : '';
+    multilineLog(`${a1}${errorText}`, level);
+  } else {
+    multilineLog(formatError(a1), level);
+  }
+};
+
+const info = (a1: Error | string, a2?: Error) => logWithLevel(LOG_LEVEL.INFO, a1, a2);
+const warn = (a1: Error | string, a2?: Error) => logWithLevel(LOG_LEVEL.WARNING, a1, a2);
+const error = (a1: Error | string, a2?: Error) => logWithLevel(LOG_LEVEL.ERROR, a1, a2);
+
+export const log: Log = { info, warn, error };
 
 export const handleError = (e: Error | DetailedError): { onlyForTesting: Promise<void> } => {
-  logError(e);
+  log.error(e);
 
   // This is probably the only place where we want to ignore a floating promise.
   // We don't want to block the app and wait for user click on the "Show Logs"

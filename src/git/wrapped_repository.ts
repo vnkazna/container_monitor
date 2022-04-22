@@ -5,7 +5,7 @@ import { Repository } from '../api/git';
 
 import { GITLAB_COM_URL } from '../constants';
 import { tokenService } from '../services/token_service';
-import { log, LOG_LEVEL } from '../log';
+import { log } from '../log';
 import { GitLabRemote, parseGitLabRemote } from './git_remote_parser';
 import { getExtensionConfiguration, getRepositorySettings } from '../utils/extension_configuration';
 import { GitLabService } from '../gitlab/gitlab_service';
@@ -26,17 +26,13 @@ function heuristicInstanceUrl(gitRemoteHosts: string[]) {
   const intersection = intersectionOfInstanceAndTokenUrls(gitRemoteHosts);
   if (intersection.length === 1) {
     const heuristicUrl = intersection[0];
-    log(
-      `Found ${heuristicUrl} in the PAT list and git remotes, using it as the instanceUrl`,
-      LOG_LEVEL.INFO,
-    );
+    log.info(`Found ${heuristicUrl} in the PAT list and git remotes, using it as the instanceUrl`);
     return heuristicUrl;
   }
 
   if (intersection.length > 1) {
-    log(
+    log.warn(
       `Found more than one intersection of git remotes and configured PATs, ${intersection}. You have to configure which remote to use.`,
-      LOG_LEVEL.WARNING,
     );
   }
 
@@ -111,7 +107,7 @@ export class WrappedRepositoryImpl implements WrappedRepository {
 
   private get remoteName(): string | undefined {
     if (this.remoteNames.length === 0) {
-      log(`Repository ${this.rootFsPath} doesn't have any remotes.`, LOG_LEVEL.WARNING);
+      log.warn(`Repository ${this.rootFsPath} doesn't have any remotes.`);
       return undefined;
     }
     if (this.remoteNames.length === 1) {
@@ -119,13 +115,12 @@ export class WrappedRepositoryImpl implements WrappedRepository {
     }
     const preferred = getRepositorySettings(this.rootFsPath)?.preferredRemoteName;
     if (!preferred) {
-      log(`No preferred remote for ${this.rootFsPath}.`, LOG_LEVEL.WARNING);
+      log.warn(`No preferred remote for ${this.rootFsPath}.`);
       return undefined;
     }
     if (!this.remoteNames.includes(preferred)) {
-      log(
+      log.warn(
         `Saved preferred remote ${preferred} doesn't exist in repository ${this.rootFsPath}`,
-        LOG_LEVEL.WARNING,
       );
       return undefined;
     }

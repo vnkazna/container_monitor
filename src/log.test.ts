@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { DetailedError } from './errors/common';
-import { handleError, initializeLogging, log, logError, LOG_LEVEL } from './log';
+import { handleError, initializeLogging, log } from './log';
 import { USER_COMMANDS } from './command_names';
 import { asMock } from './test_utils/as_mock';
 
@@ -21,25 +21,30 @@ describe('logging', () => {
   describe('log', () => {
     it('passes the argument to the handler', () => {
       const message = 'A very bad error occurred';
-      log(message, LOG_LEVEL.INFO);
+      log.info(message);
       expect(logFunction).toBeCalledTimes(1);
       expect(logFunction).toBeCalledWith(`[info]: ${message}`);
     });
 
-    it.each(['error', 'warning', 'info'] as const)('it handles log level "%s"', logLevel => {
-      log('message', logLevel);
+    it.each`
+      methodName | logLevel
+      ${'info'}  | ${'info'}
+      ${'warn'}  | ${'warning'}
+      ${'error'} | ${'error'}
+    `('it handles log level "$logLevel"', ({ methodName, logLevel }) => {
+      (log as any)[methodName]('message');
       expect(logFunction).toBeCalledWith(`[${logLevel}]: message`);
     });
 
     it('indents multiline messages', () => {
-      log('error happened\nand the next line\nexplains why', LOG_LEVEL.ERROR);
+      log.error('error happened\nand the next line\nexplains why');
       expect(logFunction).toHaveBeenCalledWith(
         `[error]: error happened\n         and the next line\n         explains why`,
       );
     });
   });
 
-  describe('logError', () => {
+  describe('log Error', () => {
     describe('for normal errors', () => {
       it('passes the argument to the handler', () => {
         const message = 'A very bad error occurred';
@@ -47,7 +52,7 @@ describe('logging', () => {
           message,
           stack: 'stack',
         };
-        logError(error as Error);
+        log.error(error as Error);
         expect(getLoggedMessage()).toMatch(/\[error\]: A very bad error occurred\s+stack/m);
       });
     });
@@ -55,7 +60,7 @@ describe('logging', () => {
     describe('for detailed errors', () => {
       it('passes the details to the handler', () => {
         const message = 'Could not fetch from GitLab: error 404';
-        logError({
+        log.error({
           details: { message },
         } as unknown as DetailedError);
         const logFunctionArgument = logFunction.mock.calls[0][0];

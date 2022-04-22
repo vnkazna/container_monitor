@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { fromReviewUri } from './review_uri';
-import { logError } from '../log';
+import { log } from '../log';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 
 export class ApiContentProvider implements vscode.TextDocumentContentProvider {
@@ -14,7 +14,7 @@ export class ApiContentProvider implements vscode.TextDocumentContentProvider {
     try {
       return await service.getFileContent(params.path, params.commit, params.projectId);
     } catch (e) {
-      logError(e);
+      log.error(e);
       throw e;
     }
   }
