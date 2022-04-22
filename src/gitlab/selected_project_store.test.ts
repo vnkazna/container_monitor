@@ -1,3 +1,4 @@
+import { ExtensionContext } from 'vscode';
 import { SelectedProjectSetting } from './new_project';
 import { SelectedProjectStoreImpl } from './selected_project_store';
 
@@ -14,27 +15,37 @@ describe('SelectedProjectStoreImpl', () => {
 
   beforeEach(() => {
     store = new SelectedProjectStoreImpl();
+    let selectedProjectSettings: SelectedProjectSetting[] = [];
+    const fakeContext = {
+      globalState: {
+        get: () => selectedProjectSettings,
+        update: (name: string, settings: SelectedProjectSetting[]) => {
+          selectedProjectSettings = settings;
+        },
+      },
+    };
+    store.init(fakeContext as unknown as ExtensionContext);
   });
 
-  it('can add selected project', () => {
-    store.addSelectedProject(testSelectedProject);
+  it('can add selected project', async () => {
+    await store.addSelectedProject(testSelectedProject);
     expect(store.selectedProjectSettings[0]).toEqual(testSelectedProject);
   });
 
-  it('can delete selected projects', () => {
-    store.addSelectedProject(testSelectedProject);
-    store.clearSelectedProjects('/path/to/repo');
+  it('can delete selected projects', async () => {
+    await store.addSelectedProject(testSelectedProject);
+    await store.clearSelectedProjects('/path/to/repo');
     expect(store.selectedProjectSettings).toHaveLength(0);
   });
 
-  it('notifies when settings change', () => {
+  it('notifies when settings change', async () => {
     const listener = jest.fn();
     store.onSelectedProjectsChange(listener);
 
-    store.addSelectedProject(testSelectedProject);
+    await store.addSelectedProject(testSelectedProject);
     expect(listener).toHaveBeenCalledWith([testSelectedProject]);
 
-    store.clearSelectedProjects('/path/to/repo');
+    await store.clearSelectedProjects('/path/to/repo');
     expect(listener).toHaveBeenCalledWith([]);
   });
 });

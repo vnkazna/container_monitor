@@ -1,5 +1,8 @@
-import vscode from 'vscode';
+import assert from 'assert';
+import vscode, { ExtensionContext } from 'vscode';
 import { ProjectInRepository, SelectedProjectSetting } from './new_project';
+
+const SELECTED_PROJECT_SETTINGS_KEY = 'selectedProjectSettings';
 
 export const convertProjectToSetting = ({
   credentials,
@@ -14,8 +17,9 @@ export const convertProjectToSetting = ({
 });
 
 export interface SelectedProjectStore {
-  addSelectedProject(selectedProject: SelectedProjectSetting): void;
-  clearSelectedProjects(rootFsPath: string): void;
+  addSelectedProject(selectedProject: SelectedProjectSetting): Promise<void>;
+  clearSelectedProjects(rootFsPath: string): Promise<void>;
+  init(context: ExtensionContext): void;
   readonly onSelectedProjectsChange: vscode.Event<readonly SelectedProjectSetting[]>;
   readonly selectedProjectSettings: SelectedProjectSetting[];
 }
@@ -23,24 +27,36 @@ export interface SelectedProjectStore {
 export class SelectedProjectStoreImpl implements SelectedProjectStore {
   #emitter = new vscode.EventEmitter<SelectedProjectSetting[]>();
 
-  #selectedProjectSettings: SelectedProjectSetting[] = [];
+  #context: ExtensionContext | undefined;
 
-  addSelectedProject(preferences: SelectedProjectSetting): void {
-    this.#selectedProjectSettings = [...this.#selectedProjectSettings, preferences];
-    this.#emitter.fire(this.#selectedProjectSettings);
+  init(context: ExtensionContext): void {
+    this.#context = context;
   }
 
-  clearSelectedProjects(rootFsPath: string): void {
-    this.#selectedProjectSettings = this.#selectedProjectSettings.filter(
+  async addSelectedProject(preferences: SelectedProjectSetting): Promise<void> {
+    const selectedProjectSettings = [...this.selectedProjectSettings, preferences];
+    await this.#setSelectedProjectSettings(selectedProjectSettings);
+    this.#emitter.fire(selectedProjectSettings);
+  }
+
+  async clearSelectedProjects(rootFsPath: string): Promise<void> {
+    const selectedProjectSettings = this.selectedProjectSettings.filter(
       pc => pc.repositoryRootPath !== rootFsPath,
     );
-    this.#emitter.fire(this.#selectedProjectSettings);
+    await this.#setSelectedProjectSettings(selectedProjectSettings);
+    this.#emitter.fire(selectedProjectSettings);
   }
 
   onSelectedProjectsChange = this.#emitter.event;
 
-  get selectedProjectSettings() {
-    return this.#selectedProjectSettings;
+  async #setSelectedProjectSettings(settings: SelectedProjectSetting[]) {
+    assert(this.#context);
+    await this.#context.globalState.update(SELECTED_PROJECT_SETTINGS_KEY, settings);
+  }
+
+  get selectedProjectSettings(): SelectedProjectSetting[] {
+    assert(this.#context);
+    return this.#context.globalState.get(SELECTED_PROJECT_SETTINGS_KEY) || [];
   }
 }
 

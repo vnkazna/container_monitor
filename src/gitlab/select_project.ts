@@ -53,7 +53,7 @@ const manuallyAssignProject = async (repository: GitRepository) => {
     initializationType: 'selected',
   };
   const selectedProjectSetting = convertProjectToSetting(projectInRepository);
-  selectedProjectStore.addSelectedProject(selectedProjectSetting);
+  await selectedProjectStore.addSelectedProject(selectedProjectSetting);
   await vscode.window.showInformationMessage(
     `Success: you assigned project ${remote.project.namespaceWithPath} to remote URL ${pointer.urlEntry.url} in repository ${repository.rootFsPath}`,
   );
@@ -85,7 +85,7 @@ const selectProject = async (repository: GitRepository) => {
     await manuallyAssignProject(repository);
     return;
   }
-  selectedProjectStore.addSelectedProject(convertProjectToSetting(selectedProject));
+  await selectedProjectStore.addSelectedProject(convertProjectToSetting(selectedProject));
 };
 
 export const assignProject = async (item: NoProjectItem) => manuallyAssignProject(item.repository);
@@ -100,7 +100,7 @@ export const selectProjectForRepository = async () => {
 };
 
 export const clearSelectedProjects = async (item: ProjectItem) => {
-  selectedProjectStore.clearSelectedProjects(
+  await selectedProjectStore.clearSelectedProjects(
     item.projectInRepository.pointer.repository.rootFsPath,
   );
 };
