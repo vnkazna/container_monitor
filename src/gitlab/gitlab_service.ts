@@ -1,7 +1,7 @@
 import * as https from 'https';
 import { GraphQLClient, gql } from 'graphql-request';
 import crossFetch from 'cross-fetch';
-import { URL, URLSearchParams } from 'url';
+import { URL } from 'url';
 import createHttpProxyAgent from 'https-proxy-agent';
 import assert from 'assert';
 import { FetchError } from '../errors/fetch_error';
@@ -53,6 +53,7 @@ import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
 import { HelpError } from '../errors/help_error';
 import { Credentials } from '../services/token_service';
 import { newCreateNoteMutation, oldCreateNoteMutation } from './graphql/create_note';
+import { createQueryString, QueryValue } from '../utils/create_query_string';
 
 interface CreateNoteResult {
   createNote: {
@@ -78,8 +79,6 @@ interface GetDiscussionsOptions {
 interface RestNote {
   body: string;
 }
-
-type QueryValue = string | boolean | string[] | number | undefined | null;
 
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
@@ -154,16 +153,6 @@ const handleFetchError = async (response: Response, resourceName: string) => {
     }
     throw new FetchError(`Fetching ${resourceName} from ${response.url} failed`, response, body);
   }
-};
-
-const createQueryString = (query: Record<string, QueryValue>): string => {
-  const q = new URLSearchParams();
-  Object.entries(query).forEach(([name, value]) => {
-    if (typeof value !== 'undefined' && value !== null) {
-      q.set(name, `${value}`);
-    }
-  });
-  return q.toString() && `?${q}`;
 };
 
 const getTotalPages = (response: Response): number =>

@@ -1,9 +1,11 @@
-const vscode = require('vscode');
-const { gitExtensionWrapper } = require('./git/git_extension_wrapper');
-const openers = require('./openers');
+import vscode from 'vscode';
+import { ProjectCommand } from './commands/run_with_valid_project';
+import { GitLabRepository } from './git/wrapped_repository';
+import * as openers from './openers';
+import { createQueryString } from './utils/create_query_string';
 
-const parseQuery = (query, noteableType) => {
-  const params = {};
+const parseQuery = (query: string, noteableType: string) => {
+  const params: Record<string, any> = {};
   const tokens = query
     .replace(/: /g, ':') // Normalize spaces after tokens.
     .replace(/\s[a-z]*:/gi, t => `\n${t}`) // Get tokens and add new line.
@@ -78,55 +80,49 @@ const parseQuery = (query, noteableType) => {
     });
   }
 
-  // URL encode keys and values and return a new array to build actual query string.
-  const queryParams = Object.keys(params).map(k =>
-    params[k] ? `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}` : '',
-  );
-
-  return queryParams.length ? `?${queryParams.join('&')}` : '';
+  return createQueryString(params);
 };
 
-async function getSearchInput(description) {
-  return await vscode.window.showInputBox({
+function getSearchInput(description: string): Thenable<string | undefined> {
+  return vscode.window.showInputBox({
     ignoreFocusOut: true,
     placeHolder: description,
   });
 }
 
-async function showSearchInputFor(noteableType) {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  const project = await repository.getProject();
+async function showSearchInputFor(noteableType: string, gitlabRepository: GitLabRepository) {
+  const project = await gitlabRepository.getProject();
   const query = await getSearchInput(
     'Search in title or description. (Check extension page for search with filters)',
   );
-  const queryString = await parseQuery(query, noteableType);
+  if (!query) return;
+  const queryString = parseQuery(query, noteableType);
 
   await openers.openUrl(`${project.webUrl}/${noteableType}${queryString}`);
 }
 
-async function showIssueSearchInput() {
-  showSearchInputFor('issues');
-}
+export const showIssueSearchInput: ProjectCommand = (gitlabRepository: GitLabRepository) =>
+  showSearchInputFor('issues', gitlabRepository);
 
-async function showMergeRequestSearchInput() {
-  showSearchInputFor('merge_requests');
-}
+export const showMergeRequestSearchInput: ProjectCommand = async (
+  gitlabRepository: GitLabRepository,
+) => showSearchInputFor('merge_requests', gitlabRepository);
 
-async function showProjectAdvancedSearchInput() {
-  const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
-  const project = await repository.getProject();
+export const showProjectAdvancedSearchInput: ProjectCommand = async (
+  gitlabRepository: GitLabRepository,
+) => {
   const query = await getSearchInput(
     'Project Advanced Search. (Check extension page for Advanced Search)',
   );
-  const queryString = await encodeURIComponent(query);
-  const instanceUrl = await repository.instanceUrl;
+  if (!query) return;
+  const { instanceUrl } = gitlabRepository;
+  const project = await gitlabRepository.getProject();
 
+  const queryString = createQueryString({
+    search: query,
+    project_id: project.restId,
+    scope: 'issues',
+  });
   // Select issues tab by default for Advanced Search
-  await openers.openUrl(
-    `${instanceUrl}/search?search=${queryString}&project_id=${project.id}&scope=issues`,
-  );
-}
-
-exports.showIssueSearchInput = showIssueSearchInput;
-exports.showMergeRequestSearchInput = showMergeRequestSearchInput;
-exports.showProjectAdvancedSearchInput = showProjectAdvancedSearchInput;
+  await openers.openUrl(`${instanceUrl}/search${queryString}`);
+};
