@@ -3,7 +3,6 @@ import * as openers from './openers';
 import * as tokenInput from './token_input';
 import { tokenService } from './services/token_service';
 import { extensionState } from './extension_state';
-import searchInput from './search_input.js';
 import { createSnippet } from './commands/create_snippet';
 import { insertSnippet } from './commands/insert_snippet';
 import * as ciConfigValidator from './ci_config_validator';
@@ -54,6 +53,11 @@ import {
   selectProjectForRepository,
 } from './gitlab/select_project';
 import { selectedProjectStore } from './gitlab/selected_project_store';
+import {
+  showIssueSearchInput,
+  showMergeRequestSearchInput,
+  showProjectAdvancedSearchInput,
+} from './search_input';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -90,9 +94,9 @@ const registerCommands = (
     [USER_COMMANDS.OPEN_CREATE_NEW_MR]: runWithValidProject(openers.openCreateNewMr),
     [USER_COMMANDS.OPEN_PROJECT_PAGE]: runWithValidProject(openers.openProjectPage),
     [USER_COMMANDS.PIPELINE_ACTIONS]: runWithValidProject(triggerPipelineAction),
-    [USER_COMMANDS.ISSUE_SEARCH]: searchInput.showIssueSearchInput,
-    [USER_COMMANDS.MERGE_REQUEST_SEARCH]: searchInput.showMergeRequestSearchInput,
-    [USER_COMMANDS.PROJECT_ADVANCED_SEARCH]: searchInput.showProjectAdvancedSearchInput,
+    [USER_COMMANDS.ISSUE_SEARCH]: runWithValidProject(showIssueSearchInput),
+    [USER_COMMANDS.MERGE_REQUEST_SEARCH]: runWithValidProject(showMergeRequestSearchInput),
+    [USER_COMMANDS.PROJECT_ADVANCED_SEARCH]: runWithValidProject(showProjectAdvancedSearchInput),
     [USER_COMMANDS.COMPARE_CURRENT_BRANCH]: runWithValidProject(openers.compareCurrentBranch),
     [USER_COMMANDS.CREATE_SNIPPET]: runWithValidProject(createSnippet),
     [USER_COMMANDS.INSERT_SNIPPET]: runWithValidProject(insertSnippet),
