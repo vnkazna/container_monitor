@@ -17,6 +17,8 @@ import {
 } from './selected_project_store';
 import { log } from '../log';
 import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
+import { prettyJson } from '../errors/common';
+import { EnsureLatestPromise } from '../utils/ensure_latest_promise';
 
 interface ParsedProject {
   namespaceWithPath: string;
@@ -193,6 +195,8 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
 
   #projects: ProjectInRepository[] = [];
 
+  #ensureLatestPromise = new EnsureLatestPromise<ProjectInRepository[]>();
+
   constructor(ts = tokenService, gew = gitExtensionWrapper, sps = selectedProjectStore) {
     this.#tokenService = ts;
     this.#gitExtensionWrapper = gew;
@@ -229,12 +233,28 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
 
   async #updateProjects() {
     const pointers = this.#gitExtensionWrapper.gitRepositories.flatMap(createRemoteUrlPointers);
-    this.#projects = await initializeAllProjects(
-      this.#tokenService.getAllCredentials(),
-      pointers,
-      this.#selectedProjectsStore.selectedProjectSettings,
+    log.info(`Extracted urls: ${prettyJson(pointers.map(p => p.urlEntry.url))}`);
+    const projects = await this.#ensureLatestPromise.discardIfNotLatest(
+      () =>
+        initializeAllProjects(
+          this.#tokenService.getAllCredentials(),
+          pointers,
+          this.#selectedProjectsStore.selectedProjectSettings,
+        ),
+      `More recent project update in progress, discarding findings for urls: ${prettyJson(
+        pointers.map(p => p.urlEntry.url),
+      )}`,
     );
+    if (!projects) {
+      return;
+    }
+    this.#projects = projects;
     this.#emitter.fire(this.#projects);
+    log.info(
+      `Found ${this.#projects.length} projects for urls: ${prettyJson(
+        pointers.map(p => p.urlEntry.url),
+      )}`,
+    );
   }
 }
 
