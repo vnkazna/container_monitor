@@ -1,7 +1,11 @@
+import { assert } from 'console';
 import * as vscode from 'vscode';
 import { USER_COMMANDS } from '../command_names';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { createRemoteUrlPointers } from '../git/new_git';
 import { GitLabRepository, WrappedRepository } from '../git/wrapped_repository';
+import { ProjectInRepository } from '../gitlab/new_project';
+import { tokenService } from '../services/token_service';
 import { doNotAwait } from '../utils/do_not_await';
 import { setPreferredRemote } from '../utils/extension_configuration';
 
@@ -10,11 +14,76 @@ export interface GitLabRepositoryAndFile {
   activeEditor: vscode.TextEditor;
 }
 
+export interface ProjectInRepositoryAndFile {
+  projectInRepository: ProjectInRepository;
+  activeEditor: vscode.TextEditor;
+}
+
+function getRepositoryForActiveEditor(): WrappedRepository | undefined {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor?.document.uri) {
+    return undefined;
+  }
+
+  return gitExtensionWrapper.getRepositoryForFile(editor.document.uri);
+}
+
+/**
+ * This method doesn't require any user input and should be used only for automated functionality.
+ * (e.g. periodical status bar refresh). If there is any uncertainty about which repository to choose,
+ * (i.e. there's multiple repositories and no open editor) we return undefined.
+ */
+export const getActiveRepository: () => WrappedRepository | undefined = () => {
+  const activeEditorRepository = getRepositoryForActiveEditor();
+
+  if (activeEditorRepository) {
+    return activeEditorRepository;
+  }
+
+  if (gitExtensionWrapper.repositories.length === 1) {
+    return gitExtensionWrapper.repositories[0];
+  }
+
+  return undefined;
+};
+
+/**
+ * Returns active repository, user-selected repository or undefined if there
+ * are no repositories or user didn't select one.
+ */
+// TODO: exported only for testing
+export const getActiveRepositoryOrSelectOne: () => Promise<
+  WrappedRepository | undefined
+> = async () => {
+  const activeRepository = getActiveRepository();
+
+  if (activeRepository) {
+    return activeRepository;
+  }
+
+  if (gitExtensionWrapper.repositories.length === 0) {
+    return undefined;
+  }
+
+  const repositoryOptions = gitExtensionWrapper.repositories.map(wr => ({
+    label: wr.name,
+    repository: wr,
+  }));
+  const selection = await vscode.window.showQuickPick(repositoryOptions, {
+    placeHolder: 'Select a repository',
+  });
+  return selection?.repository;
+};
+
 /** Command that needs a valid GitLab project to run */
 export type ProjectCommand = (gitlabRepository: GitLabRepository) => Promise<void>;
+export type NewProjectCommand = (projectInRepository: ProjectInRepository) => Promise<void>;
 
 /** Command that needs to be executed on an open file from a valid GitLab project */
-export type ProjectFileCommand = (repositoryAndFile: GitLabRepositoryAndFile) => Promise<void>;
+type ProjectFileCommandOld = (repositoryAndFile: GitLabRepositoryAndFile) => Promise<void>;
+export type ProjectFileCommand = (
+  projectInRepositoryAndFile: ProjectInRepositoryAndFile,
+) => Promise<void>;
 
 const getRemoteOrSelectOne = async (repository: WrappedRepository) => {
   const { remote } = repository;
@@ -55,10 +124,32 @@ const ensureGitLabProject = async (
   return repository as GitLabRepository;
 };
 
-export const runWithValidProject =
+const convertRepositoryToProject = async (
+  gitlabRepository: GitLabRepository,
+): Promise<ProjectInRepository> => {
+  const project = await gitlabRepository.getProject();
+  const [repository] = gitExtensionWrapper.gitRepositories.filter(
+    gr => gr.rootFsPath === gitlabRepository.rootFsPath,
+  );
+  assert(repository, `Git Repository for ${gitlabRepository.rootFsPath} not found.`);
+  const pointers = createRemoteUrlPointers(repository);
+  const { namespaceWithPath } = gitlabRepository.remote;
+  const [pointer] = pointers.filter(p => p.urlEntry.url.includes(namespaceWithPath));
+  assert(pointer, `Cannot find git remote that includes ${namespaceWithPath} project.`);
+  const { instanceUrl } = gitlabRepository;
+  const [credentials] = tokenService.getAllCredentials().filter(c => c.instanceUrl === instanceUrl);
+  assert(credentials, `Missing credentials for ${instanceUrl}`);
+  return {
+    project,
+    pointer,
+    credentials,
+  };
+};
+
+export const runWithValidProjectOld =
   (command: ProjectCommand): (() => Promise<void>) =>
   async () => {
-    const repository = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+    const repository = await getActiveRepositoryOrSelectOne();
     if (!repository) {
       return undefined;
     }
@@ -67,8 +158,13 @@ export const runWithValidProject =
     return command(repositoryWithProject);
   };
 
-export const runWithValidProjectFile =
-  (command: ProjectFileCommand): (() => Promise<void>) =>
+export const runWithValidProject = (command: NewProjectCommand): (() => Promise<void>) =>
+  runWithValidProjectOld(async gitLabRepository =>
+    command(await convertRepositoryToProject(gitLabRepository)),
+  );
+
+export const runWithValidProjectFileOld =
+  (command: ProjectFileCommandOld): (() => Promise<void>) =>
   async () => {
     const activeEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
@@ -76,7 +172,7 @@ export const runWithValidProjectFile =
       return undefined;
     }
 
-    const repository = gitExtensionWrapper.getActiveRepository();
+    const repository = getActiveRepository();
 
     if (!repository) {
       await vscode.window.showInformationMessage(
@@ -88,6 +184,11 @@ export const runWithValidProjectFile =
     if (!gitlabRepository) return undefined;
     return command({ activeEditor, repository: gitlabRepository });
   };
+
+export const runWithValidProjectFile = (command: ProjectFileCommand): (() => Promise<void>) =>
+  runWithValidProjectFileOld(async ({ activeEditor, repository }) =>
+    command({ activeEditor, projectInRepository: await convertRepositoryToProject(repository) }),
+  );
 
 export const diagnoseRepository = async (repository: WrappedRepository) => {
   const repositoryWithProject = await ensureGitLabProject(repository);

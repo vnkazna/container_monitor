@@ -63,6 +63,14 @@ export class GitExtensionWrapper implements vscode.Disposable {
     return result;
   }
 
+  getRepositoryForFile(fileUri: vscode.Uri): WrappedRepository | undefined {
+    const rawRepository = this.gitApi?.getRepository(fileUri);
+    if (!rawRepository) return undefined;
+    const result = this.repositories.find(r => r.hasSameRootAs(rawRepository));
+    assert(result, `GitExtensionWrapper is missing repository for ${rawRepository.rootUri}`);
+    return result;
+  }
+
   private register() {
     assert(this.gitExtension);
     try {
@@ -123,61 +131,6 @@ export class GitExtensionWrapper implements vscode.Disposable {
     } catch (error) {
       handleError(error);
     }
-  }
-
-  private getRepositoryForActiveEditor(): WrappedRepository | undefined {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor?.document.uri) {
-      return undefined;
-    }
-
-    const repositoryForActiveFile = this.gitApi?.getRepository(editor.document.uri);
-    if (!repositoryForActiveFile) return undefined;
-    return this.repositories.find(wr => wr.hasSameRootAs(repositoryForActiveFile));
-  }
-
-  /**
-   * This method doesn't require any user input and should be used only for automated functionality.
-   * (e.g. periodical status bar refresh). If there is any uncertainty about which repository to choose,
-   * (i.e. there's multiple repositories and no open editor) we return undefined.
-   */
-  getActiveRepository(): WrappedRepository | undefined {
-    const activeEditorRepository = this.getRepositoryForActiveEditor();
-
-    if (activeEditorRepository) {
-      return activeEditorRepository;
-    }
-
-    if (this.repositories.length === 1) {
-      return this.repositories[0];
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Returns active repository, user-selected repository or undefined if there
-   * are no repositories or user didn't select one.
-   */
-  async getActiveRepositoryOrSelectOne(): Promise<WrappedRepository | undefined> {
-    const activeRepository = this.getActiveRepository();
-
-    if (activeRepository) {
-      return activeRepository;
-    }
-
-    if (this.repositories.length === 0) {
-      return undefined;
-    }
-
-    const repositoryOptions = this.repositories.map(wr => ({
-      label: wr.name,
-      repository: wr,
-    }));
-    const selection = await vscode.window.showQuickPick(repositoryOptions, {
-      placeHolder: 'Select a repository',
-    });
-    return selection?.repository;
   }
 }
 

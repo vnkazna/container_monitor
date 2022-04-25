@@ -10,7 +10,6 @@ const { getServer, createJsonEndpoint } = require('./test_infrastructure/mock_se
 const { setSidebarViewState, SidebarViewState } = require('../../src/tree_view/sidebar_view_state');
 const { IssuableDataProvider } = require('../../src/tree_view/issuable_data_provider');
 const { MrItemModel } = require('../../src/tree_view/items/mr_item_model');
-const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
 
 const { ChangedFolderItem } = require('../../src/tree_view/items/changed_folder_item');
 const { ChangedFileItem } = require('../../src/tree_view/items/changed_file_item');
@@ -24,6 +23,8 @@ const onlyOneFolder = require('./fixtures/rest/mr_versions/only_one_folder.json'
 const nestFolders = require('./fixtures/rest/mr_versions/nest_folders.json');
 const onlyRootFiles = require('./fixtures/rest/mr_versions/only_root_files.json');
 const multiFiles = require('./fixtures/rest/mr_versions/multi_files.json');
+const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
+const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 
 const fileTestCase = (changedFileItem, filename, filepath) => {
   // this test case ensures file items list in the tree view is as same as they are in the list view
@@ -83,7 +84,7 @@ describe('MR in tree view', () => {
     const dataProvider = new IssuableDataProvider();
     const mrItemModel = new MrItemModel(
       openMergeRequestResponse,
-      gitExtensionWrapper.getActiveRepository(),
+      gitExtensionWrapper.getRepository(getRepositoryRoot()),
     );
 
     const mrContent = await dataProvider.getChildren(mrItemModel);

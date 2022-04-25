@@ -1,26 +1,30 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const vscode = require('vscode');
-const { gitExtensionWrapper } = require('../../../src/git/git_extension_wrapper');
+const {
+  getActiveRepository,
+  getActiveRepositoryOrSelectOne,
+} = require('../../src/commands/run_with_valid_project');
+const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
 const {
   createAndOpenFile,
   closeAndDeleteFile,
   simulateQuickPickChoice,
   getRepositoryRoot,
-} = require('../test_infrastructure/helpers');
+} = require('./test_infrastructure/helpers');
 
-describe('git_extension_wrapper', () => {
+describe('run_with_valid_project', () => {
   describe('getting repositories', () => {
     const sandbox = sinon.createSandbox();
 
     describe('one repository, no open files', () => {
       it('getActiveRepository returns the open repository', () => {
-        const result = gitExtensionWrapper.getActiveRepository();
+        const result = getActiveRepository();
         assert.strictEqual(result.rootFsPath, getRepositoryRoot());
       });
 
       it('getActiveRepositoryOrSelectOne returns the open repository', async () => {
-        const result = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+        const result = await getActiveRepositoryOrSelectOne();
         assert.strictEqual(result.rootFsPath, getRepositoryRoot());
       });
     });
@@ -43,14 +47,14 @@ describe('git_extension_wrapper', () => {
       });
 
       it('getActiveRepository returns undefined', () => {
-        const result = gitExtensionWrapper.getActiveRepository();
+        const result = getActiveRepository();
         assert.strictEqual(result, undefined);
       });
 
       it('getActiveRepositoryOrSelectOne lets user select a repository', async () => {
         // simulating user selecting second option
         simulateQuickPickChoice(sandbox, 1);
-        const result = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+        const result = await getActiveRepositoryOrSelectOne();
         assert.strictEqual(result.rootFsPath, '/r2');
       });
 
@@ -66,12 +70,12 @@ describe('git_extension_wrapper', () => {
         });
 
         it('getActiveRepository returns repository for the open file', () => {
-          const result = gitExtensionWrapper.getActiveRepository();
+          const result = getActiveRepository();
           assert.strictEqual(result.rootFsPath, getRepositoryRoot());
         });
 
         it('getActiveRepositoryOrSelectOne returns repository for the open file', async () => {
-          const result = await gitExtensionWrapper.getActiveRepositoryOrSelectOne();
+          const result = await getActiveRepositoryOrSelectOne();
           assert.strictEqual(result.rootFsPath, getRepositoryRoot());
         });
       });

@@ -1,6 +1,6 @@
 import vscode from 'vscode';
-import { ProjectCommand } from './commands/run_with_valid_project';
-import { GitLabRepository } from './git/wrapped_repository';
+import { NewProjectCommand } from './commands/run_with_valid_project';
+import { GitLabProject } from './gitlab/gitlab_project';
 import * as openers from './openers';
 import { createQueryString } from './utils/create_query_string';
 
@@ -90,8 +90,7 @@ function getSearchInput(description: string): Thenable<string | undefined> {
   });
 }
 
-async function showSearchInputFor(noteableType: string, gitlabRepository: GitLabRepository) {
-  const project = await gitlabRepository.getProject();
+async function showSearchInputFor(noteableType: string, project: GitLabProject) {
   const query = await getSearchInput(
     'Search in title or description. (Check extension page for search with filters)',
   );
@@ -101,22 +100,19 @@ async function showSearchInputFor(noteableType: string, gitlabRepository: GitLab
   await openers.openUrl(`${project.webUrl}/${noteableType}${queryString}`);
 }
 
-export const showIssueSearchInput: ProjectCommand = (gitlabRepository: GitLabRepository) =>
-  showSearchInputFor('issues', gitlabRepository);
+export const showIssueSearchInput: NewProjectCommand = async projectInRepository =>
+  showSearchInputFor('issues', projectInRepository.project);
 
-export const showMergeRequestSearchInput: ProjectCommand = async (
-  gitlabRepository: GitLabRepository,
-) => showSearchInputFor('merge_requests', gitlabRepository);
+export const showMergeRequestSearchInput: NewProjectCommand = async projectInRepository =>
+  showSearchInputFor('merge_requests', projectInRepository.project);
 
-export const showProjectAdvancedSearchInput: ProjectCommand = async (
-  gitlabRepository: GitLabRepository,
-) => {
+export const showProjectAdvancedSearchInput: NewProjectCommand = async projectInRepository => {
   const query = await getSearchInput(
     'Project Advanced Search. (Check extension page for Advanced Search)',
   );
   if (!query) return;
-  const { instanceUrl } = gitlabRepository;
-  const project = await gitlabRepository.getProject();
+  const { instanceUrl } = projectInRepository.credentials;
+  const { project } = projectInRepository;
 
   const queryString = createQueryString({
     search: query,

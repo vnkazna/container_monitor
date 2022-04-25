@@ -51,6 +51,7 @@ describe('Insert snippet', async () => {
     const git = simpleGit(getRepositoryRoot());
     await git.removeRemote(REMOTE.NAME);
     await git.addRemote(REMOTE.NAME, REMOTE.URL);
+    await updateRepositoryStatus();
     sandbox.restore();
     await closeAndDeleteFile(testFileUri);
   });
@@ -73,6 +74,7 @@ describe('Insert snippet', async () => {
     assert.strictEqual(vscode.window.activeTextEditor.document.getText(), 'second blob content');
   });
 
+  // FIXME: this test should move to run_with_valid_project, since it tests that logic, not the snippet command
   it('throws an error when it cannot find GitLab project', async () => {
     const git = simpleGit(getRepositoryRoot());
     await git.removeRemote(REMOTE.NAME);
@@ -82,7 +84,7 @@ describe('Insert snippet', async () => {
     await vscode.commands.executeCommand(USER_COMMANDS.INSERT_SNIPPET);
     assert.match(
       showErrorMessage.firstCall.args[0],
-      /Project gitlab-org\/nonexistent was not found./,
+      /Project "gitlab-org\/nonexistent" was not found./,
     );
   });
 });

@@ -5,7 +5,8 @@ import { promises as fs } from 'fs';
 import { pickSnippet } from './insert_snippet';
 import { PATCH_FILE_SUFFIX } from '../constants';
 import { GqlBlob, GqlSnippet } from '../gitlab/graphql/get_snippets';
-import { ProjectCommand } from './run_with_valid_project';
+import { NewProjectCommand } from './run_with_valid_project';
+import { getGitLabService } from '../gitlab/get_gitlab_service';
 
 const FETCHING_PROJECT_SNIPPETS = 'Fetching all project snippets.';
 export const NO_PATCH_SNIPPETS_MESSAGE =
@@ -14,11 +15,11 @@ export const NO_PATCH_SNIPPETS_MESSAGE =
 const getFirstPatchBlob = (snippet: GqlSnippet): GqlBlob | undefined =>
   snippet.blobs.nodes.find(b => b.name.endsWith(PATCH_FILE_SUFFIX));
 
-export const applySnippetPatch: ProjectCommand = async repository => {
-  const { remote } = repository;
+export const applySnippetPatch: NewProjectCommand = async projectInRepository => {
+  const gitlabService = getGitLabService(projectInRepository);
   const snippets = await vscode.window.withProgress(
     { location: vscode.ProgressLocation.Notification, title: FETCHING_PROJECT_SNIPPETS },
-    () => repository.getGitLabService().getSnippets(remote.namespaceWithPath),
+    () => gitlabService.getSnippets(projectInRepository.project.namespaceWithPath),
   );
   const patchSnippets = snippets.filter(s => getFirstPatchBlob(s));
   if (patchSnippets.length === 0) {
@@ -32,11 +33,11 @@ export const applySnippetPatch: ProjectCommand = async repository => {
   }
   const blob = getFirstPatchBlob(result.original);
   assert(blob, 'blob should be here, we filtered out all snippets without patch blob');
-  const snippet = await repository.getGitLabService().getSnippetContent(result.original, blob);
+  const snippet = await gitlabService.getSnippetContent(result.original, blob);
   const tmpFilePath = temp.path({ suffix: PATCH_FILE_SUFFIX });
   await fs.writeFile(tmpFilePath, snippet);
 
-  await repository.apply(tmpFilePath);
+  await projectInRepository.pointer.repository.rawRepository.apply(tmpFilePath);
 
   await fs.unlink(tmpFilePath);
 };
