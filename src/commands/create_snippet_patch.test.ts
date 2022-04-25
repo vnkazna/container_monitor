@@ -3,30 +3,30 @@ import { createSnippetPatch } from './create_snippet_patch';
 import { project } from '../test_utils/entities';
 import { asMock } from '../test_utils/as_mock';
 import { openUrl } from '../openers';
-import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
-import { GitLabRepository } from '../git/wrapped_repository';
+import { getTrackingBranchName } from '../git/get_tracking_branch_name';
+import { getLastCommitSha } from '../git/get_last_commit_sha';
+import { getGitLabService } from '../gitlab/get_gitlab_service';
+import { ProjectInRepository } from '../gitlab/new_project';
 
 jest.mock('../git/git_extension_wrapper');
 jest.mock('../openers');
+jest.mock('../git/get_tracking_branch_name');
+jest.mock('../git/get_last_commit_sha');
+jest.mock('../gitlab/get_gitlab_service');
 
 const SNIPPET_URL = 'https://gitlab.com/test-group/test-project/-/snippets/2146265';
 const DIFF_OUTPUT = 'diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml';
 
 describe('create snippet patch', () => {
-  let wrappedRepository: GitLabRepository;
   let createSnippet: jest.Mock;
+  const pointer = { repository: { rawRepository: { diff: async () => DIFF_OUTPUT } } };
 
   beforeEach(() => {
     createSnippet = jest.fn();
-    const mockRepository: Partial<GitLabRepository> = {
-      lastCommitSha: 'abcd1234567',
-      getTrackingBranchName: async () => 'tracking-branch-name',
-      getProject: async () => project,
-      diff: async () => DIFF_OUTPUT,
-      getGitLabService: () => ({ createSnippet } as unknown as GitLabService),
-    };
-    wrappedRepository = mockRepository as GitLabRepository;
+    asMock(getTrackingBranchName).mockReturnValue('tracking-branch-name');
+    asMock(getLastCommitSha).mockReturnValue('abcd1234567');
+    asMock(getGitLabService).mockReturnValue({ createSnippet });
     asMock(vscode.window.showInputBox).mockResolvedValue('snippet_name');
     asMock(vscode.window.showQuickPick).mockImplementation(options =>
       options.filter((o: any) => o.type === 'private').pop(),
@@ -41,7 +41,7 @@ describe('create snippet patch', () => {
   });
 
   it('creates a snippet patch and opens it in a browser', async () => {
-    await createSnippetPatch(wrappedRepository);
+    await createSnippetPatch({ pointer, project } as unknown as ProjectInRepository);
     expect(openUrl).toHaveBeenCalledWith(SNIPPET_URL);
   });
 
@@ -49,7 +49,7 @@ describe('create snippet patch', () => {
     let formData: Record<string, string>;
     let projectArgument: GitLabProject;
     beforeEach(async () => {
-      await createSnippetPatch(wrappedRepository);
+      await createSnippetPatch({ pointer, project } as unknown as ProjectInRepository);
       [[projectArgument, formData]] = asMock(createSnippet).mock.calls;
     });
 

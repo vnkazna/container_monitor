@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
 import { doNotAwait } from './utils/do_not_await';
-import { ProjectCommand } from './commands/run_with_valid_project';
+import { NewProjectCommand } from './commands/run_with_valid_project';
+import { getGitLabService } from './gitlab/get_gitlab_service';
 
-export const validate: ProjectCommand = async repository => {
+export const validate: NewProjectCommand = async projectInRepository => {
   const editor = vscode.window.activeTextEditor;
 
   if (!editor) {
@@ -12,9 +13,12 @@ export const validate: ProjectCommand = async repository => {
   }
 
   const content = editor.document.getText();
-  const project = await repository.getProject();
+  const { project } = projectInRepository;
   assert(project, "Current folder doesn't contain a GitLab project");
-  const { valid, errors } = await repository.getGitLabService().validateCIConfig(project, content);
+  const { valid, errors } = await getGitLabService(projectInRepository).validateCIConfig(
+    project,
+    content,
+  );
 
   if (valid) {
     doNotAwait(

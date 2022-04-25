@@ -3,12 +3,12 @@ import assert from 'assert';
 import dayjs from 'dayjs';
 import { log } from './log';
 import { extensionState } from './extension_state';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { WrappedRepository } from './git/wrapped_repository';
 import { StatusBar } from './status_bar';
 import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { notNullOrUndefined } from './utils/not_null_or_undefined';
+import { getActiveRepository } from './commands/run_with_valid_project';
 
 export interface ValidBranchState {
   valid: true;
@@ -72,7 +72,7 @@ export class CurrentBranchRefresher {
     // (Repository.state.onDidChange()) are triggered many times per second.
     // We wouldn't save any CPU cycles, just increased the complexity of this extension.
     this.branchTrackingTimer = setInterval(async () => {
-      const currentBranch = gitExtensionWrapper.getActiveRepository()?.branch;
+      const currentBranch = getActiveRepository()?.branch;
       if (currentBranch && currentBranch !== this.previousBranchName) {
         this.previousBranchName = currentBranch;
         await this.clearAndSetIntervalAndRefresh();
@@ -104,7 +104,7 @@ export class CurrentBranchRefresher {
 
   static async getState(userInitiated: boolean): Promise<BranchState> {
     if (!extensionState.isValid()) return INVALID_STATE;
-    const repository = gitExtensionWrapper.getActiveRepository();
+    const repository = getActiveRepository();
     if (!repository) return INVALID_STATE;
     const gitlabProject = await repository.getProject();
     if (!gitlabProject) return INVALID_STATE;

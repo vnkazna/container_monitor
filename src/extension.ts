@@ -38,9 +38,9 @@ import { contextUtils } from './utils/context_utils';
 import { currentBranchRefresher } from './current_branch_refresher';
 import { statusBar } from './status_bar';
 import {
+  diagnoseRepository,
   runWithValidProject,
   runWithValidProjectFile,
-  diagnoseRepository,
 } from './commands/run_with_valid_project';
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';

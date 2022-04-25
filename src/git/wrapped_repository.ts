@@ -11,6 +11,8 @@ import { getExtensionConfiguration, getRepositorySettings } from '../utils/exten
 import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
+import { getTrackingBranchName } from './get_tracking_branch_name';
+import { getLastCommitSha } from './get_last_commit_sha';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   const instanceUrls = tokenService.getInstanceUrls();
@@ -82,8 +84,6 @@ export interface WrappedRepository {
   getMr(id: number): CachedMr | undefined;
   getGitLabService(): GitLabService;
   getFileContent(path: string, sha: string): Promise<string | null>;
-  diff(): Promise<string>;
-  apply(patchPath: string): Promise<void>;
   getTrackingBranchName(): Promise<string>;
   hasSameRootAs(repository: Repository): boolean;
   getVersion(): Promise<string | undefined>;
@@ -161,7 +161,10 @@ export class WrappedRepositoryImpl implements WrappedRepository {
 
   async getProject(): Promise<GitLabProject | undefined> {
     if (!this.remote) return undefined;
-    if (!this.cachedProject) {
+    if (
+      !this.cachedProject ||
+      this.cachedProject.namespaceWithPath !== this.remote.namespaceWithPath // mainly for tests, scenario where the preferred remote changes
+    ) {
       this.cachedProject = await this.getGitLabService().getProject(this.remote.namespaceWithPath);
     }
     return this.cachedProject;
@@ -202,7 +205,7 @@ export class WrappedRepositoryImpl implements WrappedRepository {
   }
 
   get lastCommitSha(): string | undefined {
-    return this.rawRepository.state.HEAD?.commit;
+    return getLastCommitSha(this.rawRepository);
   }
 
   get instanceUrl(): string {
@@ -234,25 +237,8 @@ export class WrappedRepositoryImpl implements WrappedRepository {
     return this.rawRepository.show(sha, absolutePath).catch(() => null);
   }
 
-  async diff(): Promise<string> {
-    return this.rawRepository.diff();
-  }
-
-  async apply(patchPath: string): Promise<void> {
-    return this.rawRepository.apply(patchPath);
-  }
-
   async getTrackingBranchName(): Promise<string> {
-    const branchName = this.rawRepository.state.HEAD?.name;
-    assert(
-      branchName,
-      'The repository seems to be in a detached HEAD state. Please checkout a branch.',
-    );
-    const trackingBranch = await this.rawRepository
-      .getConfig(`branch.${branchName}.merge`)
-      .catch(() => ''); // the tracking branch is going to be empty most of the time, we'll swallow the error instead of logging it every time
-
-    return trackingBranch.replace('refs/heads/', '') || branchName;
+    return getTrackingBranchName(this.rawRepository);
   }
 
   /**

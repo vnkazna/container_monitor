@@ -18,6 +18,7 @@ export interface GitRepository {
   rootFsPath: string;
   remotes: GitRemote[];
   hasSameRootAs(repository: Repository): boolean;
+  readonly rawRepository: Repository;
 }
 
 export interface GitRemoteUrlPointer {
@@ -45,18 +46,18 @@ const getRemoteUrlEntries = (remote: Remote): GitRemoteUrlEntry[] => {
 };
 
 export class GitRepositoryImpl implements GitRepository {
-  #rawRepository: Repository;
+  readonly rawRepository: Repository;
 
   constructor(rawRepository: Repository) {
-    this.#rawRepository = rawRepository;
+    this.rawRepository = rawRepository;
   }
 
   get rootFsPath() {
-    return this.#rawRepository.rootUri.fsPath;
+    return this.rawRepository.rootUri.fsPath;
   }
 
   get remotes() {
-    return this.#rawRepository.state.remotes.map(r => ({
+    return this.rawRepository.state.remotes.map(r => ({
       name: r.name,
       urlEntries: getRemoteUrlEntries(r),
     }));

@@ -23,6 +23,7 @@ const {
 } = require('./test_infrastructure/mock_server');
 const { ApiContentProvider } = require('../../src/review/api_content_provider');
 const { PROGRAMMATIC_COMMANDS } = require('../../src/command_names');
+const { getRepositoryRoot } = require('./test_infrastructure/helpers');
 const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
 const { toReviewUri } = require('../../src/review/review_uri');
 
@@ -75,7 +76,7 @@ describe('MR Review', () => {
     dataProvider = new IssuableDataProvider();
     mrItemModel = new MrItemModel(
       openMergeRequestResponse,
-      gitExtensionWrapper.getActiveRepository(),
+      gitExtensionWrapper.getRepository(getRepositoryRoot()),
     );
   });
 
@@ -237,7 +238,7 @@ describe('MR Review', () => {
           commit: versionResponse.base_commit_sha, // base sha === old version of the file
           mrId: openMergeRequestResponse.id,
           projectId: openMergeRequestResponse.project_id,
-          repositoryRoot: gitExtensionWrapper.getActiveRepository().rootFsPath,
+          repositoryRoot: getRepositoryRoot(),
         });
 
         const thread = {

@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import { openCurrentPipeline } from '../openers';
-import { ProjectCommand } from './run_with_valid_project';
+import { NewProjectCommand } from './run_with_valid_project';
 import { USER_COMMANDS } from '../command_names';
+import { getGitLabService } from '../gitlab/get_gitlab_service';
+import { getTrackingBranchName } from '../git/get_tracking_branch_name';
 
 type PipelineAction = 'view' | 'create' | 'retry' | 'cancel';
 
-export const triggerPipelineAction: ProjectCommand = async repository => {
+export const triggerPipelineAction: NewProjectCommand = async projectInRepository => {
   const items: { label: string; action: PipelineAction }[] = [
     {
       label: 'View latest pipeline on GitLab',
@@ -26,6 +28,7 @@ export const triggerPipelineAction: ProjectCommand = async repository => {
   ];
 
   const selected = await vscode.window.showQuickPick(items);
+  const { repository } = projectInRepository.pointer;
 
   if (selected) {
     if (selected.action === 'view') {
@@ -33,15 +36,15 @@ export const triggerPipelineAction: ProjectCommand = async repository => {
       return;
     }
 
-    const project = await repository.getProject();
-    const gitlabService = repository.getGitLabService();
+    const { project } = projectInRepository;
+    const gitlabService = getGitLabService(projectInRepository);
     const { pipeline } = await gitlabService.getPipelineAndMrForCurrentBranch(
       project,
-      await repository.getTrackingBranchName(),
+      await getTrackingBranchName(repository.rawRepository),
     );
 
     if (selected.action === 'create') {
-      const branchName = await repository.getTrackingBranchName();
+      const branchName = await getTrackingBranchName(repository.rawRepository);
       const result = await gitlabService.createPipeline(branchName, project);
       if (result) await vscode.commands.executeCommand(USER_COMMANDS.REFRESH_SIDEBAR);
       return;

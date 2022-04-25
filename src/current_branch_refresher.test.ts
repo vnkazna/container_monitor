@@ -1,10 +1,10 @@
 import { ValidBranchState, CurrentBranchRefresher } from './current_branch_refresher';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { extensionState } from './extension_state';
 import { asMock } from './test_utils/as_mock';
 import { pipeline, project, mr, issue, job } from './test_utils/entities';
+import { getActiveRepository } from './commands/run_with_valid_project';
 
-jest.mock('./git/git_extension_wrapper');
+jest.mock('./commands/run_with_valid_project');
 jest.mock('./extension_state');
 
 describe('CurrentBranchRefrehser', () => {
@@ -14,7 +14,7 @@ describe('CurrentBranchRefrehser', () => {
 
   describe('invalid state', () => {
     it('returns invalid state if the current repo does not contain GitLab project', async () => {
-      asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
+      asMock(getActiveRepository).mockReturnValue({
         getProject: async () => undefined,
       });
       const state = await CurrentBranchRefresher.getState(false);
@@ -22,7 +22,7 @@ describe('CurrentBranchRefrehser', () => {
     });
 
     it('returns invalid state if fetching the mr and pipelines fails', async () => {
-      asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
+      asMock(getActiveRepository).mockReturnValue({
         getProject: async () => project,
         getTrackingBranchName: async () => 'branch',
         getGitLabService: () => ({
@@ -36,7 +36,7 @@ describe('CurrentBranchRefrehser', () => {
 
   describe('valid state', () => {
     beforeEach(() => {
-      asMock(gitExtensionWrapper.getActiveRepository).mockReturnValue({
+      asMock(getActiveRepository).mockReturnValue({
         getProject: async () => project,
         getTrackingBranchName: async () => 'branch',
         getGitLabService: () => ({
