@@ -6,9 +6,10 @@ import assert from 'assert';
 import { handleError, log } from './log';
 import { isMr } from './utils/is_mr';
 import { makeHtmlLinksAbsolute } from './utils/make_html_links_absolute';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { GitLabService } from './gitlab/gitlab_service';
-import { GitLabRepository } from './git/wrapped_repository';
+import { gitlabProjectRepository } from './gitlab/gitlab_project_repository';
+import { ProjectInRepository } from './gitlab/new_project';
+import { getGitLabService } from './gitlab/get_gitlab_service';
 
 const webviewResourcePaths = {
   appScriptUri: 'src/webview/dist/js/app.js',
@@ -100,13 +101,21 @@ class WebviewController {
 
   // eslint-disable-next-line class-methods-use-this
   private createMessageHandler =
-    (panel: vscode.WebviewPanel, issuable: RestIssuable, repository: GitLabRepository) =>
+    (
+      panel: vscode.WebviewPanel,
+      issuable: RestIssuable,
+      projectInRepository: ProjectInRepository,
+    ) =>
     async (message: any) => {
       if (message.command === 'renderMarkdown') {
-        let rendered = await repository
-          .getGitLabService()
-          .renderMarkdown(message.markdown, await repository.getProject());
-        rendered = makeHtmlLinksAbsolute(rendered || '', repository.instanceUrl);
+        let rendered = await getGitLabService(projectInRepository).renderMarkdown(
+          message.markdown,
+          projectInRepository.project,
+        );
+        rendered = makeHtmlLinksAbsolute(
+          rendered || '',
+          projectInRepository.credentials.instanceUrl,
+        );
 
         await panel.webview.postMessage({
           type: 'markdownRendered',
@@ -118,7 +127,7 @@ class WebviewController {
 
       if (message.command === 'saveNote') {
         try {
-          const gitlabService = repository.getGitLabService();
+          const gitlabService = getGitLabService(projectInRepository);
           await gitlabService.createNote(issuable, message.note, message.replyId);
           const discussionsAndLabels = await gitlabService.getDiscussionsAndLabelEvents(issuable);
           await panel.webview.postMessage({
@@ -149,20 +158,16 @@ class WebviewController {
   }
 
   async open(issuable: RestIssuable, repositoryRoot: string) {
-    const repository = gitExtensionWrapper.getRepository(repositoryRoot);
-    assert(
-      repository.containsGitLabProject,
-      `Repository ${repository.rootFsPath} doesn't contain GitLab project.`,
-    );
-    const gitlabRepository = repository as GitLabRepository;
+    const projectInRepository =
+      await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(repositoryRoot);
 
-    const panelKey = `${repository.rootFsPath}-${issuable.id}`;
+    const panelKey = `${repositoryRoot}-${issuable.id}`;
     const openedPanel = this.openedPanels[panelKey];
     if (openedPanel) {
       openedPanel.reveal();
       return openedPanel;
     }
-    const newPanel = await this.create(issuable, gitlabRepository);
+    const newPanel = await this.create(issuable, projectInRepository);
     this.openedPanels[panelKey] = newPanel;
     newPanel.onDidDispose(() => {
       this.openedPanels[panelKey] = undefined;
@@ -170,19 +175,21 @@ class WebviewController {
     return newPanel;
   }
 
-  private async create(issuable: RestIssuable, repository: GitLabRepository) {
+  private async create(issuable: RestIssuable, projectInRepository: ProjectInRepository) {
     assert(this.context);
     const panel = this.createPanel(issuable);
     const html = this.replaceResources(panel);
     panel.webview.html = html;
     panel.iconPath = this.getIconPathForIssuable(issuable);
 
-    await initPanelIfActive(panel, issuable, repository.getGitLabService());
+    await initPanelIfActive(panel, issuable, getGitLabService(projectInRepository));
     panel.onDidChangeViewState(async () => {
-      await initPanelIfActive(panel, issuable, repository.getGitLabService());
+      await initPanelIfActive(panel, issuable, getGitLabService(projectInRepository));
     });
 
-    panel.webview.onDidReceiveMessage(this.createMessageHandler(panel, issuable, repository));
+    panel.webview.onDidReceiveMessage(
+      this.createMessageHandler(panel, issuable, projectInRepository),
+    );
     return panel;
   }
 }

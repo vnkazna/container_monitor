@@ -2,11 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { VS_COMMANDS } from '../command_names';
 import { toReviewUri } from '../review/review_uri';
-import { mrVersion, reviewUriParams } from '../test_utils/entities';
+import { mrVersion, projectInRepository, reviewUriParams } from '../test_utils/entities';
 import { openMrFile } from './open_mr_file';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
-import { WrappedRepository } from '../git/wrapped_repository';
 import { asMock } from '../test_utils/as_mock';
+import { mrCache } from '../gitlab/mr_cache';
+import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
+
+jest.mock('../gitlab/mr_cache');
+jest.mock('../gitlab/gitlab_project_repository');
 
 jest.mock('fs', () => ({
   promises: {
@@ -16,9 +19,10 @@ jest.mock('fs', () => ({
 
 describe('openMrFile', () => {
   beforeEach(() => {
-    jest
-      .spyOn(gitExtensionWrapper, 'getRepository')
-      .mockReturnValue({ getMr: () => ({ mrVersion }) } as unknown as WrappedRepository);
+    asMock(gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy).mockResolvedValue(
+      projectInRepository,
+    );
+    asMock(mrCache.getMr).mockReturnValue({ mrVersion });
     asMock(fs.promises.access).mockResolvedValue(undefined);
   });
 

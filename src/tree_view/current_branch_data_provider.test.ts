@@ -1,5 +1,5 @@
 import { Disposable } from 'vscode';
-import { mr, pipeline, job, issue, repository } from '../test_utils/entities';
+import { mr, pipeline, job, issue, projectInRepository } from '../test_utils/entities';
 import { CurrentBranchDataProvider } from './current_branch_data_provider';
 import { ItemModel } from './items/item_model';
 
@@ -13,7 +13,7 @@ const testState = {
   pipeline,
   jobs: [job],
   issues: [issue],
-  repository,
+  projectInRepository,
   userInitiated: true,
 };
 

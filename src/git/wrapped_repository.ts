@@ -1,5 +1,5 @@
 import * as url from 'url';
-import { basename, join } from 'path';
+import { basename } from 'path';
 import assert from 'assert';
 import { Repository } from '../api/git';
 
@@ -11,8 +11,6 @@ import { getExtensionConfiguration, getRepositorySettings } from '../utils/exten
 import { GitLabService } from '../gitlab/gitlab_service';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
-import { getTrackingBranchName } from './get_tracking_branch_name';
-import { getLastCommitSha } from './get_last_commit_sha';
 
 function intersectionOfInstanceAndTokenUrls(gitRemoteHosts: string[]) {
   const instanceUrls = tokenService.getInstanceUrls();
@@ -61,30 +59,19 @@ function getInstanceUrlFromRemotes(gitRemoteUrls: string[]): string {
   return GITLAB_COM_URL;
 }
 
-export interface CachedMr {
-  mr: RestMr;
-  mrVersion: RestMrVersion;
-}
-
 export interface WrappedRepository {
   remoteNames: string[];
   containsGitLabProject: boolean;
   branch?: string;
   remote?: GitLabRemote;
-  lastCommitSha?: string;
   instanceUrl: string;
   name: string;
   rootFsPath: string;
-  fetch(): Promise<void>;
-  checkout(branchName: string): Promise<void>;
   getRemoteByName(remoteName: string): GitLabRemote;
   getProject(): Promise<GitLabProject | undefined>;
   getPipelineProject(): Promise<GitLabProject | undefined>;
-  reloadMr(mr: RestMr): Promise<CachedMr>;
-  getMr(id: number): CachedMr | undefined;
+
   getGitLabService(): GitLabService;
-  getFileContent(path: string, sha: string): Promise<string | null>;
-  getTrackingBranchName(): Promise<string>;
   hasSameRootAs(repository: Repository): boolean;
   getVersion(): Promise<string | undefined>;
 }
@@ -98,8 +85,6 @@ export class WrappedRepositoryImpl implements WrappedRepository {
   private readonly rawRepository: Repository;
 
   private cachedProject?: GitLabProject;
-
-  private mrCache: Record<number, CachedMr> = {};
 
   constructor(rawRepository: Repository) {
     this.rawRepository = rawRepository;
@@ -130,25 +115,6 @@ export class WrappedRepositoryImpl implements WrappedRepository {
 
   get remoteNames(): string[] {
     return this.rawRepository.state.remotes.map(r => r.name);
-  }
-
-  async fetch(): Promise<void> {
-    await this.rawRepository.fetch();
-  }
-
-  async checkout(branchName: string): Promise<void> {
-    await this.rawRepository.checkout(branchName);
-
-    assert(
-      this.rawRepository.state.HEAD,
-      "We can't read repository HEAD. We suspect that your `git head` command fails and we can't continue till it succeeds",
-    );
-
-    const currentBranchName = this.rawRepository.state.HEAD.name;
-    assert(
-      currentBranchName === branchName,
-      `The branch name after the checkout (${currentBranchName}) is not the branch that the extension tried to check out (${branchName}). Inspect your repository before making any more changes.`,
-    );
   }
 
   getRemoteByName(remoteName: string): GitLabRemote {
@@ -185,27 +151,9 @@ export class WrappedRepositoryImpl implements WrappedRepository {
     return this.rawRepository.state.HEAD?.name;
   }
 
-  async reloadMr(mr: RestMr): Promise<CachedMr> {
-    const mrVersion = await this.getGitLabService().getMrDiff(mr);
-    const cachedMr = {
-      mr,
-      mrVersion,
-    };
-    this.mrCache[mr.id] = cachedMr;
-    return cachedMr;
-  }
-
-  getMr(id: number): CachedMr | undefined {
-    return this.mrCache[id];
-  }
-
   get remote(): GitLabRemote | undefined {
     if (!this.remoteName) return undefined;
     return this.getRemoteByName(this.remoteName);
-  }
-
-  get lastCommitSha(): string | undefined {
-    return getLastCommitSha(this.rawRepository);
   }
 
   get instanceUrl(): string {
@@ -227,18 +175,6 @@ export class WrappedRepositoryImpl implements WrappedRepository {
 
   get rootFsPath(): string {
     return this.rawRepository.rootUri.fsPath;
-  }
-
-  async getFileContent(path: string, sha: string): Promise<string | null> {
-    // even on Windows, the git show command accepts only POSIX paths
-    const absolutePath = join(this.rootFsPath, path).replace(/\\/g, '/');
-    // null sufficiently signalises that the file has not been found
-    // this scenario is going to happen often (for open and squashed MRs)
-    return this.rawRepository.show(sha, absolutePath).catch(() => null);
-  }
-
-  async getTrackingBranchName(): Promise<string> {
-    return getTrackingBranchName(this.rawRepository);
   }
 
   /**

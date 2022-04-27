@@ -8,7 +8,6 @@ import { handleError } from '../../log';
 import { UserFriendlyError } from '../../errors/user_friendly_error';
 import { GitLabCommentThread } from '../../review/gitlab_comment_thread';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
-import { WrappedRepository } from '../../git/wrapped_repository';
 import { commentControllerProvider } from '../../review/comment_controller_provider';
 import { GqlTextDiffNote } from '../../gitlab/graphql/shared';
 import { toReviewUri } from '../../review/review_uri';
@@ -20,6 +19,9 @@ import {
 import { UnsupportedVersionError } from '../../errors/unsupported_version_error';
 import { ChangedFolderItem, FolderTreeItem } from './changed_folder_item';
 import { getSidebarViewState, SidebarViewState } from '../sidebar_view_state';
+import { ProjectInRepository } from '../../gitlab/new_project';
+import { getGitLabService } from '../../gitlab/get_gitlab_service';
+import { mrCache } from '../../gitlab/mr_cache';
 
 const isTextDiffDiscussion = (discussion: GqlDiscussion): discussion is GqlTextDiffDiscussion => {
   const firstNote = discussion.notes.nodes[0];
@@ -33,7 +35,7 @@ const firstNoteFrom = (discussion: GqlTextDiffDiscussion): GqlTextDiffNote => {
 };
 
 const uriForDiscussion = (
-  repository: WrappedRepository,
+  rootFsPath: string,
   mr: RestMr,
   discussion: GqlTextDiffDiscussion,
 ): vscode.Uri => {
@@ -41,7 +43,7 @@ const uriForDiscussion = (
   return toReviewUri({
     path: pathFromPosition(position),
     commit: commitFromPosition(position),
-    repositoryRoot: repository.rootFsPath,
+    repositoryRoot: rootFsPath,
     projectId: mr.project_id,
     mrId: mr.id,
   });
@@ -50,7 +52,7 @@ const uriForDiscussion = (
 export class MrItemModel extends ItemModel {
   private allUrisWithComments?: string[];
 
-  constructor(readonly mr: RestMr, readonly repository: WrappedRepository) {
+  constructor(readonly mr: RestMr, readonly projectInRepository: ProjectInRepository) {
     super();
   }
 
@@ -72,7 +74,7 @@ export class MrItemModel extends ItemModel {
     result.iconPath = new vscode.ThemeIcon('note');
     result.command = {
       command: PROGRAMMATIC_COMMANDS.SHOW_RICH_CONTENT,
-      arguments: [this.mr, this.repository.rootFsPath],
+      arguments: [this.mr, this.projectInRepository.pointer.repository.rootFsPath],
       title: 'Show MR Overview',
     };
     return result;
@@ -80,7 +82,7 @@ export class MrItemModel extends ItemModel {
 
   private async getMrDiscussions(): Promise<GqlTextDiffDiscussion[]> {
     try {
-      const discussions = await this.repository.getGitLabService().getDiscussions({
+      const discussions = await getGitLabService(this.projectInRepository).getDiscussions({
         issuable: this.mr,
       });
       return discussions.filter(isTextDiffDiscussion);
@@ -100,7 +102,7 @@ export class MrItemModel extends ItemModel {
   }
 
   async getChildren(): Promise<vscode.TreeItem[]> {
-    const { mrVersion } = await this.repository.reloadMr(this.mr);
+    const { mrVersion } = await mrCache.reloadMr(this.mr, this.projectInRepository);
 
     // don't initialize comments twice
     if (!this.allUrisWithComments) {
@@ -108,7 +110,11 @@ export class MrItemModel extends ItemModel {
       await this.addAllCommentsToVsCode(mrVersion, discussions);
 
       this.allUrisWithComments = discussions.map(d =>
-        uriForDiscussion(this.repository, this.mr, d).toString(),
+        uriForDiscussion(
+          this.projectInRepository.pointer.repository.rootFsPath,
+          this.mr,
+          d,
+        ).toString(),
       );
     }
 
@@ -122,7 +128,7 @@ export class MrItemModel extends ItemModel {
           this.mr,
           mrVersion as RestMrVersion,
           diff,
-          this.repository.rootFsPath,
+          this.projectInRepository.pointer.repository.rootFsPath,
           hasCommentsFn,
           shownInList,
         ),
@@ -140,7 +146,7 @@ export class MrItemModel extends ItemModel {
     mrVersion: RestMrVersion,
     discussions: GqlTextDiffDiscussion[],
   ): Promise<void> {
-    const gitlabService = this.repository.getGitLabService();
+    const gitlabService = getGitLabService(this.projectInRepository);
     const userCanComment = await gitlabService.canUserCommentOnMr(this.mr);
 
     const commentController = commentControllerProvider.borrowCommentController(
@@ -153,7 +159,11 @@ export class MrItemModel extends ItemModel {
     discussions.forEach(discussion => {
       const { position } = firstNoteFrom(discussion);
       const vsThread = commentController.createCommentThread(
-        uriForDiscussion(this.repository, this.mr, discussion),
+        uriForDiscussion(
+          this.projectInRepository.pointer.repository.rootFsPath,
+          this.mr,
+          discussion,
+        ),
         commentRangeFromPosition(position),
         // the comments need to know about the thread, so we first
         // create empty thread to be able to create comments
@@ -162,7 +172,7 @@ export class MrItemModel extends ItemModel {
       return new GitLabCommentThread(
         vsThread,
         discussion,
-        this.repository.getGitLabService(),
+        getGitLabService(this.projectInRepository),
         this.mr,
       );
     });

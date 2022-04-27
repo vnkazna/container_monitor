@@ -6,7 +6,6 @@ import {
   ProjectFileCommand,
   ProjectInRepositoryAndFile,
 } from './commands/run_with_valid_project';
-import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { ifVersionGte } from './utils/if_version_gte';
 import { GitLabProject } from './gitlab/gitlab_project';
 import { ProjectInRepository } from './gitlab/new_project';
@@ -119,15 +118,11 @@ export const openProjectPage: NewProjectCommand = async projectInRepository => {
   await openTemplatedLink('$projectUrl', projectInRepository);
 };
 
-// FIXME pass in GitLabRepository instead of the root
-export async function openCurrentPipeline(repositoryRoot: string): Promise<void> {
-  const repository = gitExtensionWrapper.getRepository(repositoryRoot);
-  const { pipeline } = await repository
-    .getGitLabService()
-    .getPipelineAndMrForCurrentBranch(
-      (await repository.getProject())!,
-      await repository.getTrackingBranchName(),
-    );
+export async function openCurrentPipeline(projectInRepository: ProjectInRepository): Promise<void> {
+  const { pipeline } = await getGitLabService(projectInRepository).getPipelineAndMrForCurrentBranch(
+    projectInRepository.project,
+    await getTrackingBranchName(projectInRepository.pointer.repository.rawRepository),
+  );
 
   if (pipeline) {
     await openUrl(pipeline.web_url);

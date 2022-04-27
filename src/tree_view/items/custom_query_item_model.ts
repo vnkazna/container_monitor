@@ -9,7 +9,8 @@ import { VulnerabilityItem } from './vulnerability_item';
 import { CustomQuery } from '../../gitlab/custom_query';
 import { CustomQueryType } from '../../gitlab/custom_query_type';
 import { ItemModel } from './item_model';
-import { WrappedRepository } from '../../git/wrapped_repository';
+import { GitLabRepository, WrappedRepository } from '../../git/wrapped_repository';
+import { convertRepositoryToProject } from '../../utils/convert_repository_to_project';
 
 export class CustomQueryItemModel extends ItemModel {
   private repository: WrappedRepository;
@@ -43,10 +44,13 @@ export class CustomQueryItemModel extends ItemModel {
     }
 
     const { MR, ISSUE, SNIPPET, EPIC, VULNERABILITY } = CustomQueryType;
+    const projectInRepository = await convertRepositoryToProject(
+      this.repository as GitLabRepository,
+    );
     switch (this.customQuery.type) {
       case MR: {
         const mrModels = issues.map(
-          (mr: RestIssuable) => new MrItemModel(mr as RestMr, this.repository),
+          (mr: RestIssuable) => new MrItemModel(mr as RestMr, projectInRepository),
         );
         this.setDisposableChildren(mrModels);
         return mrModels;

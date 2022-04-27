@@ -5,6 +5,7 @@ import { UserFriendlyError } from './errors/user_friendly_error';
 import { log } from './log';
 import { PROGRAMMATIC_COMMANDS, USER_COMMANDS } from './command_names';
 import { BranchState } from './current_branch_refresher';
+import { ProjectInRepository } from './gitlab/new_project';
 
 const MAXIMUM_DISPLAYED_JOBS = 4;
 
@@ -83,8 +84,8 @@ export class StatusBar {
 
   async refresh(state: BranchState) {
     if (state.valid) {
-      const { rootFsPath } = state.repository;
-      await this.updatePipelineItem(state.pipeline, state.jobs, rootFsPath);
+      const { rootFsPath } = state.projectInRepository.pointer.repository;
+      await this.updatePipelineItem(state.pipeline, state.jobs, state.projectInRepository);
       this.updateMrItem(state.mr, rootFsPath);
       this.fetchMrClosingIssue(state.mr, state.issues, rootFsPath);
     } else {
@@ -101,7 +102,7 @@ export class StatusBar {
   async updatePipelineItem(
     pipeline: RestPipeline | undefined,
     jobs: RestJob[],
-    repositoryRoot: string,
+    projectInRepository: ProjectInRepository,
   ): Promise<void> {
     if (!this.pipelineStatusBarItem) return;
     if (!pipeline) {
@@ -135,7 +136,7 @@ export class StatusBar {
         .showInformationMessage(message, { modal: false }, 'View in Gitlab')
         .then(async selection => {
           if (selection === 'View in Gitlab') {
-            await openers.openCurrentPipeline(repositoryRoot);
+            await openers.openCurrentPipeline(projectInRepository);
           }
         });
     }
