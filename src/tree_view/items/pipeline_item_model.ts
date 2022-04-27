@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { WrappedRepository } from '../../git/wrapped_repository';
 import { getPipelineMetadata } from '../../gitlab/ci_status_metadata';
 import { openInBrowserCommand } from '../../utils/open_in_browser_command';
 import { ItemModel } from './item_model';
@@ -15,11 +14,7 @@ const uniq = <T>(duplicated: T[]): T[] => [...new Set(duplicated)];
 const getUniqueStages = (jobs: RestJob[]): string[] => uniq(jobs.map(j => j.stage));
 
 export class PipelineItemModel extends ItemModel {
-  constructor(
-    private pipeline: RestPipeline,
-    private jobs: RestJob[],
-    private repository: WrappedRepository,
-  ) {
+  constructor(private pipeline: RestPipeline, private jobs: RestJob[]) {
     super();
   }
 

@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import { pipeline, mr, issue, job, repository } from './test_utils/entities';
+import { pipeline, mr, issue, job, project } from './test_utils/entities';
 import { USER_COMMANDS } from './command_names';
 import { asMock } from './test_utils/as_mock';
 import { ValidBranchState } from './current_branch_refresher';
+import { ProjectInRepository } from './gitlab/new_project';
 
 jest.mock('./git/git_extension_wrapper');
 jest.mock('./extension_state');
@@ -27,7 +28,7 @@ const createFakeItem = (): vscode.StatusBarItem =>
 
 const createBranchInfo = (partialInfo: Partial<ValidBranchState> = {}): ValidBranchState => ({
   valid: true,
-  repository,
+  projectInRepository: { project, pointer: { repository: {} } } as unknown as ProjectInRepository,
   issues: [],
   jobs: [],
   userInitiated: true,

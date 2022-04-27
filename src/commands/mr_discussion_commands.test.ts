@@ -1,10 +1,8 @@
 import * as vscode from 'vscode';
-import { mocked } from 'ts-jest/utils';
 import {
   discussionOnDiff,
   noteOnDiff,
 } from '../../test/integration/fixtures/graphql/discussions.js';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { GqlTextDiffNote } from '../gitlab/graphql/shared';
 import { GitLabComment } from '../review/gitlab_comment';
 import { GitLabCommentThread } from '../review/gitlab_comment_thread';
@@ -15,11 +13,16 @@ import {
   retryFailedComment,
   CommentWithThread,
 } from './mr_discussion_commands';
-import { WrappedRepository } from '../git/wrapped_repository';
-import { mr, mrVersion } from '../test_utils/entities';
+import { mr, mrVersion, projectInRepository } from '../test_utils/entities';
 import { FAILED_COMMENT_CONTEXT, SYNCED_COMMENT_CONTEXT } from '../constants';
+import { mrCache } from '../gitlab/mr_cache';
+import { asMock } from '../test_utils/as_mock';
+import { getGitLabService } from '../gitlab/get_gitlab_service';
+import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
 
-jest.mock('../git/git_extension_wrapper');
+jest.mock('../gitlab/mr_cache');
+jest.mock('../gitlab/get_gitlab_service');
+jest.mock('../gitlab/gitlab_project_repository');
 
 describe('MR discussion commands', () => {
   describe('deleteComment', () => {
@@ -136,16 +139,13 @@ describe('MR discussion commands', () => {
 
       beforeEach(() => {
         mockedCreateDiffNote = jest.fn().mockResolvedValue(discussionOnDiff);
-        const mockedWrappedRepository = {
-          getMr: () => ({ mr, mrVersion: customMrVersion }),
-          getGitLabService: () => ({
-            createDiffNote: mockedCreateDiffNote,
-          }),
-        };
-
-        mocked(gitExtensionWrapper).getRepository.mockReturnValue(
-          mockedWrappedRepository as unknown as WrappedRepository,
+        asMock(gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy).mockReturnValue(
+          projectInRepository,
         );
+        asMock(mrCache.getMr).mockReturnValue({ mr, mrVersion: customMrVersion });
+        asMock(getGitLabService).mockReturnValue({
+          createDiffNote: mockedCreateDiffNote,
+        });
       });
 
       it.each`

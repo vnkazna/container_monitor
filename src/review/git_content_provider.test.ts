@@ -1,12 +1,16 @@
 import { mocked } from 'ts-jest/utils';
 import { GitContentProvider } from './git_content_provider';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { ApiContentProvider } from './api_content_provider';
 import { toReviewUri } from './review_uri';
-import { WrappedRepository } from '../git/wrapped_repository';
+import { getFileContent } from '../git/get_file_content';
+import { asMock } from '../test_utils/as_mock';
+import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
+import { projectInRepository } from '../test_utils/entities';
 
 jest.mock('../git/git_extension_wrapper');
 jest.mock('./api_content_provider');
+jest.mock('../git/get_file_content');
+jest.mock('../gitlab/gitlab_project_repository');
 
 describe('GitContentProvider', () => {
   const gitContentProvider = new GitContentProvider();
@@ -19,15 +23,14 @@ describe('GitContentProvider', () => {
     repositoryRoot: 'path/to/workspace',
   };
 
-  let getFileContent: jest.Mock;
-
   beforeEach(() => {
-    getFileContent = jest.fn();
-    gitExtensionWrapper.getRepository = () => ({ getFileContent } as unknown as WrappedRepository);
+    asMock(gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy).mockResolvedValue(
+      projectInRepository,
+    );
   });
 
   it('provides file content from a git repository', async () => {
-    getFileContent.mockReturnValue('Test text');
+    asMock(getFileContent).mockReturnValue('Test text');
 
     const result = await gitContentProvider.provideTextDocumentContent(
       toReviewUri(reviewUriParams),
@@ -36,7 +39,7 @@ describe('GitContentProvider', () => {
   });
 
   it('falls back to the API provider if file does not exist in the git repository', async () => {
-    getFileContent.mockReturnValue(null);
+    asMock(getFileContent).mockReturnValue(null);
 
     const apiContentProvider = new ApiContentProvider();
     apiContentProvider.provideTextDocumentContent = jest.fn().mockReturnValue('Api content');

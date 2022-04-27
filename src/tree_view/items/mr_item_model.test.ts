@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { MrItemModel } from './mr_item_model';
-import { mr } from '../../test_utils/entities';
+import { mr, projectInRepository } from '../../test_utils/entities';
 import {
   discussionOnDiff,
   noteOnDiffTextSnippet,
@@ -8,13 +8,15 @@ import {
 } from '../../../test/integration/fixtures/graphql/discussions.js';
 import * as mrVersion from '../../../test/integration/fixtures/rest/mr_version.json';
 import { CommentingRangeProvider } from '../../review/commenting_range_provider';
-import { createWrappedRepository } from '../../test_utils/create_wrapped_repository';
 import { fromReviewUri } from '../../review/review_uri';
-import { WrappedRepository } from '../../git/wrapped_repository';
 import { DELETED, CHANGE_TYPE_QUERY_KEY, HAS_COMMENTS_QUERY_KEY } from '../../constants';
 import { setSidebarViewState, SidebarViewState } from '../sidebar_view_state';
 import { ChangedFolderItem } from './changed_folder_item';
 import { ChangedFileItem } from './changed_file_item';
+import { asMock } from '../../test_utils/as_mock';
+import { getGitLabService } from '../../gitlab/get_gitlab_service';
+
+jest.mock('../../gitlab/get_gitlab_service');
 
 const createCommentControllerMock = vscode.comments.createCommentController as jest.Mock;
 
@@ -24,7 +26,6 @@ describe('MrItemModel', () => {
   let canUserCommentOnMr = false;
   let commentController: any;
   let gitLabService: any;
-  let repository: WrappedRepository;
 
   const createCommentThreadMock = jest.fn();
 
@@ -34,10 +35,8 @@ describe('MrItemModel', () => {
       getMrDiff: jest.fn().mockResolvedValue({ diffs: [] }),
       canUserCommentOnMr: jest.fn(async () => canUserCommentOnMr),
     };
-    repository = createWrappedRepository({
-      gitLabService,
-    });
-    item = new MrItemModel(mr, repository);
+    asMock(getGitLabService).mockReturnValue(gitLabService);
+    item = new MrItemModel(mr, projectInRepository);
     commentThread = {} as vscode.CommentThread;
 
     commentController = {
@@ -56,7 +55,7 @@ describe('MrItemModel', () => {
     it('should return return correct context when MR comes from the same project', () => {
       item = new MrItemModel(
         { ...mr, source_project_id: 1234, target_project_id: 1234 },
-        repository,
+        projectInRepository,
       );
       expect(item.getTreeItem().contextValue).toBe('mr-item-from-same-project');
     });
@@ -64,7 +63,7 @@ describe('MrItemModel', () => {
     it('should return return correct context when MR comes from a fork', () => {
       item = new MrItemModel(
         { ...mr, source_project_id: 5678, target_project_id: 1234 },
-        repository,
+        projectInRepository,
       );
       expect(item.getTreeItem().contextValue).toBe('mr-item-from-fork');
     });
@@ -92,7 +91,7 @@ describe('MrItemModel', () => {
     const { mrId, projectId, repositoryRoot, commit, path } = fromReviewUri(uri);
     expect(mrId).toBe(mr.id);
     expect(projectId).toBe(mr.project_id);
-    expect(repositoryRoot).toBe(repository.rootFsPath);
+    expect(repositoryRoot).toBe(projectInRepository.pointer.repository.rootFsPath);
 
     const discussionPosition = discussionOnDiff.notes.nodes[0].position;
     expect(commit).toBe(discussionPosition.diffRefs.baseSha);

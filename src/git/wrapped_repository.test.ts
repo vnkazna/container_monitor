@@ -7,7 +7,7 @@ import {
 } from '../utils/extension_configuration';
 import { tokenService } from '../services/token_service';
 import { GITLAB_COM_URL } from '../constants';
-import { gqlProject, mr, mrVersion, project } from '../test_utils/entities';
+import { gqlProject, project } from '../test_utils/entities';
 import { createWrappedRepository } from '../test_utils/create_wrapped_repository';
 import { asMock } from '../test_utils/as_mock';
 import { GitLabProject } from '../gitlab/gitlab_project';
@@ -134,38 +134,6 @@ describe('WrappedRepository', () => {
       await wrappedRepository.getProject();
 
       expect(wrappedRepository.name).toEqual(project.name);
-    });
-  });
-
-  describe('cached MRs', () => {
-    it('returns undefined if the MR is not cached', () => {
-      wrappedRepository = createWrappedRepository();
-
-      expect(wrappedRepository.getMr(1)).toBe(undefined);
-    });
-
-    it('fetches MR versions when we reload MR', async () => {
-      wrappedRepository = createWrappedRepository({
-        gitLabService: {
-          getMrDiff: async () => mrVersion,
-        },
-      });
-
-      const result = await wrappedRepository.reloadMr(mr);
-
-      expect(result).toEqual({ mr, mrVersion });
-    });
-
-    it('returns MR when it was cached', async () => {
-      wrappedRepository = createWrappedRepository({
-        gitLabService: {
-          getMrDiff: async () => mrVersion,
-        },
-      });
-
-      await wrappedRepository.reloadMr(mr);
-
-      expect(wrappedRepository.getMr(mr.id)).toEqual({ mr, mrVersion });
     });
   });
 

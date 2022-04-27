@@ -1,4 +1,5 @@
 import vscode from 'vscode';
+import assert from 'assert';
 import { GitLabService } from './gitlab_service';
 import { ExistingProject, ProjectInRepository, SelectedProjectSetting } from './new_project';
 import { Credentials, tokenService, TokenService } from '../services/token_service';
@@ -19,6 +20,8 @@ import { log } from '../log';
 import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
 import { prettyJson } from '../errors/common';
 import { EnsureLatestPromise } from '../utils/ensure_latest_promise';
+import { convertRepositoryToProject } from '../utils/convert_repository_to_project';
+import { GitLabRepository } from '../git/wrapped_repository';
 
 interface ParsedProject {
   namespaceWithPath: string;
@@ -29,6 +32,7 @@ interface ParsedProject {
 export interface GitLabProjectRepository {
   getAllProjects(): ProjectInRepository[];
   getSelectedOrDefaultForRepository(rootFsPath: string): ProjectInRepository | undefined;
+  getSelectedOrDefaultForRepositoryLegacy(rootFsPath: string): Promise<ProjectInRepository>;
   repositoryHasAmbiguousProjects(rootFsPath: string): boolean;
   init(): Promise<void>;
   readonly onProjectChange: vscode.Event<readonly ProjectInRepository[]>;
@@ -224,6 +228,15 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
   getSelectedOrDefaultForRepository(rootFsPath: string): ProjectInRepository | undefined {
     const projects = this.#getProjectsForRepository(rootFsPath);
     return getSelectedOrDefault(projects);
+  }
+
+  async getSelectedOrDefaultForRepositoryLegacy(rootFsPath: string): Promise<ProjectInRepository> {
+    const wrappedRepository = this.#gitExtensionWrapper.getRepository(rootFsPath);
+    assert(
+      await wrappedRepository.getProject(),
+      `Repository ${rootFsPath} doesn't contain GitLab project`,
+    );
+    return convertRepositoryToProject(wrappedRepository as GitLabRepository);
   }
 
   repositoryHasAmbiguousProjects(rootFsPath: string): boolean {

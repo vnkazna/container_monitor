@@ -28,15 +28,15 @@ export const triggerPipelineAction: NewProjectCommand = async projectInRepositor
   ];
 
   const selected = await vscode.window.showQuickPick(items);
-  const { repository } = projectInRepository.pointer;
 
   if (selected) {
     if (selected.action === 'view') {
-      await openCurrentPipeline(repository.rootFsPath);
+      await openCurrentPipeline(projectInRepository);
       return;
     }
 
     const { project } = projectInRepository;
+    const { repository } = projectInRepository.pointer;
     const gitlabService = getGitLabService(projectInRepository);
     const { pipeline } = await gitlabService.getPipelineAndMrForCurrentBranch(
       project,

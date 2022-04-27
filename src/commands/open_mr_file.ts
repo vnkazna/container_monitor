@@ -4,8 +4,9 @@ import assert from 'assert';
 import { promises as fs } from 'fs';
 import { VS_COMMANDS } from '../command_names';
 import { fromReviewUri } from '../review/review_uri';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { removeLeadingSlash } from '../utils/remove_leading_slash';
+import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
+import { mrCache } from '../gitlab/mr_cache';
 
 /** returns true if file exists, false if it doesn't */
 const tryToOpen = async (filePath: string): Promise<boolean> => {
@@ -24,8 +25,10 @@ const findDiffWithPath = (diffs: RestDiffFile[], relativePath: string): RestDiff
 export const openMrFile = async (uri: vscode.Uri): Promise<void> => {
   const params = fromReviewUri(uri);
   assert(params.path);
-  const repository = gitExtensionWrapper.getRepository(params.repositoryRoot);
-  const cachedMr = repository.getMr(params.mrId);
+  const projectInRepository = await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(
+    params.repositoryRoot,
+  );
+  const cachedMr = mrCache.getMr(params.mrId, projectInRepository);
   assert(cachedMr);
   const diff = findDiffWithPath(cachedMr.mrVersion.diffs, removeLeadingSlash(params.path));
   assert(diff, 'Extension did not find the file in the MR, please refresh the side panel.');

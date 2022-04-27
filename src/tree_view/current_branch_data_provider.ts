@@ -3,7 +3,6 @@ import { ErrorItem } from './items/error_item';
 import { ItemModel } from './items/item_model';
 import { MrItemModel } from './items/mr_item_model';
 import { IssueItem } from './items/issue_item';
-import { WrappedRepository } from '../git/wrapped_repository';
 import { PipelineItemModel } from './items/pipeline_item_model';
 import { BranchState, ValidBranchState, InvalidBranchState } from '../current_branch_refresher';
 import { onSidebarViewStateChange } from './sidebar_view_state';
@@ -25,15 +24,11 @@ export class CurrentBranchDataProvider
     onSidebarViewStateChange(() => this.refresh(this.state), this);
   }
 
-  createPipelineItem(
-    repository: WrappedRepository,
-    pipeline: RestPipeline | undefined,
-    jobs: RestJob[],
-  ) {
+  createPipelineItem(pipeline: RestPipeline | undefined, jobs: RestJob[]) {
     if (!pipeline) {
       return new vscode.TreeItem('No pipeline found');
     }
-    this.pipelineItem = new PipelineItemModel(pipeline, jobs, repository);
+    this.pipelineItem = new PipelineItemModel(pipeline, jobs);
     return this.pipelineItem;
   }
 
@@ -47,20 +42,20 @@ export class CurrentBranchDataProvider
       return this.mrState.item;
     this.disposeMrItem();
     if (!state.mr) return new vscode.TreeItem('No merge request found');
-    const item = new MrItemModel(state.mr, state.repository);
+    const item = new MrItemModel(state.mr, state.projectInRepository);
     this.mrState = { mr: state.mr, item };
     return item;
   }
 
-  static createClosingIssueItems(repository: WrappedRepository, issues: RestIssuable[]) {
+  static createClosingIssueItems(rootFsPath: string, issues: RestIssuable[]) {
     if (issues.length === 0) return [new vscode.TreeItem('No closing issue found')];
-    return issues.map(issue => new IssueItem(issue, repository.rootFsPath));
+    return issues.map(issue => new IssueItem(issue, rootFsPath));
   }
 
   renderValidState(state: ValidBranchState) {
-    const pipelineItem = this.createPipelineItem(state.repository, state.pipeline, state.jobs);
+    const pipelineItem = this.createPipelineItem(state.pipeline, state.jobs);
     const closingIssuesItems = CurrentBranchDataProvider.createClosingIssueItems(
-      state.repository,
+      state.projectInRepository.pointer.repository.rootFsPath,
       state.issues,
     );
     return { pipelineItem, closingIssuesItems };

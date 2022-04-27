@@ -3,16 +3,20 @@ import assert from 'assert';
 import dayjs from 'dayjs';
 import { log } from './log';
 import { extensionState } from './extension_state';
-import { WrappedRepository } from './git/wrapped_repository';
+import { GitLabRepository } from './git/wrapped_repository';
 import { StatusBar } from './status_bar';
 import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { notNullOrUndefined } from './utils/not_null_or_undefined';
 import { getActiveRepository } from './commands/run_with_valid_project';
+import { ProjectInRepository } from './gitlab/new_project';
+import { convertRepositoryToProject } from './utils/convert_repository_to_project';
+import { getGitLabService } from './gitlab/get_gitlab_service';
+import { getTrackingBranchName } from './git/get_tracking_branch_name';
 
 export interface ValidBranchState {
   valid: true;
-  repository: WrappedRepository;
+  projectInRepository: ProjectInRepository;
   mr?: RestMr;
   issues: RestIssuable[];
   pipeline?: RestPipeline;
@@ -30,17 +34,25 @@ export type BranchState = ValidBranchState | InvalidBranchState;
 const INVALID_STATE: InvalidBranchState = { valid: false };
 
 const getJobs = async (
-  repository: WrappedRepository,
+  projectInRepository: ProjectInRepository,
   pipeline?: RestPipeline,
 ): Promise<RestJob[]> => {
   if (!pipeline) return [];
   try {
-    return await repository.getGitLabService().getJobsForPipeline(pipeline);
+    return await getGitLabService(projectInRepository).getJobsForPipeline(pipeline);
   } catch (e) {
     log.error(new UserFriendlyError('Failed to fetch jobs for pipeline.', e));
     return [];
   }
 };
+
+const getProjectInRepository = async () => {
+  const repository = getActiveRepository();
+  if (!repository) return undefined;
+  if (!(await repository.getProject())) return undefined;
+  return convertRepositoryToProject(repository as GitLabRepository);
+};
+
 export class CurrentBranchRefresher {
   private refreshTimer?: NodeJS.Timeout;
 
@@ -96,32 +108,34 @@ export class CurrentBranchRefresher {
   async refresh(userInitiated = false) {
     assert(this.statusBar);
     assert(this.currentBranchProvider);
-    const state = await CurrentBranchRefresher.getState(userInitiated);
+    const projectInRepository = await getProjectInRepository();
+    const state = await CurrentBranchRefresher.getState(projectInRepository, userInitiated);
     await this.statusBar.refresh(state);
     this.currentBranchProvider.refresh(state);
     this.lastRefresh = dayjs();
   }
 
-  static async getState(userInitiated: boolean): Promise<BranchState> {
-    if (!extensionState.isValid()) return INVALID_STATE;
-    const repository = getActiveRepository();
-    if (!repository) return INVALID_STATE;
-    const gitlabProject = await repository.getProject();
-    if (!gitlabProject) return INVALID_STATE;
-    const gitLabService = repository.getGitLabService();
+  static async getState(
+    projectInRepository: ProjectInRepository | undefined,
+    userInitiated: boolean,
+  ): Promise<BranchState> {
+    if (!projectInRepository) return INVALID_STATE;
+    const { project } = projectInRepository;
+    const { rawRepository } = projectInRepository.pointer.repository;
+    const gitLabService = getGitLabService(projectInRepository);
     try {
       const { pipeline, mr } = await gitLabService.getPipelineAndMrForCurrentBranch(
-        gitlabProject,
-        await repository.getTrackingBranchName(),
+        projectInRepository.project,
+        await getTrackingBranchName(rawRepository),
       );
-      const jobs = await getJobs(repository, pipeline);
-      const minimalIssues = mr ? await gitLabService.getMrClosingIssues(gitlabProject, mr.iid) : [];
+      const jobs = await getJobs(projectInRepository, pipeline);
+      const minimalIssues = mr ? await gitLabService.getMrClosingIssues(project, mr.iid) : [];
       const issues = (
         await Promise.all(
-          minimalIssues.map(mi => gitLabService.getSingleProjectIssue(gitlabProject, mi.iid)),
+          minimalIssues.map(mi => gitLabService.getSingleProjectIssue(project, mi.iid)),
         )
       ).filter(notNullOrUndefined);
-      return { valid: true, repository, pipeline, mr, jobs, issues, userInitiated };
+      return { valid: true, projectInRepository, pipeline, mr, jobs, issues, userInitiated };
     } catch (e) {
       log.error(e);
       return { valid: false, error: e };

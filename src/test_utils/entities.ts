@@ -1,8 +1,11 @@
+import { GitRemote, GitRepository } from '../git/new_git';
 import { CustomQueryType } from '../gitlab/custom_query_type';
 import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
+import { ProjectInRepository } from '../gitlab/new_project';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
 import { createWrappedRepository } from './create_wrapped_repository';
+import { createFakeRepository } from './fake_git_extension';
 
 export const issue: RestIssuable = {
   id: 1,
@@ -113,3 +116,19 @@ export const reviewUriParams: ReviewUriParams = {
 };
 
 export const project = new GitLabProject(gqlProject);
+
+export const projectInRepository: ProjectInRepository = {
+  project,
+  pointer: {
+    repository: {
+      rootFsPath: '/path/to/repo',
+      rawRepository: createFakeRepository(),
+    } as GitRepository,
+    remote: { name: 'name' } as GitRemote,
+    urlEntry: { type: 'both', url: 'git@gitlab.com:gitlab-org/gitlab-vscode-extension' },
+  },
+  credentials: {
+    instanceUrl: 'https://gitlab.com',
+    token: 'abc',
+  },
+};

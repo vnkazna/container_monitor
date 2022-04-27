@@ -23,8 +23,8 @@ const onlyOneFolder = require('./fixtures/rest/mr_versions/only_one_folder.json'
 const nestFolders = require('./fixtures/rest/mr_versions/nest_folders.json');
 const onlyRootFiles = require('./fixtures/rest/mr_versions/only_root_files.json');
 const multiFiles = require('./fixtures/rest/mr_versions/multi_files.json');
-const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
 const { getRepositoryRoot } = require('./test_infrastructure/helpers');
+const { gitlabProjectRepository } = require('../../src/gitlab/gitlab_project_repository');
 
 const fileTestCase = (changedFileItem, filename, filepath) => {
   // this test case ensures file items list in the tree view is as same as they are in the list view
@@ -84,7 +84,7 @@ describe('MR in tree view', () => {
     const dataProvider = new IssuableDataProvider();
     const mrItemModel = new MrItemModel(
       openMergeRequestResponse,
-      gitExtensionWrapper.getRepository(getRepositoryRoot()),
+      await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(getRepositoryRoot()),
     );
 
     const mrContent = await dataProvider.getChildren(mrItemModel);

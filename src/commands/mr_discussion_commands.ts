@@ -2,7 +2,9 @@ import assert from 'assert';
 import * as vscode from 'vscode';
 import { FAILED_COMMENT_CONTEXT } from '../constants';
 import { getNewLineForOldUnchangedLine } from '../git/diff_line_count';
-import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { getGitLabService } from '../gitlab/get_gitlab_service';
+import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
+import { mrCache } from '../gitlab/mr_cache';
 import { GitLabComment } from '../review/gitlab_comment';
 import { GitLabCommentThread } from '../review/gitlab_comment_thread';
 import { fromReviewUri } from '../review/review_uri';
@@ -15,8 +17,10 @@ const createNewComment = async (
   thread: vscode.CommentThread,
 ): Promise<GitLabCommentThread> => {
   const { path, commit, repositoryRoot, mrId } = fromReviewUri(thread.uri);
-  const repository = gitExtensionWrapper.getRepository(repositoryRoot);
-  const cachedMr = repository.getMr(mrId);
+  const projectInRepository = await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(
+    repositoryRoot,
+  );
+  const cachedMr = mrCache.getMr(mrId, projectInRepository);
   assert(cachedMr);
   const { mr, mrVersion } = cachedMr;
   const isOld = commit === mrVersion.base_commit_sha;
@@ -32,7 +36,7 @@ const createNewComment = async (
         newLine: getNewLineForOldUnchangedLine(mrVersion, path!, getLineNumber(thread)),
       }
     : { newLine: getLineNumber(thread) };
-  const discussion = await repository.getGitLabService().createDiffNote(mrId, text, {
+  const discussion = await getGitLabService(projectInRepository).createDiffNote(mrId, text, {
     baseSha: mrVersion.base_commit_sha,
     headSha: mrVersion.head_commit_sha,
     startSha: mrVersion.start_commit_sha,
@@ -43,7 +47,7 @@ const createNewComment = async (
     ...positionFragment,
   });
 
-  return new GitLabCommentThread(thread, discussion, repository.getGitLabService(), mr);
+  return new GitLabCommentThread(thread, discussion, getGitLabService(projectInRepository), mr);
 };
 
 export interface CommentWithThread extends vscode.Comment {

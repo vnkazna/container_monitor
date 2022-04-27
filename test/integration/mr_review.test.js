@@ -24,8 +24,8 @@ const {
 const { ApiContentProvider } = require('../../src/review/api_content_provider');
 const { PROGRAMMATIC_COMMANDS } = require('../../src/command_names');
 const { getRepositoryRoot } = require('./test_infrastructure/helpers');
-const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
 const { toReviewUri } = require('../../src/review/review_uri');
+const { gitlabProjectRepository } = require('../../src/gitlab/gitlab_project_repository');
 
 describe('MR Review', () => {
   let server;
@@ -71,12 +71,12 @@ describe('MR Review', () => {
     ]);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server.resetHandlers();
     dataProvider = new IssuableDataProvider();
     mrItemModel = new MrItemModel(
       openMergeRequestResponse,
-      gitExtensionWrapper.getRepository(getRepositoryRoot()),
+      await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(getRepositoryRoot()),
     );
   });
 

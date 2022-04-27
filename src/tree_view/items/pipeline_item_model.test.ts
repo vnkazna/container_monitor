@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import dayjs from 'dayjs';
-import { job, pipeline, repository } from '../../test_utils/entities';
+import { job, pipeline } from '../../test_utils/entities';
 import { PipelineItemModel } from './pipeline_item_model';
 import { VS_COMMANDS } from '../../command_names';
 
@@ -18,7 +18,6 @@ describe('PipelineItemModel', () => {
           updated_at: fourYearsAgo.toString(),
         },
         [],
-        repository,
       ).getTreeItem();
     });
 
@@ -53,7 +52,7 @@ describe('PipelineItemModel', () => {
 
     beforeEach(() => {
       const jobs = [unitTestJob, integrationTestJob, packageJob];
-      pipelineItem = new PipelineItemModel(pipeline, jobs, repository);
+      pipelineItem = new PipelineItemModel(pipeline, jobs);
     });
 
     it('returns unique stages', async () => {
@@ -70,7 +69,7 @@ describe('PipelineItemModel', () => {
         { ...packageJob, id: 1 },
       ];
 
-      pipelineItem = new PipelineItemModel(pipeline, jobs, repository);
+      pipelineItem = new PipelineItemModel(pipeline, jobs);
       const children = await pipelineItem.getChildren();
       const labels = children.map(ch => ch.getTreeItem()).map(i => i.label);
 
