@@ -1,11 +1,11 @@
-import { Account } from '../services/account';
+import { Account, makeAccountId } from '../services/account';
 
 export const testAccount = (
   instanceUrl = 'https://gitlab.com',
   userId = 1,
   token = 'abc',
 ): Account => ({
-  id: `${instanceUrl}-${userId}`,
+  id: makeAccountId(instanceUrl, userId),
   username: `user${userId}`,
   instanceUrl,
   token,

@@ -3,6 +3,7 @@ import { GITLAB_COM_URL } from './constants';
 import { FetchError } from './errors/fetch_error';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { GitLabService } from './gitlab/gitlab_service';
+import { makeAccountId } from './services/account';
 import { accountService } from './services/account_service';
 import { Credentials } from './services/credentials';
 import { validateInstanceUrl } from './utils/validate_instance_url';
@@ -45,7 +46,7 @@ export async function showInput() {
   await accountService.addAccount({
     instanceUrl,
     token,
-    id: `${instanceUrl}-${user.id}`,
+    id: makeAccountId(instanceUrl, user.id),
     username: user.username,
   });
   await vscode.window.showInformationMessage(

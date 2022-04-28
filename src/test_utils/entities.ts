@@ -4,6 +4,7 @@ import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
 import { ProjectInRepository } from '../gitlab/new_project';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
+import { makeAccountId } from '../services/account';
 import { createFakeRepository } from './fake_git_extension';
 
 export const issue: RestIssuable = {
@@ -130,7 +131,7 @@ export const projectInRepository: ProjectInRepository = {
     urlEntry: { type: 'both', url: 'git@gitlab.com:gitlab-org/gitlab-vscode-extension' },
   },
   account: {
-    id: 'https://gitlab.com-1',
+    id: makeAccountId('https://gitlab.com', 1),
     username: 'username',
     instanceUrl: 'https://gitlab.com',
     token: 'abc',

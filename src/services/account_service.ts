@@ -2,7 +2,7 @@ import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
-import { Account } from './account';
+import { Account, makeAccountId } from './account';
 import { Credentials } from './credentials';
 
 const getEnvironmentVariables = (): Credentials | undefined => {
@@ -26,7 +26,7 @@ const getEnvAccount = (): Account | undefined => {
   const credentials = getEnvironmentVariables();
   if (!credentials) return undefined;
   return {
-    id: `${credentials.instanceUrl}-environment-variables`,
+    id: makeAccountId(credentials.instanceUrl, 'environment-variables'),
     username: 'environment_variable_credentials',
     ...credentials,
   };
