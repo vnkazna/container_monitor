@@ -54,13 +54,16 @@ export async function showInput() {
 }
 
 export async function removeTokenPicker() {
-  const instanceUrls = accountService.getRemovableInstanceUrls();
-  const selectedInstanceUrl = await vscode.window.showQuickPick(instanceUrls, {
-    ignoreFocusOut: true,
-    placeHolder: 'Select Gitlab instance for PAT removal',
-  });
+  const accounts = accountService.getRemovableAccounts();
+  const result = await vscode.window.showQuickPick(
+    accounts.map(a => ({ label: a.instanceUrl, description: a.username, id: a.id })),
+    {
+      ignoreFocusOut: true,
+      placeHolder: 'Select Gitlab instance for PAT removal',
+    },
+  );
 
-  if (selectedInstanceUrl) {
-    await accountService.setToken(selectedInstanceUrl, undefined);
+  if (result) {
+    await accountService.removeAccount(result.id);
   }
 }

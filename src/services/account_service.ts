@@ -5,7 +5,7 @@ import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 import { Account } from './account';
 import { Credentials } from './credentials';
 
-const getEnvironmentVariables = () => {
+const getEnvironmentVariables = (): Credentials | undefined => {
   const { GITLAB_WORKFLOW_INSTANCE_URL, GITLAB_WORKFLOW_TOKEN } = process.env;
   if (!GITLAB_WORKFLOW_INSTANCE_URL || !GITLAB_WORKFLOW_TOKEN) return undefined;
   return {
@@ -22,6 +22,15 @@ const environmentTokenForInstance = (instanceUrl: string) =>
     ? getEnvironmentVariables()?.token
     : undefined;
 
+const getEnvAccount = (): Account | undefined => {
+  const credentials = getEnvironmentVariables();
+  if (!credentials) return undefined;
+  return {
+    id: `${credentials.instanceUrl}-environment-variables`,
+    username: 'environment_variable_credentials',
+    ...credentials,
+  };
+};
 export class AccountService {
   context?: ExtensionContext;
 
@@ -72,8 +81,12 @@ export class AccountService {
     }));
   }
 
-  getAllAccounts(): Account[] {
+  getRemovableAccounts(): Account[] {
     return Object.values(this.accountMap).filter(notNullOrUndefined);
+  }
+
+  getAllAccounts(): Account[] {
+    return [...Object.values(this.accountMap), getEnvAccount()].filter(notNullOrUndefined);
   }
 
   async addAccount(account: Account) {
@@ -84,6 +97,15 @@ export class AccountService {
 
     await this.context.globalState.update(ACCOUNTS_KEY, accountMap);
 
+    this.onDidChangeEmitter.fire();
+  }
+
+  async removeAccount(accountId: string) {
+    assert(this.context);
+    const { accountMap } = this;
+    delete accountMap[accountId];
+
+    await this.context.globalState.update(ACCOUNTS_KEY, accountMap);
     this.onDidChangeEmitter.fire();
   }
 
