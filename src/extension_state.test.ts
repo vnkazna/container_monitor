@@ -37,7 +37,7 @@ describe('extension_state', () => {
 
       const { executeCommand } = vscode.commands;
       expect(executeCommand).toBeCalledWith('setContext', 'gitlab:validState', validState);
-      expect(executeCommand).toBeCalledWith('setContext', 'gitlab:noToken', noToken);
+      expect(executeCommand).toBeCalledWith('setContext', 'gitlab:noAccount', noToken);
       expect(executeCommand).toBeCalledWith('setContext', 'gitlab:noRepository', noRepository);
     },
   );
