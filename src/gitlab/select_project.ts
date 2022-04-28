@@ -1,8 +1,8 @@
 import vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { createRemoteUrlPointers, GitRemoteUrlPointer, GitRepository } from '../git/new_git';
+import { Account } from '../services/account';
 import { accountService } from '../services/account_service';
-import { Credentials } from '../services/credentials';
 import { MultipleProjectsItem } from '../tree_view/items/multiple_projects_item';
 import { NoProjectItem } from '../tree_view/items/no_project_item';
 import { ProjectItemModel } from '../tree_view/items/project_item_model';
@@ -22,12 +22,12 @@ const selectRepository = async (): Promise<GitRepository | undefined> => {
   return choice.repository;
 };
 
-const pickCredentials = async (allCredentials: Credentials[]) => {
-  if (allCredentials.length === 0) return undefined;
-  if (allCredentials.length === 1) return allCredentials[0];
+const pickCredentials = async (accounts: Account[]) => {
+  if (accounts.length === 0) return undefined;
+  if (accounts.length === 1) return accounts[0];
 
   return vscode.window.showQuickPick(
-    allCredentials.map(c => ({ ...c, label: c.instanceUrl })),
+    accounts.map(c => ({ ...c, label: c.instanceUrl })),
     { title: 'Select token' },
   );
 };
@@ -42,14 +42,14 @@ const pickRemoteUrl = async (pointers: GitRemoteUrlPointer[]) => {
 };
 
 const manuallyAssignProject = async (repository: GitRepository) => {
-  const credentials = await pickCredentials(accountService.getAllCredentials());
-  if (!credentials) return;
+  const account = await pickCredentials(accountService.getAllAccounts());
+  if (!account) return;
   const pointer = await pickRemoteUrl(createRemoteUrlPointers(repository));
   if (!pointer) return;
-  const project = await pickProject(new GitLabService(credentials));
+  const project = await pickProject(new GitLabService(account));
   if (!project) return;
   const projectInRepository: ProjectInRepository = {
-    credentials,
+    account,
     pointer,
     project,
     initializationType: 'selected',
@@ -68,7 +68,7 @@ const selectProject = async (repository: GitRepository) => {
       ...p,
       label: p.project.namespaceWithPath,
       description: 'detected',
-      detail: `${p.credentials.instanceUrl}`,
+      detail: `${p.account.instanceUrl}`,
       isOther: false as const,
     })),
     {

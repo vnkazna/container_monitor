@@ -22,14 +22,19 @@ describe('token input', () => {
         options.password ? 'token' : 'instanceUrl',
       );
     });
-    it('adds token', async () => {
+    it('adds account', async () => {
       // simulate API returning user for the instance url and token
-      mockGetCurrentUserResponse({ username: 'testname' });
+      mockGetCurrentUserResponse({ id: 1, username: 'testname' });
 
       await showInput();
 
       expect(GitLabService).toHaveBeenCalledWith({ instanceUrl: 'instanceUrl', token: 'token' });
-      expect(accountService.setToken).toHaveBeenCalledWith('instanceUrl', 'token');
+      expect(accountService.addAccount).toHaveBeenCalledWith({
+        instanceUrl: 'instanceUrl',
+        token: 'token',
+        id: 'instanceUrl-1',
+        username: 'testname',
+      });
     });
     it('handles Unauthorized error', async () => {
       // simulate API failing with Unauthorized

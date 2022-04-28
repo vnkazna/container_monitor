@@ -129,7 +129,9 @@ export const projectInRepository: ProjectInRepository = {
     remote: { name: 'name' } as GitRemote,
     urlEntry: { type: 'both', url: 'git@gitlab.com:gitlab-org/gitlab-vscode-extension' },
   },
-  credentials: {
+  account: {
+    id: 'https://gitlab.com-1',
+    username: 'username',
     instanceUrl: 'https://gitlab.com',
     token: 'abc',
   },

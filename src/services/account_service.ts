@@ -2,6 +2,7 @@ import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
+import { Account } from './account';
 import { Credentials } from './credentials';
 
 const getEnvironmentVariables = () => {
@@ -12,6 +13,9 @@ const getEnvironmentVariables = () => {
     token: GITLAB_WORKFLOW_TOKEN,
   };
 };
+
+const TOKENS_KEY = 'glTokens';
+const ACCOUNTS_KEY = 'glAccounts';
 
 const environmentTokenForInstance = (instanceUrl: string) =>
   instanceUrl === getEnvironmentVariables()?.instanceUrl
@@ -33,7 +37,12 @@ export class AccountService {
 
   private get glTokenMap(): Record<string, string | undefined> {
     assert(this.context);
-    return this.context.globalState.get('glTokens', {});
+    return this.context.globalState.get(TOKENS_KEY, {});
+  }
+
+  private get accountMap(): Record<string, Account | undefined> {
+    assert(this.context);
+    return this.context.globalState.get(ACCOUNTS_KEY, {});
   }
 
   getInstanceUrls(): string[] {
@@ -63,6 +72,21 @@ export class AccountService {
     }));
   }
 
+  getAllAccounts(): Account[] {
+    return Object.values(this.accountMap).filter(notNullOrUndefined);
+  }
+
+  async addAccount(account: Account) {
+    assert(this.context);
+    const { accountMap } = this;
+    // FIXME: handle duplicates
+    accountMap[account.id] = account;
+
+    await this.context.globalState.update(ACCOUNTS_KEY, accountMap);
+
+    this.onDidChangeEmitter.fire();
+  }
+
   async setToken(instanceUrl: string, token: string | undefined): Promise<void> {
     assert(this.context);
     const tokenMap = this.glTokenMap;
@@ -73,7 +97,7 @@ export class AccountService {
       delete tokenMap[instanceUrl];
     }
 
-    await this.context.globalState.update('glTokens', tokenMap);
+    await this.context.globalState.update(TOKENS_KEY, tokenMap);
     this.onDidChangeEmitter.fire();
   }
 }

@@ -111,7 +111,7 @@ export const showProjectAdvancedSearchInput: NewProjectCommand = async projectIn
     'Project Advanced Search. (Check extension page for Advanced Search)',
   );
   if (!query) return;
-  const { instanceUrl } = projectInRepository.credentials;
+  const { instanceUrl } = projectInRepository.account;
   const { project } = projectInRepository;
 
   const queryString = createQueryString({

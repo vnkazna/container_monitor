@@ -2,9 +2,9 @@ import { GitExtensionWrapper } from '../git/git_extension_wrapper';
 import { createRemoteUrlPointers, GitRepositoryImpl } from '../git/new_git';
 import { log } from '../log';
 import { AccountService } from '../services/account_service';
-import { Credentials } from '../services/credentials';
 import { asMock } from '../test_utils/as_mock';
 import { createFakeRepository } from '../test_utils/fake_git_extension';
+import { testAccount } from '../test_utils/test_account';
 import { GitLabProject } from './gitlab_project';
 import { GitLabProjectRepositoryImpl, initializeAllProjects } from './gitlab_project_repository';
 import { GitLabService } from './gitlab_service';
@@ -37,7 +37,7 @@ describe('gitlab_project_repository', () => {
     projects = {};
   });
   describe('initializeAllProjects', () => {
-    const defaultCredentials = { instanceUrl: 'https://gitlab.com', token: 'abc' };
+    const defaultAccount = testAccount('https://gitlab.com', 1, 'abc');
     const extensionRemoteUrl = 'git@gitlab.com/gitlab-org/gitlab-vscode-extension';
 
     describe('with one project on the GitLab instance', () => {
@@ -49,7 +49,7 @@ describe('gitlab_project_repository', () => {
         const pointers = createPointers([['origin', extensionRemoteUrl]]);
 
         const initializedProjects = await initializeAllProjects(
-          [defaultCredentials],
+          [defaultAccount],
           pointers,
           [],
           fakeGetProject,
@@ -57,7 +57,7 @@ describe('gitlab_project_repository', () => {
 
         expect(initializedProjects).toHaveLength(1);
         const [projectAndRepo] = initializedProjects;
-        expect(projectAndRepo.credentials).toEqual(defaultCredentials);
+        expect(projectAndRepo.account).toEqual(defaultAccount);
         expect(projectAndRepo.project.namespaceWithPath).toEqual(
           'gitlab-org/gitlab-vscode-extension',
         );
@@ -73,7 +73,7 @@ describe('gitlab_project_repository', () => {
         ]);
 
         const initializedProjects = await initializeAllProjects(
-          [defaultCredentials],
+          [defaultAccount],
           pointers,
           [],
           fakeGetProject,
@@ -85,7 +85,7 @@ describe('gitlab_project_repository', () => {
       it('can manually assign GitLab project to a remote URL', async () => {
         const pointers = createPointers([['origin', 'remote:that-we-cannot-parse-automatically']]);
         const selectedProjectSetting: SelectedProjectSetting = {
-          accountId: defaultCredentials.instanceUrl,
+          accountId: defaultAccount.instanceUrl,
           namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
           remoteName: 'origin',
           remoteUrl: 'remote:that-we-cannot-parse-automatically',
@@ -93,7 +93,7 @@ describe('gitlab_project_repository', () => {
         };
 
         const initializedProjects = await initializeAllProjects(
-          [defaultCredentials],
+          [defaultAccount],
           pointers,
           [selectedProjectSetting],
           fakeGetProject,
@@ -120,7 +120,7 @@ describe('gitlab_project_repository', () => {
 
       it('initializes two detected projects in one repo', async () => {
         const initializedProjects = await initializeAllProjects(
-          [defaultCredentials],
+          [defaultAccount],
           pointers,
           [],
           fakeGetProject,
@@ -136,7 +136,7 @@ describe('gitlab_project_repository', () => {
 
       it('marks repo as selected if it was selected by the user', async () => {
         const selectedProjectSetting: SelectedProjectSetting = {
-          accountId: defaultCredentials.instanceUrl,
+          accountId: defaultAccount.instanceUrl,
           namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
           remoteName: 'origin',
           remoteUrl: extensionRemoteUrl,
@@ -144,7 +144,7 @@ describe('gitlab_project_repository', () => {
         };
 
         const initializedProjects = await initializeAllProjects(
-          [defaultCredentials],
+          [defaultAccount],
           pointers,
           [selectedProjectSetting],
           fakeGetProject,
@@ -159,21 +159,18 @@ describe('gitlab_project_repository', () => {
 
     it('initializes multiple projects on multiple instances', async () => {
       const exampleRemoteUrl = 'git@example.com/example/gitlab-vscode-extension';
-      const exampleCredentials: Credentials = {
-        instanceUrl: 'https://example.com',
-        token: 'def',
-      };
+      const exampleAccount = testAccount('https://example.com');
       const pointers = createPointers([
         ['origin', extensionRemoteUrl],
         ['example', exampleRemoteUrl],
       ]);
       projects = {
         'https://gitlab.com-abc': ['gitlab-org/gitlab-vscode-extension'],
-        'https://example.com-def': ['example/gitlab-vscode-extension'],
+        'https://example.com-abc': ['example/gitlab-vscode-extension'],
       };
 
       const initializedProjects = await initializeAllProjects(
-        [defaultCredentials, exampleCredentials],
+        [defaultAccount, exampleAccount],
         pointers,
         [],
         fakeGetProject,
@@ -185,12 +182,9 @@ describe('gitlab_project_repository', () => {
       expect(example.project.namespaceWithPath).toBe('example/gitlab-vscode-extension');
     });
 
-    // TODO enable this test once we have multi-account support https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/298
-    xit('initializes multiple projects for multiple credentials', async () => {
-      const secondCredentials: Credentials = {
-        instanceUrl: 'https://gitlab.com',
-        token: 'def',
-      };
+    it('initializes multiple projects for multiple credentials', async () => {
+      const firstAccount = testAccount('https://gitlab.com', 1, 'abc');
+      const secondAccount = testAccount('https://gitlab.com', 2, 'def');
 
       projects = {
         'https://gitlab.com-abc': ['gitlab-org/gitlab-vscode-extension'],
@@ -199,7 +193,7 @@ describe('gitlab_project_repository', () => {
       const pointers = createPointers([['origin', extensionRemoteUrl]]);
 
       const initializedProjects = await initializeAllProjects(
-        [defaultCredentials, secondCredentials],
+        [firstAccount, secondAccount],
         pointers,
         [],
         fakeGetProject,
@@ -211,7 +205,7 @@ describe('gitlab_project_repository', () => {
     describe('when the setting cannot be loaded into a project', () => {
       const pointers = createPointers([['origin', extensionRemoteUrl]]);
       const correctSetting: SelectedProjectSetting = {
-        accountId: defaultCredentials.instanceUrl,
+        accountId: defaultAccount.instanceUrl,
         namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
         remoteName: 'origin',
         remoteUrl: extensionRemoteUrl,
@@ -220,7 +214,7 @@ describe('gitlab_project_repository', () => {
 
       const initializeProjectsWithSetting = async (setting: Partial<SelectedProjectSetting>) =>
         initializeAllProjects(
-          [defaultCredentials],
+          [defaultAccount],
           pointers,
           [{ ...correctSetting, ...setting }],
           fakeGetProject,
@@ -269,7 +263,7 @@ describe('gitlab_project_repository', () => {
 
     beforeEach(async () => {
       const fakeAccountService: Partial<AccountService> = {
-        getAllCredentials: () => [{ instanceUrl: 'https://gitlab.com', token: 'abc' }],
+        getAllAccounts: () => [testAccount()],
         onDidChange: jest.fn(),
       };
 

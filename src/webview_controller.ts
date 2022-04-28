@@ -112,10 +112,7 @@ class WebviewController {
           message.markdown,
           projectInRepository.project,
         );
-        rendered = makeHtmlLinksAbsolute(
-          rendered || '',
-          projectInRepository.credentials.instanceUrl,
-        );
+        rendered = makeHtmlLinksAbsolute(rendered || '', projectInRepository.account.instanceUrl);
 
         await panel.webview.postMessage({
           type: 'markdownRendered',

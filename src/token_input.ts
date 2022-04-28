@@ -42,7 +42,12 @@ export async function showInput() {
 
   if (!token) return;
   const user = await validateCredentialsAndGetUser({ instanceUrl, token });
-  await accountService.setToken(instanceUrl, token);
+  await accountService.addAccount({
+    instanceUrl,
+    token,
+    id: `${instanceUrl}-${user.id}`,
+    username: user.username,
+  });
   await vscode.window.showInformationMessage(
     `Added the GitLab account for user ${user.username} on ${instanceUrl}.`,
   );
