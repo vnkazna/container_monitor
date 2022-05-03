@@ -37,11 +37,7 @@ import { openRepository } from './commands/open_repository';
 import { contextUtils } from './utils/context_utils';
 import { currentBranchRefresher } from './current_branch_refresher';
 import { statusBar } from './status_bar';
-import {
-  diagnoseRepository,
-  runWithValidProject,
-  runWithValidProjectFile,
-} from './commands/run_with_valid_project';
+import { runWithValidProject, runWithValidProjectFile } from './commands/run_with_valid_project';
 import { triggerPipelineAction } from './commands/trigger_pipeline_action';
 import { setSidebarViewState, SidebarViewState } from './tree_view/sidebar_view_state';
 import { doNotAwait } from './utils/do_not_await';
@@ -120,7 +116,7 @@ const registerCommands = (
     [USER_COMMANDS.SIDEBAR_VIEW_AS_LIST]: () => setSidebarViewState(SidebarViewState.ListView),
     [USER_COMMANDS.SIDEBAR_VIEW_AS_TREE]: () => setSidebarViewState(SidebarViewState.TreeView),
     [USER_COMMANDS.REFRESH_SIDEBAR]: async () => {
-      issuableDataProvider.refresh();
+      await gitlabProjectRepository.reload();
       await currentBranchRefresher.refresh(true);
     },
     [USER_COMMANDS.OPEN_MR_FILE]: openMrFile,
@@ -128,7 +124,6 @@ const registerCommands = (
     [USER_COMMANDS.SELECT_PROJECT]: selectProjectCommand,
     [USER_COMMANDS.ASSIGN_PROJECT]: assignProject,
     [USER_COMMANDS.CLEAR_SELECTED_PROJECT]: clearSelectedProjects,
-    [PROGRAMMATIC_COMMANDS.DIAGNOSE_REPOSITORY]: diagnoseRepository,
     [PROGRAMMATIC_COMMANDS.NO_IMAGE_REVIEW]: () =>
       vscode.window.showInformationMessage("GitLab MR review doesn't support images yet."),
   };

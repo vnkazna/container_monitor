@@ -25,9 +25,7 @@ const findDiffWithPath = (diffs: RestDiffFile[], relativePath: string): RestDiff
 export const openMrFile = async (uri: vscode.Uri): Promise<void> => {
   const params = fromReviewUri(uri);
   assert(params.path);
-  const projectInRepository = await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(
-    params.repositoryRoot,
-  );
+  const projectInRepository = gitlabProjectRepository.getProjectOrFail(params.repositoryRoot);
   const cachedMr = mrCache.getMr(params.mrId, projectInRepository);
   assert(cachedMr);
   const diff = findDiffWithPath(cachedMr.mrVersion.diffs, removeLeadingSlash(params.path));

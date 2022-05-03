@@ -17,9 +17,7 @@ const createNewComment = async (
   thread: vscode.CommentThread,
 ): Promise<GitLabCommentThread> => {
   const { path, commit, repositoryRoot, mrId } = fromReviewUri(thread.uri);
-  const projectInRepository = await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(
-    repositoryRoot,
-  );
+  const projectInRepository = gitlabProjectRepository.getProjectOrFail(repositoryRoot);
   const cachedMr = mrCache.getMr(mrId, projectInRepository);
   assert(cachedMr);
   const { mr, mrVersion } = cachedMr;

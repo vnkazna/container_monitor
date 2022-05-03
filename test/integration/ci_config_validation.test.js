@@ -14,20 +14,6 @@ const {
   insertTextIntoActiveEditor,
 } = require('./test_infrastructure/helpers');
 const { USER_COMMANDS } = require('../../src/command_names');
-const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
-
-const ensureRepository = async () => {
-  await gitExtensionWrapper.init();
-  if (gitExtensionWrapper.repositories.length > 0) return undefined;
-  const createPromiseThatResolvesWhenRepoCountChanges = () =>
-    new Promise(resolve => {
-      const sub = gitExtensionWrapper.onRepositoryCountChanged(() => {
-        sub.dispose();
-        resolve(undefined);
-      });
-    });
-  return createPromiseThatResolvesWhenRepoCountChanges();
-};
 
 describe('Validate CI config', async () => {
   let server;
@@ -49,7 +35,6 @@ describe('Validate CI config', async () => {
         }
       }),
     ]);
-    await ensureRepository();
   });
 
   beforeEach(async () => {

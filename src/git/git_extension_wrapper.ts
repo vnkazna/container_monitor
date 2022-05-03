@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import { API, GitExtension, Repository } from '../api/git';
 import { gitlabCredentialsProvider } from '../gitlab/clone/gitlab_credentials_provider';
 import { GitLabRemoteSourceProviderRepository } from '../gitlab/clone/gitlab_remote_source_provider_repository';
-import { WrappedRepository, WrappedRepositoryImpl } from './wrapped_repository';
 import { handleError, log } from '../log';
 import { GitRepository, GitRepositoryImpl } from './new_git';
 
@@ -16,8 +15,6 @@ export class GitExtensionWrapper implements vscode.Disposable {
   apiListeners: vscode.Disposable[] = [];
 
   private enablementListener?: vscode.Disposable;
-
-  private wrappedRepositories: WrappedRepository[] = [];
 
   #gitRepositories: GitRepository[] = [];
 
@@ -35,7 +32,6 @@ export class GitExtensionWrapper implements vscode.Disposable {
       this.register();
       await this.addRepositories(this.gitApi?.repositories ?? []);
     } else {
-      this.wrappedRepositories = [];
       this.repositoryCountChangedEmitter.fire();
       this.disposeApiListeners();
     }
@@ -47,26 +43,14 @@ export class GitExtensionWrapper implements vscode.Disposable {
     return path;
   }
 
-  get repositories(): WrappedRepository[] {
-    return this.wrappedRepositories;
-  }
-
   get gitRepositories(): GitRepository[] {
     return this.#gitRepositories;
   }
 
-  getRepository(repositoryRoot: string): WrappedRepository {
-    const rawRepository = this.gitApi?.getRepository(vscode.Uri.file(repositoryRoot));
-    assert(rawRepository, `Git Extension doesn't have repository with root ${repositoryRoot}`);
-    const result = this.repositories.find(r => r.hasSameRootAs(rawRepository));
-    assert(result, `GitExtensionWrapper is missing repository for ${repositoryRoot}`);
-    return result;
-  }
-
-  getRepositoryForFile(fileUri: vscode.Uri): WrappedRepository | undefined {
+  getRepositoryForFile(fileUri: vscode.Uri): GitRepository | undefined {
     const rawRepository = this.gitApi?.getRepository(fileUri);
     if (!rawRepository) return undefined;
-    const result = this.repositories.find(r => r.hasSameRootAs(rawRepository));
+    const result = this.gitRepositories.find(r => r.hasSameRootAs(rawRepository));
     assert(result, `GitExtensionWrapper is missing repository for ${rawRepository.rootUri}`);
     return result;
   }
@@ -88,10 +72,6 @@ export class GitExtensionWrapper implements vscode.Disposable {
 
   private async addRepositories(repositories: Repository[]) {
     await Promise.all(repositories.map(r => r.status())); // make sure the repositories are initialized
-    this.wrappedRepositories = [
-      ...this.wrappedRepositories,
-      ...repositories.map(r => new WrappedRepositoryImpl(r)),
-    ];
     this.#gitRepositories = [
       ...this.#gitRepositories,
       ...repositories.map(r => new GitRepositoryImpl(r)),
@@ -100,7 +80,6 @@ export class GitExtensionWrapper implements vscode.Disposable {
   }
 
   private removeRepository(repository: Repository) {
-    this.wrappedRepositories = this.wrappedRepositories.filter(wr => !wr.hasSameRootAs(repository));
     this.#gitRepositories = this.#gitRepositories.filter(gr => !gr.hasSameRootAs(repository));
     this.repositoryCountChangedEmitter.fire();
   }

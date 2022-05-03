@@ -139,9 +139,7 @@ describe('MR discussion commands', () => {
 
       beforeEach(() => {
         mockedCreateDiffNote = jest.fn().mockResolvedValue(discussionOnDiff);
-        asMock(gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy).mockReturnValue(
-          projectInRepository,
-        );
+        asMock(gitlabProjectRepository.getProjectOrFail).mockReturnValue(projectInRepository);
         asMock(mrCache.getMr).mockReturnValue({ mr, mrVersion: customMrVersion });
         asMock(getGitLabService).mockReturnValue({
           createDiffNote: mockedCreateDiffNote,

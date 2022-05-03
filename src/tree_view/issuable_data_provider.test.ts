@@ -1,18 +1,12 @@
 import { extensionState } from '../extension_state';
+import { gitExtensionWrapper } from '../git/git_extension_wrapper';
+import { gitlabProjectRepository } from '../gitlab/gitlab_project_repository';
 import { asMock } from '../test_utils/as_mock';
-import { repository } from '../test_utils/entities';
+import { gitRepository } from '../test_utils/entities';
 import { IssuableDataProvider } from './issuable_data_provider';
 
-let repositories: any = [];
-
 jest.mock('../extension_state');
-jest.mock('../git/git_extension_wrapper', () => ({
-  gitExtensionWrapper: {
-    get repositories() {
-      return repositories;
-    },
-  },
-}));
+jest.mock('../gitlab/gitlab_project_repository');
 
 describe('Issuable Data Provider', () => {
   let provider: IssuableDataProvider;
@@ -22,14 +16,15 @@ describe('Issuable Data Provider', () => {
   });
 
   it('returns empty array when there are no repositories', async () => {
-    repositories = [];
+    jest.spyOn(gitExtensionWrapper, 'gitRepositories', 'get').mockReturnValue([]);
     expect(await provider.getChildren(undefined)).toEqual([]);
   });
 
   it('returns an error item if the repository does not contain GitLab project', async () => {
-    repositories = [{ ...repository, getProject: () => undefined }];
+    jest.spyOn(gitExtensionWrapper, 'gitRepositories', 'get').mockReturnValue([gitRepository]);
+    asMock(gitlabProjectRepository.getSelectedOrDefaultForRepository).mockReturnValue(undefined);
     const children = await provider.getChildren(undefined);
     expect(children.length).toBe(1);
-    expect((children[0] as any).label).toMatch(/failed to load/);
+    expect((children[0] as any).label).toMatch(/no GitLab project/);
   });
 });

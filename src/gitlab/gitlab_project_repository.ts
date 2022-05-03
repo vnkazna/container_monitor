@@ -20,8 +20,6 @@ import { log } from '../log';
 import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
 import { prettyJson } from '../errors/common';
 import { EnsureLatestPromise } from '../utils/ensure_latest_promise';
-import { convertRepositoryToProject } from '../utils/convert_repository_to_project';
-import { GitLabRepository } from '../git/wrapped_repository';
 
 interface ParsedProject {
   namespaceWithPath: string;
@@ -30,11 +28,14 @@ interface ParsedProject {
 }
 
 export interface GitLabProjectRepository {
-  getAllProjects(): ProjectInRepository[];
+  getDefaultAndSelectedProjects(): ProjectInRepository[];
+  getProjectsForRepository(rootFsPath: string): ProjectInRepository[];
   getSelectedOrDefaultForRepository(rootFsPath: string): ProjectInRepository | undefined;
-  getSelectedOrDefaultForRepositoryLegacy(rootFsPath: string): Promise<ProjectInRepository>;
+  /** Returns selected or default project for repository root. If there's no initialized project it throws assertion error. */
+  getProjectOrFail(rootFsPath: string): ProjectInRepository;
   repositoryHasAmbiguousProjects(rootFsPath: string): boolean;
   init(): Promise<void>;
+  reload(): Promise<void>;
   readonly onProjectChange: vscode.Event<readonly ProjectInRepository[]>;
 }
 
@@ -217,30 +218,31 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
 
   onProjectChange = this.#emitter.event;
 
-  getAllProjects(): ProjectInRepository[] {
-    return this.#projects;
+  getDefaultAndSelectedProjects(): ProjectInRepository[] {
+    const repositoryPaths = uniq(this.#projects.map(p => p.pointer.repository.rootFsPath));
+
+    return repositoryPaths
+      .map(path => this.getSelectedOrDefaultForRepository(path))
+      .filter(notNullOrUndefined);
   }
 
-  #getProjectsForRepository(rootFsPath: string): ProjectInRepository[] {
+  getProjectsForRepository(rootFsPath: string): ProjectInRepository[] {
     return this.#projects.filter(p => p.pointer.repository.rootFsPath === rootFsPath);
   }
 
   getSelectedOrDefaultForRepository(rootFsPath: string): ProjectInRepository | undefined {
-    const projects = this.#getProjectsForRepository(rootFsPath);
+    const projects = this.getProjectsForRepository(rootFsPath);
     return getSelectedOrDefault(projects);
   }
 
-  async getSelectedOrDefaultForRepositoryLegacy(rootFsPath: string): Promise<ProjectInRepository> {
-    const wrappedRepository = this.#gitExtensionWrapper.getRepository(rootFsPath);
-    assert(
-      await wrappedRepository.getProject(),
-      `Repository ${rootFsPath} doesn't contain GitLab project`,
-    );
-    return convertRepositoryToProject(wrappedRepository as GitLabRepository);
+  getProjectOrFail(rootFsPath: string): ProjectInRepository {
+    const project = this.getSelectedOrDefaultForRepository(rootFsPath);
+    assert(project, `There is no initialized GitLab project in ${rootFsPath} repository.`);
+    return project;
   }
 
   repositoryHasAmbiguousProjects(rootFsPath: string): boolean {
-    const projects = this.#getProjectsForRepository(rootFsPath);
+    const projects = this.getProjectsForRepository(rootFsPath);
     return projects.length > 1 && getSelectedOrDefault(projects) === undefined;
   }
 
@@ -268,6 +270,10 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
         pointers.map(p => p.urlEntry.url),
       )}`,
     );
+  }
+
+  reload() {
+    return this.#updateProjects();
   }
 }
 

@@ -2,10 +2,11 @@ const assert = require('assert');
 const sinon = require('sinon');
 const vscode = require('vscode');
 const {
-  getActiveRepository,
-  getActiveRepositoryOrSelectOne,
+  getActiveProject,
+  getActiveProjectOrSelectOne,
 } = require('../../src/commands/run_with_valid_project');
-const { gitExtensionWrapper } = require('../../src/git/git_extension_wrapper');
+const { gitlabProjectRepository } = require('../../src/gitlab/gitlab_project_repository');
+const { projectInRepository } = require('../../src/test_utils/entities');
 const {
   createAndOpenFile,
   closeAndDeleteFile,
@@ -19,27 +20,22 @@ describe('run_with_valid_project', () => {
 
     describe('one repository, no open files', () => {
       it('getActiveRepository returns the open repository', () => {
-        const result = getActiveRepository();
-        assert.strictEqual(result.rootFsPath, getRepositoryRoot());
+        const result = getActiveProject();
+        assert.strictEqual(result.pointer.repository.rootFsPath, getRepositoryRoot());
       });
 
       it('getActiveRepositoryOrSelectOne returns the open repository', async () => {
-        const result = await getActiveRepositoryOrSelectOne();
-        assert.strictEqual(result.rootFsPath, getRepositoryRoot());
+        const result = await getActiveProjectOrSelectOne();
+        assert.strictEqual(result.pointer.repository.rootFsPath, getRepositoryRoot());
       });
     });
 
     describe('multiple repositories', () => {
-      const fakeRepository = {
-        name: 'repository 2',
-        rootFsPath: '/r2',
-      };
-
       beforeEach(() => {
-        const originalRepositories = gitExtensionWrapper.repositories;
+        const originalProjects = gitlabProjectRepository.getDefaultAndSelectedProjects();
         sandbox
-          .stub(gitExtensionWrapper, 'repositories')
-          .get(() => [...originalRepositories, fakeRepository]);
+          .stub(gitlabProjectRepository, 'getDefaultAndSelectedProjects')
+          .returns([...originalProjects, projectInRepository]);
       });
 
       afterEach(() => {
@@ -47,15 +43,15 @@ describe('run_with_valid_project', () => {
       });
 
       it('getActiveRepository returns undefined', () => {
-        const result = getActiveRepository();
+        const result = getActiveProject();
         assert.strictEqual(result, undefined);
       });
 
       it('getActiveRepositoryOrSelectOne lets user select a repository', async () => {
         // simulating user selecting second option
         simulateQuickPickChoice(sandbox, 1);
-        const result = await getActiveRepositoryOrSelectOne();
-        assert.strictEqual(result.rootFsPath, '/r2');
+        const result = await getActiveProjectOrSelectOne();
+        assert.strictEqual(result.pointer.repository.rootFsPath, '/path/to/repo');
       });
 
       describe('with open editor', () => {
@@ -70,13 +66,13 @@ describe('run_with_valid_project', () => {
         });
 
         it('getActiveRepository returns repository for the open file', () => {
-          const result = getActiveRepository();
-          assert.strictEqual(result.rootFsPath, getRepositoryRoot());
+          const result = getActiveProject();
+          assert.strictEqual(result.pointer.repository.rootFsPath, getRepositoryRoot());
         });
 
         it('getActiveRepositoryOrSelectOne returns repository for the open file', async () => {
-          const result = await getActiveRepositoryOrSelectOne();
-          assert.strictEqual(result.rootFsPath, getRepositoryRoot());
+          const result = await getActiveProjectOrSelectOne();
+          assert.strictEqual(result.pointer.repository.rootFsPath, getRepositoryRoot());
         });
       });
     });

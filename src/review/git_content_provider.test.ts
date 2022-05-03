@@ -24,9 +24,7 @@ describe('GitContentProvider', () => {
   };
 
   beforeEach(() => {
-    asMock(gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy).mockResolvedValue(
-      projectInRepository,
-    );
+    asMock(gitlabProjectRepository.getProjectOrFail).mockReturnValue(projectInRepository);
   });
 
   it('provides file content from a git repository', async () => {

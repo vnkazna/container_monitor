@@ -12,8 +12,7 @@ export class GitContentProvider implements vscode.TextDocumentContentProvider {
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     const params = fromReviewUri(uri);
     if (!params.path || !params.commit) return '';
-    const projectInRepository =
-      await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(params.repositoryRoot);
+    const projectInRepository = gitlabProjectRepository.getProjectOrFail(params.repositoryRoot);
     const result = await getFileContent(
       projectInRepository.pointer.repository.rawRepository,
       params.path,

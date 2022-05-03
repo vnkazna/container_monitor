@@ -13,7 +13,7 @@ describe('extension_state', () => {
     mockedRepositories = [];
     tokenService.getInstanceUrls = () => mockedInstancesWithTokens;
     jest
-      .spyOn(gitExtensionWrapper, 'repositories', 'get')
+      .spyOn(gitExtensionWrapper, 'gitRepositories', 'get')
       .mockImplementation(() => mockedRepositories);
     extensionState = new ExtensionState();
   });

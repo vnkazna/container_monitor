@@ -3,7 +3,7 @@ import assert from 'assert';
 import { TokenService } from './services/token_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
-const hasOpenRepositories = (): boolean => gitExtensionWrapper.repositories.length > 0;
+const hasOpenRepositories = (): boolean => gitExtensionWrapper.gitRepositories.length > 0;
 export class ExtensionState {
   private changeValidEmitter = new vscode.EventEmitter<void>();
 
