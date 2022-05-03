@@ -1,60 +1,77 @@
 import { ExtensionContext } from 'vscode';
+import { testAccount } from '../test_utils/test_account';
+import { Account } from './account';
 import { AccountService } from './account_service';
+import { CredentialsMigrator } from './credentials_migrator';
 
-type TokenMap = Record<string, string | undefined>;
+jest.mock('./credentials_migrator');
+
+type AccountMap = Record<string, Account | undefined>;
 
 describe('AccountService', () => {
-  let tokenMap: TokenMap;
+  let accountMap: AccountMap;
   let accountService: AccountService;
-  beforeEach(() => {
-    tokenMap = {};
+
+  beforeEach(async () => {
+    accountMap = {};
     const fakeContext = {
       globalState: {
-        get: () => tokenMap,
-        update: (name: string, tm: TokenMap) => {
-          tokenMap = tm;
+        get: () => accountMap,
+        update: (name: string, am: AccountMap) => {
+          accountMap = am;
         },
       },
     };
     accountService = new AccountService();
-    accountService.init(fakeContext as unknown as ExtensionContext);
+    await accountService.init(fakeContext as unknown as ExtensionContext);
+    delete process.env.GITLAB_WORKFLOW_INSTANCE_URL;
+    delete process.env.GITLAB_WORKFLOW_TOKEN;
   });
 
-  it.each`
-    storedFor                | retrievedFor
-    ${'https://gitlab.com'}  | ${'https://gitlab.com'}
-    ${'https://gitlab.com'}  | ${'https://gitlab.com/'}
-    ${'https://gitlab.com/'} | ${'https://gitlab.com'}
-    ${'https://gitlab.com/'} | ${'https://gitlab.com/'}
-  `(
-    'when token stored for $storedFor, it can be retrieved for $retrievedFor',
-    async ({ storedFor, retrievedFor }) => {
-      await accountService.setToken(storedFor, 'abc');
-
-      expect(accountService.getToken(retrievedFor)).toBe('abc');
-    },
-  );
-
-  /* This scenario happens when token was introduced before we started removing trailing slashes */
-  it('can retrieve token if it was stored for url with trailing slash', async () => {
-    tokenMap['https://gitlab.com/'] = 'abc';
-
-    expect(accountService.getToken('https://gitlab.com/')).toBe('abc');
+  it('runs migrator', () => {
+    expect(CredentialsMigrator).toHaveBeenCalled();
   });
 
-  it('can set and get one token', async () => {
-    expect(accountService.getToken('https://gitlab.com')).toBeUndefined();
+  it('adds account', async () => {
+    const account = testAccount();
+    await accountService.addAccount(account);
 
-    await accountService.setToken('https://gitlab.com', 'abc');
-    expect(accountService.getToken('https://gitlab.com')).toBe('abc');
+    expect(accountService.getAllAccounts()).toHaveLength(1);
+    expect(accountService.getAllAccounts()).toEqual([account]);
+  });
+
+  it('removes account', async () => {
+    const account = testAccount();
+
+    await accountService.addAccount(account);
+
+    expect(accountService.getAllAccounts()).toHaveLength(1);
+
+    await accountService.removeAccount(account.id);
+
+    expect(accountService.getAllAccounts()).toHaveLength(0);
+  });
+
+  it('adds account from env', () => {
+    process.env.GITLAB_WORKFLOW_INSTANCE_URL = 'https://gitlab.com';
+    process.env.GITLAB_WORKFLOW_TOKEN = 'abc';
+
+    expect(accountService.getAllAccounts()).toHaveLength(1);
+
+    expect(accountService.getAllAccounts()[0]).toEqual({
+      id: 'https://gitlab.com-environment-variables',
+      instanceUrl: 'https://gitlab.com',
+      token: 'abc',
+      username: 'environment_variable_credentials',
+    });
   });
 
   it('can retrieve all instance URLs', async () => {
-    await accountService.setToken('https://gitlab.com', 'abc');
-    await accountService.setToken('https://dev.gitlab.com', 'def');
-    expect(accountService.getRemovableInstanceUrls()).toEqual([
-      'https://gitlab.com',
-      'https://dev.gitlab.com',
+    await accountService.addAccount(testAccount('https://instance1.com'));
+    await accountService.addAccount(testAccount('https://instance2.com'));
+    expect(accountService.getInstanceUrls()).toEqual([
+      'https://instance1.com',
+      'https://instance2.com',
     ]);
   });
 });

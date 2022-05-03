@@ -133,8 +133,6 @@ const registerCommands = (
       vscode.commands.registerCommand(cmd, wrapWithCatch(commands[cmd] as any)),
     );
   });
-
-  registerSidebarTreeDataProviders();
 };
 
 const registerCiCompletion = (context: vscode.ExtensionContext) => {
@@ -163,7 +161,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   registerCommands(context, outputChannel);
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
-  accountService.init(context);
+  await accountService.init(context);
   selectedProjectStore.init(context);
   registerCiCompletion(context);
   context.subscriptions.push(gitExtensionWrapper);
@@ -174,11 +172,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
+  await extensionState.init(accountService);
+  registerSidebarTreeDataProviders();
   // we don't want to hold the extension startup by waiting on VS Code and GitLab API
   doNotAwait(
     Promise.all([
       setSidebarViewState(SidebarViewState.ListView),
-      extensionState.init(accountService),
       gitExtensionWrapper.init(),
       gitlabProjectRepository.init(),
       currentBranchRefresher.refresh(),

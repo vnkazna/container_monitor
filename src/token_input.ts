@@ -1,28 +1,9 @@
 import vscode from 'vscode';
 import { GITLAB_COM_URL } from './constants';
-import { FetchError } from './errors/fetch_error';
-import { UserFriendlyError } from './errors/user_friendly_error';
-import { GitLabService } from './gitlab/gitlab_service';
 import { makeAccountId } from './services/account';
 import { accountService } from './services/account_service';
-import { Credentials } from './services/credentials';
+import { getUserForCredentialsOrFail } from './services/get_user_for_credentials_or_fail';
 import { validateInstanceUrl } from './utils/validate_instance_url';
-
-const validateCredentialsAndGetUser = async ({
-  instanceUrl,
-  token,
-}: Credentials): Promise<RestUser> => {
-  try {
-    return await new GitLabService({ instanceUrl, token }).getCurrentUser();
-  } catch (e) {
-    const message =
-      e instanceof FetchError && e.status === 401
-        ? `API Unauthorized: Can't add GitLab account for ${instanceUrl}. Is your token valid?`
-        : `Request failed: Can't add GitLab account for ${instanceUrl}. Check your instance URL and network connection.`;
-
-    throw new UserFriendlyError(message, e);
-  }
-};
 
 export async function showInput() {
   const instanceUrl = await vscode.window.showInputBox({
@@ -42,7 +23,7 @@ export async function showInput() {
   });
 
   if (!token) return;
-  const user = await validateCredentialsAndGetUser({ instanceUrl, token });
+  const user = await getUserForCredentialsOrFail({ instanceUrl, token });
   await accountService.addAccount({
     instanceUrl,
     token,

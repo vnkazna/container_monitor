@@ -137,3 +137,10 @@ export const projectInRepository: ProjectInRepository = {
     token: 'abc',
   },
 };
+
+export const user: RestUser = {
+  email: 'test@user.com',
+  id: 123,
+  state: 'active',
+  username: 'test-user',
+};

@@ -1,9 +1,10 @@
 import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
-import { removeTrailingSlash } from '../utils/remove_trailing_slash';
+import { uniq } from '../utils/uniq';
 import { Account, makeAccountId } from './account';
 import { Credentials } from './credentials';
+import { CredentialsMigrator } from './credentials_migrator';
 
 const getEnvironmentVariables = (): Credentials | undefined => {
   const { GITLAB_WORKFLOW_INSTANCE_URL, GITLAB_WORKFLOW_TOKEN } = process.env;
@@ -14,13 +15,7 @@ const getEnvironmentVariables = (): Credentials | undefined => {
   };
 };
 
-const TOKENS_KEY = 'glTokens';
 const ACCOUNTS_KEY = 'glAccounts';
-
-const environmentTokenForInstance = (instanceUrl: string) =>
-  instanceUrl === getEnvironmentVariables()?.instanceUrl
-    ? getEnvironmentVariables()?.token
-    : undefined;
 
 const getEnvAccount = (): Account | undefined => {
   const credentials = getEnvironmentVariables();
@@ -31,22 +26,24 @@ const getEnvAccount = (): Account | undefined => {
     ...credentials,
   };
 };
+
 export class AccountService {
   context?: ExtensionContext;
 
   private onDidChangeEmitter = new EventEmitter<void>();
 
-  init(context: ExtensionContext): void {
+  async init(context: ExtensionContext): Promise<void> {
     this.context = context;
+    const migrator = new CredentialsMigrator(
+      context,
+      a => this.addAccount(a),
+      a => Boolean(this.accountMap[a.id]),
+    );
+    await migrator.migrate();
   }
 
   get onDidChange(): Event<void> {
     return this.onDidChangeEmitter.event;
-  }
-
-  private get glTokenMap(): Record<string, string | undefined> {
-    assert(this.context);
-    return this.context.globalState.get(TOKENS_KEY, {});
   }
 
   private get accountMap(): Record<string, Account | undefined> {
@@ -55,30 +52,15 @@ export class AccountService {
   }
 
   getInstanceUrls(): string[] {
-    return [...this.getRemovableInstanceUrls(), getEnvironmentVariables()?.instanceUrl].filter(
-      notNullOrUndefined,
-    );
-  }
-
-  getRemovableInstanceUrls(): string[] {
-    return Object.keys(this.glTokenMap);
+    return uniq(this.getAllAccounts().map(a => a.instanceUrl));
   }
 
   getToken(instanceUrl: string): string | undefined {
-    // the first part of the return (`this.glTokenMap[instanceUrl]`)
-    // can be removed on 2022-08-15 (year after new tokens can't contain trailing slash)
-    return (
-      this.glTokenMap[instanceUrl] ||
-      this.glTokenMap[removeTrailingSlash(instanceUrl)] ||
-      environmentTokenForInstance(instanceUrl)
-    );
+    throw new Error('not implemented');
   }
 
   getAllCredentials(): Credentials[] {
-    return this.getInstanceUrls().map(instanceUrl => ({
-      instanceUrl,
-      token: this.getToken(instanceUrl)!,
-    }));
+    return [];
   }
 
   getRemovableAccounts(): Account[] {
@@ -106,20 +88,6 @@ export class AccountService {
     delete accountMap[accountId];
 
     await this.context.globalState.update(ACCOUNTS_KEY, accountMap);
-    this.onDidChangeEmitter.fire();
-  }
-
-  async setToken(instanceUrl: string, token: string | undefined): Promise<void> {
-    assert(this.context);
-    const tokenMap = this.glTokenMap;
-
-    if (token) {
-      tokenMap[removeTrailingSlash(instanceUrl)] = token;
-    } else {
-      delete tokenMap[instanceUrl];
-    }
-
-    await this.context.globalState.update(TOKENS_KEY, tokenMap);
     this.onDidChangeEmitter.fire();
   }
 }
