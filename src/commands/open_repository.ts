@@ -4,6 +4,7 @@ import { GitLabRemoteFileSystem } from '../remotefs/gitlab_remote_file_system';
 import { pickInstance } from '../gitlab/pick_instance';
 import { pickProject } from '../gitlab/pick_project';
 import { pickGitRef } from '../gitlab/pick_git_ref';
+import { GitLabService } from '../gitlab/gitlab_service';
 
 // eslint-disable-next-line no-shadow
 enum Action {
@@ -50,14 +51,16 @@ async function chooseProject(action: Action) {
   const credentials = await pickInstance();
   if (!credentials) return;
 
-  const remote = await pickProject(credentials);
-  if (!remote) return;
+  const gitlabService = new GitLabService(credentials);
 
-  const ref = await pickGitRef(credentials, remote.project.restId);
+  const project = await pickProject(gitlabService);
+  if (!project) return;
+
+  const ref = await pickGitRef(gitlabService, project.restId);
   if (!ref) return;
 
   const label = await vscode.window.showInputBox({
-    value: remote.project.name,
+    value: project.name,
     prompt: 'GitLab remote folder label',
     ignoreFocusOut: true,
     validateInput: GitLabRemoteFileSystem.validateLabel,
@@ -67,7 +70,7 @@ async function chooseProject(action: Action) {
   const instanceUri = vscode.Uri.parse(credentials.instanceUrl);
   const remoteUri = vscode.Uri.joinPath(instanceUri, label).with({
     scheme: REMOTE_URI_SCHEME,
-    query: `project=${remote.project.restId}&ref=${ref.name}`,
+    query: `project=${project.restId}&ref=${ref.name}`,
   });
   await openUrl(remoteUri, action);
 }

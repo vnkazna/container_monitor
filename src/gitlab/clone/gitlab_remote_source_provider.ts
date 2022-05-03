@@ -3,13 +3,6 @@ import { GitLabService } from '../gitlab_service';
 import { GitLabProject } from '../gitlab_project';
 import { Credentials } from '../../services/token_service';
 
-const SEARCH_LIMIT = 30;
-const getProjectQueryAttributes = {
-  membership: true,
-  limit: SEARCH_LIMIT,
-  searchNamespaces: true,
-};
-
 export function convertUrlToWikiUrl(url: string): string {
   return url.replace(/\.git$/, '.wiki.git');
 }
@@ -20,7 +13,7 @@ export type GitLabRemote = RemoteSource & {
   wikiUrl: string[];
 };
 
-function remoteForProject(project: GitLabProject): GitLabRemote {
+export function remoteForProject(project: GitLabProject): GitLabRemote {
   const url = [project.sshUrlToRepo, project.httpUrlToRepo];
 
   return {
@@ -56,7 +49,6 @@ export class GitLabRemoteSourceProvider implements RemoteSourceProvider {
   async getRemoteSources(query?: string): Promise<GitLabRemote[]> {
     const projects = await this.gitlabService.getProjects({
       search: query,
-      ...getProjectQueryAttributes,
     });
 
     return projects.filter(project => !project.empty).map(project => remoteForProject(project));

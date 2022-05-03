@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { Credentials } from '../services/token_service';
 import { pickWithQuery } from '../utils/pick_with_query';
 import { GitLabService } from './gitlab_service';
 
@@ -7,10 +6,9 @@ type BranchRef = RestBranch & vscode.QuickPickItem & { refType: 'branch' };
 type TagRef = RestTag & vscode.QuickPickItem & { refType: 'tag' };
 
 export async function pickGitRef(
-  credentials: Credentials,
+  gitlabService: GitLabService,
   project: string | number,
 ): Promise<BranchRef | TagRef | undefined> {
-  const service = new GitLabService(credentials);
   const { picked } = await pickWithQuery(
     {
       ignoreFocusOut: true,
@@ -18,8 +16,8 @@ export async function pickGitRef(
     },
     async query => {
       const [branches, tags] = await Promise.all([
-        service.getBranches(project, query),
-        service.getTags(project, query),
+        gitlabService.getBranches(project, query),
+        gitlabService.getTags(project, query),
       ]);
 
       return [
