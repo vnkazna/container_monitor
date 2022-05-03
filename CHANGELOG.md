@@ -1,3 +1,17 @@
+# [3.43.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.42.2...v3.43.0) (2022-05-03)
+
+
+### Bug Fixes
+
+* few minor issues with issuable search ([24253c1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/24253c140221b698a3d74e98e056871109215967))
+
+
+### Features
+
+* project-centric extension internal model ([d1c97a1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/d1c97a17f2ae262af375523ef11d273c5f05ab90))
+
+
+
 ## [3.42.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.42.1...v3.42.2) (2022-04-20)
 
 
