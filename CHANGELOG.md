@@ -1,3 +1,12 @@
+## [3.43.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.43.0...v3.43.1) (2022-05-03)
+
+
+### Bug Fixes
+
+* avoid "GitExtensionWrapper is missing repository" error ([537ed11](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/537ed11fd742ac9923b05fe4075848bd3ac956ca))
+
+
+
 # [3.43.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.42.2...v3.43.0) (2022-05-03)
 
 This release contains a [larger refactor of the extension internal state](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/558). This refactor closes 9 outstanding issues:
