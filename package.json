@@ -520,15 +520,6 @@
     "configuration": {
       "title": "GitLab Workflow (GitLab VSCode Extension)",
       "properties": {
-        "gitlab.instanceUrl": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
-          "pattern": "https?://.*",
-          "description": "Your GitLab instance URL (default is https://gitlab.com)"
-        },
         "gitlab.showStatusBarLinks": {
           "type": "boolean",
           "default": true,
@@ -563,33 +554,6 @@
           "type": "boolean",
           "default": false,
           "description": "Ignore TLS/SSL certificate errors when calling the GitLab API"
-        },
-        "gitlab.repositories": {
-          "type": "object",
-          "scope": "machine-overridable",
-          "default": {},
-          "description": "Repository-specific settings.",
-          "examples": [
-            {
-              "/absolute/path/to/repo": {
-                "preferredRemoteName": "origin"
-              }
-            }
-          ],
-          "patternProperties": {
-            ".*": {
-              "type": "object",
-              "required": [
-                "preferredRemoteName"
-              ],
-              "properties": {
-                "preferredRemoteName": {
-                  "type": "string",
-                  "description": "Name of the preferred remote for each repository in the workspace."
-                }
-              }
-            }
-          }
         },
         "gitlab.pipelineGitRemoteName": {
           "type": "string",
