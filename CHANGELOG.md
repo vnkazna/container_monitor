@@ -1,5 +1,21 @@
 # [3.43.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.42.2...v3.43.0) (2022-05-03)
 
+This release contains a [larger refactor of the extension internal state](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/558). This refactor closes 9 outstanding issues:
+
+- [Detect GitLab instance from git remote](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/34)
+- [Smarter multiple instances management](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/116)
+- [Consistent handling of remotes, instances and branches](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/260)
+- [Setting non-existing gitlab.remoteName causes git remote parsing error](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/394)
+- [Assertion error if the local repository has a remote pointing to a local path](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/418)
+- [Remote name will be used for every sub project](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/448)
+- [Support instanceUrl at the workspace folder level](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/480)
+- [not compatible with git remote using ssh config](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/537)
+- [gitlab.repositories setting (used for preferred remote) can't handle relative path](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/546)
+
+The following settings are no longer used:
+
+- `gitlab.instanceUrl` - The extension automatically matches your GitLab token instance URL with the Git remote (based on host). If this matching fails, right-click the repository item in the GitLab Workflow TreeView and manually assign a GitLab repository.
+- `gitlab.repositories.preferredRemote` - if you've got multiple GitLab projects for the same repository (e.g. fork and upstream), right-click the repository item in the GitLab Workflow TreeView and select which project should be used.
 
 ### Bug Fixes
 
