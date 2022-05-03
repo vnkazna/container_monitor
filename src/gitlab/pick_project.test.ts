@@ -1,21 +1,27 @@
 import * as vscode from 'vscode';
-import { tokenService } from '../services/token_service';
-import { testCredentials } from '../test_utils/test_credentials';
+import { createProject } from '../test_utils/entities';
 import { showQuickPick } from '../utils/show_quickpick';
-import { GitLabRemoteSourceProvider } from './clone/gitlab_remote_source_provider';
+import { GitLabProject } from './gitlab_project';
+import { GitLabService } from './gitlab_service';
 import { pickProject } from './pick_project';
 
 jest.mock('../utils/show_quickpick');
-jest.mock('../services/token_service');
 jest.mock('./clone/gitlab_remote_source_provider');
 
 describe('pickProject', () => {
-  const credentials = testCredentials('https://gitlab.com');
-  const projects = [
-    { name: 'foo', label: 'foo' },
-    { name: 'bar', label: 'bar' },
-    { name: 'baz', label: 'baz' },
+  const projects: GitLabProject[] = [
+    createProject('a/b'),
+    createProject('c/d'),
+    createProject('e/f'),
   ];
+  const partialGitLabService: Partial<GitLabService> = {
+    getProjects: async ({ search }) => {
+      if (!search) return projects;
+      return projects.filter(p => p.namespaceWithPath.indexOf(search) >= 0);
+    },
+    getProject: async path => projects.find(p => p.namespaceWithPath === path),
+  };
+  const gitLabService = partialGitLabService as GitLabService;
 
   const alwaysPickOptionN = (n: number, v?: string) => {
     (showQuickPick as jest.Mock).mockImplementation(async picker => {
@@ -34,34 +40,21 @@ describe('pickProject', () => {
   };
 
   beforeEach(() => {
-    tokenService.getAllCredentials = () => [credentials];
-
     (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => ({
       onDidChangeValue: jest.fn(),
       items: [],
-    }));
-
-    (GitLabRemoteSourceProvider as jest.Mock).mockImplementation(() => ({
-      getRemoteSources(query?: string) {
-        if (!query) return projects;
-        return projects.filter(p => p.name.indexOf(query) >= 0);
-      },
-
-      lookupByPath(path: string) {
-        return projects.find(p => p.name === path);
-      },
     }));
   });
 
   it('returns undefined when the picker is canceled', async () => {
     alwaysPickOptionN(-1);
-    const r = await pickProject(credentials);
+    const r = await pickProject(gitLabService);
     expect(r).toBeUndefined();
   });
 
   it('returns the selected item', async () => {
     alwaysPickOptionN(1);
-    const r = await pickProject(credentials);
+    const r = await pickProject(gitLabService);
     expect(r).toStrictEqual(projects[0]);
   });
 
@@ -70,7 +63,7 @@ describe('pickProject', () => {
 
     it('resolves the user-provided value', async () => {
       alwaysInput(projects[2].name);
-      const r = await pickProject(credentials);
+      const r = await pickProject(gitLabService);
       expect(r).toStrictEqual(projects[2]);
     });
 
@@ -78,7 +71,7 @@ describe('pickProject', () => {
       beforeEach(() => alwaysPickOptionN(0, projects[2].name));
 
       it('does not show an input box', async () => {
-        await pickProject(credentials);
+        await pickProject(gitLabService);
         expect(vscode.window.showInputBox).toHaveBeenCalledTimes(0);
       });
     });
@@ -87,12 +80,12 @@ describe('pickProject', () => {
       beforeEach(() => alwaysInput(undefined));
 
       it('shows an input box', async () => {
-        await pickProject(credentials);
+        await pickProject(gitLabService);
         expect(vscode.window.showInputBox).toHaveBeenCalledTimes(1);
       });
 
       it('returns undefined when the input box is canceled', async () => {
-        const r = await pickProject(credentials);
+        const r = await pickProject(gitLabService);
         expect(vscode.window.showInputBox).toHaveBeenCalledTimes(1);
         expect(r).toStrictEqual(undefined);
       });

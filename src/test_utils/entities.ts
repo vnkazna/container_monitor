@@ -114,6 +114,9 @@ export const reviewUriParams: ReviewUriParams = {
 
 export const project = new GitLabProject(gqlProject);
 
+export const createProject = (namespaceWithPath: string) =>
+  new GitLabProject({ ...gqlProject, fullPath: namespaceWithPath, name: namespaceWithPath });
+
 export const gitRepository = {
   rootFsPath: '/path/to/repo',
   rawRepository: createFakeRepository(),

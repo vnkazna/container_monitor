@@ -1,35 +1,38 @@
 import * as vscode from 'vscode';
-import { Credentials } from '../services/token_service';
 import { pickWithQuery } from '../utils/pick_with_query';
-import { GitLabRemote, GitLabRemoteSourceProvider } from './clone/gitlab_remote_source_provider';
+import { GitLabProject } from './gitlab_project';
+import { GitLabService } from './gitlab_service';
 
-// FIXME: GitLabRemote is too similar name to Remote that we use in Git. We should rename GitLabRemote to GitLabCheckoutInfo
-export async function pickProject(credentials: Credentials): Promise<GitLabRemote | undefined> {
-  const provider = new GitLabRemoteSourceProvider(credentials);
+export async function pickProject(
+  gitlabService: GitLabService,
+): Promise<GitLabProject | undefined> {
   const other = {
     label: '$(globe) Other',
     description: 'Enter the path of a public project',
     alwaysShow: true,
+    other: true as const,
   };
 
-  type Item = GitLabRemote & vscode.QuickPickItem;
+  type Item = vscode.QuickPickItem & { project: GitLabProject; other: false };
   type ItemOrOther = Item | typeof other;
 
   // Return the user's projects which match the query
   async function getItems(query?: string): Promise<ItemOrOther[]> {
-    const sources = await provider.getRemoteSources(query);
-    // The remote provider already adds $(repo) to the name
-    const items = sources.map(s => ({ ...s, label: s.name }));
+    const projects = await gitlabService.getProjects({ search: query });
+    const items = projects.map(project => ({
+      label: `$(repo) ${project.name}`,
+      project,
+      other: false as const,
+    }));
     return [other, ...items];
   }
 
   // Lookup a specific project by path
-  async function lookupItem(path: string): Promise<Item | undefined> {
-    const remote = await provider.lookupByPath(path);
-    if (remote) return { ...remote, label: remote.name };
+  async function lookupItem(path: string): Promise<GitLabProject | undefined> {
+    const project = await gitlabService.getProject(path);
 
-    await vscode.window.showWarningMessage(`Cannot find project with path '${path}'`);
-    return undefined;
+    if (!project) await vscode.window.showWarningMessage(`Cannot find project with path '${path}'`);
+    return project;
   }
 
   // Show the quick pick
@@ -42,8 +45,8 @@ export async function pickProject(credentials: Credentials): Promise<GitLabRemot
   );
 
   // If the user picked an item other than `other`, return it
-  if (picked !== other) {
-    return picked as Item;
+  if (picked && !picked.other) {
+    return picked.project;
   }
 
   // If the user typed something in, resolve that as a project without prompting

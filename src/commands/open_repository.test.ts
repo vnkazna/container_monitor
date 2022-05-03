@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
 import { REMOTE_URI_SCHEME } from '../constants';
 import { HelpError } from '../errors/help_error';
-import { GitLabRemote } from '../gitlab/clone/gitlab_remote_source_provider';
-import { GitLabProject } from '../gitlab/gitlab_project';
 import { pickGitRef } from '../gitlab/pick_git_ref';
 import { pickInstance } from '../gitlab/pick_instance';
 import { pickProject } from '../gitlab/pick_project';
 import { tokenService } from '../services/token_service';
+import { project } from '../test_utils/entities';
 import { testCredentials } from '../test_utils/test_credentials';
 import { openRepository } from './open_repository';
 
@@ -87,16 +86,6 @@ describe('openRepository', () => {
       pickOnce('Choose a project');
     });
 
-    const remote: GitLabRemote = {
-      name: '$(repo) Foo Bar',
-      url: ['https://example.com/foo/bar.git'],
-      wikiUrl: ['https://example.com/foo/bar.wiki.git'],
-      project: {
-        restId: 1,
-        name: 'Foo Bar',
-      } as GitLabProject,
-    };
-
     const branch: Partial<RestBranch> & { refType: 'branch' } = {
       refType: 'branch',
       name: 'main',
@@ -104,7 +93,7 @@ describe('openRepository', () => {
 
     it('constructs and opens the correct URL', async () => {
       (pickInstance as jest.Mock).mockImplementation(() => testCredentials('https://example.com'));
-      (pickProject as jest.Mock).mockImplementation(() => remote);
+      (pickProject as jest.Mock).mockImplementation(() => project);
       (pickGitRef as jest.Mock).mockImplementation(() => branch);
       alwaysInput('FooBar');
 
@@ -115,7 +104,7 @@ describe('openRepository', () => {
       expect(pickGitRef).toHaveBeenCalled();
       expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
         'vscode.openFolder',
-        vscode.Uri.parse('gitlab-remote://example.com/FooBar?project=1&ref=main'),
+        vscode.Uri.parse('gitlab-remote://example.com/FooBar?project=5261717&ref=main'),
         false,
       );
     });

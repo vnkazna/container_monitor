@@ -6,6 +6,7 @@ import { MultipleProjectsItem } from '../tree_view/items/multiple_projects_item'
 import { NoProjectItem } from '../tree_view/items/no_project_item';
 import { ProjectItemModel } from '../tree_view/items/project_item_model';
 import { gitlabProjectRepository } from './gitlab_project_repository';
+import { GitLabService } from './gitlab_service';
 import { ProjectInRepository } from './new_project';
 import { pickProject } from './pick_project';
 import { convertProjectToSetting, selectedProjectStore } from './selected_project_store';
@@ -44,18 +45,18 @@ const manuallyAssignProject = async (repository: GitRepository) => {
   if (!credentials) return;
   const pointer = await pickRemoteUrl(createRemoteUrlPointers(repository));
   if (!pointer) return;
-  const remote = await pickProject(credentials);
-  if (!remote) return;
+  const project = await pickProject(new GitLabService(credentials));
+  if (!project) return;
   const projectInRepository: ProjectInRepository = {
     credentials,
     pointer,
-    project: remote.project,
+    project,
     initializationType: 'selected',
   };
   const selectedProjectSetting = convertProjectToSetting(projectInRepository);
   await selectedProjectStore.addSelectedProject(selectedProjectSetting);
   await vscode.window.showInformationMessage(
-    `Success: you assigned project ${remote.project.namespaceWithPath} to remote URL ${pointer.urlEntry.url} in repository ${repository.rootFsPath}`,
+    `Success: you assigned project ${project.namespaceWithPath} to remote URL ${pointer.urlEntry.url} in repository ${repository.rootFsPath}`,
   );
 };
 

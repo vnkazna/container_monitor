@@ -161,6 +161,13 @@ const getTotalPages = (response: Response): number =>
 const getCurrentPage = (query: Record<string, QueryValue>): number =>
   query.page && typeof query.page === 'number' ? query.page : 1;
 
+const SEARCH_LIMIT = 30;
+const getProjectDefaultOptions = {
+  membership: true,
+  limit: SEARCH_LIMIT,
+  searchNamespaces: true,
+};
+
 interface ValidationResponse {
   valid?: boolean;
   errors: string[];
@@ -275,8 +282,12 @@ export class GitLabService {
     return result.project && new GitLabProject(result.project);
   }
 
-  async getProjects(options: GetProjectsOptions): Promise<GitLabProject[]> {
-    const results = await this.client.request<GqlProjectsResult>(queryGetProjects, options);
+  async getProjects(options: Partial<GetProjectsOptions>): Promise<GitLabProject[]> {
+    const optionsWithDefaults = { ...getProjectDefaultOptions, ...options };
+    const results = await this.client.request<GqlProjectsResult>(
+      queryGetProjects,
+      optionsWithDefaults,
+    );
     return results.projects?.nodes?.map(project => new GitLabProject(project)) || [];
   }
 
