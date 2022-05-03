@@ -3,8 +3,6 @@ const path = require('path').posix;
 const vscode = require('vscode');
 const { graphql } = require('msw');
 
-const { tokenService } = require('../../src/services/token_service');
-const { GITLAB_URL } = require('./test_infrastructure/constants');
 const { getServer, createJsonEndpoint } = require('./test_infrastructure/mock_server');
 
 const { setSidebarViewState, SidebarViewState } = require('../../src/tree_view/sidebar_view_state');
@@ -77,14 +75,13 @@ describe('MR in tree view', () => {
 
   before(async () => {
     setSidebarViewState(SidebarViewState.TreeView);
-    await tokenService.setToken(GITLAB_URL, 'abcd-secret');
   });
 
   beforeEach(async () => {
     const dataProvider = new IssuableDataProvider();
     const mrItemModel = new MrItemModel(
       openMergeRequestResponse,
-      await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(getRepositoryRoot()),
+      await gitlabProjectRepository.getSelectedOrDefaultForRepository(getRepositoryRoot()),
     );
 
     const mrContent = await dataProvider.getChildren(mrItemModel);
@@ -95,7 +92,6 @@ describe('MR in tree view', () => {
 
   after(async () => {
     setSidebarViewState(SidebarViewState.ListView);
-    await tokenService.setToken(GITLAB_URL, undefined);
   });
 
   describe('only one folder', () => {

@@ -76,7 +76,7 @@ describe('MR Review', () => {
     dataProvider = new IssuableDataProvider();
     mrItemModel = new MrItemModel(
       openMergeRequestResponse,
-      await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(getRepositoryRoot()),
+      gitlabProjectRepository.getProjectOrFail(getRepositoryRoot()),
     );
   });
 

@@ -6,6 +6,7 @@ const openMergeRequestResponse = require('./fixtures/rest/open_mr.json');
 const userResponse = require('./fixtures/rest/user.json');
 const { getServer, createQueryJsonEndpoint } = require('./test_infrastructure/mock_server');
 const { GITLAB_URL } = require('./test_infrastructure/constants');
+const { gitlabProjectRepository } = require('../../src/gitlab/gitlab_project_repository');
 
 describe('GitLab tree view', () => {
   let server;
@@ -82,9 +83,10 @@ describe('GitLab tree view', () => {
     await vscode.workspace.getConfiguration().update('gitlab.customQueries', customQuerySettings);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server.resetHandlers();
     dataProvider = new IssuableDataProvider();
+    await gitlabProjectRepository.reload();
   });
 
   after(async () => {
@@ -99,7 +101,8 @@ describe('GitLab tree view', () => {
    * Opens a top level category from the extension issues tree view
    */
   async function openCategory(label) {
-    const categories = await dataProvider.getChildren();
+    const [projectItem] = await dataProvider.getChildren();
+    const categories = await projectItem.getChildren();
     const [chosenCategory] = categories.filter(c => getTreeItem(c).label === label);
     assert(
       chosenCategory,

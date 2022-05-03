@@ -19,9 +19,7 @@ jest.mock('fs', () => ({
 
 describe('openMrFile', () => {
   beforeEach(() => {
-    asMock(gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy).mockResolvedValue(
-      projectInRepository,
-    );
+    asMock(gitlabProjectRepository.getProjectOrFail).mockReturnValue(projectInRepository);
     asMock(mrCache.getMr).mockReturnValue({ mrVersion });
     asMock(fs.promises.access).mockResolvedValue(undefined);
   });

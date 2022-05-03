@@ -4,7 +4,6 @@ import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
 import { ProjectInRepository } from '../gitlab/new_project';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
-import { createWrappedRepository } from './create_wrapped_repository';
 import { createFakeRepository } from './fake_git_extension';
 
 export const issue: RestIssuable = {
@@ -91,8 +90,6 @@ export const job: RestJob = {
   web_url: 'https://example.com/foo/bar/jobs/68',
 };
 
-export const repository = createWrappedRepository();
-
 export const gqlProject: GqlProject = {
   id: 'gid://gitlab/Project/5261717',
   name: 'gitlab-vscode-extension',
@@ -117,13 +114,15 @@ export const reviewUriParams: ReviewUriParams = {
 
 export const project = new GitLabProject(gqlProject);
 
+export const gitRepository = {
+  rootFsPath: '/path/to/repo',
+  rawRepository: createFakeRepository(),
+} as GitRepository;
+
 export const projectInRepository: ProjectInRepository = {
   project,
   pointer: {
-    repository: {
-      rootFsPath: '/path/to/repo',
-      rawRepository: createFakeRepository(),
-    } as GitRepository,
+    repository: gitRepository,
     remote: { name: 'name' } as GitRemote,
     urlEntry: { type: 'both', url: 'git@gitlab.com:gitlab-org/gitlab-vscode-extension' },
   },

@@ -3,16 +3,15 @@ import assert from 'assert';
 import dayjs from 'dayjs';
 import { log } from './log';
 import { extensionState } from './extension_state';
-import { GitLabRepository } from './git/wrapped_repository';
 import { StatusBar } from './status_bar';
 import { CurrentBranchDataProvider } from './tree_view/current_branch_data_provider';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { notNullOrUndefined } from './utils/not_null_or_undefined';
-import { getActiveRepository } from './commands/run_with_valid_project';
+import { getActiveProject } from './commands/run_with_valid_project';
 import { ProjectInRepository } from './gitlab/new_project';
-import { convertRepositoryToProject } from './utils/convert_repository_to_project';
 import { getGitLabService } from './gitlab/get_gitlab_service';
 import { getTrackingBranchName } from './git/get_tracking_branch_name';
+import { getCurrentBranchName } from './git/get_current_branch';
 
 export interface ValidBranchState {
   valid: true;
@@ -46,13 +45,6 @@ const getJobs = async (
   }
 };
 
-const getProjectInRepository = async () => {
-  const repository = getActiveRepository();
-  if (!repository) return undefined;
-  if (!(await repository.getProject())) return undefined;
-  return convertRepositoryToProject(repository as GitLabRepository);
-};
-
 export class CurrentBranchRefresher {
   private refreshTimer?: NodeJS.Timeout;
 
@@ -84,7 +76,10 @@ export class CurrentBranchRefresher {
     // (Repository.state.onDidChange()) are triggered many times per second.
     // We wouldn't save any CPU cycles, just increased the complexity of this extension.
     this.branchTrackingTimer = setInterval(async () => {
-      const currentBranch = getActiveRepository()?.branch;
+      const projectInRepository = getActiveProject();
+      const currentBranch =
+        projectInRepository &&
+        getCurrentBranchName(projectInRepository.pointer.repository.rawRepository);
       if (currentBranch && currentBranch !== this.previousBranchName) {
         this.previousBranchName = currentBranch;
         await this.clearAndSetIntervalAndRefresh();
@@ -108,7 +103,7 @@ export class CurrentBranchRefresher {
   async refresh(userInitiated = false) {
     assert(this.statusBar);
     assert(this.currentBranchProvider);
-    const projectInRepository = await getProjectInRepository();
+    const projectInRepository = getActiveProject();
     const state = await CurrentBranchRefresher.getState(projectInRepository, userInitiated);
     await this.statusBar.refresh(state);
     this.currentBranchProvider.refresh(state);

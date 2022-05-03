@@ -158,8 +158,7 @@ class WebviewController {
   }
 
   async open(issuable: RestIssuable, repositoryRoot: string) {
-    const projectInRepository =
-      await gitlabProjectRepository.getSelectedOrDefaultForRepositoryLegacy(repositoryRoot);
+    const projectInRepository = gitlabProjectRepository.getProjectOrFail(repositoryRoot);
 
     const panelKey = `${repositoryRoot}-${issuable.id}`;
     const openedPanel = this.openedPanels[panelKey];

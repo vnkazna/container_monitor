@@ -92,11 +92,10 @@ This extension requires you to create a GitLab personal access token, and assign
 1. In the command palette, search for **GitLab: Set GitLab Personal Access Token** and press <kbd>Enter<kbd>.
 1. In the **URL to GitLab instance**, paste the full URL to your GitLab instance, including the `http://` or `https://`. Press <kbd>Enter</kbd> to confirm.
 1. Paste in your GitLab personal access token and press <kbd>Enter</kbd>. The token is not displayed, nor is it accessible to others.
-1. Optional. To connect to GitLab hosted on a custom domain, you must set a value for `gitlab.instanceUrl` in your user or workspace settings, or the extension attempts to connect to `gitlab.com`. For more information, read [Extension settings](#extension-settings).
+
+The extension automatically matches your Git repository remote URL with the GitLab instance URL you specified for your token. If this automatic matching fails, you can right-click (<kbd>Ctrl</kbd>+click on MacOS) the repository in the GitLab Tree View and resolve the problem.
 
 The extension is ready to use. If your project has a pipeline for the last commit, and a merge request from your current branch, information about both is displayed in the Visual Studio Code status bar.
-
-If you use multiple GitLab instances, you may want to configure each workspace separately. Refer to the `gitlab.instanceUrl` configuration option in the [Extension settings](#extension-settings) section.
 
 ### Set token with environment variables
 
@@ -120,12 +119,6 @@ To learn how to change the VS Code Settings, read the official [Settings documen
 If you use self-signed certificates to connect to your GitLab instance, read the
 community-contributed
 [settings for self-signed certificates](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/docs/user/troubleshooting.md#settings-for-self-signed-certificates).
-
-**`gitlab.instanceUrl`** _(required: false, default: "https://gitlab.com")_
-
-If you are using GitLab on a custom domain, you must add this to your user settings file. Example: `"gitlab.instanceUrl": "https://my-gitlab-domain.com"`
-
-To enable GitLab Workflow extension to work with different GitLab instances, each token is assigned to a GitLab instance URL. For the extension to select the correct token for a specific workspace, the option [`gitlab.instanceUrl`](#extension-settings) can be used. This option can be set in the current workspace's `.vscode/settings.json` file.
 
 **`gitlab.showStatusBarLinks`** _(required: false, default: true)_
 

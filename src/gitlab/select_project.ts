@@ -4,7 +4,7 @@ import { createRemoteUrlPointers, GitRemoteUrlPointer, GitRepository } from '../
 import { Credentials, tokenService } from '../services/token_service';
 import { MultipleProjectsItem } from '../tree_view/items/multiple_projects_item';
 import { NoProjectItem } from '../tree_view/items/no_project_item';
-import { ProjectItem } from '../tree_view/items/project_item';
+import { ProjectItemModel } from '../tree_view/items/project_item_model';
 import { gitlabProjectRepository } from './gitlab_project_repository';
 import { ProjectInRepository } from './new_project';
 import { pickProject } from './pick_project';
@@ -60,9 +60,7 @@ const manuallyAssignProject = async (repository: GitRepository) => {
 };
 
 const selectProject = async (repository: GitRepository) => {
-  const projects = gitlabProjectRepository
-    .getAllProjects()
-    .filter(p => p.pointer.repository.rootFsPath === repository.rootFsPath);
+  const projects = gitlabProjectRepository.getProjectsForRepository(repository.rootFsPath);
   const options = [
     ...projects.map(p => ({
       ...p,
@@ -99,7 +97,7 @@ export const selectProjectForRepository = async () => {
   await selectProject(repository);
 };
 
-export const clearSelectedProjects = async (item: ProjectItem) => {
+export const clearSelectedProjects = async (item: ProjectItemModel) => {
   await selectedProjectStore.clearSelectedProjects(
     item.projectInRepository.pointer.repository.rootFsPath,
   );

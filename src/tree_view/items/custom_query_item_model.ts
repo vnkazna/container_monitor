@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import assert from 'assert';
 import { handleError } from '../../log';
 import { ErrorItem } from './error_item';
 import { MrItemModel } from './mr_item_model';
@@ -9,23 +8,21 @@ import { VulnerabilityItem } from './vulnerability_item';
 import { CustomQuery } from '../../gitlab/custom_query';
 import { CustomQueryType } from '../../gitlab/custom_query_type';
 import { ItemModel } from './item_model';
-import { GitLabRepository, WrappedRepository } from '../../git/wrapped_repository';
-import { convertRepositoryToProject } from '../../utils/convert_repository_to_project';
+import { ProjectInRepository } from '../../gitlab/new_project';
+import { getGitLabService } from '../../gitlab/get_gitlab_service';
 
 export class CustomQueryItemModel extends ItemModel {
-  private repository: WrappedRepository;
+  private projectInRepository: ProjectInRepository;
 
   private customQuery: CustomQuery;
 
-  constructor(customQuery: CustomQuery, repository: WrappedRepository) {
+  constructor(customQuery: CustomQuery, projectInRepository: ProjectInRepository) {
     super();
-    this.repository = repository;
+    this.projectInRepository = projectInRepository;
     this.customQuery = customQuery;
   }
 
   getTreeItem(): vscode.TreeItem {
-    assert(this.repository.containsGitLabProject);
-
     const item = new vscode.TreeItem(
       this.customQuery.name,
       vscode.TreeItemCollapsibleState.Collapsed,
@@ -35,29 +32,28 @@ export class CustomQueryItemModel extends ItemModel {
   }
 
   private async getProjectIssues(): Promise<vscode.TreeItem[] | ItemModel[]> {
-    const issues = await this.repository
-      .getGitLabService()
-      .getIssuables(this.customQuery, (await this.repository.getProject())!); // FIXME use GitLabRepository instead of WrappedRepository
+    const issues = await getGitLabService(this.projectInRepository).getIssuables(
+      this.customQuery,
+      this.projectInRepository.project,
+    );
     if (issues.length === 0) {
       const noItemText = this.customQuery.noItemText || 'No items found.';
       return [new vscode.TreeItem(noItemText)];
     }
 
     const { MR, ISSUE, SNIPPET, EPIC, VULNERABILITY } = CustomQueryType;
-    const projectInRepository = await convertRepositoryToProject(
-      this.repository as GitLabRepository,
-    );
     switch (this.customQuery.type) {
       case MR: {
         const mrModels = issues.map(
-          (mr: RestIssuable) => new MrItemModel(mr as RestMr, projectInRepository),
+          (mr: RestIssuable) => new MrItemModel(mr as RestMr, this.projectInRepository),
         );
         this.setDisposableChildren(mrModels);
         return mrModels;
       }
       case ISSUE:
         return issues.map(
-          (issue: RestIssuable) => new IssueItem(issue, this.repository.rootFsPath),
+          (issue: RestIssuable) =>
+            new IssueItem(issue, this.projectInRepository.pointer.repository.rootFsPath),
         );
       case SNIPPET:
         return issues.map(

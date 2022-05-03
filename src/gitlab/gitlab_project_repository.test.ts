@@ -296,7 +296,7 @@ describe('gitlab_project_repository', () => {
     });
 
     it('initializes projects', () => {
-      expect(repository.getAllProjects()).toHaveLength(1);
+      expect(repository.getDefaultAndSelectedProjects()).toHaveLength(1);
     });
   });
 });
