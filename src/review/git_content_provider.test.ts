@@ -1,4 +1,3 @@
-import { mocked } from 'ts-jest/utils';
 import { GitContentProvider } from './git_content_provider';
 import { ApiContentProvider } from './api_content_provider';
 import { toReviewUri } from './review_uri';
@@ -41,7 +40,7 @@ describe('GitContentProvider', () => {
 
     const apiContentProvider = new ApiContentProvider();
     apiContentProvider.provideTextDocumentContent = jest.fn().mockReturnValue('Api content');
-    mocked(ApiContentProvider).mockReturnValue(apiContentProvider);
+    asMock(ApiContentProvider).mockReturnValue(apiContentProvider);
 
     const result = await gitContentProvider.provideTextDocumentContent(
       toReviewUri(reviewUriParams),
