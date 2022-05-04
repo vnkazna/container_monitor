@@ -74,9 +74,9 @@ end
 
 To further understand how the extension communicates with the webview, read the [Webview extension guide](https://code.visualstudio.com/api/extension-guides/webview).
 
-### Access tokens (`src/services/token_service.ts`)
+### Access tokens (`src/services/account_service.ts`)
 
-We authenticate to GitLab API using [personal access tokens](https://docs.gitlab.com/ee/api/README.html#personalproject-access-tokens). These tokens are stored in [`ExtensionContext.globalState`](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.globalState). [`TokenService`](../src/services/token_service.ts) orchestrates storing and retrieving tokens.
+We authenticate to GitLab API using [personal access tokens](https://docs.gitlab.com/ee/api/README.html#personalproject-access-tokens). These tokens are stored in [`ExtensionContext.globalState`](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.globalState). [`AccountService`](../src/services/account_service.ts) orchestrates storing and retrieving tokens.
 
 ---
 

@@ -1,7 +1,7 @@
 import { RemoteSource, RemoteSourceProvider } from '../../api/git';
 import { GitLabService } from '../gitlab_service';
 import { GitLabProject } from '../gitlab_project';
-import { Credentials } from '../../services/token_service';
+import { Credentials } from '../../services/credentials';
 
 export function convertUrlToWikiUrl(url: string): string {
   return url.replace(/\.git$/, '.wiki.git');

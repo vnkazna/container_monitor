@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
-import { TokenService } from './services/token_service';
+import { AccountService } from './services/account_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 const hasOpenRepositories = (): boolean => gitExtensionWrapper.gitRepositories.length > 0;
@@ -9,21 +9,21 @@ export class ExtensionState {
 
   onDidChangeValid = this.changeValidEmitter.event;
 
-  tokenService?: TokenService;
+  accountService?: AccountService;
 
   private lastValid = false;
 
-  async init(tokenService: TokenService): Promise<void> {
-    this.tokenService = tokenService;
+  async init(accountService: AccountService): Promise<void> {
+    this.accountService = accountService;
     this.lastValid = this.isValid();
-    tokenService.onDidChange(this.updateExtensionStatus, this);
+    accountService.onDidChange(this.updateExtensionStatus, this);
     gitExtensionWrapper.onRepositoryCountChanged(this.updateExtensionStatus, this);
     await this.updateExtensionStatus();
   }
 
   private hasAnyTokens(): boolean {
-    assert(this.tokenService, 'ExtensionState has not been initialized.');
-    return this.tokenService.getInstanceUrls().length > 0;
+    assert(this.accountService, 'ExtensionState has not been initialized.');
+    return this.accountService.getInstanceUrls().length > 0;
   }
 
   isValid(): boolean {

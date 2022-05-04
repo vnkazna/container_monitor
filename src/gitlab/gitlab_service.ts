@@ -51,7 +51,7 @@ import { README_SECTIONS, REQUIRED_VERSIONS } from '../constants';
 import { makeMarkdownLinksAbsolute } from '../utils/make_markdown_links_absolute';
 import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
 import { HelpError } from '../errors/help_error';
-import { Credentials } from '../services/token_service';
+import { Credentials } from '../services/credentials';
 import { newCreateNoteMutation, oldCreateNoteMutation } from './graphql/create_note';
 import { createQueryString, QueryValue } from '../utils/create_query_string';
 

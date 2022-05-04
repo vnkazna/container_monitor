@@ -2,7 +2,8 @@ import vscode from 'vscode';
 import assert from 'assert';
 import { GitLabService } from './gitlab_service';
 import { ExistingProject, ProjectInRepository, SelectedProjectSetting } from './new_project';
-import { Credentials, tokenService, TokenService } from '../services/token_service';
+import { accountService, AccountService } from '../services/account_service';
+import { Credentials } from '../services/credentials';
 import { cartesianProduct } from '../utils/cartesian_product';
 import { hasPresentKey } from '../utils/has_present_key';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
@@ -192,7 +193,7 @@ const getSelectedOrDefault = (projects: ProjectInRepository[]): ProjectInReposit
 export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
   #emitter = new vscode.EventEmitter<ProjectInRepository[]>();
 
-  #tokenService: TokenService;
+  #accountService: AccountService;
 
   #gitExtensionWrapper: GitExtensionWrapper;
 
@@ -202,14 +203,14 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
 
   #ensureLatestPromise = new EnsureLatestPromise<ProjectInRepository[]>();
 
-  constructor(ts = tokenService, gew = gitExtensionWrapper, sps = selectedProjectStore) {
-    this.#tokenService = ts;
+  constructor(ts = accountService, gew = gitExtensionWrapper, sps = selectedProjectStore) {
+    this.#accountService = ts;
     this.#gitExtensionWrapper = gew;
     this.#selectedProjectsStore = sps;
   }
 
   async init(): Promise<void> {
-    this.#tokenService.onDidChange(this.#updateProjects, this);
+    this.#accountService.onDidChange(this.#updateProjects, this);
     this.#gitExtensionWrapper.onRepositoryCountChanged(this.#updateProjects, this);
     this.#selectedProjectsStore.onSelectedProjectsChange(this.#updateProjects, this);
 
@@ -252,7 +253,7 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
     const projects = await this.#ensureLatestPromise.discardIfNotLatest(
       () =>
         initializeAllProjects(
-          this.#tokenService.getAllCredentials(),
+          this.#accountService.getAllCredentials(),
           pointers,
           this.#selectedProjectsStore.selectedProjectSettings,
         ),

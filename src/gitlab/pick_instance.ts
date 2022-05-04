@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import { Credentials, tokenService } from '../services/token_service';
+import { accountService } from '../services/account_service';
+import { Credentials } from '../services/credentials';
 
 export async function pickInstance(): Promise<Credentials | undefined> {
-  const credentials = tokenService.getAllCredentials();
+  const credentials = accountService.getAllCredentials();
   const instanceItems = credentials.map(c => ({
     label: `$(cloud) ${c.instanceUrl}`,
     credentials: c,

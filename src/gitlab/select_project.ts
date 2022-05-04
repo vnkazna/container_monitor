@@ -1,7 +1,8 @@
 import vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { createRemoteUrlPointers, GitRemoteUrlPointer, GitRepository } from '../git/new_git';
-import { Credentials, tokenService } from '../services/token_service';
+import { accountService } from '../services/account_service';
+import { Credentials } from '../services/credentials';
 import { MultipleProjectsItem } from '../tree_view/items/multiple_projects_item';
 import { NoProjectItem } from '../tree_view/items/no_project_item';
 import { ProjectItemModel } from '../tree_view/items/project_item_model';
@@ -41,7 +42,7 @@ const pickRemoteUrl = async (pointers: GitRemoteUrlPointer[]) => {
 };
 
 const manuallyAssignProject = async (repository: GitRepository) => {
-  const credentials = await pickCredentials(tokenService.getAllCredentials());
+  const credentials = await pickCredentials(accountService.getAllCredentials());
   if (!credentials) return;
   const pointer = await pickRemoteUrl(createRemoteUrlPointers(repository));
   if (!pointer) return;
