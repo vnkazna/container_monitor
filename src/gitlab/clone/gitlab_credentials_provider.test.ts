@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
-import { tokenService } from '../../services/token_service';
+import { accountService } from '../../services/account_service';
 import { GITLAB_URL } from '../../../test/integration/test_infrastructure/constants';
 import { gitlabCredentialsProvider } from './gitlab_credentials_provider';
 
-jest.mock('../../services/token_service');
+jest.mock('../../services/account_service');
 
 describe('GitLab Credentials Provider', () => {
   beforeEach(() => {
-    tokenService.getInstanceUrls = () => [GITLAB_URL];
-    tokenService.getToken = (url: string) => (url === GITLAB_URL ? 'password' : undefined);
+    accountService.getInstanceUrls = () => [GITLAB_URL];
+    accountService.getToken = (url: string) => (url === GITLAB_URL ? 'password' : undefined);
   });
 
   it('getting credentials works', async () => {

@@ -4,12 +4,12 @@ import { HelpError } from '../errors/help_error';
 import { pickGitRef } from '../gitlab/pick_git_ref';
 import { pickInstance } from '../gitlab/pick_instance';
 import { pickProject } from '../gitlab/pick_project';
-import { tokenService } from '../services/token_service';
+import { accountService } from '../services/account_service';
 import { project } from '../test_utils/entities';
 import { testCredentials } from '../test_utils/test_credentials';
 import { openRepository } from './open_repository';
 
-jest.mock('../services/token_service');
+jest.mock('../services/account_service');
 jest.mock('../gitlab/pick_instance');
 jest.mock('../gitlab/pick_project');
 jest.mock('../gitlab/pick_git_ref');
@@ -34,8 +34,8 @@ describe('openRepository', () => {
     (vscode.window.showInputBox as jest.Mock).mockImplementation(() => url);
 
   beforeEach(() => {
-    tokenService.getAllCredentials = () => credentials;
-    tokenService.getInstanceUrls = () => credentials.map(c => c.instanceUrl);
+    accountService.getAllCredentials = () => credentials;
+    accountService.getInstanceUrls = () => credentials.map(c => c.instanceUrl);
 
     (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => ({
       onDidChangeValue: jest.fn(),

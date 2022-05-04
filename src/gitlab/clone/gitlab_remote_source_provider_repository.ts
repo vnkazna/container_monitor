@@ -1,6 +1,6 @@
 import { Disposable } from 'vscode';
 import { API } from '../../api/git';
-import { tokenService } from '../../services/token_service';
+import { accountService } from '../../services/account_service';
 import { GitLabRemoteSourceProvider } from './gitlab_remote_source_provider';
 
 /**
@@ -12,15 +12,15 @@ export class GitLabRemoteSourceProviderRepository implements Disposable {
     { provider: GitLabRemoteSourceProvider; disposable: Disposable }
   >();
 
-  private tokenServiceListener: Disposable;
+  private accountServiceListener: Disposable;
 
   constructor(private gitAPI: API) {
     this.update();
-    this.tokenServiceListener = tokenService.onDidChange(this.update, this);
+    this.accountServiceListener = accountService.onDidChange(this.update, this);
   }
 
   update(): void {
-    const credentials = tokenService.getAllCredentials();
+    const credentials = accountService.getAllCredentials();
     // create provider(s) for the missing url(s)
     credentials.forEach(c => {
       if (!this.remoteSourceProviders.has(c.instanceUrl)) {
@@ -42,6 +42,6 @@ export class GitLabRemoteSourceProviderRepository implements Disposable {
   dispose(): void {
     this.remoteSourceProviders.forEach(({ disposable }) => disposable?.dispose());
     this.remoteSourceProviders.clear();
-    this.tokenServiceListener.dispose();
+    this.accountServiceListener.dispose();
   }
 }

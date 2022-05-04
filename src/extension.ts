@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import * as openers from './openers';
 import * as tokenInput from './token_input';
-import { tokenService } from './services/token_service';
+import { accountService } from './services/account_service';
 import { extensionState } from './extension_state';
 import { createSnippet } from './commands/create_snippet';
 import { insertSnippet } from './commands/insert_snippet';
@@ -163,7 +163,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   registerCommands(context, outputChannel);
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
-  tokenService.init(context);
+  accountService.init(context);
   selectedProjectStore.init(context);
   registerCiCompletion(context);
   context.subscriptions.push(gitExtensionWrapper);
@@ -178,7 +178,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   doNotAwait(
     Promise.all([
       setSidebarViewState(SidebarViewState.ListView),
-      extensionState.init(tokenService),
+      extensionState.init(accountService),
       gitExtensionWrapper.init(),
       gitlabProjectRepository.init(),
       currentBranchRefresher.refresh(),

@@ -1,11 +1,11 @@
 import { ExtensionContext } from 'vscode';
-import { TokenService } from './token_service';
+import { AccountService } from './account_service';
 
 type TokenMap = Record<string, string | undefined>;
 
-describe('TokenService', () => {
+describe('AccountService', () => {
   let tokenMap: TokenMap;
-  let tokenService: TokenService;
+  let accountService: AccountService;
   beforeEach(() => {
     tokenMap = {};
     const fakeContext = {
@@ -16,8 +16,8 @@ describe('TokenService', () => {
         },
       },
     };
-    tokenService = new TokenService();
-    tokenService.init(fakeContext as unknown as ExtensionContext);
+    accountService = new AccountService();
+    accountService.init(fakeContext as unknown as ExtensionContext);
   });
 
   it.each`
@@ -29,9 +29,9 @@ describe('TokenService', () => {
   `(
     'when token stored for $storedFor, it can be retrieved for $retrievedFor',
     async ({ storedFor, retrievedFor }) => {
-      await tokenService.setToken(storedFor, 'abc');
+      await accountService.setToken(storedFor, 'abc');
 
-      expect(tokenService.getToken(retrievedFor)).toBe('abc');
+      expect(accountService.getToken(retrievedFor)).toBe('abc');
     },
   );
 
@@ -39,20 +39,20 @@ describe('TokenService', () => {
   it('can retrieve token if it was stored for url with trailing slash', async () => {
     tokenMap['https://gitlab.com/'] = 'abc';
 
-    expect(tokenService.getToken('https://gitlab.com/')).toBe('abc');
+    expect(accountService.getToken('https://gitlab.com/')).toBe('abc');
   });
 
   it('can set and get one token', async () => {
-    expect(tokenService.getToken('https://gitlab.com')).toBeUndefined();
+    expect(accountService.getToken('https://gitlab.com')).toBeUndefined();
 
-    await tokenService.setToken('https://gitlab.com', 'abc');
-    expect(tokenService.getToken('https://gitlab.com')).toBe('abc');
+    await accountService.setToken('https://gitlab.com', 'abc');
+    expect(accountService.getToken('https://gitlab.com')).toBe('abc');
   });
 
   it('can retrieve all instance URLs', async () => {
-    await tokenService.setToken('https://gitlab.com', 'abc');
-    await tokenService.setToken('https://dev.gitlab.com', 'def');
-    expect(tokenService.getRemovableInstanceUrls()).toEqual([
+    await accountService.setToken('https://gitlab.com', 'abc');
+    await accountService.setToken('https://dev.gitlab.com', 'def');
+    expect(accountService.getRemovableInstanceUrls()).toEqual([
       'https://gitlab.com',
       'https://dev.gitlab.com',
     ]);

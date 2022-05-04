@@ -2,11 +2,7 @@ import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
-
-export interface Credentials {
-  instanceUrl: string;
-  token: string;
-}
+import { Credentials } from './credentials';
 
 const getEnvironmentVariables = () => {
   const { GITLAB_WORKFLOW_INSTANCE_URL, GITLAB_WORKFLOW_TOKEN } = process.env;
@@ -21,7 +17,8 @@ const environmentTokenForInstance = (instanceUrl: string) =>
   instanceUrl === getEnvironmentVariables()?.instanceUrl
     ? getEnvironmentVariables()?.token
     : undefined;
-export class TokenService {
+
+export class AccountService {
   context?: ExtensionContext;
 
   private onDidChangeEmitter = new EventEmitter<void>();
@@ -81,4 +78,4 @@ export class TokenService {
   }
 }
 
-export const tokenService: TokenService = new TokenService();
+export const accountService: AccountService = new AccountService();

@@ -4,7 +4,7 @@ const { extensionState } = require('../../../src/extension_state');
 const { gitExtensionWrapper } = require('../../../src/git/git_extension_wrapper');
 const { gitlabProjectRepository } = require('../../../src/gitlab/gitlab_project_repository');
 const { selectedProjectStore } = require('../../../src/gitlab/selected_project_store');
-const { tokenService } = require('../../../src/services/token_service');
+const { accountService } = require('../../../src/services/account_service');
 const { webviewController } = require('../../../src/webview_controller');
 const { GITLAB_URL } = require('./constants');
 const { InMemoryMemento } = require('./in_memory_memento');
@@ -26,11 +26,11 @@ const ensureProject = async () => {
 };
 
 const initializeTestEnvironment = async testRoot => {
-  tokenService.init({ globalState: new InMemoryMemento() });
-  await tokenService.setToken(GITLAB_URL, 'abcd-secret');
+  accountService.init({ globalState: new InMemoryMemento() });
+  await accountService.setToken(GITLAB_URL, 'abcd-secret');
   process.env.GITLAB_WORKFLOW_INSTANCE_URL = GITLAB_URL;
   process.env.GITLAB_WORKFLOW_TOKEN = 'abcd-secret';
-  extensionState.init(tokenService);
+  extensionState.init(accountService);
   webviewController.init({ extensionPath: `${testRoot}/../../..` });
   selectedProjectStore.init({ globalState: new InMemoryMemento() });
   const ext = vscode.extensions.getExtension('gitlab.gitlab-workflow');

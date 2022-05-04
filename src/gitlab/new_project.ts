@@ -1,5 +1,5 @@
 import { GitRemoteUrlPointer } from '../git/new_git';
-import { Credentials } from '../services/token_service';
+import { Credentials } from '../services/credentials';
 import { GitLabProject } from './gitlab_project';
 
 /**

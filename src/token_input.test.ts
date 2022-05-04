@@ -1,12 +1,12 @@
 import vscode from 'vscode';
 import { FetchError } from './errors/fetch_error';
 import { GitLabService } from './gitlab/gitlab_service';
-import { tokenService } from './services/token_service';
+import { accountService } from './services/account_service';
 import { asMock } from './test_utils/as_mock';
 import { showInput } from './token_input';
 
 jest.mock('./gitlab/gitlab_service');
-jest.mock('./services/token_service');
+jest.mock('./services/account_service');
 
 describe('token input', () => {
   describe('showInput', () => {
@@ -29,7 +29,7 @@ describe('token input', () => {
       await showInput();
 
       expect(GitLabService).toHaveBeenCalledWith({ instanceUrl: 'instanceUrl', token: 'token' });
-      expect(tokenService.setToken).toHaveBeenCalledWith('instanceUrl', 'token');
+      expect(accountService.setToken).toHaveBeenCalledWith('instanceUrl', 'token');
     });
     it('handles Unauthorized error', async () => {
       // simulate API failing with Unauthorized

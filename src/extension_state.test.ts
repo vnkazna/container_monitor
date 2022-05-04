@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionState } from './extension_state';
-import { tokenService } from './services/token_service';
+import { accountService } from './services/account_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 describe('extension_state', () => {
@@ -11,7 +11,7 @@ describe('extension_state', () => {
   beforeEach(() => {
     mockedInstancesWithTokens = [];
     mockedRepositories = [];
-    tokenService.getInstanceUrls = () => mockedInstancesWithTokens;
+    accountService.getInstanceUrls = () => mockedInstancesWithTokens;
     jest
       .spyOn(gitExtensionWrapper, 'gitRepositories', 'get')
       .mockImplementation(() => mockedRepositories);
@@ -33,7 +33,7 @@ describe('extension_state', () => {
     async ({ instancesWithTokens, repositories, validState, noToken, noRepository }) => {
       mockedInstancesWithTokens = instancesWithTokens;
       mockedRepositories = repositories;
-      await extensionState.init(tokenService);
+      await extensionState.init(accountService);
 
       const { executeCommand } = vscode.commands;
       expect(executeCommand).toBeCalledWith('setContext', 'gitlab:validState', validState);
@@ -43,7 +43,7 @@ describe('extension_state', () => {
   );
 
   it('fires event when valid state changes', async () => {
-    await extensionState.init(tokenService);
+    await extensionState.init(accountService);
     const listener = jest.fn();
     extensionState.onDidChangeValid(listener);
     // setting tokens and repositories makes extension state valid

@@ -36,7 +36,7 @@ When creating a new integration test, you need to know how the tested functional
 
 #### Prepare VS Code dependency
 
-We are now not mocking any part of VS Code. You should be able to set the extension up by calling the [VS Code extension API](https://code.visualstudio.com/api). You might be able to use some of our services directly to set up the extension. Example is setting up the test token by running `tokenService.setToken('https://gitlab.com', 'abcd-secret');`
+We are now not mocking any part of VS Code. You should be able to set the extension up by calling the [VS Code extension API](https://code.visualstudio.com/api). You might be able to use some of our services directly to set up the extension. Example is setting up the test token by running `accountService.setToken('https://gitlab.com', 'abcd-secret');`
 
 #### Prepare Filesystem dependency
 

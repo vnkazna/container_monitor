@@ -1,16 +1,17 @@
 import * as vscode from 'vscode';
-import { Credentials, tokenService } from '../services/token_service';
+import { accountService } from '../services/account_service';
+import { Credentials } from '../services/credentials';
 import { testCredentials } from '../test_utils/test_credentials';
 import { pickInstance } from './pick_instance';
 
-jest.mock('../services/token_service');
+jest.mock('../services/account_service');
 
 describe('pickInstance', () => {
   let credentials: Credentials[];
 
   beforeEach(() => {
     (vscode.window.showQuickPick as jest.Mock).mockImplementation(([option]) => option);
-    tokenService.getAllCredentials = () => credentials;
+    accountService.getAllCredentials = () => credentials;
   });
 
   it('skips selection of instance if there is only one', async () => {

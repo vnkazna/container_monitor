@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { FetchError } from '../errors/fetch_error';
 import { GitLabService } from '../gitlab/gitlab_service';
-import { tokenService } from '../services/token_service';
+import { accountService } from '../services/account_service';
 import { asMock } from '../test_utils/as_mock';
 import { GitLabRemoteFileSystem } from './gitlab_remote_file_system';
 
-jest.mock('../services/token_service');
+jest.mock('../services/account_service');
 jest.mock('../gitlab/gitlab_service');
 
 const encoder = new TextEncoder();
@@ -88,8 +88,8 @@ describe('GitLabRemoteFileSystem', () => {
     instanceUrls = [gitlabAbs, gitlabRel];
     projectInfo = null;
 
-    tokenService.getInstanceUrls = () => instanceUrls;
-    tokenService.getToken = () => 'token';
+    accountService.getInstanceUrls = () => instanceUrls;
+    accountService.getToken = () => 'token';
 
     asMock(GitLabService).mockImplementation(() => ({
       async getTree(

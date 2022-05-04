@@ -4,7 +4,7 @@ import { README_SECTIONS, REMOTE_URI_SCHEME } from '../constants';
 import { FetchError } from '../errors/fetch_error';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { handleError } from '../log';
-import { tokenService } from '../services/token_service';
+import { accountService } from '../services/account_service';
 import { HelpError } from '../errors/help_error';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 import { ReadOnlyFileSystem } from './readonly_file_system';
@@ -13,7 +13,7 @@ const encoder = new TextEncoder();
 
 export function newGitLabService(instance: vscode.Uri): GitLabService {
   const instanceUrl = removeTrailingSlash(instance.toString());
-  const token = tokenService.getToken(instanceUrl);
+  const token = accountService.getToken(instanceUrl);
   assert(token, `There is no token for ${instanceUrl}`);
   return new GitLabService({ instanceUrl, token });
 }
@@ -94,7 +94,7 @@ export class GitLabRemoteFileSystem extends ReadOnlyFileSystem {
 
     // Find the instance with a matching authority and a subpath that is a
     // prefix of the URI's path.
-    const instance = tokenService
+    const instance = accountService
       .getInstanceUrls()
       .map(x => vscode.Uri.parse(x))
       .find(x => uri.authority === x.authority && uri.path.startsWith(x.path));

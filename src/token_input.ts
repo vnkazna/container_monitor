@@ -3,7 +3,8 @@ import { GITLAB_COM_URL } from './constants';
 import { FetchError } from './errors/fetch_error';
 import { UserFriendlyError } from './errors/user_friendly_error';
 import { GitLabService } from './gitlab/gitlab_service';
-import { Credentials, tokenService } from './services/token_service';
+import { accountService } from './services/account_service';
+import { Credentials } from './services/credentials';
 import { validateInstanceUrl } from './utils/validate_instance_url';
 
 const validateCredentialsAndGetUser = async ({
@@ -41,20 +42,20 @@ export async function showInput() {
 
   if (!token) return;
   const user = await validateCredentialsAndGetUser({ instanceUrl, token });
-  await tokenService.setToken(instanceUrl, token);
+  await accountService.setToken(instanceUrl, token);
   await vscode.window.showInformationMessage(
     `Added the GitLab account for user ${user.username} on ${instanceUrl}.`,
   );
 }
 
 export async function removeTokenPicker() {
-  const instanceUrls = tokenService.getRemovableInstanceUrls();
+  const instanceUrls = accountService.getRemovableInstanceUrls();
   const selectedInstanceUrl = await vscode.window.showQuickPick(instanceUrls, {
     ignoreFocusOut: true,
     placeHolder: 'Select Gitlab instance for PAT removal',
   });
 
   if (selectedInstanceUrl) {
-    await tokenService.setToken(selectedInstanceUrl, undefined);
+    await accountService.setToken(selectedInstanceUrl, undefined);
   }
 }
