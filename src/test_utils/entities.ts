@@ -4,6 +4,7 @@ import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
 import { ProjectInRepository } from '../gitlab/new_project';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
+import { Account, makeAccountId } from '../services/account';
 import { createFakeRepository } from './fake_git_extension';
 
 export const issue: RestIssuable = {
@@ -116,6 +117,17 @@ export const project = new GitLabProject(gqlProject);
 
 export const createProject = (namespaceWithPath: string) =>
   new GitLabProject({ ...gqlProject, fullPath: namespaceWithPath, name: namespaceWithPath });
+
+export const createAccount = (
+  instanceUrl = 'https://gitlab.com',
+  userId = 1,
+  token = 'abc',
+): Account => ({
+  id: makeAccountId(instanceUrl, userId),
+  username: `user${userId}`,
+  instanceUrl,
+  token,
+});
 
 export const gitRepository = {
   rootFsPath: '/path/to/repo',

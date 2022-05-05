@@ -2,6 +2,7 @@ import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
+import { Account } from './account';
 import { Credentials } from './credentials';
 
 const getEnvironmentVariables = () => {
@@ -37,12 +38,12 @@ export class AccountService {
   }
 
   getInstanceUrls(): string[] {
-    return [...this.getRemovableInstanceUrls(), getEnvironmentVariables()?.instanceUrl].filter(
+    return [...this.#getRemovableInstanceUrls(), getEnvironmentVariables()?.instanceUrl].filter(
       notNullOrUndefined,
     );
   }
 
-  getRemovableInstanceUrls(): string[] {
+  #getRemovableInstanceUrls(): string[] {
     return Object.keys(this.glTokenMap);
   }
 
@@ -63,18 +64,33 @@ export class AccountService {
     }));
   }
 
-  async setToken(instanceUrl: string, token: string | undefined): Promise<void> {
+  async addAccount(account: Account) {
     assert(this.context);
     const tokenMap = this.glTokenMap;
 
-    if (token) {
-      tokenMap[removeTrailingSlash(instanceUrl)] = token;
-    } else {
-      delete tokenMap[instanceUrl];
-    }
+    tokenMap[account.instanceUrl] = account.token;
 
     await this.context.globalState.update('glTokens', tokenMap);
     this.onDidChangeEmitter.fire();
+  }
+
+  async removeAccount(accountId: string) {
+    assert(this.context);
+    const tokenMap = this.glTokenMap;
+
+    delete tokenMap[removeTrailingSlash(accountId)]; // TODO: remove this sanitization once we use real accounts
+
+    await this.context.globalState.update('glTokens', tokenMap);
+    this.onDidChangeEmitter.fire();
+  }
+
+  getRemovableAccounts(): Account[] {
+    return this.#getRemovableInstanceUrls().map(instanceUrl => ({
+      id: instanceUrl,
+      instanceUrl,
+      token: this.getToken(instanceUrl)!,
+      username: 'GitLab user',
+    }));
   }
 }
 

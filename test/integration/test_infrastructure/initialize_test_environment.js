@@ -27,7 +27,12 @@ const ensureProject = async () => {
 
 const initializeTestEnvironment = async testRoot => {
   accountService.init({ globalState: new InMemoryMemento() });
-  await accountService.setToken(GITLAB_URL, 'abcd-secret');
+  await accountService.addAccount({
+    instanceUrl: GITLAB_URL,
+    token: 'abcd-secret',
+    id: GITLAB_URL,
+    username: 'test',
+  });
   process.env.GITLAB_WORKFLOW_INSTANCE_URL = GITLAB_URL;
   process.env.GITLAB_WORKFLOW_TOKEN = 'abcd-secret';
   extensionState.init(accountService);
