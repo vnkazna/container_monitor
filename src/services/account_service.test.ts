@@ -1,4 +1,5 @@
 import { ExtensionContext } from 'vscode';
+import { createAccount } from '../test_utils/entities';
 import { AccountService } from './account_service';
 
 type TokenMap = Record<string, string | undefined>;
@@ -21,15 +22,18 @@ describe('AccountService', () => {
   });
 
   it.each`
-    storedFor                | retrievedFor
-    ${'https://gitlab.com'}  | ${'https://gitlab.com'}
-    ${'https://gitlab.com'}  | ${'https://gitlab.com/'}
-    ${'https://gitlab.com/'} | ${'https://gitlab.com'}
-    ${'https://gitlab.com/'} | ${'https://gitlab.com/'}
+    storedFor               | retrievedFor
+    ${'https://gitlab.com'} | ${'https://gitlab.com'}
+    ${'https://gitlab.com'} | ${'https://gitlab.com/'}
   `(
     'when token stored for $storedFor, it can be retrieved for $retrievedFor',
     async ({ storedFor, retrievedFor }) => {
-      await accountService.setToken(storedFor, 'abc');
+      await accountService.addAccount({
+        id: storedFor,
+        instanceUrl: storedFor,
+        token: 'abc',
+        username: 'username',
+      });
 
       expect(accountService.getToken(retrievedFor)).toBe('abc');
     },
@@ -45,14 +49,14 @@ describe('AccountService', () => {
   it('can set and get one token', async () => {
     expect(accountService.getToken('https://gitlab.com')).toBeUndefined();
 
-    await accountService.setToken('https://gitlab.com', 'abc');
+    await accountService.addAccount(createAccount('https://gitlab.com', 1, 'abc'));
     expect(accountService.getToken('https://gitlab.com')).toBe('abc');
   });
 
   it('can retrieve all instance URLs', async () => {
-    await accountService.setToken('https://gitlab.com', 'abc');
-    await accountService.setToken('https://dev.gitlab.com', 'def');
-    expect(accountService.getRemovableInstanceUrls()).toEqual([
+    await accountService.addAccount(createAccount('https://gitlab.com', 1, 'abc'));
+    await accountService.addAccount(createAccount('https://dev.gitlab.com', 1, 'def'));
+    expect(accountService.getRemovableAccounts().map(a => a.instanceUrl)).toEqual([
       'https://gitlab.com',
       'https://dev.gitlab.com',
     ]);

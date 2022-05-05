@@ -22,15 +22,39 @@ describe('token input', () => {
         options.password ? 'token' : 'instanceUrl',
       );
     });
-    it('adds token', async () => {
+    it('adds account', async () => {
       // simulate API returning user for the instance url and token
-      mockGetCurrentUserResponse({ username: 'testname' });
+      mockGetCurrentUserResponse({ id: 1, username: 'testname' });
 
       await showInput();
 
       expect(GitLabService).toHaveBeenCalledWith({ instanceUrl: 'instanceUrl', token: 'token' });
-      expect(accountService.setToken).toHaveBeenCalledWith('instanceUrl', 'token');
+      expect(accountService.addAccount).toHaveBeenCalledWith({
+        instanceUrl: 'instanceUrl',
+        token: 'token',
+        id: 'instanceUrl',
+        username: 'testname',
+      });
     });
+
+    it('removes trailing slash from the instanceUrl', async () => {
+      // simulate user filling in instance URL and token
+      asMock(vscode.window.showInputBox).mockImplementation(async (options: any) =>
+        options.password ? 'token' : 'https://gitlab.com/',
+      );
+      // simulate API returning user for the instance url and token
+      mockGetCurrentUserResponse({ id: 1, username: 'testname' });
+
+      await showInput();
+
+      expect(accountService.addAccount).toHaveBeenCalledWith({
+        instanceUrl: 'https://gitlab.com',
+        token: 'token',
+        id: 'https://gitlab.com',
+        username: 'testname',
+      });
+    });
+
     it('handles Unauthorized error', async () => {
       // simulate API failing with Unauthorized
       mockGetCurrentUserResponse(Promise.reject(new FetchError('', { status: 401 } as Response)));
