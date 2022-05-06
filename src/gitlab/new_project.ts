@@ -1,5 +1,5 @@
 import { GitRemoteUrlPointer } from '../git/new_git';
-import { Credentials } from '../services/credentials';
+import { Account } from '../services/account';
 import { GitLabProject } from './gitlab_project';
 
 /**
@@ -11,7 +11,7 @@ import { GitLabProject } from './gitlab_project';
 export interface ExistingProject {
   remoteUrl: string;
   project: GitLabProject;
-  credentials: Credentials;
+  account: Account;
 }
 
 export type InitializationType = 'selected';
@@ -23,7 +23,7 @@ export type InitializationType = 'selected';
  */
 export interface ProjectInRepository {
   pointer: GitRemoteUrlPointer;
-  credentials: Credentials;
+  account: Account;
   project: GitLabProject;
   initializationType?: InitializationType;
 }

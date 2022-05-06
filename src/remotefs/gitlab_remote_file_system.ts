@@ -13,9 +13,9 @@ const encoder = new TextEncoder();
 
 export function newGitLabService(instance: vscode.Uri): GitLabService {
   const instanceUrl = removeTrailingSlash(instance.toString());
-  const token = accountService.getToken(instanceUrl);
-  assert(token, `There is no token for ${instanceUrl}`);
-  return new GitLabService({ instanceUrl, token });
+  const account = accountService.getOneAccountForInstance(instanceUrl);
+  assert(account, `There is no account for ${instanceUrl}`);
+  return new GitLabService(account);
 }
 
 /**

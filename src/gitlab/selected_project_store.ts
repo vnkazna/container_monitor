@@ -5,11 +5,11 @@ import { ProjectInRepository, SelectedProjectSetting } from './new_project';
 const SELECTED_PROJECT_SETTINGS_KEY = 'selectedProjectSettings';
 
 export const convertProjectToSetting = ({
-  credentials,
+  account,
   project,
   pointer,
 }: ProjectInRepository): SelectedProjectSetting => ({
-  accountId: credentials.instanceUrl,
+  accountId: account.id,
   namespaceWithPath: project.namespaceWithPath,
   remoteName: pointer.remote.name,
   remoteUrl: pointer.urlEntry.url,

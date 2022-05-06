@@ -21,36 +21,63 @@ describe('AccountService', () => {
     accountService.init(fakeContext as unknown as ExtensionContext);
   });
 
-  it.each`
-    storedFor               | retrievedFor
-    ${'https://gitlab.com'} | ${'https://gitlab.com'}
-    ${'https://gitlab.com'} | ${'https://gitlab.com/'}
-  `(
-    'when token stored for $storedFor, it can be retrieved for $retrievedFor',
-    async ({ storedFor, retrievedFor }) => {
-      await accountService.addAccount({
-        id: storedFor,
-        instanceUrl: storedFor,
-        token: 'abc',
-        username: 'username',
-      });
-
-      expect(accountService.getToken(retrievedFor)).toBe('abc');
-    },
-  );
-
   /* This scenario happens when token was introduced before we started removing trailing slashes */
   it('can retrieve token if it was stored for url with trailing slash', async () => {
     tokenMap['https://gitlab.com/'] = 'abc';
 
-    expect(accountService.getToken('https://gitlab.com/')).toBe('abc');
+    expect(accountService.getOneAccountForInstance('https://gitlab.com')?.token).toBe('abc');
   });
 
+  describe('account from environment variable', () => {
+    afterEach(() => {
+      delete process.env.GITLAB_WORKFLOW_INSTANCE_URL;
+      delete process.env.GITLAB_WORKFLOW_TOKEN;
+    });
+
+    it('adds account', () => {
+      process.env.GITLAB_WORKFLOW_INSTANCE_URL = 'https://gitlab.com';
+      process.env.GITLAB_WORKFLOW_TOKEN = 'abc';
+
+      expect(accountService.getAllAccounts()).toHaveLength(1);
+
+      expect(accountService.getAllAccounts()[0]).toEqual({
+        id: 'https://gitlab.com',
+        instanceUrl: 'https://gitlab.com',
+        token: 'abc',
+        username: 'environment_variable_credentials',
+      });
+    });
+
+    it('sanitizes instance URL from env', () => {
+      process.env.GITLAB_WORKFLOW_INSTANCE_URL = 'https://gitlab.com/';
+      process.env.GITLAB_WORKFLOW_TOKEN = 'abc';
+
+      expect(accountService.getAllAccounts()).toHaveLength(1);
+
+      expect(accountService.getAllAccounts()[0]).toEqual({
+        id: 'https://gitlab.com',
+        instanceUrl: 'https://gitlab.com',
+        token: 'abc',
+        username: 'environment_variable_credentials',
+      });
+    });
+  });
+
+  it('sanitizes instance URLs stored with trailing slash', async () => {
+    tokenMap['https://gitlab.com/'] = 'abc';
+
+    expect(accountService.getAllAccounts()[0]).toEqual({
+      id: 'https://gitlab.com',
+      instanceUrl: 'https://gitlab.com',
+      token: 'abc',
+      username: 'GitLab user',
+    });
+  });
   it('can set and get one token', async () => {
-    expect(accountService.getToken('https://gitlab.com')).toBeUndefined();
+    expect(accountService.getOneAccountForInstance('https://gitlab.com')).toBeUndefined();
 
     await accountService.addAccount(createAccount('https://gitlab.com', 1, 'abc'));
-    expect(accountService.getToken('https://gitlab.com')).toBe('abc');
+    expect(accountService.getOneAccountForInstance('https://gitlab.com')?.token).toBe('abc');
   });
 
   it('can retrieve all instance URLs', async () => {

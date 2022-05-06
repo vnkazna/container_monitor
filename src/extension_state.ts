@@ -21,17 +21,17 @@ export class ExtensionState {
     await this.updateExtensionStatus();
   }
 
-  private hasAnyTokens(): boolean {
+  private hasAnyAccounts(): boolean {
     assert(this.accountService, 'ExtensionState has not been initialized.');
-    return this.accountService.getInstanceUrls().length > 0;
+    return this.accountService.getAllAccounts().length > 0;
   }
 
   isValid(): boolean {
-    return this.hasAnyTokens() && hasOpenRepositories();
+    return this.hasAnyAccounts() && hasOpenRepositories();
   }
 
   async updateExtensionStatus(): Promise<void> {
-    await vscode.commands.executeCommand('setContext', 'gitlab:noToken', !this.hasAnyTokens());
+    await vscode.commands.executeCommand('setContext', 'gitlab:noAccount', !this.hasAnyAccounts());
     await vscode.commands.executeCommand(
       'setContext',
       'gitlab:noRepository',
