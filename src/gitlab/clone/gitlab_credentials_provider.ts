@@ -9,11 +9,11 @@ export const gitlabCredentialsProvider: CredentialsProvider = {
       return host.scheme === instanceURI.scheme && host.authority === instanceURI.authority;
     });
     if (matchingInstance) {
-      const token = accountService.getToken(matchingInstance);
-      if (token) {
+      const account = accountService.getOneAccountForInstance(matchingInstance);
+      if (account) {
         return {
           username: 'arbitrary_username_ignored_by_gitlab',
-          password: token,
+          password: account.token,
         };
       }
     }

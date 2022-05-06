@@ -3,7 +3,6 @@ import assert from 'assert';
 import { GitLabService } from './gitlab_service';
 import { ExistingProject, ProjectInRepository, SelectedProjectSetting } from './new_project';
 import { accountService, AccountService } from '../services/account_service';
-import { Credentials } from '../services/credentials';
 import { cartesianProduct } from '../utils/cartesian_product';
 import { hasPresentKey } from '../utils/has_present_key';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
@@ -21,6 +20,7 @@ import { log } from '../log';
 import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
 import { prettyJson } from '../errors/common';
 import { EnsureLatestPromise } from '../utils/ensure_latest_promise';
+import { Account } from '../services/account';
 
 interface ParsedProject {
   namespaceWithPath: string;
@@ -54,19 +54,19 @@ const parseProjects = (remoteUrls: string[], instanceUrls: string[]): ParsedProj
 
 const detectProjects = async (
   remoteUrls: string[],
-  allCredentials: Credentials[],
+  accounts: Account[],
   getProject: typeof GitLabService.tryToGetProjectFromInstance,
 ): Promise<ExistingProject[]> => {
   const uniqRemoteUrls = uniq(remoteUrls);
-  const credentialsForInstance = groupBy(allCredentials, i => i.instanceUrl);
-  const instanceUrls = Object.keys(credentialsForInstance);
+  const accountsForInstance = groupBy(accounts, a => a.instanceUrl);
+  const instanceUrls = Object.keys(accountsForInstance);
   const parsedProjects = parseProjects(uniqRemoteUrls, instanceUrls);
   const projectsWithCredentials = parsedProjects.flatMap(pp =>
-    credentialsForInstance[pp.instanceUrl].map(credentials => ({ ...pp, credentials })),
+    accountsForInstance[pp.instanceUrl].map(account => ({ ...pp, account })),
   );
   const loadedProjects = await Promise.all(
     projectsWithCredentials.map(async p => {
-      const project = await getProject(p.credentials, p.namespaceWithPath);
+      const project = await getProject(p.account, p.namespaceWithPath);
       return { ...p, project };
     }),
   );
@@ -89,7 +89,7 @@ const assignProjectsToRepositories = async (
 const loadProjectFromSettings = async (
   settings: SelectedProjectSetting,
   pointers: GitRemoteUrlPointer[],
-  allCredentials: Credentials[],
+  accounts: Account[],
   getProject: typeof GitLabService.tryToGetProjectFromInstance,
 ): Promise<ProjectInRepository | undefined> => {
   const [pointer] = pointers.filter(
@@ -104,21 +104,21 @@ const loadProjectFromSettings = async (
     );
     return undefined;
   }
-  const [credentials] = allCredentials.filter(c => c.instanceUrl === settings.accountId);
-  if (!credentials) {
+  const [account] = accounts.filter(c => c.instanceUrl === settings.accountId);
+  if (!account) {
     log.warn(
       `Unable to find credentials for account ${settings.accountId}. Ignoring selected project ${settings.namespaceWithPath}.`,
     );
     return undefined;
   }
-  const project = await getProject(credentials, settings.namespaceWithPath);
+  const project = await getProject(account, settings.namespaceWithPath);
   if (!project) {
     log.warn(
-      `Unable to fetch selected project ${settings.namespaceWithPath} from ${credentials.instanceUrl}. Ignoring this selected project`,
+      `Unable to fetch selected project ${settings.namespaceWithPath} from ${account.instanceUrl}. Ignoring this selected project`,
     );
     return undefined;
   }
-  return { credentials, pointer, project, initializationType: 'selected' };
+  return { account, pointer, project, initializationType: 'selected' };
 };
 
 const mergeSelectedAndDetected = (
@@ -144,7 +144,7 @@ const mergeSelectedAndDetected = (
 
 const loadSelectedProjects = async (
   selectedProjectSettings: SelectedProjectSetting[],
-  allCredentials: Credentials[],
+  accounts: Account[],
   pointers: GitRemoteUrlPointer[],
   getProject: typeof GitLabService.tryToGetProjectFromInstance,
 ): Promise<ProjectInRepository[]> => {
@@ -153,22 +153,20 @@ const loadSelectedProjects = async (
   const relevantSettings = allRepositoryPaths.flatMap(path => settingsByRepository[path] ?? []);
   return (
     await Promise.all(
-      relevantSettings.map(async s =>
-        loadProjectFromSettings(s, pointers, allCredentials, getProject),
-      ),
+      relevantSettings.map(async s => loadProjectFromSettings(s, pointers, accounts, getProject)),
     )
   ).filter(notNullOrUndefined);
 };
 
 export const initializeAllProjects = async (
-  allCredentials: Credentials[],
+  accounts: Account[],
   pointers: GitRemoteUrlPointer[],
   selectedProjectSettings: SelectedProjectSetting[],
   getProject = GitLabService.tryToGetProjectFromInstance,
 ): Promise<ProjectInRepository[]> => {
   const detectedProjects = await detectProjects(
     uniq(pointers.map(p => p.urlEntry.url)),
-    allCredentials,
+    accounts,
     getProject,
   );
   const detectedProjectsInRepositories = await assignProjectsToRepositories(
@@ -177,7 +175,7 @@ export const initializeAllProjects = async (
   );
   const selectedProjectsInRepositories = await loadSelectedProjects(
     selectedProjectSettings,
-    allCredentials,
+    accounts,
     pointers,
     getProject,
   );
@@ -253,7 +251,7 @@ export class GitLabProjectRepositoryImpl implements GitLabProjectRepository {
     const projects = await this.#ensureLatestPromise.discardIfNotLatest(
       () =>
         initializeAllProjects(
-          this.#accountService.getAllCredentials(),
+          this.#accountService.getAllAccounts(),
           pointers,
           this.#selectedProjectsStore.selectedProjectSettings,
         ),
