@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { REMOTE_URI_SCHEME } from '../constants';
 import { HelpError } from '../errors/help_error';
 import { pickGitRef } from '../gitlab/pick_git_ref';
-import { pickInstance } from '../gitlab/pick_instance';
+import { pickAccount } from '../gitlab/pick_account';
 import { pickProject } from '../gitlab/pick_project';
 import { accountService } from '../services/account_service';
 import { project } from '../test_utils/entities';
@@ -10,16 +10,11 @@ import { testCredentials } from '../test_utils/test_credentials';
 import { openRepository } from './open_repository';
 
 jest.mock('../services/account_service');
-jest.mock('../gitlab/pick_instance');
+jest.mock('../gitlab/pick_account');
 jest.mock('../gitlab/pick_project');
 jest.mock('../gitlab/pick_git_ref');
 
 describe('openRepository', () => {
-  const credentials = [
-    testCredentials('https://gitlab.com'),
-    testCredentials('https://example.com'),
-  ];
-
   const cancelOnce = () =>
     (vscode.window.showQuickPick as jest.Mock).mockImplementationOnce(() => undefined);
   const pickOnce = (label: string) =>
@@ -34,8 +29,7 @@ describe('openRepository', () => {
     (vscode.window.showInputBox as jest.Mock).mockImplementation(() => url);
 
   beforeEach(() => {
-    accountService.getAllCredentials = () => credentials;
-    accountService.getInstanceUrls = () => credentials.map(c => c.instanceUrl);
+    accountService.getInstanceUrls = () => ['https://gitlab.com', 'https://example.com'];
 
     (vscode.window.createQuickPick as jest.Mock).mockImplementation(() => ({
       onDidChangeValue: jest.fn(),
@@ -92,14 +86,14 @@ describe('openRepository', () => {
     };
 
     it('constructs and opens the correct URL', async () => {
-      (pickInstance as jest.Mock).mockImplementation(() => testCredentials('https://example.com'));
+      (pickAccount as jest.Mock).mockImplementation(() => testCredentials('https://example.com'));
       (pickProject as jest.Mock).mockImplementation(() => project);
       (pickGitRef as jest.Mock).mockImplementation(() => branch);
       alwaysInput('FooBar');
 
       await openRepository();
 
-      expect(pickInstance).toHaveBeenCalled();
+      expect(pickAccount).toHaveBeenCalled();
       expect(pickProject).toHaveBeenCalled();
       expect(pickGitRef).toHaveBeenCalled();
       expect(vscode.commands.executeCommand).toHaveBeenCalledWith(

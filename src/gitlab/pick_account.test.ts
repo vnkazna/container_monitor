@@ -1,31 +1,31 @@
 import * as vscode from 'vscode';
+import { Account } from '../services/account';
 import { accountService } from '../services/account_service';
-import { Credentials } from '../services/credentials';
-import { testCredentials } from '../test_utils/test_credentials';
-import { pickInstance } from './pick_instance';
+import { createAccount } from '../test_utils/entities';
+import { pickAccount } from './pick_account';
 
 jest.mock('../services/account_service');
 
-describe('pickInstance', () => {
-  let credentials: Credentials[];
+describe('pickAccount', () => {
+  let accounts: Account[];
 
   beforeEach(() => {
     (vscode.window.showQuickPick as jest.Mock).mockImplementation(([option]) => option);
-    accountService.getAllCredentials = () => credentials;
+    accountService.getAllAccounts = () => accounts;
   });
 
   it('skips selection of instance if there is only one', async () => {
-    credentials = [testCredentials('https://gitlab.com')];
+    accounts = [createAccount()];
 
-    await pickInstance();
+    await pickAccount();
 
     expect(vscode.window.showQuickPick).not.toHaveBeenCalled();
   });
 
   it('asks for instance if there are multiple', async () => {
-    credentials = [testCredentials('https://gitlab.com'), testCredentials('https://example.com')];
+    accounts = [createAccount('https://gitlab.com'), createAccount('https://example.com')];
 
-    await pickInstance();
+    await pickAccount();
 
     expect(vscode.window.showQuickPick).toHaveBeenCalled();
   });
