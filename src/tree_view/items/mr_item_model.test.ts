@@ -3,7 +3,7 @@ import { MrItemModel } from './mr_item_model';
 import { mr, projectInRepository } from '../../test_utils/entities';
 import {
   discussionOnDiff,
-  noteOnDiffTextSnippet,
+  noteOnDiffBody,
   multipleNotes,
 } from '../../../test/integration/fixtures/graphql/discussions.js';
 import * as mrVersion from '../../../test/integration/fixtures/rest/mr_version.json';
@@ -81,7 +81,7 @@ describe('MrItemModel', () => {
     const firstComment = commentThread.comments[0];
     expect(firstComment.author.name).toBe('Tomas Vik');
     expect(firstComment.mode).toBe(vscode.CommentMode.Preview);
-    expect(firstComment.body).toMatch(noteOnDiffTextSnippet);
+    expect(firstComment.body).toEqual(new vscode.MarkdownString(noteOnDiffBody));
   });
 
   it('should associate the thread with the correct URI', async () => {

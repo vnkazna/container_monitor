@@ -70,7 +70,7 @@ export class GitLabCommentThread {
   async submitEdit(comment: GitLabComment): Promise<void> {
     await this.gitlabService.updateNoteBody(
       comment.id,
-      comment.body,
+      comment.getBodyAsText(),
       comment.gqlNote.body, // this is what we think is the latest version stored in API
       this.mr,
     );

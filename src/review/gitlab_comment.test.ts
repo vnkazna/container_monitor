@@ -1,3 +1,4 @@
+import vscode from 'vscode';
 import { GitLabComment } from './gitlab_comment';
 import { GitLabCommentThread } from './gitlab_comment_thread';
 import { noteOnDiff } from '../../test/integration/fixtures/graphql/discussions.js';
@@ -104,7 +105,7 @@ And here`;
         ...(noteOnDiff as GqlTextDiffNote),
         body: suggestion,
       });
-      expect(comment.body).toEqual(renderedSuggestion);
+      expect(comment.body).toEqual(new vscode.MarkdownString(renderedSuggestion));
     });
 
     it('renders multiple suggestions into markdown', () => {
@@ -112,7 +113,7 @@ And here`;
         ...(noteOnDiff as GqlTextDiffNote),
         body: multipleSuggestions,
       });
-      expect(comment.body).toEqual(renderedMultipleSuggestions);
+      expect(comment.getBodyAsText()).toEqual(renderedMultipleSuggestions);
     });
 
     it('editing comment sets the comment body into original markdown', () => {
@@ -128,8 +129,9 @@ And here`;
         ...(noteOnDiff as GqlTextDiffNote),
         body: suggestion,
       });
+      comment = comment.setOriginalBody();
       comment.body = `${comment.body}\nabc`;
-      expect(comment.markBodyAsSubmitted().body).toEqual(`${renderedSuggestion}\nabc`);
+      expect(comment.markBodyAsSubmitted().getBodyAsText()).toEqual(`${renderedSuggestion}\nabc`);
     });
   });
 });
