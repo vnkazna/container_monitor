@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { REMOTE_URI_SCHEME } from '../constants';
 import { GitLabRemoteFileSystem } from '../remotefs/gitlab_remote_file_system';
-import { pickInstance } from '../gitlab/pick_instance';
+import { pickAccount } from '../gitlab/pick_account';
 import { pickProject } from '../gitlab/pick_project';
 import { pickGitRef } from '../gitlab/pick_git_ref';
 import { GitLabService } from '../gitlab/gitlab_service';
@@ -48,10 +48,10 @@ async function enterUrl(action: Action) {
 }
 
 async function chooseProject(action: Action) {
-  const credentials = await pickInstance();
-  if (!credentials) return;
+  const account = await pickAccount();
+  if (!account) return;
 
-  const gitlabService = new GitLabService(credentials);
+  const gitlabService = new GitLabService(account);
 
   const project = await pickProject(gitlabService);
   if (!project) return;
@@ -67,7 +67,7 @@ async function chooseProject(action: Action) {
   });
   if (!label) return;
 
-  const instanceUri = vscode.Uri.parse(credentials.instanceUrl);
+  const instanceUri = vscode.Uri.parse(account.instanceUrl);
   const remoteUri = vscode.Uri.joinPath(instanceUri, label).with({
     scheme: REMOTE_URI_SCHEME,
     query: `project=${project.restId}&ref=${ref.name}`,

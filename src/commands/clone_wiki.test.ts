@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
 import { cloneWiki } from './clone_wiki';
-import { pickInstance } from '../gitlab/pick_instance';
+import { pickAccount } from '../gitlab/pick_account';
 import { pickProject } from '../gitlab/pick_project';
-import { project } from '../test_utils/entities';
+import { createAccount, project } from '../test_utils/entities';
 
-jest.mock('../gitlab/pick_instance');
+jest.mock('../gitlab/pick_account');
 jest.mock('../gitlab/pick_project');
 jest.mock('../gitlab/gitlab_service');
 
 describe('cloneWiki', () => {
   it('calls git.clone command with selected URL', async () => {
-    (pickInstance as jest.Mock).mockImplementation(() => 'https://gitlab.com');
+    (pickAccount as jest.Mock).mockImplementation(() => createAccount());
     (pickProject as jest.Mock).mockImplementation(() => project);
     (vscode.window.showQuickPick as jest.Mock).mockImplementation(([option]) => option);
 

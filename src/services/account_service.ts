@@ -84,13 +84,6 @@ export class AccountService {
     return accounts[0];
   }
 
-  getAllCredentials(): Credentials[] {
-    return this.getInstanceUrls().map(instanceUrl => ({
-      instanceUrl,
-      token: this.#getToken(instanceUrl)!,
-    }));
-  }
-
   getAllAccounts(): Account[] {
     return [...this.getRemovableAccounts(), getEnvAccount()].filter(notNullOrUndefined);
   }

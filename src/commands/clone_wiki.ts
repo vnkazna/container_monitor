@@ -2,16 +2,16 @@ import * as vscode from 'vscode';
 import { VS_COMMANDS } from '../command_names';
 import { remoteForProject } from '../gitlab/clone/gitlab_remote_source_provider';
 import { GitLabService } from '../gitlab/gitlab_service';
-import { pickInstance } from '../gitlab/pick_instance';
+import { pickAccount } from '../gitlab/pick_account';
 import { pickProject } from '../gitlab/pick_project';
 
 export async function cloneWiki(): Promise<void> {
-  const credentials = await pickInstance();
-  if (!credentials) {
+  const account = await pickAccount();
+  if (!account) {
     return;
   }
 
-  const project = await pickProject(new GitLabService(credentials));
+  const project = await pickProject(new GitLabService(account));
   if (!project) {
     return;
   }
