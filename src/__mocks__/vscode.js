@@ -19,6 +19,10 @@ module.exports = {
   TreeItemCollapsibleState: {
     Collapsed: 'collapsed',
   },
+  MarkdownString: function MarkdownString(value, supportThemeIcons) {
+    this.value = value;
+    this.supportThemeIcons = supportThemeIcons;
+  },
   Uri,
   comments: {
     createCommentController: jest.fn(),

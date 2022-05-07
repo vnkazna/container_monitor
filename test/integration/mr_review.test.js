@@ -144,7 +144,7 @@ describe('MR Review', () => {
       const { uri, range, comments } = thread;
       assert.strictEqual(uri.path, `/${noteOnDiff.position.oldPath}`);
       assert.strictEqual(range.start.line, noteOnDiff.position.oldLine - 1);
-      assert.strictEqual(comments[0].body, noteOnDiff.body);
+      assert.strictEqual(comments[0].body.value, noteOnDiff.body);
     });
 
     it('editing comment fails if the comment body has changed on the GitLab instance', async () => {

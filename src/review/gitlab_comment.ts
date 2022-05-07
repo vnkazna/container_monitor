@@ -5,7 +5,7 @@ import { GitLabCommentThread } from './gitlab_comment_thread';
 
 interface CommentOptions {
   mode?: vscode.CommentMode;
-  body?: string;
+  body?: string | vscode.MarkdownString;
   note?: GqlTextDiffNote;
 }
 
@@ -24,7 +24,7 @@ export class GitLabComment implements vscode.Comment {
     readonly gqlNote: GqlTextDiffNote,
     public mode: vscode.CommentMode,
     readonly thread: GitLabCommentThread,
-    public body: string,
+    public body: string | vscode.MarkdownString,
   ) {}
 
   get id(): string {
@@ -46,18 +46,25 @@ export class GitLabComment implements vscode.Comment {
   }
 
   renderBody(): GitLabComment {
-    return this.copyWith({ body: renderSuggestions(this.gqlNote.body, this.gqlNote.url) });
+    return this.copyWith({
+      body: new vscode.MarkdownString(renderSuggestions(this.gqlNote.body, this.gqlNote.url)),
+    });
   }
 
   setOriginalBody(): GitLabComment {
     return this.copyWith({ body: this.gqlNote.body });
   }
 
+  getBodyAsText(): string {
+    if (this.body instanceof vscode.MarkdownString) return this.body.value;
+    return this.body;
+  }
+
   markBodyAsSubmitted(): GitLabComment {
     return this.copyWith({
       note: {
         ...this.gqlNote,
-        body: this.body, // this synchronizes the API response with the latest body
+        body: this.getBodyAsText(), // this synchronizes the API response with the latest body
       },
     }).renderBody();
   }
@@ -80,7 +87,7 @@ export class GitLabComment implements vscode.Comment {
       gqlNote,
       vscode.CommentMode.Preview,
       thread,
-      renderSuggestions(gqlNote.body, gqlNote.url),
-    );
+      gqlNote.body,
+    ).renderBody();
   }
 }

@@ -138,7 +138,7 @@ describe('GitLabCommentThread', () => {
     expect(vsCommentThread.comments.length).toBe(1);
     const [comment] = vsCommentThread.comments;
     expect(comment).toBeInstanceOf(GitLabComment);
-    expect(comment.body).toBe(noteOnDiff.body);
+    expect((comment as GitLabComment).getBodyAsText()).toBe(noteOnDiff.body);
   });
 
   describe('deleting comments', () => {
@@ -204,7 +204,7 @@ describe('GitLabCommentThread', () => {
       gitlabCommentThread.cancelEdit(vsCommentThread.comments[0] as GitLabComment);
 
       expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Preview);
-      expect(vsCommentThread.comments[0].body).toBe('first body');
+      expect(vsCommentThread.comments[0].body).toEqual(new vscode.MarkdownString('first body'));
       expect(vsCommentThread.comments[1].mode).toBe(vscode.CommentMode.Preview);
     });
   });
@@ -222,7 +222,7 @@ describe('GitLabCommentThread', () => {
       await gitlabCommentThread.submitEdit(vsCommentThread.comments[0] as GitLabComment);
 
       expect(vsCommentThread.comments[0].mode).toBe(vscode.CommentMode.Preview);
-      expect(vsCommentThread.comments[0].body).toBe('updated body');
+      expect(vsCommentThread.comments[0].body).toEqual(new vscode.MarkdownString('updated body'));
       expect((vsCommentThread.comments[0] as GitLabComment).gqlNote.body).toBe('updated body');
     });
 
@@ -255,7 +255,7 @@ describe('GitLabCommentThread', () => {
       expect(vsCommentThread.comments.length).toBe(2);
       const { mode, body, gqlNote } = vsCommentThread.comments[1] as GitLabComment;
       expect(mode).toBe(vscode.CommentMode.Preview);
-      expect(body).toBe('reply text');
+      expect(body).toEqual(new vscode.MarkdownString('reply text'));
       expect(gqlNote.body).toBe('reply text');
     });
 

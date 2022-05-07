@@ -191,7 +191,9 @@ describe('MR discussion commands', () => {
           await retryFailedComment(comment);
 
           expect(thread.comments.length).toBe(1);
-          expect(thread.comments[0].body).toBe(discussionOnDiff.notes.nodes[0].body);
+          expect(thread.comments[0].body).toEqual(
+            new vscode.MarkdownString(discussionOnDiff.notes.nodes[0].body),
+          );
           expect(thread.comments[0].contextValue).toMatch(SYNCED_COMMENT_CONTEXT);
         });
 

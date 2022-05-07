@@ -80,6 +80,9 @@ const note2 = {
 
 const note2TextSnippet = 'I know that the dependencies are managed separately, but it would';
 
+const noteOnDiffBody =
+  'This is the core improvement. `NoteBody` sends the `note.body` to our `/api/v4/markdown` endpoint to render HTML. For labels, we can easily render the HTML ourselves, saving all the API requests and complexity.';
+
 const noteOnDiff = {
   id: 'gid://gitlab/DiffNote/469379582',
   createdAt: '2020-12-17T17:20:14Z',
@@ -96,7 +99,7 @@ const noteOnDiff = {
     username: 'viktomas',
     webUrl: 'https://gitlab.com/viktomas',
   },
-  body: 'This is the core improvement. `NoteBody` sends the `note.body` to our `/api/v4/markdown` endpoint to render HTML. For labels, we can easily render the HTML ourselves, saving all the API requests and complexity.',
+  body: noteOnDiffBody,
   bodyHtml:
     '<p data-sourcepos="1:1-1:210" dir="auto">This is the core improvement. <code>NoteBody</code> sends the <code>note.body</code> to our <code>/api/v4/markdown</code> endpoint to render HTML. For labels, we can easily render the HTML ourselves, saving all the API requests and complexity.</p>',
   url: 'https://gitlab.com/viktomas/test-project/-/merge_requests/7#note_754841236',
@@ -149,9 +152,6 @@ const noteOnDiffWithSuggestion = {
     oldPath: 'test.js',
   },
 };
-
-const noteOnDiffTextSnippet =
-  'For labels, we can easily render the HTML ourselves, saving all the API requests';
 
 const singleNote = {
   replyId: 'gid://gitlab/IndividualNoteDiscussion/afbf8f461a773fc130aa8091c6636f22efb5f4c5',
@@ -233,7 +233,7 @@ module.exports = {
   note2,
   note2TextSnippet,
   noteOnDiff,
-  noteOnDiffTextSnippet,
+  noteOnDiffBody,
   noteOnDiffWithSuggestion,
   singleNote,
   multipleNotes,
