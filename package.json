@@ -912,7 +912,7 @@
     "msw": "^0.38.0",
     "prettier": "^2.6.2",
     "simple-git": "^3.0.0",
-    "sinon": "^13.0.2",
+    "sinon": "^14.0.0",
     "source-map-support": "^0.5.20",
     "ts-jest": "^28.0.1",
     "typescript": "^4.4.3",
