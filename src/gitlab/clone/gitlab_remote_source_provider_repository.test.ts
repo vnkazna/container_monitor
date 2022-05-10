@@ -17,8 +17,7 @@ describe('GitLabRemoteSourceProviderRepository', () => {
     };
   });
 
-  // TODO: enable this test once we generate account ID properly
-  xit('remote source provider created for new token', async () => {
+  it('remote source provider created for new token', async () => {
     accountService.getAllAccounts = () => [createAccount('https://test2.gitlab.com', 1)];
     // TODO: maybe introduce something like an initialize method instead of doing the work in constructor
     // eslint-disable-next-line no-new

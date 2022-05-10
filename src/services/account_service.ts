@@ -16,10 +16,7 @@ const getEnvironmentVariables = (): Credentials | undefined => {
   };
 };
 
-const environmentTokenForInstance = (instanceUrl: string) =>
-  instanceUrl === getEnvironmentVariables()?.instanceUrl
-    ? getEnvironmentVariables()?.token
-    : undefined;
+const ACCOUNTS_KEY = 'glAccounts';
 
 const getEnvAccount = (): Account | undefined => {
   const credentials = getEnvironmentVariables();
@@ -44,27 +41,13 @@ export class AccountService {
     return this.onDidChangeEmitter.event;
   }
 
-  private get glTokenMap(): Record<string, string | undefined> {
+  private get accountMap(): Record<string, Account | undefined> {
     assert(this.context);
-    return this.context.globalState.get('glTokens', {});
+    return this.context.globalState.get(ACCOUNTS_KEY, {});
   }
 
   getInstanceUrls(): string[] {
     return uniq(this.getAllAccounts().map(a => a.instanceUrl));
-  }
-
-  #getRemovableInstanceUrls(): string[] {
-    return Object.keys(this.glTokenMap).map(removeTrailingSlash);
-  }
-
-  #getToken(instanceUrl: string): string | undefined {
-    // the first part of the return (`this.glTokenMap[instanceUrl]`)
-    // can be removed on 2022-08-15 (year after new tokens can't contain trailing slash)
-    return (
-      this.glTokenMap[instanceUrl] ||
-      this.glTokenMap[`${instanceUrl}/`] ||
-      environmentTokenForInstance(instanceUrl)
-    );
   }
 
   /**
@@ -90,31 +73,32 @@ export class AccountService {
 
   async addAccount(account: Account) {
     assert(this.context);
-    const tokenMap = this.glTokenMap;
+    const { accountMap } = this;
 
-    tokenMap[account.instanceUrl] = account.token;
+    if (accountMap[account.id]) {
+      log.warn(
+        `Account for instance ${account.instanceUrl} and user ${account.username} already exists. The extension ignored the request to re-add it.`,
+      );
+      return;
+    }
+    accountMap[account.id] = account;
 
-    await this.context.globalState.update('glTokens', tokenMap);
+    await this.context.globalState.update(ACCOUNTS_KEY, accountMap);
+
     this.onDidChangeEmitter.fire();
   }
 
   async removeAccount(accountId: string) {
     assert(this.context);
-    const tokenMap = this.glTokenMap;
+    const { accountMap } = this;
+    delete accountMap[accountId];
 
-    delete tokenMap[removeTrailingSlash(accountId)]; // TODO: remove this sanitization once we use real accounts
-
-    await this.context.globalState.update('glTokens', tokenMap);
+    await this.context.globalState.update(ACCOUNTS_KEY, accountMap);
     this.onDidChangeEmitter.fire();
   }
 
   getRemovableAccounts(): Account[] {
-    return this.#getRemovableInstanceUrls().map(instanceUrl => ({
-      id: instanceUrl,
-      instanceUrl,
-      token: this.#getToken(instanceUrl)!,
-      username: 'GitLab user',
-    }));
+    return Object.values(this.accountMap).filter(notNullOrUndefined);
   }
 }
 

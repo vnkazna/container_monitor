@@ -143,3 +143,10 @@ export const projectInRepository: ProjectInRepository = {
   },
   account: createAccount(),
 };
+
+export const user: RestUser = {
+  email: 'test@user.com',
+  id: 123,
+  state: 'active',
+  username: 'test-user',
+};

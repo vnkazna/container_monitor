@@ -1,19 +1,19 @@
 import { ExtensionContext } from 'vscode';
 import { createAccount } from '../test_utils/entities';
+import { Account } from './account';
 import { AccountService } from './account_service';
 
-type TokenMap = Record<string, string | undefined>;
-
+type AccountMap = Record<string, Account | undefined>;
 describe('AccountService', () => {
-  let tokenMap: TokenMap;
+  let accountMap: AccountMap;
   let accountService: AccountService;
   beforeEach(() => {
-    tokenMap = {};
+    accountMap = {};
     const fakeContext = {
       globalState: {
-        get: () => tokenMap,
-        update: (name: string, tm: TokenMap) => {
-          tokenMap = tm;
+        get: () => accountMap,
+        update: (name: string, am: AccountMap) => {
+          accountMap = am;
         },
       },
     };
@@ -21,11 +21,34 @@ describe('AccountService', () => {
     accountService.init(fakeContext as unknown as ExtensionContext);
   });
 
-  /* This scenario happens when token was introduced before we started removing trailing slashes */
-  it('can retrieve token if it was stored for url with trailing slash', async () => {
-    tokenMap['https://gitlab.com/'] = 'abc';
+  it('adds account', async () => {
+    const account = createAccount();
+    await accountService.addAccount(account);
 
-    expect(accountService.getOneAccountForInstance('https://gitlab.com')?.token).toBe('abc');
+    expect(accountService.getAllAccounts()).toHaveLength(1);
+    expect(accountService.getAllAccounts()).toEqual([account]);
+  });
+
+  it('does not add a duplicate account', async () => {
+    const account = createAccount('https://gitlab.com', 1, 'abc');
+    await accountService.addAccount(account);
+    const duplicateAccount = createAccount('https://gitlab.com', 1, 'def');
+    await accountService.addAccount(duplicateAccount);
+
+    expect(accountService.getAllAccounts()).toHaveLength(1);
+    expect(accountService.getAllAccounts()).toEqual([account]);
+  });
+
+  it('removes account', async () => {
+    const account = createAccount();
+
+    await accountService.addAccount(account);
+
+    expect(accountService.getAllAccounts()).toHaveLength(1);
+
+    await accountService.removeAccount(account.id);
+
+    expect(accountService.getAllAccounts()).toHaveLength(0);
   });
 
   describe('account from environment variable', () => {
@@ -41,7 +64,7 @@ describe('AccountService', () => {
       expect(accountService.getAllAccounts()).toHaveLength(1);
 
       expect(accountService.getAllAccounts()[0]).toEqual({
-        id: 'https://gitlab.com',
+        id: 'https://gitlab.com|environment-variables',
         instanceUrl: 'https://gitlab.com',
         token: 'abc',
         username: 'environment_variable_credentials',
@@ -55,7 +78,7 @@ describe('AccountService', () => {
       expect(accountService.getAllAccounts()).toHaveLength(1);
 
       expect(accountService.getAllAccounts()[0]).toEqual({
-        id: 'https://gitlab.com',
+        id: 'https://gitlab.com|environment-variables',
         instanceUrl: 'https://gitlab.com',
         token: 'abc',
         username: 'environment_variable_credentials',
@@ -63,17 +86,7 @@ describe('AccountService', () => {
     });
   });
 
-  it('sanitizes instance URLs stored with trailing slash', async () => {
-    tokenMap['https://gitlab.com/'] = 'abc';
-
-    expect(accountService.getAllAccounts()[0]).toEqual({
-      id: 'https://gitlab.com',
-      instanceUrl: 'https://gitlab.com',
-      token: 'abc',
-      username: 'GitLab user',
-    });
-  });
-  it('can set and get one token', async () => {
+  it('can set and get one account', async () => {
     expect(accountService.getOneAccountForInstance('https://gitlab.com')).toBeUndefined();
 
     await accountService.addAccount(createAccount('https://gitlab.com', 1, 'abc'));
