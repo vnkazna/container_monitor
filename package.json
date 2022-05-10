@@ -914,7 +914,7 @@
     "simple-git": "^3.0.0",
     "sinon": "^14.0.0",
     "source-map-support": "^0.5.20",
-    "ts-jest": "^28.0.1",
+    "ts-jest": "^28.0.2",
     "typescript": "^4.4.3",
     "vsce": "^2.0.0",
     "vscode-test": "^1.6.1"
