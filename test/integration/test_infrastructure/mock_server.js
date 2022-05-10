@@ -3,6 +3,7 @@ const { rest, graphql } = require('msw');
 const { API_URL_PREFIX } = require('./constants');
 const projectResponse = require('../fixtures/graphql/project.json');
 const versionResponse = require('../fixtures/rest/version.json');
+const userResponse = require('../fixtures/rest/user.json');
 
 const createJsonEndpoint = (path, response) =>
   rest.get(`${API_URL_PREFIX}${path}`, (req, res, ctx) => res(ctx.status(200), ctx.json(response)));
@@ -61,6 +62,7 @@ const getServer = (handlers = []) => {
       return res(ctx.data({ project: null }));
     }),
     createJsonEndpoint('/version', versionResponse),
+    createJsonEndpoint('/user', userResponse),
     ...handlers,
     notFoundByDefault,
   );

@@ -54,6 +54,8 @@ import {
   showMergeRequestSearchInput,
   showProjectAdvancedSearchInput,
 } from './search_input';
+import { migrateCredentials } from './services/credentials_migrator';
+import { migrateSelectedProjects } from './gitlab/migrate_selected_projects';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -133,8 +135,6 @@ const registerCommands = (
       vscode.commands.registerCommand(cmd, wrapWithCatch(commands[cmd] as any)),
     );
   });
-
-  registerSidebarTreeDataProviders();
 };
 
 const registerCiCompletion = (context: vscode.ExtensionContext) => {
@@ -174,11 +174,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
+  await extensionState.init(accountService);
+  registerSidebarTreeDataProviders();
+  await migrateCredentials(context, accountService).catch(e => handleError(e));
+  await migrateSelectedProjects(selectedProjectStore, accountService).catch(e => handleError(e));
   // we don't want to hold the extension startup by waiting on VS Code and GitLab API
   doNotAwait(
     Promise.all([
       setSidebarViewState(SidebarViewState.ListView),
-      extensionState.init(accountService),
       gitExtensionWrapper.init(),
       gitlabProjectRepository.init(),
       currentBranchRefresher.refresh(),

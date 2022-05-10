@@ -10,6 +10,11 @@ const { GITLAB_URL } = require('./constants');
 const { InMemoryMemento } = require('./in_memory_memento');
 const { getServer } = require('./mock_server');
 
+const rejectAfter = (reason, durationInMs) =>
+  new Promise((res, rej) => {
+    setTimeout(() => rej(new Error(reason)), durationInMs);
+  });
+
 const ensureProject = async () => {
   await gitExtensionWrapper.init();
   await gitlabProjectRepository.init();
@@ -27,12 +32,6 @@ const ensureProject = async () => {
 
 const initializeTestEnvironment = async testRoot => {
   accountService.init({ globalState: new InMemoryMemento() });
-  await accountService.addAccount({
-    instanceUrl: GITLAB_URL,
-    token: 'abcd-secret',
-    id: GITLAB_URL,
-    username: 'test',
-  });
   process.env.GITLAB_WORKFLOW_INSTANCE_URL = GITLAB_URL;
   process.env.GITLAB_WORKFLOW_TOKEN = 'abcd-secret';
   extensionState.init(accountService);
@@ -42,7 +41,7 @@ const initializeTestEnvironment = async testRoot => {
   // run the extension activation and project load with a mock server
   const server = getServer();
   await ext.activate();
-  await ensureProject();
+  await Promise.race([ensureProject(), rejectAfter('No project after 5s', 5000)]);
   await vscode.commands.executeCommand(USER_COMMANDS.REFRESH_SIDEBAR);
   server.close();
 };

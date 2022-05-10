@@ -182,8 +182,7 @@ describe('gitlab_project_repository', () => {
       expect(example.project.namespaceWithPath).toBe('example/gitlab-vscode-extension');
     });
 
-    // TODO enable this test once we have multi-account support https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/298
-    xit('initializes multiple projects for multiple credentials', async () => {
+    it('initializes multiple projects for multiple credentials', async () => {
       const firstAccount = createAccount('https://gitlab.com', 1, 'abc');
       const secondAccount = createAccount('https://gitlab.com', 2, 'def');
 

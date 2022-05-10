@@ -19,7 +19,7 @@ describe('token input', () => {
     beforeEach(() => {
       // simulate user filling in instance URL and token
       asMock(vscode.window.showInputBox).mockImplementation(async (options: any) =>
-        options.password ? 'token' : 'instanceUrl',
+        options.password ? 'token' : 'https://gitlab.com',
       );
     });
     it('adds account', async () => {
@@ -28,11 +28,14 @@ describe('token input', () => {
 
       await showInput();
 
-      expect(GitLabService).toHaveBeenCalledWith({ instanceUrl: 'instanceUrl', token: 'token' });
-      expect(accountService.addAccount).toHaveBeenCalledWith({
-        instanceUrl: 'instanceUrl',
+      expect(GitLabService).toHaveBeenCalledWith({
+        instanceUrl: 'https://gitlab.com',
         token: 'token',
-        id: 'instanceUrl',
+      });
+      expect(accountService.addAccount).toHaveBeenCalledWith({
+        id: 'https://gitlab.com|1',
+        token: 'token',
+        instanceUrl: 'https://gitlab.com',
         username: 'testname',
       });
     });
@@ -48,9 +51,9 @@ describe('token input', () => {
       await showInput();
 
       expect(accountService.addAccount).toHaveBeenCalledWith({
+        id: 'https://gitlab.com|1',
         instanceUrl: 'https://gitlab.com',
         token: 'token',
-        id: 'https://gitlab.com',
         username: 'testname',
       });
     });
