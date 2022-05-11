@@ -127,6 +127,7 @@ export const createAccount = (
   username: `user${userId}`,
   instanceUrl,
   token,
+  type: 'token',
 });
 
 export const gitRepository = {

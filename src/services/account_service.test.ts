@@ -81,6 +81,7 @@ describe('AccountService', () => {
         instanceUrl: 'https://gitlab.com',
         token: 'abc',
         username: 'environment_variable_credentials',
+        type: 'token',
       });
     });
 
@@ -95,6 +96,7 @@ describe('AccountService', () => {
         instanceUrl: 'https://gitlab.com',
         token: 'abc',
         username: 'environment_variable_credentials',
+        type: 'token',
       });
     });
   });

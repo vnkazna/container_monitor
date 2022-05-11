@@ -32,6 +32,7 @@ const getEnvAccount = (): Account | undefined => {
     id: makeAccountId(credentials.instanceUrl, 'environment-variables'),
     username: 'environment_variable_credentials',
     ...credentials,
+    type: 'token',
   };
 };
 
