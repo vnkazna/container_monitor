@@ -32,6 +32,7 @@ export async function showInput() {
     token,
     id: makeAccountId(instanceUrl, user.id),
     username: user.username,
+    type: 'token',
   });
   await vscode.window.showInformationMessage(
     `Added the GitLab account for user ${user.username} on ${instanceUrl}.`,

@@ -37,6 +37,7 @@ describe('token input', () => {
         token: 'token',
         instanceUrl: 'https://gitlab.com',
         username: 'testname',
+        type: 'token',
       });
     });
 
@@ -55,6 +56,7 @@ describe('token input', () => {
         instanceUrl: 'https://gitlab.com',
         token: 'token',
         username: 'testname',
+        type: 'token',
       });
     });
 

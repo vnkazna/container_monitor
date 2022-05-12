@@ -33,6 +33,7 @@ export const migrateCredentials = async (
             instanceUrl: credentials.instanceUrl,
             token: credentials.token,
             username: user.username,
+            type: 'token' as const,
           };
         } catch (e) {
           log.error('Failed to migrate credentials', e);
