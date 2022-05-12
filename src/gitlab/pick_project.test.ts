@@ -62,7 +62,7 @@ describe('pickProject', () => {
     beforeEach(() => alwaysPickOptionN(0));
 
     it('resolves the user-provided value', async () => {
-      alwaysInput(projects[2].name);
+      alwaysInput(projects[2].namespaceWithPath);
       const r = await pickProject(gitLabService);
       expect(r).toStrictEqual(projects[2]);
     });

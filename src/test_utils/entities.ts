@@ -116,7 +116,11 @@ export const reviewUriParams: ReviewUriParams = {
 export const project = new GitLabProject(gqlProject);
 
 export const createProject = (namespaceWithPath: string) =>
-  new GitLabProject({ ...gqlProject, fullPath: namespaceWithPath, name: namespaceWithPath });
+  new GitLabProject({
+    ...gqlProject,
+    fullPath: namespaceWithPath,
+    name: namespaceWithPath.replace('/', '-'),
+  });
 
 export const createAccount = (
   instanceUrl = 'https://gitlab.com',

@@ -20,7 +20,10 @@ export async function pickProject(
   async function getItems(query?: string): Promise<ItemOrOther[]> {
     const projects = await gitlabService.getProjects({ search: query });
     const items = projects.map(project => ({
-      label: `$(repo) ${project.name}`,
+      // We have to use `namespaceWithPath`. `project.name` can be arbitrary text and VS Code filters the items based on `query`
+      // For example, we search for `test`, API returns project {name: 'Project', namespaceWithPath: 'group/test'}, if we use `project.name`
+      // VS Code won't find the `test` string and won't show the item to the user
+      label: `$(repo) ${project.namespaceWithPath}`,
       project,
       other: false as const,
     }));
