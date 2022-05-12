@@ -85,7 +85,7 @@ describe('gitlab_project_repository', () => {
       it('can manually assign GitLab project to a remote URL', async () => {
         const pointers = createPointers([['origin', 'remote:that-we-cannot-parse-automatically']]);
         const selectedProjectSetting: SelectedProjectSetting = {
-          accountId: defaultAccount.instanceUrl,
+          accountId: defaultAccount.id,
           namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
           remoteName: 'origin',
           remoteUrl: 'remote:that-we-cannot-parse-automatically',
@@ -115,6 +115,7 @@ describe('gitlab_project_repository', () => {
             'gitlab-org/gitlab-vscode-extension',
             'gitlab-org/security/gitlab-vscode-extension',
           ],
+          'https://gitlab.com-def': ['gitlab-org/gitlab-vscode-extension'],
         };
       });
 
@@ -136,7 +137,7 @@ describe('gitlab_project_repository', () => {
 
       it('marks repo as selected if it was selected by the user', async () => {
         const selectedProjectSetting: SelectedProjectSetting = {
-          accountId: defaultAccount.instanceUrl,
+          accountId: defaultAccount.id,
           namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
           remoteName: 'origin',
           remoteUrl: extensionRemoteUrl,
@@ -154,6 +155,28 @@ describe('gitlab_project_repository', () => {
         const [origin, security] = initializedProjects;
         expect(origin.initializationType).toBe('selected');
         expect(security.initializationType).toBeUndefined();
+      });
+
+      it('uses account ID to match the selected project', async () => {
+        const secondAccount = createAccount(defaultAccount.instanceUrl, 10, 'def');
+        const selectedProjectSetting: SelectedProjectSetting = {
+          accountId: secondAccount.id,
+          namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
+          remoteName: 'origin',
+          remoteUrl: extensionRemoteUrl,
+          repositoryRootPath: pointers[0].repository.rootFsPath,
+        };
+
+        const initializedProjects = await initializeAllProjects(
+          [defaultAccount, secondAccount],
+          pointers,
+          [selectedProjectSetting],
+          fakeGetProject,
+        );
+
+        const [origin] = initializedProjects;
+        expect(origin.initializationType).toBe('selected');
+        expect(origin.account).toEqual(secondAccount);
       });
     });
 
@@ -205,7 +228,7 @@ describe('gitlab_project_repository', () => {
     describe('when the setting cannot be loaded into a project', () => {
       const pointers = createPointers([['origin', extensionRemoteUrl]]);
       const correctSetting: SelectedProjectSetting = {
-        accountId: defaultAccount.instanceUrl,
+        accountId: defaultAccount.id,
         namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
         remoteName: 'origin',
         remoteUrl: extensionRemoteUrl,
