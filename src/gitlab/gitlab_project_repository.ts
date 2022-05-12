@@ -104,7 +104,7 @@ const loadProjectFromSettings = async (
     );
     return undefined;
   }
-  const [account] = accounts.filter(c => c.instanceUrl === settings.accountId);
+  const [account] = accounts.filter(a => a.id === settings.accountId);
   if (!account) {
     log.warn(
       `Unable to find credentials for account ${settings.accountId}. Ignoring selected project ${settings.namespaceWithPath}.`,
