@@ -1,5 +1,6 @@
 import { ExtensionContext } from 'vscode';
 import { createAccount } from '../test_utils/entities';
+import { SecretStorage } from '../test_utils/secret_storage';
 import { Account } from './account';
 import { AccountService } from './account_service';
 
@@ -7,8 +8,10 @@ type AccountMap = Record<string, Account | undefined>;
 describe('AccountService', () => {
   let accountMap: AccountMap;
   let accountService: AccountService;
-  beforeEach(() => {
+  let secrets: SecretStorage;
+  beforeEach(async () => {
     accountMap = {};
+    secrets = new SecretStorage();
     const fakeContext = {
       globalState: {
         get: () => accountMap,
@@ -16,9 +19,10 @@ describe('AccountService', () => {
           accountMap = am;
         },
       },
+      secrets,
     };
     accountService = new AccountService();
-    accountService.init(fakeContext as unknown as ExtensionContext);
+    await accountService.init(fakeContext as unknown as ExtensionContext);
   });
 
   it('adds account', async () => {
@@ -37,6 +41,15 @@ describe('AccountService', () => {
 
     expect(accountService.getAllAccounts()).toHaveLength(1);
     expect(accountService.getAllAccounts()).toEqual([account]);
+  });
+
+  it('fails when some other process changed secrets', async () => {
+    const account = createAccount('https://gitlab.com', 1, 'abc');
+    await accountService.addAccount(account);
+    await secrets.store('gitlab-tokens', '{}');
+    await expect(accountService.addAccount(createAccount('https://gitlab.com', 2))).rejects.toThrow(
+      /The GitLab secrets stored in your keychain have changed/,
+    );
   });
 
   it('removes account', async () => {

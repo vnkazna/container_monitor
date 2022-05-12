@@ -3,6 +3,7 @@ import { InMemoryMemento } from '../../test/integration/test_infrastructure/in_m
 import { makeAccountId } from '../services/account';
 import { AccountService } from '../services/account_service';
 import { createAccount } from '../test_utils/entities';
+import { SecretStorage } from '../test_utils/secret_storage';
 import { migrateSelectedProjects } from './migrate_selected_projects';
 import { SelectedProjectStore, SelectedProjectStoreImpl } from './selected_project_store';
 
@@ -11,12 +12,13 @@ describe('migrateSelectedProjects', () => {
   let accountService: AccountService;
   let selectedProjectStore: SelectedProjectStore;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fakeContext = {
       globalState: new InMemoryMemento(),
+      secrets: new SecretStorage(),
     } as unknown as ExtensionContext;
     accountService = new AccountService();
-    accountService.init(fakeContext);
+    await accountService.init(fakeContext);
     selectedProjectStore = new SelectedProjectStoreImpl();
     selectedProjectStore.init(fakeContext);
   });
