@@ -1,5 +1,6 @@
 import { ExtensionContext } from 'vscode';
 import { createAccount, user } from '../test_utils/entities';
+import { SecretStorage } from '../test_utils/secret_storage';
 import { AccountService } from './account_service';
 import { Credentials } from './credentials';
 import { migrateCredentials } from './credentials_migrator';
@@ -24,7 +25,7 @@ describe('CredentialsMigrator', () => {
     return user;
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     globalStateContent = { [TOKENS_KEY]: [], [MIGRATED_CREDENTIALS]: [] };
     fakeContext = {
       globalState: {
@@ -33,10 +34,11 @@ describe('CredentialsMigrator', () => {
           globalStateContent[key] = value;
         },
       },
+      secrets: new SecretStorage(),
     } as unknown as ExtensionContext;
     users = {};
     accountService = new AccountService();
-    accountService.init(fakeContext);
+    await accountService.init(fakeContext);
   });
 
   it('migrates credentials', async () => {

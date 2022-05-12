@@ -163,7 +163,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   registerCommands(context, outputChannel);
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
-  accountService.init(context);
+  await accountService.init(context);
   selectedProjectStore.init(context);
   registerCiCompletion(context);
   context.subscriptions.push(gitExtensionWrapper);
