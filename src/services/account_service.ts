@@ -86,7 +86,7 @@ export class AccountService {
   }
 
   getAllAccounts(): Account[] {
-    return [...this.getRemovableAccounts(), getEnvAccount()].filter(notNullOrUndefined);
+    return [...this.#getRemovableAccountsWithTokens(), getEnvAccount()].filter(notNullOrUndefined);
   }
 
   async addAccount(account: Account) {
@@ -110,7 +110,7 @@ export class AccountService {
     this.onDidChangeEmitter.fire();
   }
 
-  async #storeToken(accountId: string, token: string) {
+  async #validateSecretsAreUpToDate() {
     assert(this.context);
     const storedSecrets = await getSecrets(this.context);
     assert.deepStrictEqual(
@@ -118,6 +118,18 @@ export class AccountService {
       storedSecrets,
       'The GitLab secrets stored in your keychain have changed. (Maybe another instance of VS Code or maybe OS synchronizing keychains.) Please restart VS Code.',
     );
+  }
+
+  async #removeToken(accountId: string) {
+    assert(this.context);
+    await this.#validateSecretsAreUpToDate();
+    delete this.secrets[accountId];
+    await this.context.secrets.store(SECRETS_KEY, JSON.stringify(this.secrets));
+  }
+
+  async #storeToken(accountId: string, token: string) {
+    assert(this.context);
+    await this.#validateSecretsAreUpToDate();
     const secrets = { ...this.secrets, [accountId]: { token } };
     await this.context.secrets.store(SECRETS_KEY, JSON.stringify(secrets));
     this.secrets = secrets;
@@ -129,13 +141,19 @@ export class AccountService {
     delete accountMap[accountId];
 
     await this.context.globalState.update(ACCOUNTS_KEY, accountMap);
+    await this.#removeToken(accountId);
     this.onDidChangeEmitter.fire();
   }
 
-  getRemovableAccounts(): Account[] {
-    const accountsWithMaybeTokens = Object.values(this.accountMap)
-      .filter(notNullOrUndefined)
-      .map(a => ({ ...a, token: this.secrets[a.id]?.token }));
+  getRemovableAccounts(): AccountWithoutToken[] {
+    return Object.values(this.accountMap).filter(notNullOrUndefined);
+  }
+
+  #getRemovableAccountsWithTokens(): Account[] {
+    const accountsWithMaybeTokens = this.getRemovableAccounts().map(a => ({
+      ...a,
+      token: this.secrets[a.id]?.token,
+    }));
     accountsWithMaybeTokens
       .filter(a => !a.token)
       .forEach(a =>
