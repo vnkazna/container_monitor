@@ -16,7 +16,7 @@ const selectRepository = async (): Promise<GitRepository | undefined> => {
     repository,
     label: repository.rootFsPath,
   }));
-  const choice = await vscode.window.showQuickPick(options, { title: 'Select Git Repository' });
+  const choice = await vscode.window.showQuickPick(options, { title: 'Select Git repository' });
   if (!choice) return undefined;
   return choice.repository;
 };
@@ -67,7 +67,7 @@ const selectProject = async (repository: GitRepository) => {
     },
   ];
   const selectedProject = await vscode.window.showQuickPick(options, {
-    title: 'Select GitLab Project',
+    title: 'Select GitLab project',
   });
   if (!selectedProject) return;
   if (selectedProject.isOther) {
