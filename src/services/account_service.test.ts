@@ -62,6 +62,7 @@ describe('AccountService', () => {
     await accountService.removeAccount(account.id);
 
     expect(accountService.getAllAccounts()).toHaveLength(0);
+    expect(await secrets.get('gitlab-tokens')).toBe('{}');
   });
 
   describe('account from environment variable', () => {
