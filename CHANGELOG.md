@@ -1,3 +1,19 @@
+# [3.44.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.43.1...v3.44.0) (2022-05-13)
+
+
+### Bug Fixes
+
+* render markdown in MR comments ([9e249c7](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/9e249c7729cfd89150a4e493a0114d13b5bc2c2b))
+
+
+### Features
+
+* support multiple accounts on the same GitLab instance ([bb469bf](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/bb469bfdf51b92339d20f3c2331316ff1d69a46b))
+* Updated code completion to include *.gitlab-ci.yml ([b8e3551](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/b8e3551efe8ca0be10934dcd99c2dea848671dbe))
+* use VS Code SecretStorage to store tokens ([01cfc88](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/01cfc889ff8f4c22ccd40d631796066d3bd03e5c))
+
+
+
 ## [3.43.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.43.0...v3.43.1) (2022-05-03)
 
 
