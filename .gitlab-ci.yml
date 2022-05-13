@@ -149,9 +149,6 @@ publish_open_vsx:
   rules:
     - when: on_success
 
-retire-js-dependency_scanning:
-  <<: *secure-jobs-config
-
 gemnasium-dependency_scanning:
   <<: *secure-jobs-config
 
