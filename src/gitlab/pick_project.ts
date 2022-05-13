@@ -42,7 +42,7 @@ export async function pickProject(
   const { picked, query } = await pickWithQuery(
     {
       ignoreFocusOut: true,
-      placeholder: 'Select GitLab project',
+      title: 'Select GitLab project',
     },
     getItems,
   );

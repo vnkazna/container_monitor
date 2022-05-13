@@ -9,7 +9,7 @@ import { showQuickPick } from './show_quickpick';
  */
 export type QuickPickInitOptions = Pick<
   Partial<vscode.QuickPick<never>>,
-  'ignoreFocusOut' | 'placeholder'
+  'ignoreFocusOut' | 'title'
 >;
 
 /**

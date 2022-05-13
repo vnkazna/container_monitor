@@ -12,7 +12,7 @@ export async function pickGitRef(
   const { picked } = await pickWithQuery(
     {
       ignoreFocusOut: true,
-      placeholder: 'Select branch or tag',
+      title: 'Select branch or tag',
     },
     async query => {
       const [branches, tags] = await Promise.all([
