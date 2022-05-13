@@ -86,7 +86,7 @@ export class AccountService {
   }
 
   getAllAccounts(): Account[] {
-    return [...this.getRemovableAccounts(), getEnvAccount()].filter(notNullOrUndefined);
+    return [...this.#getRemovableAccountsWithTokens(), getEnvAccount()].filter(notNullOrUndefined);
   }
 
   async addAccount(account: Account) {
@@ -145,10 +145,15 @@ export class AccountService {
     this.onDidChangeEmitter.fire();
   }
 
-  getRemovableAccounts(): Account[] {
-    const accountsWithMaybeTokens = Object.values(this.accountMap)
-      .filter(notNullOrUndefined)
-      .map(a => ({ ...a, token: this.secrets[a.id]?.token }));
+  getRemovableAccounts(): AccountWithoutToken[] {
+    return Object.values(this.accountMap).filter(notNullOrUndefined);
+  }
+
+  #getRemovableAccountsWithTokens(): Account[] {
+    const accountsWithMaybeTokens = this.getRemovableAccounts().map(a => ({
+      ...a,
+      token: this.secrets[a.id]?.token,
+    }));
     accountsWithMaybeTokens
       .filter(a => !a.token)
       .forEach(a =>

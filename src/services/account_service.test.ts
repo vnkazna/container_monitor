@@ -1,18 +1,21 @@
-import { ExtensionContext } from 'vscode';
 import { createAccount } from '../test_utils/entities';
 import { SecretStorage } from '../test_utils/secret_storage';
 import { Account } from './account';
 import { AccountService } from './account_service';
+
+const SECRETS_KEY = 'gitlab-tokens';
 
 type AccountMap = Record<string, Account | undefined>;
 describe('AccountService', () => {
   let accountMap: AccountMap;
   let accountService: AccountService;
   let secrets: SecretStorage;
+  let fakeContext: any;
+
   beforeEach(async () => {
     accountMap = {};
     secrets = new SecretStorage();
-    const fakeContext = {
+    fakeContext = {
       globalState: {
         get: () => accountMap,
         update: (name: string, am: AccountMap) => {
@@ -22,7 +25,7 @@ describe('AccountService', () => {
       secrets,
     };
     accountService = new AccountService();
-    await accountService.init(fakeContext as unknown as ExtensionContext);
+    await accountService.init(fakeContext);
   });
 
   it('adds account', async () => {
@@ -62,7 +65,19 @@ describe('AccountService', () => {
     await accountService.removeAccount(account.id);
 
     expect(accountService.getAllAccounts()).toHaveLength(0);
-    expect(await secrets.get('gitlab-tokens')).toBe('{}');
+    expect(await secrets.get(SECRETS_KEY)).toBe('{}');
+  });
+
+  it('offers account for removal even if it does not have a token', async () => {
+    const account = createAccount();
+
+    await accountService.addAccount(account);
+
+    await secrets.store(SECRETS_KEY, '{}');
+    await accountService.init(fakeContext); // reload secrets from the store
+
+    expect(accountService.getAllAccounts()).toHaveLength(0); // the account can't be used
+    expect(accountService.getRemovableAccounts()).toHaveLength(1); // but it can be removed
   });
 
   describe('account from environment variable', () => {
