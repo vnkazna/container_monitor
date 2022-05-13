@@ -17,7 +17,7 @@ export async function pickAccount(): Promise<Account | undefined> {
   } else {
     selectedAccountItem = await vscode.window.showQuickPick(accountItems, {
       ignoreFocusOut: true,
-      placeHolder: 'Select GitLab instance',
+      title: 'Select GitLab Account',
     });
   }
   if (!selectedAccountItem) {
