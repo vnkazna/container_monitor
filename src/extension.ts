@@ -139,7 +139,7 @@ const registerCommands = (
 
 const registerCiCompletion = (context: vscode.ExtensionContext) => {
   const subscription = vscode.languages.registerCompletionItemProvider(
-    { pattern: '**/.gitlab-ci*.{yml,yaml}' },
+    { pattern: '**/*.gitlab-ci*.{yml,yaml}' },
     new CiCompletionProvider(),
     '$',
   );
