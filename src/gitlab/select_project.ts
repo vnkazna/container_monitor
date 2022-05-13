@@ -1,14 +1,13 @@
 import vscode from 'vscode';
 import { gitExtensionWrapper } from '../git/git_extension_wrapper';
 import { createRemoteUrlPointers, GitRemoteUrlPointer, GitRepository } from '../git/new_git';
-import { Account } from '../services/account';
-import { accountService } from '../services/account_service';
 import { MultipleProjectsItem } from '../tree_view/items/multiple_projects_item';
 import { NoProjectItem } from '../tree_view/items/no_project_item';
 import { ProjectItemModel } from '../tree_view/items/project_item_model';
 import { gitlabProjectRepository } from './gitlab_project_repository';
 import { GitLabService } from './gitlab_service';
 import { ProjectInRepository } from './new_project';
+import { pickAccount } from './pick_account';
 import { pickProject } from './pick_project';
 import { convertProjectToSetting, selectedProjectStore } from './selected_project_store';
 
@@ -22,16 +21,6 @@ const selectRepository = async (): Promise<GitRepository | undefined> => {
   return choice.repository;
 };
 
-const pickCredentials = async (accounts: Account[]) => {
-  if (accounts.length === 0) return undefined;
-  if (accounts.length === 1) return accounts[0];
-
-  return vscode.window.showQuickPick(
-    accounts.map(c => ({ ...c, label: c.instanceUrl })),
-    { title: 'Select token' },
-  );
-};
-
 const pickRemoteUrl = async (pointers: GitRemoteUrlPointer[]) => {
   if (pointers.length === 0) return undefined;
   if (pointers.length === 1) return pointers[0];
@@ -42,7 +31,7 @@ const pickRemoteUrl = async (pointers: GitRemoteUrlPointer[]) => {
 };
 
 const manuallyAssignProject = async (repository: GitRepository) => {
-  const account = await pickCredentials(accountService.getAllAccounts());
+  const account = await pickAccount();
   if (!account) return;
   const pointer = await pickRemoteUrl(createRemoteUrlPointers(repository));
   if (!pointer) return;
@@ -68,7 +57,7 @@ const selectProject = async (repository: GitRepository) => {
       ...p,
       label: p.project.namespaceWithPath,
       description: 'detected',
-      detail: `${p.account.instanceUrl}`,
+      detail: `${p.account.instanceUrl} (${p.account.username})`,
       isOther: false as const,
     })),
     {
@@ -78,7 +67,7 @@ const selectProject = async (repository: GitRepository) => {
     },
   ];
   const selectedProject = await vscode.window.showQuickPick(options, {
-    title: 'Select GitLab project',
+    title: 'Select GitLab Project',
   });
   if (!selectedProject) return;
   if (selectedProject.isOther) {
