@@ -1,3 +1,13 @@
+## [3.44.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.44.0...v3.44.1) (2022-05-13)
+
+
+### Bug Fixes
+
+* accounts can be removed even when they are missing token ([7fbf8d9](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/7fbf8d95a492eb5286f2e24c48676c1c4b485f93))
+* remove tokens from secret storage when we remove account ([291e6da](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/291e6dad1b3a172f1a9196d6f2b8ebff5f66c8bb))
+
+
+
 # [3.44.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.43.1...v3.44.0) (2022-05-13)
 
 In this release we redesigned account management. Now it's possible to have multiple accounts (e.g. work and personal) on the same GitLab instance.
