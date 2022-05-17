@@ -4,7 +4,7 @@ import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
 import { ProjectInRepository } from '../gitlab/new_project';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
-import { Account, makeAccountId } from '../services/account';
+import { Account, makeAccountId } from '../accounts/account';
 import { createFakeRepository } from './fake_git_extension';
 
 export const issue: RestIssuable = {

@@ -4,12 +4,12 @@ import { HelpError } from '../errors/help_error';
 import { pickGitRef } from '../gitlab/pick_git_ref';
 import { pickAccount } from '../gitlab/pick_account';
 import { pickProject } from '../gitlab/pick_project';
-import { accountService } from '../services/account_service';
+import { accountService } from '../accounts/account_service';
 import { project } from '../test_utils/entities';
 import { testCredentials } from '../test_utils/test_credentials';
 import { openRepository } from './open_repository';
 
-jest.mock('../services/account_service');
+jest.mock('../accounts/account_service');
 jest.mock('../gitlab/pick_account');
 jest.mock('../gitlab/pick_project');
 jest.mock('../gitlab/pick_git_ref');

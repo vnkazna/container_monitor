@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { accountService } from '../../services/account_service';
+import { accountService } from '../../accounts/account_service';
 import { GITLAB_URL } from '../../../test/integration/test_infrastructure/constants';
 import { gitlabCredentialsProvider } from './gitlab_credentials_provider';
 import { createAccount } from '../../test_utils/entities';
 
-jest.mock('../../services/account_service');
+jest.mock('../../accounts/account_service');
 
 describe('GitLab Credentials Provider', () => {
   beforeEach(() => {

@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import assert from 'assert';
 import { GitLabService } from './gitlab_service';
 import { ExistingProject, ProjectInRepository, SelectedProjectSetting } from './new_project';
-import { accountService, AccountService } from '../services/account_service';
+import { accountService, AccountService } from '../accounts/account_service';
 import { cartesianProduct } from '../utils/cartesian_product';
 import { hasPresentKey } from '../utils/has_present_key';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
@@ -20,7 +20,7 @@ import { log } from '../log';
 import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted_keys';
 import { prettyJson } from '../errors/common';
 import { EnsureLatestPromise } from '../utils/ensure_latest_promise';
-import { Account } from '../services/account';
+import { Account } from '../accounts/account';
 
 interface ParsedProject {
   namespaceWithPath: string;

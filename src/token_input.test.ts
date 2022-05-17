@@ -1,12 +1,12 @@
 import vscode from 'vscode';
 import { FetchError } from './errors/fetch_error';
 import { GitLabService } from './gitlab/gitlab_service';
-import { accountService } from './services/account_service';
+import { accountService } from './accounts/account_service';
 import { asMock } from './test_utils/as_mock';
 import { showInput } from './token_input';
 
 jest.mock('./gitlab/gitlab_service');
-jest.mock('./services/account_service');
+jest.mock('./accounts/account_service');
 
 describe('token input', () => {
   describe('showInput', () => {

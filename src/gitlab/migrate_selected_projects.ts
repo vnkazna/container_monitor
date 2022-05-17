@@ -1,5 +1,5 @@
 import { log } from '../log';
-import { AccountService } from '../services/account_service';
+import { AccountService } from '../accounts/account_service';
 import { SelectedProjectSetting } from './new_project';
 import { SelectedProjectStore } from './selected_project_store';
 

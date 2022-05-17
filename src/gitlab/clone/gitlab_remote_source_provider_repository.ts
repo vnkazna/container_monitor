@@ -1,6 +1,6 @@
 import { Disposable } from 'vscode';
 import { API } from '../../api/git';
-import { accountService } from '../../services/account_service';
+import { accountService } from '../../accounts/account_service';
 import { GitLabRemoteSourceProvider } from './gitlab_remote_source_provider';
 
 /**

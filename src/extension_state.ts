@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
-import { AccountService } from './services/account_service';
+import { AccountService } from './accounts/account_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 
 const hasOpenRepositories = (): boolean => gitExtensionWrapper.gitRepositories.length > 0;

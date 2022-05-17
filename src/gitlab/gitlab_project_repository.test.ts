@@ -1,7 +1,7 @@
 import { GitExtensionWrapper } from '../git/git_extension_wrapper';
 import { createRemoteUrlPointers, GitRepositoryImpl } from '../git/new_git';
 import { log } from '../log';
-import { AccountService } from '../services/account_service';
+import { AccountService } from '../accounts/account_service';
 import { asMock } from '../test_utils/as_mock';
 import { createAccount } from '../test_utils/entities';
 import { createFakeRepository } from '../test_utils/fake_git_extension';
