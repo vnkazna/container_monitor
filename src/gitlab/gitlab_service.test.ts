@@ -13,7 +13,7 @@ import { HelpError } from '../errors/help_error';
 import { testCredentials } from '../test_utils/test_credentials';
 
 jest.mock('graphql-request');
-jest.mock('../services/account_service');
+jest.mock('../accounts/account_service');
 jest.mock('cross-fetch');
 jest.mock('../utils/extension_configuration');
 jest.mock('./http/get_http_agent_options');

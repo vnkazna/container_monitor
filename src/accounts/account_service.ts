@@ -161,7 +161,7 @@ export class AccountService {
           `Account for instance ${a.instanceUrl} and user ${a.username} is missing token in secret storage. Try to remove the account and add it again.`,
         ),
       );
-    return accountsWithMaybeTokens.filter(hasPresentKey('token'));
+    return accountsWithMaybeTokens.filter((a): a is Account => hasPresentKey('token')(a));
   }
 }
 

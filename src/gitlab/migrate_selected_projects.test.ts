@@ -1,7 +1,7 @@
 import { ExtensionContext } from 'vscode';
 import { InMemoryMemento } from '../../test/integration/test_infrastructure/in_memory_memento';
-import { makeAccountId } from '../services/account';
-import { AccountService } from '../services/account_service';
+import { makeAccountId } from '../accounts/account';
+import { AccountService } from '../accounts/account_service';
 import { createAccount } from '../test_utils/entities';
 import { SecretStorage } from '../test_utils/secret_storage';
 import { migrateSelectedProjects } from './migrate_selected_projects';

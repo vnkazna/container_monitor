@@ -1,6 +1,6 @@
 import { Uri } from 'vscode';
 import { Credentials, CredentialsProvider } from '../../api/git';
-import { accountService } from '../../services/account_service';
+import { accountService } from '../../accounts/account_service';
 
 export const gitlabCredentialsProvider: CredentialsProvider = {
   async getCredentials(host: Uri): Promise<Credentials | undefined> {

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { Account } from '../services/account';
-import { accountService } from '../services/account_service';
+import { Account } from '../accounts/account';
+import { accountService } from '../accounts/account_service';
 import { createAccount } from '../test_utils/entities';
 import { pickAccount } from './pick_account';
 
-jest.mock('../services/account_service');
+jest.mock('../accounts/account_service');
 
 describe('pickAccount', () => {
   let accounts: Account[];

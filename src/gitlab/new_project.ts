@@ -1,5 +1,5 @@
 import { GitRemoteUrlPointer } from '../git/new_git';
-import { Account } from '../services/account';
+import { Account } from '../accounts/account';
 import { GitLabProject } from './gitlab_project';
 
 /**

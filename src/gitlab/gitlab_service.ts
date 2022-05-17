@@ -51,7 +51,7 @@ import { README_SECTIONS, REQUIRED_VERSIONS } from '../constants';
 import { makeMarkdownLinksAbsolute } from '../utils/make_markdown_links_absolute';
 import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
 import { HelpError } from '../errors/help_error';
-import { Credentials } from '../services/credentials';
+import { Credentials } from '../accounts/credentials';
 import { newCreateNoteMutation, oldCreateNoteMutation } from './graphql/create_note';
 import { createQueryString, QueryValue } from '../utils/create_query_string';
 
@@ -198,25 +198,32 @@ export class GitLabService {
     this.client = new GraphQLClient(endpoint, this.fetchOptions);
   }
 
-  private get httpAgent() {
+  private static getHttpAgent(instanceUrl: string) {
     const agentOptions = getHttpAgentOptions();
     if (agentOptions.proxy) {
       return createHttpProxyAgent(agentOptions.proxy);
     }
-    if (this.instanceUrl.startsWith('https://')) {
+    if (instanceUrl.startsWith('https://')) {
       return new https.Agent(agentOptions);
     }
     return undefined;
   }
 
-  private get fetchOptions() {
+  private static getFetchOptions(instanceUrl: string, token?: string) {
+    const authorizationHeader: Record<string, string> = token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
     return {
       headers: {
-        Authorization: `Bearer ${this.#token}`,
+        ...authorizationHeader,
         ...getUserAgentHeader(),
       },
-      agent: this.httpAgent,
+      agent: GitLabService.getHttpAgent(instanceUrl),
     };
+  }
+
+  private get fetchOptions() {
+    return GitLabService.getFetchOptions(this.instanceUrl, this.#token);
   }
 
   async fetchAllPages<T>(

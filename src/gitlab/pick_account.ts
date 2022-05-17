@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { Account } from '../services/account';
-import { accountService } from '../services/account_service';
+import { Account } from '../accounts/account';
+import { accountService } from '../accounts/account_service';
 
 export async function pickAccount(): Promise<Account | undefined> {
   const accounts = accountService.getAllAccounts();

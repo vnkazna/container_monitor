@@ -1,4 +1,4 @@
-import { Credentials } from '../services/credentials';
+import { Credentials } from '../accounts/credentials';
 
 export const testCredentials = (instanceUrl = 'https://gitlab.example.com'): Credentials => ({
   instanceUrl,

@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import * as openers from './openers';
 import * as tokenInput from './token_input';
-import { accountService } from './services/account_service';
+import { accountService } from './accounts/account_service';
 import { extensionState } from './extension_state';
 import { createSnippet } from './commands/create_snippet';
 import { insertSnippet } from './commands/insert_snippet';
@@ -54,8 +54,9 @@ import {
   showMergeRequestSearchInput,
   showProjectAdvancedSearchInput,
 } from './search_input';
-import { migrateCredentials } from './services/credentials_migrator';
+import { migrateCredentials } from './accounts/credentials_migrator';
 import { migrateSelectedProjects } from './gitlab/migrate_selected_projects';
+import { gitlabUriHandler } from './gitlab_uri_handler';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -166,6 +167,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await accountService.init(context);
   selectedProjectStore.init(context);
   registerCiCompletion(context);
+  vscode.window.registerUriHandler(gitlabUriHandler);
   context.subscriptions.push(gitExtensionWrapper);
   statusBar.init();
   context.subscriptions.push(statusBar);

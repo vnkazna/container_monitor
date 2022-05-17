@@ -4,7 +4,7 @@ import { README_SECTIONS, REMOTE_URI_SCHEME } from '../constants';
 import { FetchError } from '../errors/fetch_error';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { handleError } from '../log';
-import { accountService } from '../services/account_service';
+import { accountService } from '../accounts/account_service';
 import { HelpError } from '../errors/help_error';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 import { ReadOnlyFileSystem } from './readonly_file_system';

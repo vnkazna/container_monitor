@@ -1,10 +1,10 @@
-import { accountService } from '../../services/account_service';
+import { accountService } from '../../accounts/account_service';
 import { API } from '../../api/git';
 import { GitLabRemoteSourceProviderRepository } from './gitlab_remote_source_provider_repository';
 import { FakeGitExtension } from '../../test_utils/fake_git_extension';
 import { createAccount } from '../../test_utils/entities';
 
-jest.mock('../../services/account_service');
+jest.mock('../../accounts/account_service');
 
 describe('GitLabRemoteSourceProviderRepository', () => {
   let fakeExtension: FakeGitExtension;
