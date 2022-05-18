@@ -47,6 +47,9 @@ module.exports = {
   extensions: {
     getExtension: jest.fn(),
   },
+  env: {
+    uriScheme: 'vscode',
+  },
   CommentMode: { Editing: 0, Preview: 1 },
   StatusBarAlignment: { Left: 0 },
   CommentThreadCollapsibleState: { Collapsed: 0, Expanded: 1 },

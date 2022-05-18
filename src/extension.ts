@@ -57,6 +57,8 @@ import {
 import { migrateCredentials } from './accounts/credentials_migrator';
 import { migrateSelectedProjects } from './gitlab/migrate_selected_projects';
 import { gitlabUriHandler } from './gitlab_uri_handler';
+import { authenticate } from './accounts/authenticate';
+import { GitLabAuthenticationProvider } from './accounts/oauth/gitlab_authentication_provider';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -82,6 +84,7 @@ const registerCommands = (
     [USER_COMMANDS.SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME]: runWithValidProject(
       openers.showMergeRequests,
     ),
+    [USER_COMMANDS.AUTHENTICATE]: authenticate,
     [USER_COMMANDS.SET_TOKEN]: tokenInput.showInput,
     [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
     [USER_COMMANDS.OPEN_ACTIVE_FILE]: runWithValidProjectFile(openers.openActiveFile),
@@ -176,6 +179,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   vscode.window.registerFileDecorationProvider(hasCommentsDecorationProvider);
   vscode.window.registerFileDecorationProvider(changeTypeDecorationProvider);
+  vscode.authentication.registerAuthenticationProvider(
+    'gitlab',
+    'GitLab.com Authentication',
+    new GitLabAuthenticationProvider(),
+  );
   await extensionState.init(accountService);
   registerSidebarTreeDataProviders();
   await migrateCredentials(context, accountService).catch(e => handleError(e));

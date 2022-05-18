@@ -45,6 +45,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "gl.authenticate",
+        "title": "GitLab: Authenticate to GitLab.com"
+      },
+      {
         "command": "gl.setToken",
         "title": "GitLab: Set GitLab Personal Access Token"
       },
@@ -384,6 +388,10 @@
         },
         {
           "command": "gl.clearSelectedProject",
+          "when": "false"
+        },
+        {
+          "command": "gl.authenticate",
           "when": "false"
         }
       ],
