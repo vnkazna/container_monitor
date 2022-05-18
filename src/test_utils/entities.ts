@@ -1,3 +1,4 @@
+import vscode from 'vscode';
 import { GitRemote, GitRepository } from '../git/new_git';
 import { CustomQueryType } from '../gitlab/custom_query_type';
 import { GitLabProject } from '../gitlab/gitlab_project';
@@ -6,6 +7,8 @@ import { ProjectInRepository } from '../gitlab/new_project';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
 import { Account, makeAccountId } from '../accounts/account';
 import { createFakeRepository } from './fake_git_extension';
+import { InMemoryMemento } from '../../test/integration/test_infrastructure/in_memory_memento';
+import { SecretStorage } from './secret_storage';
 
 export const issue: RestIssuable = {
   id: 1,
@@ -155,3 +158,9 @@ export const user: RestUser = {
   state: 'active',
   username: 'test-user',
 };
+
+export const createExtensionContext = (): vscode.ExtensionContext =>
+  ({
+    globalState: new InMemoryMemento(),
+    secrets: new SecretStorage(),
+  } as unknown as vscode.ExtensionContext);

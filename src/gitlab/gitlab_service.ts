@@ -80,6 +80,15 @@ interface RestNote {
   body: string;
 }
 
+/** Parameters used to exchange code for token with the GitLab OAuth service */
+export interface TokenExchangeUrlParams {
+  clientId: string;
+  redirectUri: string;
+  instanceUrl: string;
+  code: string;
+  codeVerifier: string;
+}
+
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
 }
@@ -943,5 +952,26 @@ export class GitLabService {
       log.error(e);
       return undefined;
     });
+  }
+
+  /** This method exchanges code from GitLab OAuth endpoint for an access token. */
+  static async exchangeToken(params: TokenExchangeUrlParams): Promise<{ access_token: string }> {
+    const fetchOptions = GitLabService.getFetchOptions(params.instanceUrl);
+    const response = await crossFetch(`${params.instanceUrl}/oauth/token`, {
+      ...fetchOptions,
+      method: 'POST',
+      headers: {
+        ...fetchOptions.headers,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: [
+        `client_id=${params.clientId}`,
+        `code=${params.code}`,
+        `grant_type=authorization_code`,
+        `redirect_uri=${params.redirectUri}`,
+        `code_verifier=${params.codeVerifier}`,
+      ].join('&'),
+    });
+    return response.json();
   }
 }

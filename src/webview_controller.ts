@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import assert from 'assert';
 import { handleError, log } from './log';
@@ -10,6 +9,7 @@ import { GitLabService } from './gitlab/gitlab_service';
 import { gitlabProjectRepository } from './gitlab/gitlab_project_repository';
 import { ProjectInRepository } from './gitlab/new_project';
 import { getGitLabService } from './gitlab/get_gitlab_service';
+import { generateSecret } from './utils/generate_secret';
 
 const webviewResourcePaths = {
   appScriptUri: 'src/webview/dist/js/app.js',
@@ -77,7 +77,7 @@ class WebviewController {
   private replaceResources(panel: vscode.WebviewPanel) {
     assert(this.context);
     const { appScriptUri, vendorUri, styleUri, devScriptUri } = this.getResources(panel);
-    const nonce = crypto.randomBytes(20).toString('hex');
+    const nonce = generateSecret();
 
     return fs
       .readFileSync(path.join(this.context.extensionPath, this.getIndexPath()), 'UTF-8')
