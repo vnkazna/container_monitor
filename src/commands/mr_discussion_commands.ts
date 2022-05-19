@@ -24,6 +24,11 @@ const createNewComment = async (
   const isOld = commit === mrVersion.base_commit_sha;
   const diff = findFileInDiffs(mrVersion.diffs, isOld ? { oldPath: path } : { newPath: path });
   assert(diff);
+  if (diff.diff === '')
+    throw new Error(
+      'Error: Creating comment failed. The merge request diff for this file is too large. ' +
+        'Please see https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/578',
+    );
   const positionFragment = isOld
     ? {
         oldLine: getLineNumber(thread),
