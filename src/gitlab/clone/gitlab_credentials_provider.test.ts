@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { accountService } from '../../accounts/account_service';
 import { GITLAB_URL } from '../../../test/integration/test_infrastructure/constants';
 import { gitlabCredentialsProvider } from './gitlab_credentials_provider';
-import { createAccount } from '../../test_utils/entities';
+import { createTokenAccount } from '../../test_utils/entities';
 
 jest.mock('../../accounts/account_service');
 
@@ -10,7 +10,7 @@ describe('GitLab Credentials Provider', () => {
   beforeEach(() => {
     accountService.getInstanceUrls = () => [GITLAB_URL];
     accountService.getOneAccountForInstance = (url: string) =>
-      url === GITLAB_URL ? createAccount() : undefined;
+      url === GITLAB_URL ? createTokenAccount() : undefined;
   });
 
   it('getting credentials works', async () => {

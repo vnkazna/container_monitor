@@ -5,7 +5,7 @@ import { GitLabService } from '../../gitlab/gitlab_service';
 import { GitLabUriHandler } from '../../gitlab_uri_handler';
 import { openUrl } from '../../openers';
 import { asMock } from '../../test_utils/as_mock';
-import { createAccount, createExtensionContext } from '../../test_utils/entities';
+import { createExtensionContext, createOAuthAccount } from '../../test_utils/entities';
 import { AccountService } from '../account_service';
 import { GitLabAuthenticationProvider } from './gitlab_authentication_provider';
 
@@ -54,17 +54,13 @@ describe('GitLabAuthenticationProvider', () => {
 
   describe('getting existing session', () => {
     it('gets a session if there is existing oauth account', async () => {
-      await accountService.addAccount({
-        ...createAccount(),
-        type: 'oauth',
-        scopes: ['read_user', 'api'],
-      });
+      await accountService.addAccount(createOAuthAccount());
       const provider = new GitLabAuthenticationProvider(accountService, uriHandler);
 
       const sessions = await provider.getSessions(['read_user', 'api']);
 
       expect(sessions).toHaveLength(1);
-      expect(sessions[0].accessToken).toBe(createAccount().token);
+      expect(sessions[0].accessToken).toBe(createOAuthAccount().token);
     });
   });
 

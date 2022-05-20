@@ -3,7 +3,7 @@ import { createRemoteUrlPointers, GitRepositoryImpl } from '../git/new_git';
 import { log } from '../log';
 import { AccountService } from '../accounts/account_service';
 import { asMock } from '../test_utils/as_mock';
-import { createAccount } from '../test_utils/entities';
+import { createTokenAccount } from '../test_utils/entities';
 import { createFakeRepository } from '../test_utils/fake_git_extension';
 import { GitLabProject } from './gitlab_project';
 import { GitLabProjectRepositoryImpl, initializeAllProjects } from './gitlab_project_repository';
@@ -37,7 +37,7 @@ describe('gitlab_project_repository', () => {
     projects = {};
   });
   describe('initializeAllProjects', () => {
-    const defaultAccount = createAccount('https://gitlab.com', 1, 'abc');
+    const defaultAccount = createTokenAccount('https://gitlab.com', 1, 'abc');
     const extensionRemoteUrl = 'git@gitlab.com/gitlab-org/gitlab-vscode-extension';
 
     describe('with one project on the GitLab instance', () => {
@@ -158,7 +158,7 @@ describe('gitlab_project_repository', () => {
       });
 
       it('uses account ID to match the selected project', async () => {
-        const secondAccount = createAccount(defaultAccount.instanceUrl, 10, 'def');
+        const secondAccount = createTokenAccount(defaultAccount.instanceUrl, 10, 'def');
         const selectedProjectSetting: SelectedProjectSetting = {
           accountId: secondAccount.id,
           namespaceWithPath: 'gitlab-org/gitlab-vscode-extension',
@@ -182,7 +182,7 @@ describe('gitlab_project_repository', () => {
 
     it('initializes multiple projects on multiple instances', async () => {
       const exampleRemoteUrl = 'git@example.com/example/gitlab-vscode-extension';
-      const exampleAccount = createAccount('https://example.com');
+      const exampleAccount = createTokenAccount('https://example.com');
       const pointers = createPointers([
         ['origin', extensionRemoteUrl],
         ['example', exampleRemoteUrl],
@@ -206,8 +206,8 @@ describe('gitlab_project_repository', () => {
     });
 
     it('initializes multiple projects for multiple credentials', async () => {
-      const firstAccount = createAccount('https://gitlab.com', 1, 'abc');
-      const secondAccount = createAccount('https://gitlab.com', 2, 'def');
+      const firstAccount = createTokenAccount('https://gitlab.com', 1, 'abc');
+      const secondAccount = createTokenAccount('https://gitlab.com', 2, 'def');
 
       projects = {
         'https://gitlab.com-abc': ['gitlab-org/gitlab-vscode-extension'],
@@ -286,7 +286,7 @@ describe('gitlab_project_repository', () => {
 
     beforeEach(async () => {
       const fakeAccountService: Partial<AccountService> = {
-        getAllAccounts: () => [createAccount()],
+        getAllAccounts: () => [createTokenAccount()],
         onDidChange: jest.fn(),
       };
 

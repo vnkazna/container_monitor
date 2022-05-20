@@ -1,4 +1,4 @@
-import { createAccount } from '../test_utils/entities';
+import { createTokenAccount } from '../test_utils/entities';
 import { SecretStorage } from '../test_utils/secret_storage';
 import { Account } from './account';
 import { AccountService } from './account_service';
@@ -29,7 +29,7 @@ describe('AccountService', () => {
   });
 
   it('adds account', async () => {
-    const account = createAccount();
+    const account = createTokenAccount();
     await accountService.addAccount(account);
 
     expect(accountService.getAllAccounts()).toHaveLength(1);
@@ -37,9 +37,9 @@ describe('AccountService', () => {
   });
 
   it('does not add a duplicate account', async () => {
-    const account = createAccount('https://gitlab.com', 1, 'abc');
+    const account = createTokenAccount('https://gitlab.com', 1, 'abc');
     await accountService.addAccount(account);
-    const duplicateAccount = createAccount('https://gitlab.com', 1, 'def');
+    const duplicateAccount = createTokenAccount('https://gitlab.com', 1, 'def');
     await accountService.addAccount(duplicateAccount);
 
     expect(accountService.getAllAccounts()).toHaveLength(1);
@@ -47,16 +47,16 @@ describe('AccountService', () => {
   });
 
   it('fails when some other process changed secrets', async () => {
-    const account = createAccount('https://gitlab.com', 1, 'abc');
+    const account = createTokenAccount('https://gitlab.com', 1, 'abc');
     await accountService.addAccount(account);
     await secrets.store('gitlab-tokens', '{}');
-    await expect(accountService.addAccount(createAccount('https://gitlab.com', 2))).rejects.toThrow(
-      /The GitLab secrets stored in your keychain have changed/,
-    );
+    await expect(
+      accountService.addAccount(createTokenAccount('https://gitlab.com', 2)),
+    ).rejects.toThrow(/The GitLab secrets stored in your keychain have changed/);
   });
 
   it('removes account', async () => {
-    const account = createAccount();
+    const account = createTokenAccount();
 
     await accountService.addAccount(account);
 
@@ -69,7 +69,7 @@ describe('AccountService', () => {
   });
 
   it('offers account for removal even if it does not have a token', async () => {
-    const account = createAccount();
+    const account = createTokenAccount();
 
     await accountService.addAccount(account);
 
@@ -120,13 +120,13 @@ describe('AccountService', () => {
   it('can set and get one account', async () => {
     expect(accountService.getOneAccountForInstance('https://gitlab.com')).toBeUndefined();
 
-    await accountService.addAccount(createAccount('https://gitlab.com', 1, 'abc'));
+    await accountService.addAccount(createTokenAccount('https://gitlab.com', 1, 'abc'));
     expect(accountService.getOneAccountForInstance('https://gitlab.com')?.token).toBe('abc');
   });
 
   it('can retrieve all instance URLs', async () => {
-    await accountService.addAccount(createAccount('https://gitlab.com', 1, 'abc'));
-    await accountService.addAccount(createAccount('https://dev.gitlab.com', 1, 'def'));
+    await accountService.addAccount(createTokenAccount('https://gitlab.com', 1, 'abc'));
+    await accountService.addAccount(createTokenAccount('https://dev.gitlab.com', 1, 'def'));
     expect(accountService.getRemovableAccounts().map(a => a.instanceUrl)).toEqual([
       'https://gitlab.com',
       'https://dev.gitlab.com',
