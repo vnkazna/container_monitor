@@ -47,7 +47,12 @@ import {
   GqlContentSnippet,
 } from './graphql/get_snippet_content';
 import { UnsupportedVersionError } from '../errors/unsupported_version_error';
-import { README_SECTIONS, REQUIRED_VERSIONS } from '../constants';
+import {
+  OAUTH_CLIENT_ID,
+  OAUTH_REDIRECT_URI,
+  README_SECTIONS,
+  REQUIRED_VERSIONS,
+} from '../constants';
 import { makeMarkdownLinksAbsolute } from '../utils/make_markdown_links_absolute';
 import { makeHtmlLinksAbsolute } from '../utils/make_html_links_absolute';
 import { HelpError } from '../errors/help_error';
@@ -82,14 +87,30 @@ interface RestNote {
   body: string;
 }
 
-/** Parameters used to exchange code for token with the GitLab OAuth service */
-export interface TokenExchangeUrlParams {
-  clientId: string;
-  redirectUri: string;
+interface RefreshTokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  created_at: number; // TODO: make sure this time changes when we refresh the token
+}
+
+interface AuthorizationCodeTokenExchangeParams {
   instanceUrl: string;
   code: string;
   codeVerifier: string;
+  grantType: 'authorization_code';
 }
+
+interface RefreshTokenExchangeParams {
+  instanceUrl: string;
+  codeVerifier: string;
+  grantType: 'refresh_token';
+  refreshToken: string;
+}
+/** Parameters used to exchange code for token with the GitLab OAuth service */
+export type TokenExchangeUrlParams =
+  | AuthorizationCodeTokenExchangeParams
+  | RefreshTokenExchangeParams;
 
 function isLabelEvent(note: Note): note is RestLabelEvent {
   return (note as RestLabelEvent).label !== undefined;
@@ -192,6 +213,13 @@ type CreateSnippetOptions = {
   visibility: SnippetVisibility;
   content: string;
 };
+
+export interface ExchangeTokenResponse {
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  created_at: number;
+}
 
 export class GitLabService {
   #credentials: Credentials;
@@ -988,8 +1016,18 @@ export class GitLabService {
   }
 
   /** This method exchanges code from GitLab OAuth endpoint for an access token. */
-  static async exchangeToken(params: TokenExchangeUrlParams): Promise<{ access_token: string }> {
+  static async exchangeToken(params: TokenExchangeUrlParams): Promise<RefreshTokenResponse> {
     const fetchOptions = GitLabService.getFetchOptions(params.instanceUrl);
+    const commonParams = [
+      `client_id=${OAUTH_CLIENT_ID}`,
+      `redirect_uri=${OAUTH_REDIRECT_URI}`,
+      `grant_type=${params.grantType}`,
+      `code_verifier=${params.codeVerifier}`,
+    ];
+    const grantTypeParams =
+      params.grantType === 'authorization_code'
+        ? [`code=${params.code}`]
+        : [`refresh_token=${params.refreshToken}`];
     const response = await crossFetch(`${params.instanceUrl}/oauth/token`, {
       ...fetchOptions,
       method: 'POST',
@@ -997,13 +1035,7 @@ export class GitLabService {
         ...fetchOptions.headers,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: [
-        `client_id=${params.clientId}`,
-        `code=${params.code}`,
-        `grant_type=authorization_code`,
-        `redirect_uri=${params.redirectUri}`,
-        `code_verifier=${params.codeVerifier}`,
-      ].join('&'),
+      body: [...commonParams, ...grantTypeParams].join('&'),
     });
     return response.json();
   }

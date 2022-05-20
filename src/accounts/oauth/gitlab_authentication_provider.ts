@@ -7,12 +7,9 @@ import { GitLabUriHandler, gitlabUriHandler } from '../../gitlab_uri_handler';
 import { accountService, AccountService } from '../account_service';
 import { makeAccountId, OAuthAccount } from '../account';
 import { sort } from '../../utils/sort';
-import { GitLabService } from '../../gitlab/gitlab_service';
-import { GITLAB_COM_URL } from '../../constants';
+import { ExchangeTokenResponse, GitLabService } from '../../gitlab/gitlab_service';
+import { GITLAB_COM_URL, OAUTH_CLIENT_ID, OAUTH_REDIRECT_URI } from '../../constants';
 import { generateSecret } from '../../utils/generate_secret';
-
-const CLIENT_ID = '36f2a70cddeb5a0889d4fd8295c241b7e9848e89cf9e599d0eed2d8e5350fbf5';
-const REDIRECT_URI = `${vscode.env.uriScheme}://gitlab.gitlab-workflow/authentication`;
 
 const generateCodeChallengeFromVerifier = (v: string) => {
   const sha256 = (plain: string) => {
@@ -56,11 +53,11 @@ const createLoginUrl = (
   scopesParam?: readonly string[],
 ): { url: string; state: string; codeVerifier: string } => {
   const state = generateSecret();
-  const redirectUri = REDIRECT_URI;
+  const redirectUri = OAUTH_REDIRECT_URI;
   const codeVerifier = generateSecret();
   const codeChallenge = generateCodeChallengeFromVerifier(codeVerifier);
   const scopes = (scopesParam ?? ['api', 'read_user']).join(' ');
-  const clientId = CLIENT_ID;
+  const clientId = OAUTH_CLIENT_ID;
   return {
     url: createAuthUrl({ clientId, redirectUri, state, scopes, codeChallenge }),
     state,
@@ -115,9 +112,9 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
       this.exchangeCodeForToken(state),
     );
     await openUrl(url);
-    const token = await Promise.race([
+    const tokenResponse = await Promise.race([
       receivedRedirectUrl,
-      new Promise<string>((_, reject) => {
+      new Promise<ExchangeTokenResponse>((_, reject) => {
         setTimeout(
           () => reject(new Error('Cancelling the GitLab OAuth login after 60s. Try again.')),
           60000,
@@ -129,11 +126,14 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
     });
     const user = await new GitLabService({
       instanceUrl: GITLAB_COM_URL,
-      token,
+      token: tokenResponse.access_token,
     }).getCurrentUser();
     const account: OAuthAccount = {
       instanceUrl: GITLAB_COM_URL,
-      token,
+      token: tokenResponse.access_token,
+      refreshToken: tokenResponse.refresh_token,
+      expiresAtTimestampInSeconds: tokenResponse.created_at + tokenResponse.expires_in,
+      codeVerifier,
       id: makeAccountId(GITLAB_COM_URL, user.id),
       type: 'oauth',
       username: user.username,
@@ -147,7 +147,7 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
     await this.#accountService.removeAccount(sessionId);
   }
 
-  exchangeCodeForToken: (state: string) => PromiseAdapter<vscode.Uri, string> =
+  exchangeCodeForToken: (state: string) => PromiseAdapter<vscode.Uri, ExchangeTokenResponse> =
     /* This callback is triggered on every vscode://gitlab-workflow URL.
     We will ignore invocations that are not related to the OAuth login with given `state`. */
     state => async (uri, resolve, reject) => {
@@ -168,12 +168,11 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
       }
       const payload = await GitLabService.exchangeToken({
         instanceUrl: GITLAB_COM_URL,
-        clientId: CLIENT_ID,
-        redirectUri: REDIRECT_URI,
+        grantType: 'authorization_code',
         code,
         codeVerifier,
       });
-      resolve(payload.access_token);
+      resolve(payload);
     };
 }
 

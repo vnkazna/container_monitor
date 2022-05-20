@@ -8,9 +8,10 @@ import { uniq } from '../utils/uniq';
 import { Account, makeAccountId } from './account';
 import { Credentials } from './credentials';
 
-type AccountWithoutToken = Omit<Account, 'token'>;
+type AccountWithoutToken = Omit<Account, 'token' | 'exchangeToken'>;
 interface Secret {
   token: string;
+  refreshToken?: string;
 }
 
 const getEnvironmentVariables = (): Credentials | undefined => {
