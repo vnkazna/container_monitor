@@ -6,7 +6,7 @@ export const makeAccountId = (instanceUrl: string, userId: string | number) =>
 export const needsRefresh = (account: Account) => {
   if (account.type === 'token') return false;
   const unixTimestampNow = Math.floor(new Date().getTime() / 1000);
-  return account.expiresAtTimestampInSeconds <= unixTimestampNow;
+  return account.expiresAtTimestampInSeconds - 7170 <= unixTimestampNow; // FIXME: remove the 7170
 };
 
 interface AccountBase extends Credentials {

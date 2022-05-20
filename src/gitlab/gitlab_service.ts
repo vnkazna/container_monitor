@@ -59,8 +59,6 @@ import { HelpError } from '../errors/help_error';
 import { Credentials } from '../accounts/credentials';
 import { newCreateNoteMutation, oldCreateNoteMutation } from './graphql/create_note';
 import { createQueryString, QueryValue } from '../utils/create_query_string';
-import { Account } from '../accounts/account';
-import { getGitLabServiceForAccount } from './get_gitlab_service';
 
 interface CreateNoteResult {
   createNote: {
@@ -1001,18 +999,6 @@ export class GitLabService {
       `/projects/${project.restId}/pipeline?ref=${encodeURIComponent(branchName)}`,
       'create pipeline',
     );
-  }
-
-  static async tryToGetProjectFromInstance(
-    account: Account,
-    namespaceWithPath: string,
-  ): Promise<GitLabProject | undefined> {
-    return getGitLabServiceForAccount(account)
-      .getProject(namespaceWithPath)
-      .catch(e => {
-        log.error(e);
-        return undefined;
-      });
   }
 
   /** This method exchanges code from GitLab OAuth endpoint for an access token. */

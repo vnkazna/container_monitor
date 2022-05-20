@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import assert from 'assert';
-import { GitLabService } from './gitlab_service';
 import { ExistingProject, ProjectInRepository, SelectedProjectSetting } from './new_project';
 import { accountService, AccountService } from '../accounts/account_service';
 import { cartesianProduct } from '../utils/cartesian_product';
@@ -21,6 +20,7 @@ import { jsonStringifyWithSortedKeys } from '../utils/json_stringify_with_sorted
 import { prettyJson } from '../errors/common';
 import { EnsureLatestPromise } from '../utils/ensure_latest_promise';
 import { Account } from '../accounts/account';
+import { tryToGetProjectFromInstance } from './try_to_get_project_from_instance';
 
 interface ParsedProject {
   namespaceWithPath: string;
@@ -55,7 +55,7 @@ const parseProjects = (remoteUrls: string[], instanceUrls: string[]): ParsedProj
 const detectProjects = async (
   remoteUrls: string[],
   accounts: Account[],
-  getProject: typeof GitLabService.tryToGetProjectFromInstance,
+  getProject: typeof tryToGetProjectFromInstance,
 ): Promise<ExistingProject[]> => {
   const uniqRemoteUrls = uniq(remoteUrls);
   const accountsForInstance = groupBy(accounts, a => a.instanceUrl);
@@ -90,7 +90,7 @@ const loadProjectFromSettings = async (
   settings: SelectedProjectSetting,
   pointers: GitRemoteUrlPointer[],
   accounts: Account[],
-  getProject: typeof GitLabService.tryToGetProjectFromInstance,
+  getProject: typeof tryToGetProjectFromInstance,
 ): Promise<ProjectInRepository | undefined> => {
   const [pointer] = pointers.filter(
     p =>
@@ -146,7 +146,7 @@ const loadSelectedProjects = async (
   selectedProjectSettings: SelectedProjectSetting[],
   accounts: Account[],
   pointers: GitRemoteUrlPointer[],
-  getProject: typeof GitLabService.tryToGetProjectFromInstance,
+  getProject: typeof tryToGetProjectFromInstance,
 ): Promise<ProjectInRepository[]> => {
   const allRepositoryPaths = uniq(pointers.map(p => p.repository.rootFsPath));
   const settingsByRepository = groupBy(selectedProjectSettings, pc => pc.repositoryRootPath);
@@ -162,7 +162,7 @@ export const initializeAllProjects = async (
   accounts: Account[],
   pointers: GitRemoteUrlPointer[],
   selectedProjectSettings: SelectedProjectSetting[],
-  getProject = GitLabService.tryToGetProjectFromInstance,
+  getProject = tryToGetProjectFromInstance,
 ): Promise<ProjectInRepository[]> => {
   const detectedProjects = await detectProjects(
     uniq(pointers.map(p => p.urlEntry.url)),

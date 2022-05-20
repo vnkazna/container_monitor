@@ -17,6 +17,7 @@ export class RefreshingGitLabService extends GitLabService {
 
   async getCredentials(): Promise<Credentials> {
     if (needsRefresh(this.#account)) {
+      // FIXME: this block can happen only once per instance, if it's invoked multiple times, we'll loose the token
       assert(this.#account.type === 'oauth');
       const { codeVerifier, instanceUrl, refreshToken } = this.#account;
       const response = await GitLabService.exchangeToken({
