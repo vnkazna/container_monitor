@@ -3,7 +3,7 @@ import { FetchError } from '../errors/fetch_error';
 import { GitLabService } from '../gitlab/gitlab_service';
 import { accountService } from '../accounts/account_service';
 import { asMock } from '../test_utils/as_mock';
-import { createAccount } from '../test_utils/entities';
+import { createTokenAccount } from '../test_utils/entities';
 import { GitLabRemoteFileSystem } from './gitlab_remote_file_system';
 
 jest.mock('../accounts/account_service');
@@ -90,7 +90,7 @@ describe('GitLabRemoteFileSystem', () => {
     projectInfo = null;
 
     accountService.getInstanceUrls = () => instanceUrls;
-    accountService.getOneAccountForInstance = () => createAccount();
+    accountService.getOneAccountForInstance = () => createTokenAccount();
 
     asMock(GitLabService).mockImplementation(() => ({
       async getTree(

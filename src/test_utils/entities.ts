@@ -5,7 +5,7 @@ import { GitLabProject } from '../gitlab/gitlab_project';
 import { GqlProject } from '../gitlab/graphql/shared';
 import { ProjectInRepository } from '../gitlab/new_project';
 import { ReviewParams as ReviewUriParams } from '../review/review_uri';
-import { Account, makeAccountId } from '../accounts/account';
+import { makeAccountId, OAuthAccount, TokenAccount } from '../accounts/account';
 import { createFakeRepository } from './fake_git_extension';
 import { InMemoryMemento } from '../../test/integration/test_infrastructure/in_memory_memento';
 import { SecretStorage } from './secret_storage';
@@ -125,16 +125,29 @@ export const createProject = (namespaceWithPath: string) =>
     name: namespaceWithPath.replace('/', '-'),
   });
 
-export const createAccount = (
+export const createTokenAccount = (
   instanceUrl = 'https://gitlab.com',
   userId = 1,
   token = 'abc',
-): Account => ({
+): TokenAccount => ({
   id: makeAccountId(instanceUrl, userId),
   username: `user${userId}`,
   instanceUrl,
   token,
   type: 'token',
+});
+
+export const createOAuthAccount = (
+  instanceUrl = 'https://gitlab.com',
+  userId = 1,
+  token = 'abc',
+): OAuthAccount => ({
+  id: makeAccountId(instanceUrl, userId),
+  username: `user${userId}`,
+  instanceUrl,
+  token,
+  type: 'oauth',
+  scopes: ['read_user', 'api'],
 });
 
 export const gitRepository = {
@@ -149,7 +162,7 @@ export const projectInRepository: ProjectInRepository = {
     remote: { name: 'name' } as GitRemote,
     urlEntry: { type: 'both', url: 'git@gitlab.com:gitlab-org/gitlab-vscode-extension' },
   },
-  account: createAccount(),
+  account: createTokenAccount(),
 };
 
 export const user: RestUser = {

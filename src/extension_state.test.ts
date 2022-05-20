@@ -3,7 +3,7 @@ import { ExtensionState } from './extension_state';
 import { accountService } from './accounts/account_service';
 import { gitExtensionWrapper } from './git/git_extension_wrapper';
 import { Account } from './accounts/account';
-import { createAccount } from './test_utils/entities';
+import { createTokenAccount } from './test_utils/entities';
 
 describe('extension_state', () => {
   let extensionState: ExtensionState;
@@ -25,11 +25,11 @@ describe('extension_state', () => {
   });
 
   it.each`
-    scenario                             | accounts             | repositories        | validState | noToken  | noRepository
-    ${'is invalid'}                      | ${[]}                | ${[]}               | ${false}   | ${true}  | ${true}
-    ${'is invalid without tokens'}       | ${[]}                | ${['repository']}   | ${false}   | ${true}  | ${false}
-    ${'is invalid without repositories'} | ${[createAccount()]} | ${[]}               | ${false}   | ${false} | ${true}
-    ${'is valid'}                        | ${[createAccount()]} | ${[['repository']]} | ${true}    | ${false} | ${false}
+    scenario                             | accounts                  | repositories        | validState | noToken  | noRepository
+    ${'is invalid'}                      | ${[]}                     | ${[]}               | ${false}   | ${true}  | ${true}
+    ${'is invalid without tokens'}       | ${[]}                     | ${['repository']}   | ${false}   | ${true}  | ${false}
+    ${'is invalid without repositories'} | ${[createTokenAccount()]} | ${[]}               | ${false}   | ${false} | ${true}
+    ${'is valid'}                        | ${[createTokenAccount()]} | ${[['repository']]} | ${true}    | ${false} | ${false}
   `('$scenario', async ({ accounts, repositories, validState, noToken, noRepository }) => {
     mockedAccounts = accounts;
     mockedRepositories = repositories;
@@ -46,7 +46,7 @@ describe('extension_state', () => {
     const listener = jest.fn();
     extensionState.onDidChangeValid(listener);
     // setting tokens and repositories makes extension state valid
-    mockedAccounts = [createAccount()];
+    mockedAccounts = [createTokenAccount()];
     mockedRepositories = ['repository'];
 
     await extensionState.updateExtensionStatus();

@@ -1,5 +1,5 @@
 import { ExtensionContext } from 'vscode';
-import { createAccount, user } from '../test_utils/entities';
+import { createTokenAccount, user } from '../test_utils/entities';
 import { SecretStorage } from '../test_utils/secret_storage';
 import { AccountService } from './account_service';
 import { Credentials } from './credentials';
@@ -81,7 +81,7 @@ describe('CredentialsMigrator', () => {
     globalStateContent[TOKENS_KEY] = { 'https://gitlab.com': 'abc' };
     users = { 'https://gitlab.com-abc': user };
 
-    await accountService.addAccount(createAccount('https://gitlab.com', user.id, 'oldToken'));
+    await accountService.addAccount(createTokenAccount('https://gitlab.com', user.id, 'oldToken'));
 
     await migrateCredentials(fakeContext, accountService, getUser);
 
