@@ -4,7 +4,7 @@ import { GitLabRemoteFileSystem } from '../remotefs/gitlab_remote_file_system';
 import { pickAccount } from '../gitlab/pick_account';
 import { pickProject } from '../gitlab/pick_project';
 import { pickGitRef } from '../gitlab/pick_git_ref';
-import { GitLabService } from '../gitlab/gitlab_service';
+import { getGitLabServiceForAccount } from '../gitlab/get_gitlab_service';
 
 // eslint-disable-next-line no-shadow
 enum Action {
@@ -51,7 +51,7 @@ async function chooseProject(action: Action) {
   const account = await pickAccount();
   if (!account) return;
 
-  const gitlabService = new GitLabService(account);
+  const gitlabService = getGitLabServiceForAccount(account);
 
   const project = await pickProject(gitlabService);
   if (!project) return;

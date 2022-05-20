@@ -8,6 +8,7 @@ import { accountService } from '../accounts/account_service';
 import { HelpError } from '../errors/help_error';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 import { ReadOnlyFileSystem } from './readonly_file_system';
+import { getGitLabServiceForAccount } from '../gitlab/get_gitlab_service';
 
 const encoder = new TextEncoder();
 
@@ -15,7 +16,7 @@ export function newGitLabService(instance: vscode.Uri): GitLabService {
   const instanceUrl = removeTrailingSlash(instance.toString());
   const account = accountService.getOneAccountForInstance(instanceUrl);
   assert(account, `There is no account for ${instanceUrl}`);
-  return new GitLabService(account);
+  return getGitLabServiceForAccount(account);
 }
 
 /**
