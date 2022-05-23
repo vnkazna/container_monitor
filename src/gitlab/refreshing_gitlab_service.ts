@@ -1,40 +1,20 @@
-import assert from 'assert';
-import { Account, needsRefresh, OAuthAccount } from '../accounts/account';
-import { AccountService, accountService } from '../accounts/account_service';
+import { Account } from '../accounts/account';
 import { Credentials } from '../accounts/credentials';
 import { GitLabService } from './gitlab_service';
+import { TokenExchangeService, tokenExchangeService } from './token_exchange_service';
 
 export class RefreshingGitLabService extends GitLabService {
-  #account: Account;
+  #accountId: string;
 
-  #accountService: AccountService;
+  #tokenExchangeService: TokenExchangeService;
 
-  constructor(account: Account, as = accountService) {
+  constructor(account: Account, trs = tokenExchangeService) {
     super({ instanceUrl: account.instanceUrl, token: account.token });
-    this.#account = account;
-    this.#accountService = as;
+    this.#accountId = account.id;
+    this.#tokenExchangeService = trs;
   }
 
   async getCredentials(): Promise<Credentials> {
-    if (needsRefresh(this.#account)) {
-      // FIXME: this block can happen only once per instance, if it's invoked multiple times, we'll loose the token
-      assert(this.#account.type === 'oauth');
-      const { codeVerifier, instanceUrl, refreshToken } = this.#account;
-      const response = await GitLabService.exchangeToken({
-        grantType: 'refresh_token',
-        codeVerifier,
-        instanceUrl,
-        refreshToken,
-      });
-      const newAccount: OAuthAccount = {
-        ...this.#account,
-        refreshToken: response.refresh_token,
-        expiresAtTimestampInSeconds: response.created_at + response.expires_in,
-      };
-      await this.#accountService.removeAccount(newAccount.id);
-      await this.#accountService.addAccount(newAccount);
-      this.#account = newAccount;
-    }
-    return this.#account;
+    return this.#tokenExchangeService.refreshIfNeeded(this.#accountId);
   }
 }

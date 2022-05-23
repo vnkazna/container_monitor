@@ -100,6 +100,7 @@ export class AccountService {
       );
       return;
     }
+    // FIXME: don't store refresh token
     const { token, ...accountWithoutToken } = account;
     await this.#storeToken(account.id, token);
 
@@ -134,6 +135,26 @@ export class AccountService {
     const secrets = { ...this.secrets, [accountId]: { token } };
     await this.context.secrets.store(SECRETS_KEY, JSON.stringify(secrets));
     this.secrets = secrets;
+  }
+
+  getAccount(accountId: string): Account {
+    const result = this.getAllAccounts().find(a => a.id === accountId);
+    assert(result, `Account with id ${accountId} doesn't exist.`);
+    return result;
+  }
+
+  // FIXME: name this more like update credentials and only update credentials
+  async updateAccount(account: Account) {
+    assert(this.context);
+    const { accountMap } = this;
+
+    const { token, ...accountWithoutToken } = account;
+    await this.#storeToken(account.id, token);
+
+    await this.context.globalState.update(ACCOUNTS_KEY, {
+      ...accountMap,
+      [account.id]: accountWithoutToken,
+    });
   }
 
   async removeAccount(accountId: string) {

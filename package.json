@@ -389,10 +389,6 @@
         {
           "command": "gl.clearSelectedProject",
           "when": "false"
-        },
-        {
-          "command": "gl.authenticate",
-          "when": "false"
         }
       ],
       "view/title": [
