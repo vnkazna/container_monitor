@@ -139,7 +139,7 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
       username: user.username,
       scopes: [...scopes],
     };
-    await this.#accountService.addAccount(account);
+    await this.#accountService.addAccount(account); // FIXME: move the account creation into token_exchange_service
     return convertAccountToAuthenticationSession(account);
   }
 
