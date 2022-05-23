@@ -1,5 +1,5 @@
 import * as https from 'https';
-import { GraphQLClient, gql } from 'graphql-request';
+import { GraphQLClient, gql, Variables, RequestDocument } from 'graphql-request';
 import crossFetch from 'cross-fetch';
 import { URL } from 'url';
 import createHttpProxyAgent from 'https-proxy-agent';
@@ -190,21 +190,38 @@ type CreateSnippetOptions = {
   visibility: SnippetVisibility;
   content: string;
 };
+
 export class GitLabService {
-  client: GraphQLClient;
+  #credentials: Credentials;
 
-  private instanceUrl: string;
+  constructor(credentials: Credentials) {
+    this.#credentials = credentials;
+  }
 
-  #token: string;
-
-  constructor({ instanceUrl, token }: Credentials) {
+  async graphqlRequest<T = any, V = Variables>(
+    document: RequestDocument,
+    variables?: V,
+  ): Promise<T> {
     const ensureEndsWithSlash = (url: string) => url.replace(/\/?$/, '/');
-    this.instanceUrl = instanceUrl;
-    this.#token = token;
+    const endpoint = new URL(
+      './api/graphql',
+      ensureEndsWithSlash((await this.getCredentials()).instanceUrl),
+    ).href; // supports GitLab instances that are on a custom path, e.g. "https://example.com/gitlab"
+    const client = new GraphQLClient(endpoint, await this.#getFetchOptions());
+    return client.request(document, variables);
+  }
 
-    const endpoint = new URL('./api/graphql', ensureEndsWithSlash(this.instanceUrl)).href; // supports GitLab instances that are on a custom path, e.g. "https://example.com/gitlab"
+  async crossFetch(input: RequestInfo, init: RequestInit = {}): Promise<Response> {
+    const fetchOptions = await this.#getFetchOptions();
+    return crossFetch(input, {
+      ...fetchOptions,
+      ...init,
+      headers: { ...fetchOptions.headers, ...init.headers },
+    });
+  }
 
-    this.client = new GraphQLClient(endpoint, this.fetchOptions);
+  async getCredentials(): Promise<Credentials> {
+    return this.#credentials;
   }
 
   private static getHttpAgent(instanceUrl: string) {
@@ -231,8 +248,9 @@ export class GitLabService {
     };
   }
 
-  private get fetchOptions() {
-    return GitLabService.getFetchOptions(this.instanceUrl, this.#token);
+  async #getFetchOptions() {
+    const { instanceUrl, token } = await this.getCredentials();
+    return GitLabService.getFetchOptions(instanceUrl, token);
   }
 
   async fetchAllPages<T>(
@@ -240,8 +258,9 @@ export class GitLabService {
     query: Record<string, QueryValue> = {},
     resourceName = 'resource',
   ): Promise<T[]> {
-    const url = `${this.instanceUrl}/api/v4${apiResourcePath}${createQueryString(query)}`;
-    const result = await crossFetch(url, this.fetchOptions);
+    const { instanceUrl } = await this.getCredentials();
+    const url = `${instanceUrl}/api/v4${apiResourcePath}${createQueryString(query)}`;
+    const result = await this.crossFetch(url);
     await handleFetchError(result, resourceName);
     // pagination
     if (getTotalPages(result) > getCurrentPage(query))
@@ -261,8 +280,9 @@ export class GitLabService {
     query: Record<string, QueryValue> = {},
     resourceName = 'resource',
   ): Promise<T> {
-    const url = `${this.instanceUrl}/api/v4${apiResourcePath}${createQueryString(query)}`;
-    const result = await crossFetch(url, this.fetchOptions);
+    const { instanceUrl } = await this.getCredentials();
+    const url = `${instanceUrl}/api/v4${apiResourcePath}${createQueryString(query)}`;
+    const result = await this.crossFetch(url);
     await handleFetchError(result, resourceName);
     return result.json() as Promise<T>;
   }
@@ -272,9 +292,9 @@ export class GitLabService {
     resourceName = 'resource',
     body?: unknown,
   ): Promise<T> {
-    const response = await crossFetch(`${this.instanceUrl}/api/v4${apiResourcePath}`, {
-      ...this.fetchOptions,
-      headers: { ...this.fetchOptions.headers, 'Content-Type': 'application/json' },
+    const { instanceUrl } = await this.getCredentials();
+    const response = await this.crossFetch(`${instanceUrl}/api/v4${apiResourcePath}`, {
+      headers: { 'Content-Type': 'application/json' },
       method: 'POST',
       body: JSON.stringify(body),
     });
@@ -294,13 +314,13 @@ export class GitLabService {
 
   async getProject(namespaceWithPath: string): Promise<GitLabProject | undefined> {
     const options: GetProjectQueryOptions = { namespaceWithPath };
-    const result = await this.client.request<GetProjectQueryResult>(queryGetProject, options);
+    const result = await this.graphqlRequest<GetProjectQueryResult>(queryGetProject, options);
     return result.project && new GitLabProject(result.project);
   }
 
   async getProjects(options: Partial<GetProjectsOptions>): Promise<GitLabProject[]> {
     const optionsWithDefaults = { ...getProjectDefaultOptions, ...options };
-    const results = await this.client.request<GqlProjectsResult>(
+    const results = await this.graphqlRequest<GqlProjectsResult>(
       queryGetProjects,
       optionsWithDefaults,
     );
@@ -312,7 +332,7 @@ export class GitLabService {
       namespaceWithPath,
       afterCursor,
     };
-    const result = await this.client.request<GetSnippetsQueryResult>(queryGetSnippets, options);
+    const result = await this.graphqlRequest<GetSnippetsQueryResult>(queryGetSnippets, options);
 
     const { project } = result;
     // this can mean three things: project doesn't exist, user doesn't have access, or user credentials are wrong
@@ -347,15 +367,16 @@ export class GitLabService {
     const projectId = getRestIdFromGraphQLId(snippet.projectId);
     const snippetId = getRestIdFromGraphQLId(snippet.id);
     const branch = getBranch(blob.rawPath);
-    const url = `${this.instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/${branch}/${blob.path}/raw`;
-    const result = await crossFetch(url, this.fetchOptions);
+    const { instanceUrl } = await this.getCredentials();
+    const url = `${instanceUrl}/api/v4/projects/${projectId}/snippets/${snippetId}/files/${branch}/${blob.path}/raw`;
+    const result = await this.crossFetch(url);
     await handleFetchError(result, 'snippet');
     return result.text();
   }
 
   async getSnippetContentNew(snippet: GqlSnippet, blob: GqlBlob): Promise<string> {
     const options: GetSnippetContentQueryOptions = { snippetId: snippet.id };
-    const result = await this.client.request<{ snippets: Node<GqlContentSnippet> }>(
+    const result = await this.graphqlRequest<{ snippets: Node<GqlContentSnippet> }>(
       getSnippetContentQuery,
       options,
     );
@@ -388,8 +409,9 @@ export class GitLabService {
     const encodedPath = encodeURIComponent(removeLeadingSlash(path));
     const encodedRef = encodeURIComponent(ref);
     const encodedProject = encodeURIComponent(projectId);
-    const fileUrl = `${this.instanceUrl}/api/v4/projects/${encodedProject}/repository/files/${encodedPath}/raw?ref=${encodedRef}`;
-    const fileResult = await crossFetch(fileUrl, this.fetchOptions);
+    const { instanceUrl } = await this.getCredentials();
+    const fileUrl = `${instanceUrl}/api/v4/projects/${encodedProject}/repository/files/${encodedPath}/raw?ref=${encodedRef}`;
+    const fileResult = await this.crossFetch(fileUrl);
     await handleFetchError(fileResult, 'file');
     return fileResult.text();
   }
@@ -431,17 +453,22 @@ export class GitLabService {
     The GraphQL endpoint sends us the note.htmlBody with links that start with `/`.
     This works well for the the GitLab webapp, but in VS Code we need to add the full host.
   */
-  private addHostToUrl(discussion: GqlDiscussion, namespaceWithPath: string): GqlDiscussion {
+  // eslint-disable-next-line class-methods-use-this
+  private addHostToUrl(
+    discussion: GqlDiscussion,
+    namespaceWithPath: string,
+    instanceUrl: string,
+  ): GqlDiscussion {
     const prependHost: <T extends GqlBasePosition | null>(
       note: GqlGenericNote<T>,
     ) => GqlGenericNote<T> = note => ({
       ...note,
-      body: makeMarkdownLinksAbsolute(note.body, namespaceWithPath, this.instanceUrl),
-      bodyHtml: makeHtmlLinksAbsolute(note.bodyHtml, this.instanceUrl),
+      body: makeMarkdownLinksAbsolute(note.body, namespaceWithPath, instanceUrl),
+      bodyHtml: makeHtmlLinksAbsolute(note.bodyHtml, instanceUrl),
       author: {
         ...note.author,
         avatarUrl:
-          note.author.avatarUrl && ensureAbsoluteAvatarUrl(this.instanceUrl, note.author.avatarUrl),
+          note.author.avatarUrl && ensureAbsoluteAvatarUrl(instanceUrl, note.author.avatarUrl),
       },
     });
     return {
@@ -462,7 +489,7 @@ export class GitLabService {
       iid: String(issuable.iid),
       afterCursor: endCursor,
     };
-    const result = await this.client.request<GetDiscussionsQueryResult>(query, options);
+    const result = await this.graphqlRequest<GetDiscussionsQueryResult>(query, options);
     assert(result.project, `Project ${namespaceWithPath} was not found.`);
     const discussions =
       result.project.issue?.discussions || result.project.mergeRequest?.discussions;
@@ -475,7 +502,8 @@ export class GitLabService {
       });
       return [...discussions.nodes, ...remainingPages];
     }
-    return discussions.nodes.map(n => this.addHostToUrl(n, namespaceWithPath));
+    const { instanceUrl } = await this.getCredentials();
+    return discussions.nodes.map(n => this.addHostToUrl(n, namespaceWithPath, instanceUrl));
   }
 
   async canUserCommentOnMr(mr: RestMr): Promise<boolean> {
@@ -488,7 +516,7 @@ export class GitLabService {
           namespaceWithPath,
           iid: String(mr.iid),
         };
-        const result = await this.client.request(getMrPermissionsQuery, queryOptions);
+        const result = await this.graphqlRequest(getMrPermissionsQuery, queryOptions);
         assert(result?.project?.mergeRequest, `MR ${mr.references.full} was not found.`);
         return Boolean(result.project.mergeRequest.userPermissions?.createNote);
       },
@@ -499,7 +527,7 @@ export class GitLabService {
   async setResolved(replyId: string, resolved: boolean): Promise<void> {
     await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
-      return await this.client.request<void>(discussionSetResolved, {
+      return await this.graphqlRequest<void>(discussionSetResolved, {
         replyId,
         resolved,
       });
@@ -543,7 +571,7 @@ export class GitLabService {
         () => newCreateNoteMutation,
         () => oldCreateNoteMutation,
       );
-      const result = await this.client.request<CreateNoteResult>(createNoteMutation, {
+      const result = await this.graphqlRequest<CreateNoteResult>(createNoteMutation, {
         issuableId: getIssuableGqlId(issuable),
         body,
         replyId,
@@ -566,7 +594,7 @@ export class GitLabService {
   async deleteNote(noteId: string): Promise<void> {
     await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
-      await this.client.request<void>(deleteNoteMutation, {
+      await this.graphqlRequest<void>(deleteNoteMutation, {
         noteId,
       });
     } catch (e) {
@@ -610,7 +638,7 @@ export class GitLabService {
       );
     }
     try {
-      await this.client.request<void>(updateNoteBodyMutation, {
+      await this.graphqlRequest<void>(updateNoteBodyMutation, {
         noteId: noteGqlId,
         body,
       });
@@ -631,7 +659,7 @@ export class GitLabService {
   ): Promise<GqlTextDiffDiscussion> {
     await this.validateVersion('MR Discussions', REQUIRED_VERSIONS.MR_DISCUSSIONS);
     try {
-      const result = await this.client.request(createDiffNoteMutation, {
+      const result = await this.graphqlRequest(createDiffNoteMutation, {
         issuableId: getMrGqlId(mrId),
         body,
         position,
@@ -829,7 +857,8 @@ export class GitLabService {
       { ...Object.fromEntries(search), ...queryParams },
       'issuables',
     )) as RestIssuable[];
-    return issuables.map(normalizeAvatarUrl(this.instanceUrl));
+    const { instanceUrl } = await this.getCredentials();
+    return issuables.map(normalizeAvatarUrl(instanceUrl));
   }
 
   async getMrClosingIssues(project: GitLabProject, mrId: number): Promise<MinimalRestIssuable[]> {

@@ -6,7 +6,7 @@ import { DEFAULT_FETCH_RESPONSE } from '../__mocks__/cross-fetch';
 import { CustomQueryType } from './custom_query_type';
 import { CustomQuery } from './custom_query';
 import { asMock } from '../test_utils/as_mock';
-import { project } from '../test_utils/entities';
+import { gqlProject, project } from '../test_utils/entities';
 import { getExtensionConfiguration } from '../utils/extension_configuration';
 import { getHttpAgentOptions } from './http/get_http_agent_options';
 import { HelpError } from '../errors/help_error';
@@ -41,8 +41,13 @@ describe('gitlab_service', () => {
       ${'https://test.com'}         | ${'https://test.com/api/graphql'}
       ${'https://test.com/gitlab'}  | ${'https://test.com/gitlab/api/graphql'}
       ${'https://test.com/gitlab/'} | ${'https://test.com/gitlab/api/graphql'}
-    `('creates endpoint url from $instanceUrl', ({ instanceUrl, endpointUrl }) => {
-      new GitLabService(testCredentials(instanceUrl)); // eslint-disable-line no-new
+    `('creates endpoint url from $instanceUrl', async ({ instanceUrl, endpointUrl }) => {
+      service = new GitLabService(testCredentials(instanceUrl));
+      asMock(GraphQLClient).mockReturnValue({
+        request: async () => ({ project: gqlProject }),
+      });
+
+      await service.getProject('group/project');
 
       expect(GraphQLClient).toHaveBeenCalledWith(endpointUrl, expect.anything());
     });
