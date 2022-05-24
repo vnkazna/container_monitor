@@ -92,7 +92,7 @@ interface RefreshTokenResponse {
   created_at: number; // TODO: make sure this time changes when we refresh the token
 }
 
-interface AuthorizationCodeTokenExchangeParams {
+export interface AuthorizationCodeTokenExchangeParams {
   instanceUrl: string;
   code: string;
   codeVerifier: string;

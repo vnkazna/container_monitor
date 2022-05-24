@@ -5,11 +5,11 @@ import { openUrl } from '../../openers';
 import { PromiseAdapter, promiseFromEvent } from '../../utils/promise_from_event';
 import { GitLabUriHandler, gitlabUriHandler } from '../../gitlab_uri_handler';
 import { accountService, AccountService } from '../account_service';
-import { makeAccountId, OAuthAccount } from '../account';
+import { OAuthAccount } from '../account';
 import { sort } from '../../utils/sort';
-import { ExchangeTokenResponse, GitLabService } from '../../gitlab/gitlab_service';
 import { GITLAB_COM_URL, OAUTH_CLIENT_ID, OAUTH_REDIRECT_URI } from '../../constants';
 import { generateSecret } from '../../utils/generate_secret';
+import { TokenExchangeService, tokenExchangeService } from '../../gitlab/token_exchange_service';
 
 const generateCodeChallengeFromVerifier = (v: string) => {
   const sha256 = (plain: string) => {
@@ -89,9 +89,12 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
 
   #accountService: AccountService;
 
-  constructor(as = accountService, uh = gitlabUriHandler) {
+  #tokenExchangeService: TokenExchangeService;
+
+  constructor(as = accountService, uh = gitlabUriHandler, tes = tokenExchangeService) {
     this.#accountService = as;
     this.#uriHandler = uh;
+    this.#tokenExchangeService = tes;
   }
 
   onDidChangeSessions = this.#eventEmitter.event;
@@ -109,12 +112,12 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
     this.#requestsInProgress[state] = codeVerifier;
     const { promise: receivedRedirectUrl, cancel: cancelWaitingForRedirectUrl } = promiseFromEvent(
       this.#uriHandler.event,
-      this.exchangeCodeForToken(state),
+      this.exchangeCodeForToken(state, scopes),
     );
     await openUrl(url);
-    const tokenResponse = await Promise.race([
+    const account = await Promise.race([
       receivedRedirectUrl,
-      new Promise<ExchangeTokenResponse>((_, reject) => {
+      new Promise<OAuthAccount>((_, reject) => {
         setTimeout(
           () => reject(new Error('Cancelling the GitLab OAuth login after 60s. Try again.')),
           60000,
@@ -124,22 +127,7 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
       delete this.#requestsInProgress[state];
       cancelWaitingForRedirectUrl.fire();
     });
-    const user = await new GitLabService({
-      instanceUrl: GITLAB_COM_URL,
-      token: tokenResponse.access_token,
-    }).getCurrentUser();
-    const account: OAuthAccount = {
-      instanceUrl: GITLAB_COM_URL,
-      token: tokenResponse.access_token,
-      refreshToken: tokenResponse.refresh_token,
-      expiresAtTimestampInSeconds: tokenResponse.created_at + tokenResponse.expires_in,
-      codeVerifier,
-      id: makeAccountId(GITLAB_COM_URL, user.id),
-      type: 'oauth',
-      username: user.username,
-      scopes: [...scopes],
-    };
-    await this.#accountService.addAccount(account); // FIXME: move the account creation into token_exchange_service
+
     return convertAccountToAuthenticationSession(account);
   }
 
@@ -147,10 +135,13 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
     await this.#accountService.removeAccount(sessionId);
   }
 
-  exchangeCodeForToken: (state: string) => PromiseAdapter<vscode.Uri, ExchangeTokenResponse> =
+  exchangeCodeForToken: (
+    state: string,
+    scopes: readonly string[],
+  ) => PromiseAdapter<vscode.Uri, OAuthAccount> =
     /* This callback is triggered on every vscode://gitlab-workflow URL.
     We will ignore invocations that are not related to the OAuth login with given `state`. */
-    state => async (uri, resolve, reject) => {
+    (state, scopes) => async (uri, resolve, reject) => {
       if (uri.path !== '/authentication') return;
       const searchParams = new URLSearchParams(uri.query);
       const urlState = searchParams.get('state');
@@ -166,13 +157,14 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
         reject(new Error(`Authentication URL ${uri} didn't contain 'code' query param.`));
         return;
       }
-      const payload = await GitLabService.exchangeToken({
+      const account = await this.#tokenExchangeService.createOAuthAccountFromCode({
         instanceUrl: GITLAB_COM_URL,
         grantType: 'authorization_code',
         code,
         codeVerifier,
+        scopes,
       });
-      resolve(payload);
+      resolve(account);
     };
 }
 
