@@ -1,3 +1,13 @@
+## [3.44.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.44.1...v3.44.2) (2022-05-25)
+
+
+### Bug Fixes
+
+* explain why creating a comment on a large diff fails ([d7a8c46](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/d7a8c463d37b10cb0db02a338d5ec63e58eca0db))
+* warn user about OS Keychain issue on Ubuntu ([066d115](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/066d1153c3bf0e8cd8bcacc4f7d6659994a5b82b))
+
+
+
 ## [3.44.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.44.0...v3.44.1) (2022-05-13)
 
 
