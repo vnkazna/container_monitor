@@ -31,6 +31,8 @@ This extension integrates GitLab into Visual Studio Code. After you [set up the 
 
 Supports [multiple GitLab instances](#multiple-gitlab-instances).
 
+If you have trouble setting up a GitLab account on Ubuntu, please see [this existing issue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/580).
+
 ## Minimum supported version
 
 This extension supports GitLab versions 13.0 and later. Even though most of the extension's features work with older versions, we currently don't actively support GitLab instances below version 13.0.

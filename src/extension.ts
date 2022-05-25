@@ -167,7 +167,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
   registerCommands(context, outputChannel);
   const isDev = process.env.NODE_ENV === 'development';
   webviewController.init(context, isDev);
-  await accountService.init(context);
+  await accountService.init(context).catch(e => {
+    handleError(e);
+    throw e;
+  });
   selectedProjectStore.init(context);
   registerCiCompletion(context);
   vscode.window.registerUriHandler(gitlabUriHandler);
