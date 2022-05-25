@@ -91,9 +91,8 @@ export class MrItemModel extends ItemModel {
         e instanceof UnsupportedVersionError
           ? e
           : new UserFriendlyError(
-              `The extension failed to preload discussions on the MR diff.
-            It's possible that you've encountered
-            https://gitlab.com/gitlab-org/gitlab/-/issues/298827.`,
+              `The extension failed to preload discussions on the MR diff. It's possible that you've encountered
+            [this existing issue](https://gitlab.com/gitlab-org/gitlab/-/issues/298827).`,
               e,
             );
       handleError(error);

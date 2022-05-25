@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
+import { UserFriendlyError } from '../errors/user_friendly_error';
 import { log } from '../log';
 import { hasPresentKey } from '../utils/has_present_key';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
@@ -52,7 +53,14 @@ export class AccountService {
 
   async init(context: ExtensionContext): Promise<void> {
     this.context = context;
-    this.secrets = await getSecrets(context);
+    try {
+      this.secrets = await getSecrets(context);
+    } catch (error) {
+      throw new UserFriendlyError(
+        `GitLab Workflow can't access the OS Keychain. If you use Ubuntu, see this [existing issue](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/580).`,
+        error,
+      );
+    }
   }
 
   get onDidChange(): Event<void> {
