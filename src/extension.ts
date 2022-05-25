@@ -85,8 +85,8 @@ const registerCommands = (
       openers.showMergeRequests,
     ),
     [USER_COMMANDS.AUTHENTICATE]: authenticate,
-    [USER_COMMANDS.SET_TOKEN]: tokenInput.showInput,
-    [USER_COMMANDS.REMOVE_TOKEN]: tokenInput.removeTokenPicker,
+    [USER_COMMANDS.ADD_ACCOUNT]: tokenInput.addAccount,
+    [USER_COMMANDS.REMOVE_ACCOUNT]: tokenInput.removeAccount,
     [USER_COMMANDS.OPEN_ACTIVE_FILE]: runWithValidProjectFile(openers.openActiveFile),
     [USER_COMMANDS.COPY_LINK_TO_ACTIVE_FILE]: runWithValidProjectFile(openers.copyLinkToActiveFile),
     [USER_COMMANDS.OPEN_CURRENT_MERGE_REQUEST]: runWithValidProject(

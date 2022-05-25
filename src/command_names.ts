@@ -3,8 +3,8 @@
   These commands must be exactly the same as the contributed commands in package.json.
 */
 export const USER_COMMANDS = {
-  SET_TOKEN: 'gl.setToken',
-  REMOVE_TOKEN: 'gl.removeToken',
+  ADD_ACCOUNT: 'gl.addAccount',
+  REMOVE_ACCOUNT: 'gl.removeAccount',
   SHOW_ISSUES_ASSIGNED_TO_ME: 'gl.showIssuesAssignedToMe',
   SHOW_MERGE_REQUESTS_ASSIGNED_TO_ME: 'gl.showMergeRequestsAssignedToMe',
   OPEN_ACTIVE_FILE: 'gl.openActiveFile',
