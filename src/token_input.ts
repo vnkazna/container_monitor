@@ -41,6 +41,10 @@ export async function addAccount() {
 
 export async function removeAccount() {
   const accounts = accountService.getRemovableAccounts();
+  if (accounts.length === 0) {
+    await vscode.window.showInformationMessage(`No accounts to remove!`);
+    return;
+  }
   const result = await vscode.window.showQuickPick(
     accounts.map(a => ({ label: a.instanceUrl, description: a.username, id: a.id })),
     {
