@@ -103,7 +103,7 @@ export class AccountService {
 
     if (accountMap[account.id]) {
       log.warn(
-        `Account for instance ${account.instanceUrl} and user ${account.username} already exists. The extension ignored the request to re-add it.`,
+        `Account for instance ${account.instanceUrl} and user ${account.username} already exists. The extension ignored the request to re-add it. You can remove the account and add it again.`,
       );
       return;
     }

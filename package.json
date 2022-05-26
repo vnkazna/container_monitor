@@ -49,12 +49,12 @@
         "title": "GitLab: Authenticate to GitLab.com"
       },
       {
-        "command": "gl.setToken",
-        "title": "GitLab: Set GitLab Personal Access Token"
+        "command": "gl.addAccount",
+        "title": "GitLab: Add Account to VS Code"
       },
       {
-        "command": "gl.removeToken",
-        "title": "GitLab: Remove Your GitLab Personal Access Token"
+        "command": "gl.removeAccount",
+        "title": "GitLab: Remove Account from VS Code"
       },
       {
         "command": "gl.showIssuesAssignedToMe",
@@ -516,7 +516,7 @@
     "viewsWelcome": [
       {
         "view": "issuesAndMrs",
-        "contents": "Welcome to the GitLab Workflow extension!\nThis extension needs an access token with the 'api' and 'read_user' scopes.\n- GitLab.com users: [create a token on GitLab.com](https://gitlab.com/-/profile/personal_access_tokens?name=GitLab+VS+Code+Extension&scopes=api,read_user).\n- Users on self-managed instances: in GitLab, click your avatar in the top right corner and select 'Preferences.' In the left sidebar, select 'Access Tokens,' then select 'Add a personal access token.'\nAfter you create a token, select 'Set Personal Access Token':\n[Set Personal Access Token](command:gl.setToken)\nTo learn more, read [the setup information](https://gitlab.com/gitlab-org/gitlab-vscode-extension#setup) for this extension.",
+        "contents": "Welcome to the GitLab Workflow extension!\nThis extension needs an access token with the 'api' and 'read_user' scopes.\n- GitLab.com users: [create a token on GitLab.com](https://gitlab.com/-/profile/personal_access_tokens?name=GitLab+VS+Code+Extension&scopes=api,read_user).\n- Users on self-managed instances: in GitLab, click your avatar in the top right corner and select 'Preferences.' In the left sidebar, select 'Access Tokens,' then select 'Add a personal access token.'\nAfter you create a token, select 'Add Account':\n[Add Account](command:gl.addAccount)\nTo learn more, read [the setup information](https://gitlab.com/gitlab-org/gitlab-vscode-extension#setup) for this extension.",
         "when": "gitlab:noAccount"
       },
       {

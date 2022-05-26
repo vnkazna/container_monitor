@@ -91,7 +91,7 @@ This extension requires you to create a GitLab personal access token, and assign
    - If you use a self-managed GitLab instance, follow the instructions [in the GitLab documentation](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token).
 1. Copy the token. _For security reasons, this value is never displayed again, so you must copy this value now._
 1. Open Visual Studio Code, then open the command palette by pressing <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>.
-1. In the command palette, search for **GitLab: Set GitLab Personal Access Token** and press <kbd>Enter<kbd>.
+1. In the command palette, search for **GitLab: Add Account** and press <kbd>Enter<kbd>.
 1. In the **URL to GitLab instance**, paste the full URL to your GitLab instance, including the `http://` or `https://`. Press <kbd>Enter</kbd> to confirm.
 1. Paste in your GitLab personal access token and press <kbd>Enter</kbd>. The token is not displayed, nor is it accessible to others.
 

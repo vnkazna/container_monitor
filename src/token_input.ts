@@ -6,7 +6,7 @@ import { getUserForCredentialsOrFail } from './accounts/get_user_for_credentials
 import { removeTrailingSlash } from './utils/remove_trailing_slash';
 import { validateInstanceUrl } from './utils/validate_instance_url';
 
-export async function showInput() {
+export async function addAccount() {
   const rawInstanceUrl = await vscode.window.showInputBox({
     ignoreFocusOut: true,
     value: GITLAB_COM_URL,
@@ -39,7 +39,7 @@ export async function showInput() {
   );
 }
 
-export async function removeTokenPicker() {
+export async function removeAccount() {
   const accounts = accountService.getRemovableAccounts();
   const result = await vscode.window.showQuickPick(
     accounts.map(a => ({ label: a.instanceUrl, description: a.username, id: a.id })),
