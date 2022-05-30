@@ -7,17 +7,17 @@ import { createTokenAccount } from '../test_utils/entities';
 import { createFakeRepository } from '../test_utils/fake_git_extension';
 import { GitLabProject } from './gitlab_project';
 import { GitLabProjectRepositoryImpl, initializeAllProjects } from './gitlab_project_repository';
-import { GitLabService } from './gitlab_service';
 import { SelectedProjectSetting } from './new_project';
 import { SelectedProjectStore } from './selected_project_store';
+import { tryToGetProjectFromInstance } from './try_to_get_project_from_instance';
 
 jest.mock('../log');
-jest.mock('./gitlab_service');
+jest.mock('./try_to_get_project_from_instance');
 
 describe('gitlab_project_repository', () => {
   let projects: Record<string, string[]> = {};
 
-  const fakeGetProject: typeof GitLabService.tryToGetProjectFromInstance = async (
+  const fakeGetProject: typeof tryToGetProjectFromInstance = async (
     credentials,
     namespaceWithPath,
   ) => {
@@ -301,7 +301,7 @@ describe('gitlab_project_repository', () => {
         selectedProjectSettings: [],
         onSelectedProjectsChange: jest.fn(),
       };
-      asMock(GitLabService.tryToGetProjectFromInstance).mockImplementation(fakeGetProject);
+      asMock(tryToGetProjectFromInstance).mockImplementation(fakeGetProject);
       projects = {
         'https://gitlab.com-abc': ['gitlab-org/gitlab-vscode-extension'],
       };

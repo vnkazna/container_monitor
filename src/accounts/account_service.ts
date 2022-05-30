@@ -135,6 +135,19 @@ export class AccountService {
     this.secrets = secrets;
   }
 
+  getAccount(accountId: string): Account {
+    const result = this.getAllAccounts().find(a => a.id === accountId);
+    assert(result, `Account with id ${accountId} doesn't exist.`);
+    return result;
+  }
+
+  async updateAccountToken(account: Account) {
+    assert(this.context);
+
+    const { token } = account;
+    await this.#storeToken(account.id, token);
+  }
+
   async removeAccount(accountId: string) {
     assert(this.context);
     const { accountMap } = this;
