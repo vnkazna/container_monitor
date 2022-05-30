@@ -1,7 +1,8 @@
 import { RemoteSource, RemoteSourceProvider } from '../../api/git';
 import { GitLabService } from '../gitlab_service';
 import { GitLabProject } from '../gitlab_project';
-import { Credentials } from '../../accounts/credentials';
+import { Account } from '../../accounts/account';
+import { getGitLabServiceForAccount } from '../get_gitlab_service';
 
 export function convertUrlToWikiUrl(url: string): string {
   return url.replace(/\.git$/, '.wiki.git');
@@ -34,9 +35,9 @@ export class GitLabRemoteSourceProvider implements RemoteSourceProvider {
 
   private gitlabService: GitLabService;
 
-  constructor(credentials: Credentials) {
-    this.name = `GitLab (${credentials.instanceUrl})`;
-    this.gitlabService = new GitLabService(credentials);
+  constructor(account: Account) {
+    this.name = `GitLab (${account.instanceUrl})`;
+    this.gitlabService = getGitLabServiceForAccount(account);
   }
 
   async lookupByPath(path: string): Promise<GitLabRemote | undefined> {

@@ -973,16 +973,6 @@ export class GitLabService {
     );
   }
 
-  static async tryToGetProjectFromInstance(
-    credentials: Credentials,
-    namespaceWithPath: string,
-  ): Promise<GitLabProject | undefined> {
-    return new GitLabService(credentials).getProject(namespaceWithPath).catch(e => {
-      log.error(e);
-      return undefined;
-    });
-  }
-
   /** This method exchanges code from GitLab OAuth endpoint for an access token. */
   static async exchangeToken(params: TokenExchangeUrlParams): Promise<{ access_token: string }> {
     const fetchOptions = GitLabService.getFetchOptions(params.instanceUrl);

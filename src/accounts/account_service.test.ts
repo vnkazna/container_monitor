@@ -132,4 +132,27 @@ describe('AccountService', () => {
       'https://dev.gitlab.com',
     ]);
   });
+
+  it('can get account based on ID', async () => {
+    const firstAccount = createTokenAccount('https://gitlab.com', 1, 'abc');
+    const secondAccount = createTokenAccount('https://dev.gitlab.com', 1, 'def');
+    await accountService.addAccount(firstAccount);
+    await accountService.addAccount(secondAccount);
+
+    const result = accountService.getAccount(firstAccount.id);
+
+    expect(result).toEqual(firstAccount);
+  });
+
+  it('can update token', async () => {
+    const firstAccount = createTokenAccount('https://gitlab.com', 1, 'abc');
+    const updatedTokenAccount = { ...firstAccount, token: 'xyz' };
+    await accountService.addAccount(firstAccount);
+
+    await accountService.updateAccountToken(updatedTokenAccount);
+
+    const result = accountService.getAccount(firstAccount.id);
+
+    expect(result).toEqual(updatedTokenAccount);
+  });
 });

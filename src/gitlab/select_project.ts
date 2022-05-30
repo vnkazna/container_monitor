@@ -4,8 +4,8 @@ import { createRemoteUrlPointers, GitRemoteUrlPointer, GitRepository } from '../
 import { MultipleProjectsItem } from '../tree_view/items/multiple_projects_item';
 import { NoProjectItem } from '../tree_view/items/no_project_item';
 import { ProjectItemModel } from '../tree_view/items/project_item_model';
+import { getGitLabServiceForAccount } from './get_gitlab_service';
 import { gitlabProjectRepository } from './gitlab_project_repository';
-import { GitLabService } from './gitlab_service';
 import { ProjectInRepository } from './new_project';
 import { pickAccount } from './pick_account';
 import { pickProject } from './pick_project';
@@ -35,7 +35,7 @@ const manuallyAssignProject = async (repository: GitRepository) => {
   if (!account) return;
   const pointer = await pickRemoteUrl(createRemoteUrlPointers(repository));
   if (!pointer) return;
-  const project = await pickProject(new GitLabService(account));
+  const project = await pickProject(getGitLabServiceForAccount(account));
   if (!project) return;
   const projectInRepository: ProjectInRepository = {
     account,

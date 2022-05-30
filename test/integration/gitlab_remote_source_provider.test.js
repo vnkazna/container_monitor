@@ -2,10 +2,10 @@ const assert = require('assert');
 const { graphql } = require('msw');
 const projectsResponse = require('./fixtures/graphql/projects.json');
 const { getServer } = require('./test_infrastructure/mock_server');
-const { GITLAB_URL } = require('./test_infrastructure/constants');
 const {
   GitLabRemoteSourceProvider,
 } = require('../../src/gitlab/clone/gitlab_remote_source_provider');
+const { accountService } = require('../../src/accounts/account_service');
 
 const validateRemoteSource = remoteSources => {
   assert.strictEqual(remoteSources.length, 1);
@@ -27,7 +27,7 @@ const validateRemoteSource = remoteSources => {
 describe('GitLab Remote Source provider', () => {
   let server;
 
-  const credentials = { instanceUrl: GITLAB_URL, token: 'token' };
+  const [account] = accountService.getAllAccounts();
 
   before(async () => {
     server = getServer([
@@ -44,7 +44,7 @@ describe('GitLab Remote Source provider', () => {
   });
 
   it('projects are fetched with full search', async () => {
-    const sourceProvider = new GitLabRemoteSourceProvider(credentials);
+    const sourceProvider = new GitLabRemoteSourceProvider(account);
 
     const remoteSources = await sourceProvider.getRemoteSources();
 
@@ -52,7 +52,7 @@ describe('GitLab Remote Source provider', () => {
   });
 
   it('project search returns one result', async () => {
-    const sourceProvider = new GitLabRemoteSourceProvider(credentials);
+    const sourceProvider = new GitLabRemoteSourceProvider(account);
 
     const remoteSources = await sourceProvider.getRemoteSources('GitLab');
 
@@ -60,7 +60,7 @@ describe('GitLab Remote Source provider', () => {
   });
 
   it('projects search with nonexistent project returns no result', async () => {
-    const sourceProvider = new GitLabRemoteSourceProvider(credentials);
+    const sourceProvider = new GitLabRemoteSourceProvider(account);
 
     assert.deepStrictEqual(
       await sourceProvider.getRemoteSources('nonexistent'),
