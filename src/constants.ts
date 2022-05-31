@@ -1,3 +1,5 @@
+import vscode from 'vscode';
+
 export const GITLAB_COM_URL = 'https://gitlab.com';
 export const REVIEW_URI_SCHEME = 'gl-review';
 export const REMOTE_URI_SCHEME = 'gitlab-remote';
@@ -12,6 +14,9 @@ export const CHANGE_TYPE_QUERY_KEY = 'changeType';
 export const HAS_COMMENTS_QUERY_KEY = 'hasComments';
 export const PATCH_TITLE_PREFIX = 'patch: ';
 export const PATCH_FILE_SUFFIX = '.patch';
+
+export const OAUTH_CLIENT_ID = '36f2a70cddeb5a0889d4fd8295c241b7e9848e89cf9e599d0eed2d8e5350fbf5';
+export const OAUTH_REDIRECT_URI = `${vscode.env.uriScheme}://gitlab.gitlab-workflow/authentication`;
 
 /** Synced comment is stored in the GitLab instance */
 export const SYNCED_COMMENT_CONTEXT = 'synced-comment';

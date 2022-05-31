@@ -1,6 +1,6 @@
-import { createTokenAccount } from '../test_utils/entities';
+import { createOAuthAccount, createTokenAccount } from '../test_utils/entities';
 import { SecretStorage } from '../test_utils/secret_storage';
-import { Account } from './account';
+import { Account, OAuthAccount } from './account';
 import { AccountService } from './account_service';
 
 const SECRETS_KEY = 'gitlab-tokens';
@@ -144,15 +144,58 @@ describe('AccountService', () => {
     expect(result).toEqual(firstAccount);
   });
 
-  it('can update token', async () => {
-    const firstAccount = createTokenAccount('https://gitlab.com', 1, 'abc');
-    const updatedTokenAccount = { ...firstAccount, token: 'xyz' };
-    await accountService.addAccount(firstAccount);
+  describe('updateAccountSecret', () => {
+    it('can update Token Account', async () => {
+      const firstAccount = createTokenAccount('https://gitlab.com', 1, 'abc');
+      const updatedTokenAccount = { ...firstAccount, token: 'xyz' };
+      await accountService.addAccount(firstAccount);
 
-    await accountService.updateAccountToken(updatedTokenAccount);
+      await accountService.updateAccountSecret(updatedTokenAccount);
 
-    const result = accountService.getAccount(firstAccount.id);
+      const result = accountService.getAccount(firstAccount.id);
 
-    expect(result).toEqual(updatedTokenAccount);
+      expect(result).toEqual(updatedTokenAccount);
+    });
+
+    it('can update OAuth Account', async () => {
+      const nowTimestamp = Math.floor(new Date().getTime() / 1000);
+      const account = createOAuthAccount();
+      const updatedOAuthAccount = {
+        ...account,
+        token: 'xyz',
+        refreshToken: 'z12',
+        expiresAtTimestampInSeconds: nowTimestamp + 30,
+      };
+      await accountService.addAccount(account);
+
+      await accountService.updateAccountSecret(updatedOAuthAccount);
+
+      const result = accountService.getAccount(account.id);
+
+      expect(result).toEqual(updatedOAuthAccount);
+    });
+  });
+  describe('OAuth accounts', () => {
+    let account: OAuthAccount;
+
+    beforeEach(async () => {
+      account = createOAuthAccount();
+      await accountService.addAccount(account);
+    });
+
+    it('can store OAuth account', async () => {
+      const result = accountService.getAccount(account.id);
+
+      expect(result).toEqual(account);
+    });
+
+    it('does not store secrets in global state', async () => {
+      expect(accountMap[account.id]).toEqual({
+        ...account,
+        token: undefined,
+        refreshToken: undefined,
+        expiresAtTimestampInSeconds: undefined,
+      });
+    });
   });
 });
