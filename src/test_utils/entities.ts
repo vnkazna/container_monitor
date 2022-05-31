@@ -148,6 +148,8 @@ export const createOAuthAccount = (
   token,
   type: 'oauth',
   scopes: ['read_user', 'api'],
+  refreshToken: 'def',
+  expiresAtTimestampInSeconds: Math.floor(new Date().getTime() / 1000) + 1000, // valid token
 });
 
 export const gitRepository = {

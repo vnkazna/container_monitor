@@ -8,6 +8,7 @@ import { asMock } from '../../test_utils/as_mock';
 import { createExtensionContext, createOAuthAccount } from '../../test_utils/entities';
 import { AccountService } from '../account_service';
 import { GitLabAuthenticationProvider } from './gitlab_authentication_provider';
+import { TokenExchangeService } from '../../gitlab/token_exchange_service';
 
 jest.mock('../../openers');
 jest.mock('../../gitlab/gitlab_service');
@@ -35,11 +36,13 @@ const fakeOAuthService = (urlString: string): string => {
 describe('GitLabAuthenticationProvider', () => {
   let uriHandler: GitLabUriHandler;
   let accountService: AccountService;
+  let tokenExchangeService: TokenExchangeService;
 
   beforeEach(async () => {
     uriHandler = new GitLabUriHandler();
     accountService = new AccountService();
     await accountService.init(createExtensionContext());
+    tokenExchangeService = new TokenExchangeService(accountService);
     asMock(GitLabService.exchangeToken).mockReturnValue({ access_token: 'test_token' });
     asMock(GitLabService).mockImplementation(
       ({ instanceUrl, token }: { instanceUrl: string; token: string }) => {
@@ -55,7 +58,11 @@ describe('GitLabAuthenticationProvider', () => {
   describe('getting existing session', () => {
     it('gets a session if there is existing oauth account', async () => {
       await accountService.addAccount(createOAuthAccount());
-      const provider = new GitLabAuthenticationProvider(accountService, uriHandler);
+      const provider = new GitLabAuthenticationProvider(
+        accountService,
+        uriHandler,
+        tokenExchangeService,
+      );
 
       const sessions = await provider.getSessions(['read_user', 'api']);
 
@@ -72,7 +79,11 @@ describe('GitLabAuthenticationProvider', () => {
     });
 
     it('authenticates', async () => {
-      const provider = new GitLabAuthenticationProvider(accountService, uriHandler);
+      const provider = new GitLabAuthenticationProvider(
+        accountService,
+        uriHandler,
+        tokenExchangeService,
+      );
 
       const session = await provider.createSession(['read_user', 'api']);
 

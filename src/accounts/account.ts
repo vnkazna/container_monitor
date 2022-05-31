@@ -14,6 +14,8 @@ export interface TokenAccount extends AccountBase {
 export interface OAuthAccount extends AccountBase {
   type: 'oauth';
   scopes: string[];
+  refreshToken: string;
+  expiresAtTimestampInSeconds: number;
 }
 
 export type Account = TokenAccount | OAuthAccount;

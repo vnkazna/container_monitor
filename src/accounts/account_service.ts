@@ -6,13 +6,23 @@ import { hasPresentKey } from '../utils/has_present_key';
 import { notNullOrUndefined } from '../utils/not_null_or_undefined';
 import { removeTrailingSlash } from '../utils/remove_trailing_slash';
 import { uniq } from '../utils/uniq';
-import { Account, makeAccountId } from './account';
+import { Account, makeAccountId, OAuthAccount, TokenAccount } from './account';
 import { Credentials } from './credentials';
 
-type AccountWithoutToken = Omit<Account, 'token'>;
-interface Secret {
+interface TokenSecret {
   token: string;
 }
+
+interface OAuthSecret {
+  token: string;
+  refreshToken: string;
+  expiresAtTimestampInSeconds: number;
+}
+type Secret = TokenSecret | OAuthSecret;
+
+type AccountWithoutSecret =
+  | Omit<TokenAccount, keyof TokenSecret>
+  | Omit<OAuthAccount, keyof OAuthSecret>;
 
 const getEnvironmentVariables = (): Credentials | undefined => {
   const { GITLAB_WORKFLOW_INSTANCE_URL, GITLAB_WORKFLOW_TOKEN } = process.env;
@@ -44,6 +54,20 @@ const getSecrets = async (
   return stringTokens ? JSON.parse(stringTokens) : {};
 };
 
+const splitAccount = (
+  account: Account,
+): { accountWithoutSecret: AccountWithoutSecret; secret: Secret } => {
+  if (account.type === 'token') {
+    const { token, ...accountWithoutSecret } = account;
+    return { accountWithoutSecret, secret: { token } };
+  }
+  if (account.type === 'oauth') {
+    const { token, refreshToken, expiresAtTimestampInSeconds, ...accountWithoutSecret } = account;
+    return { accountWithoutSecret, secret: { token, refreshToken, expiresAtTimestampInSeconds } };
+  }
+  throw new Error(`Unexpected account type for account ${JSON.stringify(account)}`);
+};
+
 export class AccountService {
   context?: ExtensionContext;
 
@@ -67,7 +91,7 @@ export class AccountService {
     return this.onDidChangeEmitter.event;
   }
 
-  private get accountMap(): Record<string, AccountWithoutToken | undefined> {
+  private get accountMap(): Record<string, AccountWithoutSecret | undefined> {
     assert(this.context);
     return this.context.globalState.get(ACCOUNTS_KEY, {});
   }
@@ -107,12 +131,12 @@ export class AccountService {
       );
       return;
     }
-    const { token, ...accountWithoutToken } = account;
-    await this.#storeToken(account.id, token);
+    const { secret, accountWithoutSecret } = splitAccount(account);
+    await this.#storeSecret(account.id, secret);
 
     await this.context.globalState.update(ACCOUNTS_KEY, {
       ...accountMap,
-      [account.id]: accountWithoutToken,
+      [account.id]: accountWithoutSecret,
     });
 
     this.onDidChangeEmitter.fire();
@@ -135,10 +159,10 @@ export class AccountService {
     await this.context.secrets.store(SECRETS_KEY, JSON.stringify(this.secrets));
   }
 
-  async #storeToken(accountId: string, token: string) {
+  async #storeSecret(accountId: string, secret: Secret) {
     assert(this.context);
     await this.#validateSecretsAreUpToDate();
-    const secrets = { ...this.secrets, [accountId]: { token } };
+    const secrets = { ...this.secrets, [accountId]: secret };
     await this.context.secrets.store(SECRETS_KEY, JSON.stringify(secrets));
     this.secrets = secrets;
   }
@@ -149,11 +173,11 @@ export class AccountService {
     return result;
   }
 
-  async updateAccountToken(account: Account) {
+  async updateAccountSecret(account: Account) {
     assert(this.context);
 
-    const { token } = account;
-    await this.#storeToken(account.id, token);
+    const { secret } = splitAccount(account);
+    await this.#storeSecret(account.id, secret);
   }
 
   async removeAccount(accountId: string) {
@@ -166,14 +190,15 @@ export class AccountService {
     this.onDidChangeEmitter.fire();
   }
 
-  getRemovableAccounts(): AccountWithoutToken[] {
+  getRemovableAccounts(): AccountWithoutSecret[] {
     return Object.values(this.accountMap).filter(notNullOrUndefined);
   }
 
   #getRemovableAccountsWithTokens(): Account[] {
     const accountsWithMaybeTokens = this.getRemovableAccounts().map(a => ({
       ...a,
-      token: this.secrets[a.id]?.token,
+      token: undefined,
+      ...this.secrets[a.id],
     }));
     accountsWithMaybeTokens
       .filter(a => !a.token)
