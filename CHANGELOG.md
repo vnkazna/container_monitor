@@ -1,3 +1,21 @@
+# [3.45.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.44.2...v3.45.0) (2022-06-06)
+
+
+### Bug Fixes
+
+* improve UX for removing accounts where there is no account ([f0fef4d](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/f0fef4dba615a232dd60ac278dd8c98ea44c94f4))
+* update extension icon ([fb5f20c](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fb5f20c85b0e3ee6585b15560d673597e40b7bd4))
+* update extension marketplace icon ([0755ff6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0755ff6065721ff7524cffbc4404cbee0319d7d4))
+
+
+### Features
+
+* introduce debug mode ([2e0137f](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/2e0137f04e58a7028a53b7b2d5d2791718eb930a))
+* OAuth authentication to GitLab.com ([e140b2d](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/e140b2d6d333454dfba562d88bf1b697079b89b8))
+* rename "Set GitLab Personal Access Token" command to "Add Account" ([c94c5fe](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/c94c5fe7385161350156a5096867b772999943f2))
+
+
+
 ## [3.44.2](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.44.1...v3.44.2) (2022-05-25)
 
 
