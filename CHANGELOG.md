@@ -5,6 +5,7 @@
 
 * improve UX for removing accounts where there is no account ([f0fef4d](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/f0fef4dba615a232dd60ac278dd8c98ea44c94f4))
 * update extension icon ([fb5f20c](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/fb5f20c85b0e3ee6585b15560d673597e40b7bd4))
+  * Implemented by [George Tsiolis](https://gitlab.com/gtsiolis) with [MR !570](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/570) 👍
 * update extension marketplace icon ([0755ff6](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/0755ff6065721ff7524cffbc4404cbee0319d7d4))
 
 
