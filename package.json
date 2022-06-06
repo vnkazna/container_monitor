@@ -37,7 +37,7 @@
     "email": "incoming+gitlab-org-gitlab-vscode-extension-5261717-issue-@incoming.gitlab.com"
   },
   "galleryBanner": {
-    "color": "#805DE7",
+    "color": "#171321",
     "theme": "dark"
   },
   "main": "out/extension",
