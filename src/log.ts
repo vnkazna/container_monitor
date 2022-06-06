@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { USER_COMMANDS } from './command_names';
 import { DetailedError, isDetailedError, prettyJson } from './errors/common';
 import { HelpError } from './errors/help_error';
+import { getExtensionConfiguration } from './utils/extension_configuration';
 import { Help, HelpMessageSeverity } from './utils/help';
 
 type logFunction = (line: string) => void;
@@ -12,6 +13,8 @@ export const initializeLogging = (logLine: logFunction): void => {
 };
 
 interface Log {
+  debug(e: Error): void;
+  debug(message: string, e?: Error): void;
   info(e: Error): void;
   info(message: string, e?: Error): void;
   warn(e: Error): void;
@@ -21,6 +24,7 @@ interface Log {
 }
 
 const LOG_LEVEL = {
+  DEBUG: 'debug',
   INFO: 'info',
   WARNING: 'warning',
   ERROR: 'error',
@@ -47,11 +51,15 @@ const logWithLevel = (level: LogLevel, a1: Error | string, a2?: Error) => {
   }
 };
 
+/** This method logs only if user added `"debug": true` to their `settings.json` */
+const debug = (a1: Error | string, a2?: Error) => {
+  if (getExtensionConfiguration().debug) logWithLevel(LOG_LEVEL.DEBUG, a1, a2);
+};
 const info = (a1: Error | string, a2?: Error) => logWithLevel(LOG_LEVEL.INFO, a1, a2);
 const warn = (a1: Error | string, a2?: Error) => logWithLevel(LOG_LEVEL.WARNING, a1, a2);
 const error = (a1: Error | string, a2?: Error) => logWithLevel(LOG_LEVEL.ERROR, a1, a2);
 
-export const log: Log = { info, warn, error };
+export const log: Log = { debug, info, warn, error };
 
 export const handleError = (e: Error | DetailedError): { onlyForTesting: Promise<void> } => {
   log.error(e);

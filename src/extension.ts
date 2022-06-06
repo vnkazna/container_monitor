@@ -1,4 +1,5 @@
 import vscode from 'vscode';
+import { install as installSourceMapSupport } from 'source-map-support';
 import * as openers from './openers';
 import * as tokenInput from './token_input';
 import { accountService } from './accounts/account_service';
@@ -59,6 +60,7 @@ import { migrateSelectedProjects } from './gitlab/migrate_selected_projects';
 import { gitlabUriHandler } from './gitlab_uri_handler';
 import { authenticate } from './accounts/authenticate';
 import { GitLabAuthenticationProvider } from './accounts/oauth/gitlab_authentication_provider';
+import { getExtensionConfiguration, GITLAB_DEBUG_MODE } from './utils/extension_configuration';
 
 const wrapWithCatch =
   (command: (...args: unknown[]) => unknown) =>
@@ -151,10 +153,21 @@ const registerCiCompletion = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(subscription);
 };
 
+const activateDebugMode = () => {
+  const installSourceMapsIfDebug = () => {
+    if (getExtensionConfiguration().debug) installSourceMapSupport();
+  };
+  installSourceMapsIfDebug();
+  vscode.workspace.onDidChangeConfiguration(e => {
+    if (e.affectsConfiguration(GITLAB_DEBUG_MODE)) installSourceMapsIfDebug();
+  });
+};
+
 /**
  * @param {vscode.ExtensionContext} context
  */
 export const activate = async (context: vscode.ExtensionContext) => {
+  activateDebugMode();
   contextUtils.init(context);
   const outputChannel = vscode.window.createOutputChannel('GitLab Workflow');
   initializeLogging(line => outputChannel.appendLine(line));

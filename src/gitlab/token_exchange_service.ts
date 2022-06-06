@@ -2,6 +2,7 @@ import assert from 'assert';
 import { Account, makeAccountId, OAuthAccount } from '../accounts/account';
 import { accountService, AccountService } from '../accounts/account_service';
 import { GITLAB_COM_URL } from '../constants';
+import { log } from '../log';
 import {
   AuthorizationCodeTokenExchangeParams,
   ExchangeTokenResponse,
@@ -57,13 +58,13 @@ export class TokenExchangeService {
   async refreshIfNeeded(accountId: string): Promise<Account> {
     const latestAccount = this.#accountService.getAccount(accountId);
     if (!needsRefresh(latestAccount)) {
-      // log.debug(`Using non-expired account ${JSON.stringify(latestAccount)}`);
+      log.debug(`Using non-expired account ${JSON.stringify(latestAccount)}`);
       return latestAccount;
     }
     const refreshInProgress = this.#refreshesInProgress[accountId];
     if (refreshInProgress) return refreshInProgress;
     assert(latestAccount.type === 'oauth');
-    // log.debug(`Refreshing expired account ${JSON.stringify(latestAccount)}.`);
+    log.debug(`Refreshing expired account ${JSON.stringify(latestAccount)}.`);
     const refresh = this.#refreshToken(latestAccount).finally(() => {
       delete this.#refreshesInProgress[accountId];
     });
@@ -85,7 +86,7 @@ export class TokenExchangeService {
       expiresAtTimestampInSeconds: createExpiresTimestamp(response),
     };
     await this.#accountService.updateAccountSecret(refreshedAccount);
-    // log.debug(`Saved refreshed account ${JSON.stringify(refreshedAccount)}.`);
+    log.debug(`Saved refreshed account ${JSON.stringify(refreshedAccount)}.`);
     return refreshedAccount;
   }
 }
