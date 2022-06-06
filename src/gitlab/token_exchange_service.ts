@@ -9,10 +9,21 @@ import {
   GitLabService,
 } from './gitlab_service';
 
+/**
+  We'll refresh the token 10s before it expires. On two hours it won't make a difference and
+  I'd rather not rely on the local and server clocks being perfectly in sync. Otherwise we would
+  risk making unauthorized requests.
+
+  Note: change this value to 7170 to simulate token expiration every 30s
+*/
+const SMALL_GRACE_DURATION_JUST_TO_BE_SURE = 10;
+
 const needsRefresh = (account: Account) => {
   if (account.type === 'token') return false;
   const unixTimestampNow = Math.floor(new Date().getTime() / 1000);
-  return account.expiresAtTimestampInSeconds <= unixTimestampNow; // subtract 7170 from expiresAtTimestampInSeconds to simulate expiration every 30s
+  return (
+    account.expiresAtTimestampInSeconds - SMALL_GRACE_DURATION_JUST_TO_BE_SURE <= unixTimestampNow
+  );
 };
 
 const createExpiresTimestamp = (etr: ExchangeTokenResponse): number =>
@@ -58,13 +69,21 @@ export class TokenExchangeService {
   async refreshIfNeeded(accountId: string): Promise<Account> {
     const latestAccount = this.#accountService.getAccount(accountId);
     if (!needsRefresh(latestAccount)) {
-      log.debug(`Using non-expired account ${JSON.stringify(latestAccount)}`);
+      log.debug(`Using non-expired account ${latestAccount.id}.`);
       return latestAccount;
+    }
+    // before we start refreshing token, let's check if some other VS Code instance already has refreshed it
+    await this.#accountService.reloadCache();
+    const reloadedAccount = this.#accountService.getAccount(accountId);
+    if (!needsRefresh(reloadedAccount)) {
+      // log.debug(`Using non-expired reloaded account ${JSON.stringify(latestAccount)}`);
+      return reloadedAccount;
     }
     const refreshInProgress = this.#refreshesInProgress[accountId];
     if (refreshInProgress) return refreshInProgress;
     assert(latestAccount.type === 'oauth');
-    log.debug(`Refreshing expired account ${JSON.stringify(latestAccount)}.`);
+    log.info(`Refreshing expired token for account ${latestAccount.id}.`);
+    log.debug(`Refreshing expired token for account ${JSON.stringify(latestAccount)}.`);
     const refresh = this.#refreshToken(latestAccount).finally(() => {
       delete this.#refreshesInProgress[accountId];
     });
@@ -86,7 +105,8 @@ export class TokenExchangeService {
       expiresAtTimestampInSeconds: createExpiresTimestamp(response),
     };
     await this.#accountService.updateAccountSecret(refreshedAccount);
-    log.debug(`Saved refreshed account ${JSON.stringify(refreshedAccount)}.`);
+    log.info(`Saved refreshed token for account ${refreshedAccount.id}.`);
+    log.debug(`Saved refreshed token for account ${JSON.stringify(refreshedAccount)}.`);
     return refreshedAccount;
   }
 }

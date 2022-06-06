@@ -1,3 +1,4 @@
+import { ExtensionContext } from 'vscode';
 import { AccountService } from '../accounts/account_service';
 import { asMock } from '../test_utils/as_mock';
 import {
@@ -14,12 +15,15 @@ const unixTimestampNow = () => Math.floor(new Date().getTime() / 1000);
 
 describe('TokenExchangeService', () => {
   describe('refreshing token', () => {
+    let extensionContext: ExtensionContext;
     let accountService: AccountService;
     let tokenExchangeService: TokenExchangeService;
+    const tokenExpiresIn = 7200;
 
     beforeEach(async () => {
       accountService = new AccountService();
-      await accountService.init(createExtensionContext());
+      extensionContext = createExtensionContext();
+      await accountService.init(extensionContext);
       tokenExchangeService = new TokenExchangeService(accountService);
     });
     it('returns unchanged TokenAccount', async () => {
@@ -42,7 +46,6 @@ describe('TokenExchangeService', () => {
 
     it('refreshes expired OAuth account', async () => {
       const timestampNow = unixTimestampNow();
-      const tokenExpiresIn = 7200;
 
       const expiredAccount = {
         ...createOAuthAccount(),
@@ -75,6 +78,39 @@ describe('TokenExchangeService', () => {
         refreshToken,
         instanceUrl,
       });
+    });
+
+    it('reloads secrets from OS Keychain before refreshing expired OAuth account', async () => {
+      const timestampNow = unixTimestampNow();
+
+      const expiredAccount = {
+        ...createOAuthAccount(),
+        refreshToken: 'def',
+        codeVerifier: 'abc',
+        expiresAtTimestampInSeconds: timestampNow - 60, // expired 60s ago
+      };
+      await accountService.addAccount(expiredAccount);
+
+      // simulate another VS Code instance on the OS refreshing the token
+      const secondAccountService = new AccountService();
+      await secondAccountService.init(extensionContext);
+      await secondAccountService.updateAccountSecret({
+        ...expiredAccount,
+        token: 'new_token',
+        refreshToken: 'new_refresh_token',
+        expiresAtTimestampInSeconds: timestampNow + tokenExpiresIn,
+      });
+
+      const result = await tokenExchangeService.refreshIfNeeded(expiredAccount.id);
+
+      // refreshed account has been loaded from the secure storage
+      expect(result).toEqual({
+        ...expiredAccount,
+        refreshToken: 'new_refresh_token',
+        token: 'new_token',
+        expiresAtTimestampInSeconds: timestampNow + tokenExpiresIn,
+      });
+      expect(GitLabService.exchangeToken).not.toHaveBeenCalled();
     });
   });
 });

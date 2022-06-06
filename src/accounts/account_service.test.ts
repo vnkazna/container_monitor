@@ -46,13 +46,28 @@ describe('AccountService', () => {
     expect(accountService.getAllAccounts()).toEqual([account]);
   });
 
-  it('fails when some other process changed secrets', async () => {
-    const account = createTokenAccount('https://gitlab.com', 1, 'abc');
-    await accountService.addAccount(account);
-    await secrets.store('gitlab-tokens', '{}');
-    await expect(
-      accountService.addAccount(createTokenAccount('https://gitlab.com', 2)),
-    ).rejects.toThrow(/The GitLab secrets stored in your keychain have changed/);
+  describe('when other VS Code window changes the secrets', () => {
+    let account: Account;
+    beforeEach(async () => {
+      account = createTokenAccount('https://gitlab.com', 1, 'abc');
+      await accountService.addAccount(account);
+      // other VS Code window manipulated the secrets
+      await secrets.store('gitlab-tokens', '{"https://gitlab.com|1": {"token": "xyz"}}');
+    });
+
+    it('fails to write a secret when some other process changed the secret but refreshes the secrets cache', async () => {
+      await expect(
+        accountService.updateAccountSecret(createTokenAccount('https://gitlab.com', 1, 'def')),
+      ).rejects.toThrow(/The GitLab Secret .* has changed/);
+
+      expect(accountService.getAccount(account.id).token).toBe('xyz');
+    });
+
+    it('reloads the cache', async () => {
+      await accountService.reloadCache();
+
+      expect(accountService.getAccount(account.id).token).toBe('xyz');
+    });
   });
 
   it('removes account', async () => {
@@ -77,7 +92,7 @@ describe('AccountService', () => {
     await accountService.init(fakeContext); // reload secrets from the store
 
     expect(accountService.getAllAccounts()).toHaveLength(0); // the account can't be used
-    expect(accountService.getRemovableAccounts()).toHaveLength(1); // but it can be removed
+    expect(await accountService.getUpToDateRemovableAccounts()).toHaveLength(1); // but it can be removed
   });
 
   describe('account from environment variable', () => {
@@ -127,7 +142,7 @@ describe('AccountService', () => {
   it('can retrieve all instance URLs', async () => {
     await accountService.addAccount(createTokenAccount('https://gitlab.com', 1, 'abc'));
     await accountService.addAccount(createTokenAccount('https://dev.gitlab.com', 1, 'def'));
-    expect(accountService.getRemovableAccounts().map(a => a.instanceUrl)).toEqual([
+    expect((await accountService.getUpToDateRemovableAccounts()).map(a => a.instanceUrl)).toEqual([
       'https://gitlab.com',
       'https://dev.gitlab.com',
     ]);

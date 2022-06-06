@@ -124,6 +124,7 @@ const registerCommands = (
     [USER_COMMANDS.SIDEBAR_VIEW_AS_LIST]: () => setSidebarViewState(SidebarViewState.ListView),
     [USER_COMMANDS.SIDEBAR_VIEW_AS_TREE]: () => setSidebarViewState(SidebarViewState.TreeView),
     [USER_COMMANDS.REFRESH_SIDEBAR]: async () => {
+      await accountService.reloadCache();
       await gitlabProjectRepository.reload();
       await currentBranchRefresher.refresh(true);
     },
