@@ -1,3 +1,17 @@
+# [3.46.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.45.0...v3.46.0) (2022-06-06)
+
+
+### Bug Fixes
+
+* update extension description to official ([9d0f314](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/9d0f314a045bc8023b4fd52d89f47c976a4e7a5b))
+
+
+### Features
+
+* update extension banner color ([6d068b1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/6d068b1a4ea95068006684b66e00c1bf797fe940))
+
+
+
 # [3.45.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.44.2...v3.45.0) (2022-06-06)
 
 
