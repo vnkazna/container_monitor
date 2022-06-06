@@ -3,6 +3,9 @@ import { DetailedError } from './errors/common';
 import { handleError, initializeLogging, log } from './log';
 import { USER_COMMANDS } from './command_names';
 import { asMock } from './test_utils/as_mock';
+import { getExtensionConfiguration } from './utils/extension_configuration';
+
+jest.mock('./utils/extension_configuration');
 
 describe('logging', () => {
   afterEach(() => {
@@ -16,9 +19,13 @@ describe('logging', () => {
     initializeLogging(logFunction);
   });
 
-  const getLoggedMessage = () => asMock(logFunction).mock.calls[0][0];
+  const getLoggedMessage = () => logFunction.mock.calls[0][0];
 
   describe('log', () => {
+    beforeEach(() => {
+      asMock(getExtensionConfiguration).mockReturnValue({ debug: true });
+    });
+
     it('passes the argument to the handler', () => {
       const message = 'A very bad error occurred';
       log.info(message);
@@ -28,12 +35,21 @@ describe('logging', () => {
 
     it.each`
       methodName | logLevel
+      ${'debug'} | ${'debug'}
       ${'info'}  | ${'info'}
       ${'warn'}  | ${'warning'}
       ${'error'} | ${'error'}
     `('it handles log level "$logLevel"', ({ methodName, logLevel }) => {
       (log as any)[methodName]('message');
       expect(logFunction).toBeCalledWith(`[${logLevel}]: message`);
+    });
+
+    it('does not log debug messages if debug mode is disabled', () => {
+      asMock(getExtensionConfiguration).mockReturnValue({ debug: false });
+
+      log.debug('message');
+
+      expect(logFunction).not.toBeCalled();
     });
 
     it('indents multiline messages', () => {

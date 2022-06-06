@@ -5,6 +5,6 @@ export const REMOTE = {
   URL: 'git@test.gitlab.com:gitlab-org/gitlab.git',
 };
 export const DEFAULT_VS_CODE_SETTINGS = {
-  'gitlab.instanceUrl': GITLAB_URL,
   'files.enableTrash': false,
+  'gitlab.debug': true,
 };

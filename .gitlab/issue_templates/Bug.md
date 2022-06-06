@@ -38,7 +38,7 @@ and verify the issue you're about to submit isn't a duplicate.
 
 ### Relevant logs and/or screenshots
 
-<!-- Logs can be found by running `GitLab: Show extension logs` command (using `cmd+shift+p`) -->
+<!-- Logs can be found by running `GitLab: Show extension logs` command (using `cmd+shift+p`). Please enable `"gitlab.debug": true` in your `settings.json`. Debug mode will improve error stack traces and adds debug log messages. -->
 
 ### Possible fixes
 

@@ -2,8 +2,11 @@ import * as vscode from 'vscode';
 import { CONFIG_NAMESPACE } from '../constants';
 import { CustomQuery } from '../gitlab/custom_query';
 
+export const GITLAB_DEBUG_MODE = 'gitlab.debug';
+
 interface ExtensionConfiguration {
   pipelineGitRemoteName?: string;
+  debug: boolean;
   featureFlags?: string[];
   customQueries: CustomQuery[];
 }
@@ -16,6 +19,7 @@ export function getExtensionConfiguration(): ExtensionConfiguration {
   return {
     pipelineGitRemoteName: turnNullToUndefined(workspaceConfig.pipelineGitRemoteName),
     featureFlags: turnNullToUndefined(workspaceConfig.featureFlags),
+    debug: workspaceConfig.debug,
     customQueries: workspaceConfig.customQueries || [],
   };
 }
