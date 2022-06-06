@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { isDeepStrictEqual } from 'util';
 import { EventEmitter, ExtensionContext, Event } from 'vscode';
 import { UserFriendlyError } from '../errors/user_friendly_error';
 import { log } from '../log';
@@ -19,6 +20,9 @@ interface OAuthSecret {
   expiresAtTimestampInSeconds: number;
 }
 type Secret = TokenSecret | OAuthSecret;
+
+/** Secrets by Account ID (<accountId, Secret | undefined>) */
+type SecretsForAccounts = Record<string, Secret | undefined>;
 
 type AccountWithoutSecret =
   | Omit<TokenAccount, keyof TokenSecret>
@@ -71,7 +75,7 @@ const splitAccount = (
 export class AccountService {
   context?: ExtensionContext;
 
-  secrets: Record<string, Secret | undefined> = {};
+  secrets: SecretsForAccounts = {};
 
   private onDidChangeEmitter = new EventEmitter<void>();
 
@@ -142,26 +146,29 @@ export class AccountService {
     this.onDidChangeEmitter.fire();
   }
 
-  async #validateSecretsAreUpToDate() {
-    assert(this.context);
-    const storedSecrets = await getSecrets(this.context);
+  async #validateSecretIsUpToDate(accountId: string) {
+    const { oldSecrets, newSecrets } = await this.reloadCache();
     assert.deepStrictEqual(
-      this.secrets,
-      storedSecrets,
-      'The GitLab secrets stored in your keychain have changed. (Maybe another instance of VS Code or maybe OS synchronizing keychains.) Please restart VS Code.',
+      oldSecrets[accountId],
+      newSecrets[accountId],
+      `The GitLab Secret for account ${accountId} stored in your keychain has changed. ` +
+        '(Maybe another instance of VS Code or OS synchronizing keychains changed it.) ' +
+        'We have cancelled the operation that tried to override the secret. ' +
+        `Old: ${JSON.stringify(oldSecrets[accountId])}, ` +
+        `New: ${JSON.stringify(newSecrets[accountId])}`,
     );
   }
 
   async #removeToken(accountId: string) {
     assert(this.context);
-    await this.#validateSecretsAreUpToDate();
+    await this.#validateSecretIsUpToDate(accountId);
     delete this.secrets[accountId];
     await this.context.secrets.store(SECRETS_KEY, JSON.stringify(this.secrets));
   }
 
   async #storeSecret(accountId: string, secret: Secret) {
     assert(this.context);
-    await this.#validateSecretsAreUpToDate();
+    await this.#validateSecretIsUpToDate(accountId);
     const secrets = { ...this.secrets, [accountId]: secret };
     await this.context.secrets.store(SECRETS_KEY, JSON.stringify(secrets));
     this.secrets = secrets;
@@ -180,6 +187,23 @@ export class AccountService {
     await this.#storeSecret(account.id, secret);
   }
 
+  /** Loads the latest secrets from OS Keychain, useful when other VS Code Windows manipulates the secrets. */
+  async reloadCache(): Promise<{ oldSecrets: SecretsForAccounts; newSecrets: SecretsForAccounts }> {
+    assert(this.context);
+    const oldSecrets = this.secrets;
+    const newSecrets = await getSecrets(this.context);
+    this.secrets = newSecrets;
+    if (!isDeepStrictEqual(Object.keys(oldSecrets), Object.keys(newSecrets))) {
+      log.info(
+        `AccountService reloaded secrets and the local cache was out of date from the OS Keychain.\n` +
+          `Cached Account ids: ${Object.keys(oldSecrets)}, ` +
+          `OS Keychain Account ids: ${Object.keys(newSecrets)}`,
+      );
+      this.onDidChangeEmitter.fire();
+    }
+    return { oldSecrets, newSecrets };
+  }
+
   async removeAccount(accountId: string) {
     assert(this.context);
     const { accountMap } = this;
@@ -190,12 +214,17 @@ export class AccountService {
     this.onDidChangeEmitter.fire();
   }
 
-  getRemovableAccounts(): AccountWithoutSecret[] {
+  async getUpToDateRemovableAccounts(): Promise<AccountWithoutSecret[]> {
+    await this.reloadCache();
+    return this.#getRemovableAccounts();
+  }
+
+  #getRemovableAccounts(): AccountWithoutSecret[] {
     return Object.values(this.accountMap).filter(notNullOrUndefined);
   }
 
   #getRemovableAccountsWithTokens(): Account[] {
-    const accountsWithMaybeTokens = this.getRemovableAccounts().map(a => ({
+    const accountsWithMaybeTokens = this.#getRemovableAccounts().map(a => ({
       ...a,
       token: undefined,
       ...this.secrets[a.id],

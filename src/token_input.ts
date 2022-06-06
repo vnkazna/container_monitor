@@ -40,7 +40,7 @@ export async function addAccount() {
 }
 
 export async function removeAccount() {
-  const accounts = accountService.getRemovableAccounts();
+  const accounts = await accountService.getUpToDateRemovableAccounts();
   if (accounts.length === 0) {
     await vscode.window.showInformationMessage(`No accounts to remove!`);
     return;
