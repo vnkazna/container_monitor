@@ -492,10 +492,6 @@
     "description": "GitLab revision that schedules jobs."
   },
   {
-    "name": "CI_SERVER_TLS_CA_FILE",
-    "description": "File containing the CA certificate to verify the GitLab server."
-  },
-  {
     "name": "CI_SERVER_URL",
     "description": "The base URL of the GitLab instance, including protocol and port. For example `https://gitlab.example.com:8080`."
   },
