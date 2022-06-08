@@ -86,7 +86,8 @@ Commands this extension extends or integrates with:
 This extension requires you to create a GitLab personal access token, and assign it to the extension:
 
 1. [Install the extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow) from the Visual Studio Marketplace and enable it. If you use an unofficial version of VS Code, install the extension from the [Open VSX Registry](https://open-vsx.org/extension/GitLab/gitlab-workflow).
-1. Create a personal access token with the `api` and `read_user` scopes:
+1. Optional. To sign in to GitLab.com, you can run the command `GitLab: Authenticate to GitLab.com` to authenticate using OAuth. This feature is not available for self-managed installations.
+1. If you did not sign in with OAuth, create a personal access token with the `api` and `read_user` scopes:
    - If you use GitLab.com, go to the [personal access tokens](https://gitlab.com/-/profile/personal_access_tokens) page.
    - If you use a self-managed GitLab instance, follow the instructions [in the GitLab documentation](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token).
 1. Copy the token. _For security reasons, this value is never displayed again, so you must copy this value now._
