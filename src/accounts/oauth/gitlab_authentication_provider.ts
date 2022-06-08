@@ -115,18 +115,25 @@ export class GitLabAuthenticationProvider implements vscode.AuthenticationProvid
       this.exchangeCodeForToken(state, scopes),
     );
     await openUrl(url);
-    const account = await Promise.race([
-      receivedRedirectUrl,
-      new Promise<OAuthAccount>((_, reject) => {
-        setTimeout(
-          () => reject(new Error('Cancelling the GitLab OAuth login after 60s. Try again.')),
-          60000,
-        );
-      }),
-    ]).finally(() => {
-      delete this.#requestsInProgress[state];
-      cancelWaitingForRedirectUrl.fire();
-    });
+    const account = await vscode.window.withProgress(
+      {
+        title: 'Waiting for OAuth redirect from GitLab.com.',
+        location: vscode.ProgressLocation.Notification,
+      },
+      () =>
+        Promise.race([
+          receivedRedirectUrl,
+          new Promise<OAuthAccount>((_, reject) => {
+            setTimeout(
+              () => reject(new Error('Cancelling the GitLab OAuth login after 60s. Try again.')),
+              60000,
+            );
+          }),
+        ]).finally(() => {
+          delete this.#requestsInProgress[state];
+          cancelWaitingForRedirectUrl.fire();
+        }),
+    );
 
     return convertAccountToAuthenticationSession(account);
   }
