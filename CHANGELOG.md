@@ -1,3 +1,12 @@
+# [3.47.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.46.0...v3.47.0) (2022-06-08)
+
+
+### Features
+
+* OAuth authorization welcome screen ([e1f1f6a](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/e1f1f6a15c7c63edd8c363ceb8b0f1eaf811bf1f))
+
+
+
 # [3.46.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.45.0...v3.46.0) (2022-06-06)
 
 
