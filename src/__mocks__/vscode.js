@@ -34,7 +34,7 @@ module.exports = {
     createStatusBarItem: jest.fn(),
     showInputBox: jest.fn(),
     showQuickPick: jest.fn(),
-    withProgress: jest.fn(),
+    withProgress: jest.fn().mockImplementation((opt, callback) => callback()),
     createQuickPick: jest.fn(),
   },
   commands: {

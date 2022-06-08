@@ -91,6 +91,13 @@ describe('GitLabAuthenticationProvider', () => {
       expect(session.accessToken).toEqual('test_token');
       expect(session.scopes).toEqual(['read_user', 'api']);
       expect(accountService.getAllAccounts()).toHaveLength(1);
+      expect(vscode.window.withProgress).toHaveBeenCalledWith(
+        {
+          title: 'Waiting for OAuth redirect from GitLab.com.',
+          location: vscode.ProgressLocation.Notification,
+        },
+        expect.any(Function),
+      );
     });
   });
 
