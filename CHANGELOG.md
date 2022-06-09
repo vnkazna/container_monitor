@@ -1,3 +1,12 @@
+## [3.47.1](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.47.0...v3.47.1) (2022-06-09)
+
+
+### Bug Fixes
+
+* indicate that extension is waiting for OAuth redirect ([32e1cd7](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/32e1cd78abf936185c1ee0dc3fa2109da54badd9))
+
+
+
 # [3.47.0](https://gitlab.com/gitlab-org/gitlab-vscode-extension/compare/v3.46.0...v3.47.0) (2022-06-08)
 
 
