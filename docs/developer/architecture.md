@@ -6,54 +6,58 @@ This document will give you a high-level overview of the main components of the 
 
 The extension is providing a "glue" layer between the [VS Code Extension API](https://code.visualstudio.com/api/references/vscode-api) and the GitLab instance API ([REST](https://docs.gitlab.com/ee/api/api_resources.html), [GraphQL](https://docs.gitlab.com/ee/api/graphql/)). The extension code aims to connect VS Code editor with GitLab functionality as efficiently as possible. The less code and abstractions, the better.
 
-## The key concept
+## The key concepts
 
-Every action in the extension needs to know the `repositoryRoot`. `repositoryRoot` is the local filesystem path to a git repository open in VS Code editor.
+- GitLab project is represented by a Git remote URL in local repository.
+- To access GitLab API, you need an access token for that instance.
+- Once you know the GitLab project URL and you have access token, you can fetch the project from API.
 
-We get the GitLab instance URL, project namespace and branch information from the Git repository. We use this information to make queries to the GitLab API.
+These three points result in the most important interface in the whole extension:
 
-```mermaid
-graph LR;
-A[repositoryRoot] --> B[git information]
-B --> C[GitLab API]
+```ts
+export interface ProjectInRepository {
+  pointer: GitRemoteUrlPointer;
+  account: Account;
+  project: GitLabProject;
+}
 ```
+
+This interface is the only information we need for most extension commands and operations.
 
 ### Git integration
 
-The extension uses [`git_extension_wrapper.ts`](../src/git/git_extension_wrapper.ts) to connect to the VS Code Git Extension and read information about repositories. Each repository in the open workspaces is [wrapped](../src/git/wrapped_repository.ts) and used throughout the rest of the extension as a base for executing git commands.
+Our extension builds on top of the built-in [VS Code Git Extension](https://github.com/microsoft/vscode/tree/main/extensions/git). Our extension listens on changes in the VS Code Git and every time repository is added or removed, we run extension initialization and try to find all GitLab projects in available repositories. This means that our extension is always in sync with the [VS Code version control view](https://code.visualstudio.com/docs/editor/versioncontrol).
 
-[`git_service.ts`](../src/git_service.ts) currently handles all `git` access. This service takes a repository root folder and provides us with information about the `git` repository.
-
-- [ ] The VS Code editor works with git through its built-in [`git` extension](https://github.com/microsoft/vscode/tree/main/extensions/git). We want to use this extension instead of our custom `git_service` ([#203](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/203))[^1].
+The main class that interacts with the VS Code Git is [`GitExtensionWrapper`](../../src/git/git_extension_wrapper.ts). [`GitLabProjectRepository`](../../src/gitlab/gitlab_project_repository.ts) then listens on git repository changes and initializes instances of `ProjectInRepository`.
 
 ### GitLab integration
 
-We've got two modules that connect to the GitLab API:
+We use [`gitlab_service.ts`](../../src/gitlab/gitlab_service.ts) for all calls to GitLab API. We try to use predominantly [GraphQL](https://docs.gitlab.com/ee/api/graphql/), but some features are not available in GraphQL, and then we use `cross-fetch` to connect to the [REST](https://docs.gitlab.com/ee/api/api_resources.html) API.
 
-- [`gitlab_service.ts`](../src/gitlab/gitlab_service.ts) - New features get implemented here. We try to use predominantly [GraphQL](https://docs.gitlab.com/ee/api/graphql/), but some features are not available in GraphQL, and then we use `node-fetch` to connect to the [REST](https://docs.gitlab.com/ee/api/api_resources.html) API. `gitlab_new_service.ts` is not dependent on `git`. You should place the code that combines `git` with GitLab API one level higher (in commands or other code).
+In most cases, the `GitLabService` is wrapped in `RefreshingGitLabService`, which checks that OAuth token is valid before making an API call. If the token isn't valid, it will refresh it.
+
+When you want to obtain an instance of the `GitLabService`, use the `getGitLabService: (p: ProjectInRepository)` method.
 
 ## Building blocks of the extension
 
-### Side bar (`src/data_providers`)
+### Tree view (`src/tree_view`)
 
-Side bar, also called [TreeView](https://code.visualstudio.com/api/extension-capabilities/extending-workbench#tree-view), is the left-hand-side panel where we show issues and merge requests. Every VS Code extension can contribute a TreeView.
+[TreeView](https://code.visualstudio.com/api/extension-capabilities/extending-workbench#tree-view), is the left-hand-side panel where we show issues and merge requests. Every VS Code extension can contribute a TreeView.
 
 ### Commands (`src/commands`)
 
 [Commands](https://code.visualstudio.com/api/extension-guides/command) are functions that can be invoked either by the user (usually from [command palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette)) or programmatically. Example commands in this extension would be: "Paste snippet", "Refresh sidebar", and "Copy link to active file on GitLab".
 
-Commands are usually a function without input. They read the state from VS Code editor, Git repository, contact GitLab API and either open the GitLab website or change the UI in VS Code.
+Commands are of two types:
 
-- [x] Move commands from `src/openers.js` to `src/commands` folder.
+- Commands that run on GitLab project (e.g. "Create Snippet", "Open Current Project on GitLab"). These commands implement the [`ProjectCommand`](../../src/commands/run_with_valid_project.ts) interface.
+- Commands that don't need a project (e.g. "Add Account to VS Code", "Show Extension Logs"). These commands are functions with no arguments.
 
 ### Status bar (`src/status_bar.js`)
 
 The status bar is the last row at the bottom of the editor. We add multiple [Status Bar Items](https://code.visualstudio.com/api/extension-capabilities/extending-workbench#status-bar-item) to it to show pipeline status, open MR and closing Issue for the current branch.
 
-We also periodically check for changes (30 seconds for a pipeline, 60 seconds for MR and Issue). The code of `status_bar.js` is very tricky, with a plethora of side effects. Proceed with caution and add unit tests before you change logic.
-
-- [ ] Status bar issues are labelled [`~status-bar`](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues?label_name=status-bar)
-- [ ] when we use the built-in git extension in VS Code, we should [react when the user changes branch and fetch new information](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/21)
+We periodically check for changes (every 30 seconds). [`CurrentBranchRefresher`](../../src/current_branch_refresher.ts) is responsible for refreshing the information. [`StatusBar`](../../src/status_bar.ts) is then responsible for adding the items to the status bar.
 
 ### Webview (`src/webview/`)
 
@@ -74,9 +78,11 @@ end
 
 To further understand how the extension communicates with the webview, read the [Webview extension guide](https://code.visualstudio.com/api/extension-guides/webview).
 
-### Access tokens (`src/accounts/account_service.ts`)
+### Accounts (`src/accounts/account_service.ts`)
 
-We authenticate to GitLab API using [personal access tokens](https://docs.gitlab.com/ee/api/README.html#personalproject-access-tokens). These tokens are stored in [`ExtensionContext.globalState`](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext.globalState). [`AccountService`](../src/accounts/account_service.ts) orchestrates storing and retrieving tokens.
+We authenticate to GitLab API using [personal access tokens](https://docs.gitlab.com/ee/api/README.html#personalproject-access-tokens) or [OAuth](https://docs.gitlab.com/ee/integration/oauth_provider.html). The main interface is the [`Account`](../../src/accounts/account.ts) and we store them using the [`AccountService`](../../src/accounts/account_service.ts).
+
+OAuth accounts are more complex than Token accounts. We create them using the [`GitLabAuthenticationProvider`](../../src/accounts/oauth/gitlab_authentication_provider.ts). Then we refresh them when they expired using the [`TokenExchangeService`](../../src/gitlab/token_exchange_service.ts).
 
 ---
 
