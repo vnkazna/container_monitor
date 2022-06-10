@@ -3,7 +3,7 @@
 You need to perform the following steps to release a new version of the extension.
 These examples use version `3.0.0`:
 
-1. Do a quick test of the extension in your local development. At this stage, you
+1. _(Optional)_ Do a quick test of the extension in your local development. At this stage, you
    are only verifying there is no complete failure of the extension.
 1. Update the package version in `npm version 3.0.0`. This automatically generates a changelog entry.
 1. If there have been community contributions:
@@ -18,7 +18,13 @@ These examples use version `3.0.0`:
 
 1. `git push origin main` and `git push --tags`
 1. Trigger the **Publish** step on the tag pipeline.
-1. When the extension updates in your VS Code, do another quick check.
+1. When the extension updates in your VS Code, check that the extension works.
+1. Add a message to our `#f_vscode_extension` slack channel:
+
+   ```
+   :vscode:  [GitLab Workflow](https://marketplace.visualstudio.com/items?itemName=gitlab.gitlab-workflow) `3.0.0` has been released :rocket:
+   See [CHANGELOG.md](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CHANGELOG.md).
+   ```
 
 ## Access tokens for Marketplaces
 
