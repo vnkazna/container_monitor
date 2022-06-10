@@ -24,6 +24,16 @@ Integration tests mock the GitLab API using the [`msw`](https://mswjs.io/docs/) 
 
 A temporary workspace for integration tests is created once before running the test suite by `test/create_tmp_workspace.ts`. In this helper script, we use [`simple-git`](https://github.com/steveukx/git-js) module to initialize git repository.
 
+## Two environments for integration tests
+
+This is confusing, read it carefully. We use `esbuild` to bundle all production code into one file `out/extension.js`. This file **is** the extension. That works great for production but it's a _nightmare_ for integration testing.
+
+When we load the extension in integration tests, we load this `extension.js` bundle. And since it's all in one file, we can't import parts of our app and change them.
+
+Before the `esbuild` bundling, we could call `accountService.addAccount();` from our integration tests and we would add account to the extension under test. This is no longer the case because the `accountService` is bundled in the large bundle and we can't import it in the tests.
+
+We solve this by initializing a "second" extension for tests and running some tests on the bundled extension and some tests on the "second" extension. The benefit of testing the bundled extension is that that's as close to the production as we get. The benefit of the "second" extension is that we can manipulate the extension internals for white-box testing.
+
 ### Debugging integration tests
 
 For debugging the integration tests, we first need to create a test workspace. We can do that by running `npm run create-test-workspace` script. This script generates a new workspace and inserts its path into `.vscode/launch.json`.
@@ -36,7 +46,7 @@ When creating a new integration test, you need to know how the tested functional
 
 #### Prepare VS Code dependency
 
-We are now not mocking any part of VS Code. You should be able to set the extension up by calling the [VS Code extension API](https://code.visualstudio.com/api). You might be able to use some of our services directly to set up the extension. Example is setting up the test token by running `accountService.setToken('https://gitlab.com', 'abcd-secret');`
+We are now not mocking any part of VS Code. You should be able to set the extension up by calling the [VS Code extension API](https://code.visualstudio.com/api). You might be able to use some of our services directly to set up the extension. Example is setting up the test token by running `accountService.addAccount();`
 
 #### Prepare Filesystem dependency
 
