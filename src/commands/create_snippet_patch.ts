@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import assert from 'assert';
-import * as openers from '../openers';
+import * as openers from './openers';
 import { VISIBILITY_OPTIONS } from './create_snippet';
 import { PATCH_FILE_SUFFIX, PATCH_TITLE_PREFIX } from '../constants';
 import { ProjectCommand } from './run_with_valid_project';

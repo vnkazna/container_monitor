@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { openCurrentPipeline } from '../openers';
+import { openCurrentPipeline } from './openers';
 import { ProjectCommand } from './run_with_valid_project';
 import { USER_COMMANDS } from '../command_names';
 import { getGitLabService } from '../gitlab/get_gitlab_service';

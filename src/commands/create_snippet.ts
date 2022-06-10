@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as openers from '../openers';
+import * as openers from './openers';
 import { ProjectCommand } from './run_with_valid_project';
 import { ProjectInRepository } from '../gitlab/new_project';
 import { getGitLabService } from '../gitlab/get_gitlab_service';

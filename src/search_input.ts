@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { ProjectCommand } from './commands/run_with_valid_project';
 import { GitLabProject } from './gitlab/gitlab_project';
-import * as openers from './openers';
+import * as openers from './commands/openers';
 import { createQueryString } from './utils/create_query_string';
 
 const parseQuery = (query: string, noteableType: string) => {

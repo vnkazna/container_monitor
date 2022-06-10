@@ -44,7 +44,7 @@ Side bar, also called [TreeView](https://code.visualstudio.com/api/extension-cap
 
 Commands are usually a function without input. They read the state from VS Code editor, Git repository, contact GitLab API and either open the GitLab website or change the UI in VS Code.
 
-- [ ] Move commands from `src/openers.js` to `src/commands` folder.
+- [x] Move commands from `src/openers.js` to `src/commands` folder.
 
 ### Status bar (`src/status_bar.js`)
 

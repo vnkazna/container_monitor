@@ -1,17 +1,17 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { VS_COMMANDS } from './command_names';
+import { VS_COMMANDS } from '../command_names';
 import {
   ProjectCommand,
   ProjectFileCommand,
   ProjectInRepositoryAndFile,
-} from './commands/run_with_valid_project';
-import { ifVersionGte } from './utils/if_version_gte';
-import { GitLabProject } from './gitlab/gitlab_project';
-import { ProjectInRepository } from './gitlab/new_project';
-import { getGitLabService } from './gitlab/get_gitlab_service';
-import { getTrackingBranchName } from './git/get_tracking_branch_name';
-import { getLastCommitSha } from './git/get_last_commit_sha';
+} from './run_with_valid_project';
+import { ifVersionGte } from '../utils/if_version_gte';
+import { GitLabProject } from '../gitlab/gitlab_project';
+import { ProjectInRepository } from '../gitlab/new_project';
+import { getGitLabService } from '../gitlab/get_gitlab_service';
+import { getTrackingBranchName } from '../git/get_tracking_branch_name';
+import { getLastCommitSha } from '../git/get_last_commit_sha';
 
 export const openUrl = async (url: string): Promise<void> => {
   // workaround for a VS Code open command bug: https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/44
