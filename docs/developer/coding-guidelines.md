@@ -16,7 +16,7 @@ Each file in `utils` folder must contain only one function. The file name uses s
 Example:
 | file | function | purpose |
 | -- | -- | -- |
-| [`compare_by.ts`](../src/utils/compare_by.ts) | `compareBy()` | Creates a comparison method for objects that can be used for sorting. |
-| [`find_file_in_diffs.ts`](../src/utils/find_file_in_diffs.ts) | `findFileInDiffs()` | Iterates through the GitLab API MR diff (versions) response and finds diff for a file based on a path. This is used multiple places responsible for rendering MR Reviews. |
+| [`compare_by.ts`](../../src/utils/compare_by.ts) | `compareBy()` | Creates a comparison method for objects that can be used for sorting. |
+| [`find_file_in_diffs.ts`](../../src/utils/find_file_in_diffs.ts) | `findFileInDiffs()` | Iterates through the GitLab API MR diff (versions) response and finds diff for a file based on a path. This is used multiple places responsible for rendering MR Reviews. |
 
 [^1]: [Discussion on the MR that introduced TypeScript](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/108#note_423512996)
