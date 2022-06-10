@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { VS_COMMANDS } from './command_names';
 import {
-  NewProjectCommand,
+  ProjectCommand,
   ProjectFileCommand,
   ProjectInRepositoryAndFile,
 } from './commands/run_with_valid_project';
@@ -48,11 +48,11 @@ async function openTemplatedLink(linkTemplate: string, projectInRepository: Proj
   await openUrl(await getLink(linkTemplate, user, projectInRepository.project));
 }
 
-export const showIssues: NewProjectCommand = async projectInRepository => {
+export const showIssues: ProjectCommand = async projectInRepository => {
   await openTemplatedLink('$projectUrl/issues?assignee_id=$userId', projectInRepository);
 };
 
-export const showMergeRequests: NewProjectCommand = async projectInRepository => {
+export const showMergeRequests: ProjectCommand = async projectInRepository => {
   await openTemplatedLink('$projectUrl/merge_requests?assignee_id=$userId', projectInRepository);
 };
 
@@ -87,7 +87,7 @@ export const copyLinkToActiveFile: ProjectFileCommand = async projectInRepositor
   await vscode.env.clipboard.writeText(fileUrl);
 };
 
-export const openCurrentMergeRequest: NewProjectCommand = async projectInRepository => {
+export const openCurrentMergeRequest: ProjectCommand = async projectInRepository => {
   const { repository } = projectInRepository.pointer;
   const mr = await getGitLabService(projectInRepository).getOpenMergeRequestForCurrentBranch(
     projectInRepository.project,
@@ -99,11 +99,11 @@ export const openCurrentMergeRequest: NewProjectCommand = async projectInReposit
   }
 };
 
-export const openCreateNewIssue: NewProjectCommand = async projectInRepository => {
+export const openCreateNewIssue: ProjectCommand = async projectInRepository => {
   await openTemplatedLink('$projectUrl/issues/new', projectInRepository);
 };
 
-export const openCreateNewMr: NewProjectCommand = async projectInRepository => {
+export const openCreateNewMr: ProjectCommand = async projectInRepository => {
   const { project, pointer } = projectInRepository;
   const branchName = await getTrackingBranchName(pointer.repository.rawRepository);
 
@@ -114,7 +114,7 @@ export const openCreateNewMr: NewProjectCommand = async projectInRepository => {
   );
 };
 
-export const openProjectPage: NewProjectCommand = async projectInRepository => {
+export const openProjectPage: ProjectCommand = async projectInRepository => {
   await openTemplatedLink('$projectUrl', projectInRepository);
 };
 
@@ -129,7 +129,7 @@ export async function openCurrentPipeline(projectInRepository: ProjectInReposito
   }
 }
 
-export const compareCurrentBranch: NewProjectCommand = async projectInRepository => {
+export const compareCurrentBranch: ProjectCommand = async projectInRepository => {
   const { project } = projectInRepository;
   const { repository } = projectInRepository.pointer;
 
