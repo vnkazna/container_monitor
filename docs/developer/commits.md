@@ -28,16 +28,16 @@ C{Is MR set to be squashed?} --no--> D[Every commit must be valid]
 C --yes--> E[MR title must be valid]
 ```
 
-Following these conventions will result in a clear [changelog](./CHANGELOG.md) for every version.
+Following these conventions will result in a clear [changelog](../../CHANGELOG.md) for every version.
 
 ## When should my MR's title follow these conventions?
 
-It's always a good idea to follow the conventions for your MR's title as well as for commit messages. This way, if your MR is squashed
+It's generally a good idea to follow the conventions for your MR's title as well as for commit messages. This way, if your MR is squashed
 upon merge, the maintainer will be able to use its title as the final commit message, which will result in a properly formatted history.
 
 ## Is it okay that all my commits don't follow the conventions in a single MR?
 
-If your MR contains multiple commits but only one logical change, you can enable the [Squash commits when merge request is accepted](https://gitlab.com/help/user/project/merge_requests/squash_and_merge) option. Then GitLab uses the MR title.
+If your MR contains multiple commits but only one logical change, you can enable the [Squash commits when merge request is accepted](https://gitlab.com/help/user/project/merge_requests/squash_and_merge) option (enabled by default). Then GitLab uses the MR title.
 
 ## What types can I use for my commit messages?
 
