@@ -151,9 +151,8 @@ export class AccountService {
     assert.deepStrictEqual(
       oldSecrets[accountId],
       newSecrets[accountId],
-      `The GitLab Secret for account ${accountId} stored in your keychain has changed. ` +
-        '(Maybe another instance of VS Code or OS synchronizing keychains changed it.) ' +
-        'We have cancelled the operation that tried to override the secret. ' +
+      `Task cancelled because the GitLab token for account ${accountId} stored in your keychain has changed. ` +
+        '(Another instance of VS Code or OS synchronizing keychains changed it.) Retry the task. ' +
         `Old: ${JSON.stringify(oldSecrets[accountId])}, ` +
         `New: ${JSON.stringify(newSecrets[accountId])}`,
     );
@@ -195,9 +194,9 @@ export class AccountService {
     this.secrets = newSecrets;
     if (!isDeepStrictEqual(Object.keys(oldSecrets), Object.keys(newSecrets))) {
       log.info(
-        `AccountService reloaded secrets and the local cache was out of date from the OS Keychain.\n` +
-          `Cached Account ids: ${Object.keys(oldSecrets)}, ` +
-          `OS Keychain Account ids: ${Object.keys(newSecrets)}`,
+        `AccountService reloaded tokens, and the locally cached tokens didn't match the tokens saved in the OS Keychain.\n` +
+          `Cached account IDs: ${Object.keys(oldSecrets)}, ` +
+          `OS Keychain account IDs: ${Object.keys(newSecrets)}`,
       );
       this.onDidChangeEmitter.fire();
     }
@@ -233,7 +232,7 @@ export class AccountService {
       .filter(a => !a.token)
       .forEach(a =>
         log.error(
-          `Account for instance ${a.instanceUrl} and user ${a.username} is missing token in secret storage. Try to remove the account and add it again.`,
+          `Account for instance ${a.instanceUrl} and user ${a.username} is missing a token in secret storage. Remove the account and add it again.`,
         ),
       );
     return accountsWithMaybeTokens.filter((a): a is Account => hasPresentKey('token')(a));

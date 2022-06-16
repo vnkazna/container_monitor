@@ -58,7 +58,7 @@ describe('AccountService', () => {
     it('fails to write a secret when some other process changed the secret but refreshes the secrets cache', async () => {
       await expect(
         accountService.updateAccountSecret(createTokenAccount('https://gitlab.com', 1, 'def')),
-      ).rejects.toThrow(/The GitLab Secret .* has changed/);
+      ).rejects.toThrow(/GitLab token .* has changed/);
 
       expect(accountService.getAccount(account.id).token).toBe('xyz');
     });
